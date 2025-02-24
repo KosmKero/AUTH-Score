@@ -41,7 +41,7 @@ class Team {
   }
   bool changeFavourite(){
     _isFavourite=!_isFavourite;
-    return isFavourite;
+    return _isFavourite;
   }
 
 }
