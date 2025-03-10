@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 import 'package:flutter/material.dart';
 import 'Scorer.dart';
 
@@ -16,7 +14,7 @@ class topScorersContainer extends StatelessWidget {
       height: 90,
       //padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: Colors.deepOrange,
+        color: Color.fromARGB(150, 105, 165, 227),
         borderRadius: BorderRadius.circular(15),
       ),
       child: Column(
@@ -77,7 +75,7 @@ class scorerContainer extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       //height: 50,
-      color: Colors.deepOrange,
+      color: Color.fromARGB(150, 105, 165, 227),
       width: 85,
       alignment: Alignment.center,
       child: Column(

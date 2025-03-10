@@ -1,261 +1,406 @@
 import 'package:flutter/material.dart';
-import 'package:untitled1/Team.dart';
+import 'package:untitled1/API/Match_Handle.dart';
+import 'package:untitled1/Data_Classes/Team.dart';
+import 'Data_Classes/User.dart';
 import 'Favorite_Page.dart';
 import 'HomePage.dart';
+import 'Data_Classes/Player.dart';
 import 'Profile/Profile_Page.dart';
+import 'Search_Page.dart';
 import 'StandingsPage.dart';
-import 'Match.dart';
+import 'Data_Classes/Match.dart';
 void main() {
   runApp(MyApp());
 }
 List<Team> teams = [
-  Team("Ολυμπιακός", 10, 7, 2, 1, 1, [
-    Player("Γιώργος", "Παπαδόπουλος", 5),
-    Player("Νίκος", "Λαμπρόπουλος", 3),
+  Team("Ολυμπιακός", 10, 7, 2, 1, 1,2000, 0,[
+    Player("Γιώργος", "Παπαδόπουλος",2, 5),
+    Player("Γιώργος", "Παπαδόπουλος",2, 5),
+    Player("Γιώργος", "Παπαδόπουλος",2, 5),
+    Player("Γιώργος", "Παπαδόπουλος",2, 5),
+    Player("Γιώργος", "Παπαδόπουλος",0, 5),
+    Player("Γιώργος", "Παπαδόπουλος",0, 5),
+    Player("Γιώργος", "Παπαδόπουλος",1, 5),
+    Player("Νίκος", "Λαμπρόπουλος",2, 3),
   ]),
-  Team("Παναθηναϊκός", 10, 6, 3, 1, 1, [
-    Player("Αλέξανδρος", "Βασιλείου", 4),
-    Player("Δημήτρης", "Κωνσταντίνου", 2),
+  Team("Παναθηναϊκός", 10, 6, 3, 1, 1,2010,0, [
+    Player("Αλέξανδρος", "Βασιλείου",2, 4),
+    Player("Δημήτρης", "Κωνσταντίνου",2, 2),
   ]),
-  Team("ΑΕΚ", 10, 5, 4, 1, 1, [
-    Player("Στέφανος", "Αντωνίου", 6),
-    Player("Μιχάλης", "Γεωργίου", 3),
+  Team("ΑΕΚ", 10, 5, 4, 1, 1, 2015,0,[
+    Player("Στέφανος", "Αντωνίου",2, 6),
+    Player("Μιχάλης", "Γεωργίου",2, 3),
   ]),
-  Team("ΠΑΟΚ", 10, 4, 4, 2, 1, [
-    Player("Χρήστος", "Καραμανλής", 2),
-    Player("Παναγιώτης", "Σωτηρίου", 5),
+  Team("ΠΑΟΚ", 10, 4, 4, 2, 1,2000,0, [
+    Player("Χρήστος", "Καραμανλής", 2,2),
+    Player("Παναγιώτης", "Σωτηρίου",2, 5),
   ]),
 
   // Group 2
-  Team("Άρης", 10, 6, 2, 2, 2, [
-    Player("Λευτέρης", "Διαμαντής", 4),
-    Player("Θοδωρής", "Αναστασίου", 2),
+  Team("Άρης", 10, 6, 2, 2, 2, 2000,0,[
+    Player("Λευτέρης", "Διαμαντής", 2,4),
+    Player("Θοδωρής", "Αναστασίου", 2,2),
   ]),
-  Team("Αστέρας Τρίπολης", 10, 5, 3, 2, 2, [
-    Player("Βασίλης", "Κυριακίδης", 3),
-    Player("Γιάννης", "Χατζηδάκης", 2),
+  Team("Αστέρας Τρίπολης", 10, 5, 3, 2, 2, 2000,0,[
+    Player("Βασίλης", "Κυριακίδης",2, 3),
+    Player("Γιάννης", "Χατζηδάκης",2, 2),
   ]),
-  Team("ΟΦΗ", 10, 4, 5, 1, 2, [
-    Player("Μανώλης", "Στρατής", 2),
-    Player("Δημήτρης", "Φωτεινός", 1),
+  Team("ΟΦΗ", 10, 4, 5, 1, 2, 2000,0,[
+    Player("Μανώλης", "Στρατής",2, 2),
+    Player("Δημήτρης", "Φωτεινός",2, 1),
   ]),
-  Team("Λαμία", 10, 3, 6, 1, 2, [
-    Player("Πέτρος", "Αγγελόπουλος", 1),
-    Player("Σωτήρης", "Μιχαηλίδης", 1),
+  Team("Λαμία", 10, 3, 6, 1, 2,2000,0, [
+    Player("Πέτρος", "Αγγελόπουλος",2, 1),
+    Player("Σωτήρης", "Μιχαηλίδης",2, 1),
   ]),
 
   // Group 3
-  Team("Βόλος", 10, 7, 2, 1, 3, [
-    Player("Γιώργος", "Δημητρίου", 5),
-    Player("Χάρης", "Νικολάου", 4),
+  Team("Βόλος", 10, 7, 2, 1, 3,2000,0, [
+    Player("Γιώργος", "Δημητρίου",2, 5),
+    Player("Χάρης", "Νικολάου",2, 4),
   ]),
-  Team("Παναιτωλικός", 10, 5, 3, 2, 3, [
-    Player("Αντώνης", "Ρουμπής", 2),
-    Player("Σταύρος", "Θεοδώρου", 1),
+  Team("Παναιτωλικός", 10, 5, 3, 2, 3,2000,0, [
+    Player("Αντώνης", "Ρουμπής",2, 2),
+    Player("Σταύρος", "Θεοδώρου",2, 1),
   ]),
-  Team("Ιωνικός", 10, 4, 4, 2, 3, [
-    Player("Νεκτάριος", "Παπανικολάου", 3),
-    Player("Άρης", "Λεμονής", 2),
+  Team("Ιωνικός", 10, 4, 4, 2, 3, 2000,0,[
+    Player("Νεκτάριος", "Παπανικολάου",2, 3),
+    Player("Άρης", "Λεμονής",2, 2),
   ]),
-  Team("Απόλλων Σμύρνης", 10, 2, 6, 2, 3, [
-    Player("Χριστόφορος", "Δούκας", 1),
-    Player("Φώτης", "Σταματόπουλος", 1),
+  Team("Απόλλων Σμύρνης", 10, 2, 6, 2, 3,2000,0, [
+    Player("Χριστόφορος", "Δούκας",2, 1),
+    Player("Φώτης", "Σταματόπουλος",2, 1),
   ]),
 
   // Group 4
-  Team("Καλαμάτα", 10, 8, 1, 1, 4, [
-    Player("Στέργιος", "Κυριαζής", 6),
-    Player("Διονύσης", "Μαρκόπουλος", 3),
+  Team("Καλαμάτα", 10, 8, 1, 1, 4,2000,0, [
+    Player("Στέργιος", "Κυριαζής",2, 6),
+    Player("Διονύσης", "Μαρκόπουλος",2, 3),
   ]),
-  Team("Χανιά", 10, 6, 3, 1, 4, [
-    Player("Ευθύμης", "Ανδριανός", 5),
-    Player("Νίκος", "Σφακιανάκης", 2),
+  Team("Χανιά", 10, 6, 3, 1, 4,2000, 0,[
+    Player("Ευθύμης", "Ανδριανός",2, 5),
+    Player("Νίκος", "Σφακιανάκης",2, 2),
   ]),
-  Team("Αναγέννηση Καρδίτσας", 10, 5, 4, 1, 4, [
-    Player("Λάμπρος", "Παπαγεωργίου", 2),
-    Player("Μάριος", "Ξανθόπουλος", 1),
+  Team("Αναγέννηση Καρδίτσας", 10, 5, 4, 1, 4, 2000,0,[
+    Player("Λάμπρος", "Παπαγεωργίου",2, 2),
+    Player("Μάριος", "Ξανθόπουλος",2, 1),
   ]),
-  Team("Δόξα Δράμας", 10, 3, 6, 1, 4, [
-    Player("Χρήστος", "Καλογερόπουλος", 2),
-    Player("Σπύρος", "Αρβανίτης", 1),
+  Team("Δόξα Δράμας", 10, 3, 6, 1, 4, 2000,0,[
+    Player("Χρήστος", "Καλογερόπουλος",2, 2),
+    Player("Σπύρος", "Αρβανίτης",2, 1),
   ]),
 ];
 List<Team> favouriteTeams=[];
-
-List<Match> matches = [
+List<Player> players=[];
+List<Match> upcomingMatches = [
   Match(
-      homeTeam:  Team("CSD", 10, 7, 2, 1, 1, [
-        Player("PA", "PA", 5),
-        Player("EW", "EWF", 3),
+      homeTeam: Team("Ολυμπιακός", 10, 7, 2, 1, 1,2000,0, [
+        Player("Γιώργος", "Παπαδόπουλος",2, 5),
+        Player("Νίκος", "Λαμπρόπουλος",2, 3),
       ]),
-      awayTeam:  Team("νομ", 10, 7, 2, 1, 1, [
-        Player("Γιώργος", "Παπαδόπουλος", 5),
-        Player("Νίκος", "Λαμπρόπουλος", 3),
+      awayTeam: Team("Παναθηναϊκός", 10, 6, 3, 1, 1,2000, 0,[
+        Player("Αλέξανδρος", "Βασιλείου",2, 4),
+        Player("Δημήτρης", "Κωνσταντίνου",2, 2),
       ]),
-      hasMatchStarted: true,
-      time: 1210,
-      day: 10,
-      month: 10,
+      hasMatchStarted: false,
+      time: 1500,
+      day: 5,
+      month: 3,
+      year: 2025),
+
+  Match(
+      homeTeam: Team("ΑΕΚ", 10, 5, 4, 1, 1,2000, 0,[
+        Player("Στέφανος", "Αντωνίου",1, 6),
+        Player("Μιχάλης", "Γεωργίου",2, 3),
+      ]),
+      awayTeam: Team("ΠΑΟΚ", 10, 4, 4, 2, 1, 2000,0,[
+        Player("Χρήστος", "Καραμανλής",1, 2),
+        Player("Παναγιώτης", "Σωτηρίου",2, 5),
+      ]),
+      hasMatchStarted: false,
+      time: 1700,
+      day: 5,
+      month: 3,
+      year: 2025),
+
+  Match(
+      homeTeam: Team("Άρης", 10, 6, 2, 2, 2, 2000,0,[
+        Player("Λευτέρης", "Διαμαντής",1, 4),
+        Player("Θοδωρής", "Αναστασίου", 2,2),
+      ]),
+      awayTeam: Team("ΟΦΗ", 10, 4, 5, 1, 2,2000,0, [
+        Player("Μανώλης", "Στρατής",2, 2),
+        Player("Δημήτρης", "Φωτεινός",1, 1),
+        Player("Λευτέρης", "Διαμαντής",3, 4),
+      ]),
+      hasMatchStarted: false,
+      time: 1600,
+      day: 7,
+      month: 3,
+      year: 2025),
+
+  Match(
+      homeTeam: Team("Βόλος", 10, 7, 2, 1, 3,2015,0, [
+        Player("Γιώργος", "Δημητρίου",1, 5),
+        Player("Χάρης", "Νικολάου",2, 4),
+      ]),
+      awayTeam: Team("Ιωνικός", 10, 4, 4, 2, 3,2000,0, [
+        Player("Νεκτάριος", "Παπανικολάου", 2,3),
+        Player("Άρης", "Λεμονής",1, 2),
+      ]),
+      hasMatchStarted: false,
+      time: 1800,
+      day: 8,
+      month: 3,
+      year: 2025),
+
+  Match(
+      homeTeam: Team("Καλαμάτα", 10, 8, 1, 1, 4,2000,0, [
+        Player("Στέργιος", "Κυριαζής",2, 6),
+        Player("Διονύσης", "Μαρκόπουλος",2, 3),
+      ]),
+      awayTeam: Team("Χανιά", 10, 6, 3, 1, 4,2000,0, [
+        Player("Ευθύμης", "Ανδριανός",2, 5),
+        Player("Νίκος", "Σφακιανάκης",2, 2),
+      ]),
+      hasMatchStarted: false,
+      time: 1900,
+      day: 9,
+      month: 3,
       year: 2025),
   Match(
-      homeTeam:  Team("Ολυμπιακός", 10, 7, 2, 1, 1, [
-        Player("Γιώργος", "Παπαδόπουλος", 5),
-        Player("Νίκος", "Λαμπρόπουλος", 3),
+      homeTeam: Team("Ολυμπιακός", 10, 7, 2, 1, 1,2000, 0,[
+        Player("Γιώργος", "Παπαδόπουλος",2, 5),
+        Player("Νίκος", "Λαμπρόπουλος",2, 3),
       ]),
-      awayTeam:  Team("ψσδ", 10, 7, 2, 1, 1, [
-        Player("Γιώργος", "Παπαδόπουλος", 5),
-        Player("Νίκος", "Λαμπρόπουλος", 3),
+      awayTeam: Team("Παναθηναϊκός", 10, 6, 3, 1, 1,2000,0, [
+        Player("Αλέξανδρος", "Βασιλείου",2, 4),
+        Player("Δημήτρης", "Κωνσταντίνου",2, 2),
       ]),
       hasMatchStarted: true,
-      time: 1210,
-      day: 3,
+      time: 1500,
+      day: 12,
       month: 3,
-      year: 2015),
+      year: 2025),
+
   Match(
-      homeTeam:  Team("Ολυμπιακός", 10, 7, 2, 1, 1, [
-        Player("Γιώργος", "Παπαδόπουλος", 5),
-        Player("Νίκος", "Λαμπρόπουλος", 3),
+      homeTeam: Team("ΑΕΚ", 10, 5, 4, 1, 1,2000,0, [
+        Player("Στέφανος", "Αντωνίου",2, 6),
+        Player("Μιχάλης", "Γεωργίου",2, 3),
       ]),
-      awayTeam:  Team("Ολυμπιακός", 10, 7, 2, 1, 1, [
-        Player("Γιώργος", "Παπαδόπουλος", 5),
-        Player("Νίκος", "Λαμπρόπουλος", 3),
+      awayTeam: Team("ΠΑΟΚ", 10, 4, 4, 2, 1,2000, 0,[
+        Player("Χρήστος", "Καραμανλής",2, 2),
+        Player("Παναγιώτης", "Σωτηρίου",2, 5),
       ]),
-      hasMatchStarted: true,
-      time: 1210,
-      day: 3,
+      hasMatchStarted: false,
+      time: 1700,
+      day: 15,
       month: 3,
-      year: 2015),
+      year: 2025),
+
   Match(
-      homeTeam:  Team("Ολυμπιακός", 10, 7, 2, 1, 1, [
-        Player("Γιώργος", "Παπαδόπουλος", 5),
-        Player("Νίκος", "Λαμπρόπουλος", 3),
+      homeTeam: Team("Άρης", 10, 6, 2, 2, 2,2000, 0,[
+        Player("Λευτέρης", "Διαμαντής",2, 4),
+        Player("Θοδωρής", "Αναστασίου",2, 2),
       ]),
-      awayTeam: Team("Ολυμπιακός", 10, 7, 2, 1, 1, [
-        Player("Γιώργος", "Παπαδόπουλος", 5),
-        Player("Νίκος", "Λαμπρόπουλος", 3),
+      awayTeam: Team("Αστέρας Τρίπολης", 10, 5, 3, 2, 2,2000, 0,[
+        Player("Βασίλης", "Κυριακίδης",2, 3),
+        Player("Γιάννης", "Χατζηδάκης",2, 2),
       ]),
-      hasMatchStarted: true,
-      time: 1210,
-      day: 3,
+      hasMatchStarted: false,
+      time: 1600,
+      day: 20,
       month: 3,
-      year: 2015),
+      year: 2025),
+
   Match(
-      homeTeam:  Team("Ολυμπιακός", 10, 7, 2, 1, 1, [
-        Player("Γιώργος", "Παπαδόπουλος", 5),
-        Player("Νίκος", "Λαμπρόπουλος", 3),
+      homeTeam: Team("ΟΦΗ", 10, 4, 5, 1, 2,2000,0, [
+        Player("Μανώλης", "Στρατής",2, 2),
+        Player("Δημήτρης", "Φωτεινός",2, 1),
       ]),
-      awayTeam:  Team("Ολυμπιακός", 10, 7, 2, 1, 1, [
-        Player("Γιώργος", "Παπαδόπουλος", 5),
-        Player("Νίκος", "Λαμπρόπουλος", 3),
+      awayTeam: Team("Λαμία", 10, 3, 6, 1, 2,2000, 0,[
+        Player("Πέτρος", "Αγγελόπουλος",2, 1),
+        Player("Σωτήρης", "Μιχαηλίδης",2, 1),
       ]),
       hasMatchStarted: true,
-      time: 1210,
-      day: 3,
+      time: 1800,
+      day: 25,
       month: 3,
-      year: 2015),
+      year: 2025),
+
   Match(
-      homeTeam:  Team("Ολυμπιακός", 10, 7, 2, 1, 1, [
-        Player("Γιώργος", "Παπαδόπουλος", 5),
-        Player("Νίκος", "Λαμπρόπουλος", 3),
+      homeTeam: Team("Βόλος", 10, 7, 2, 1, 3,2000, 0,[
+        Player("Γιώργος", "Δημητρίου",2, 5),
+        Player("Χάρης", "Νικολάου",2, 4),
       ]),
-      awayTeam: Team("Ολυμπιακός", 10, 7, 2, 1, 1, [
-        Player("Γιώργος", "Παπαδόπουλος", 5),
-        Player("Νίκος", "Λαμπρόπουλος", 3),
+      awayTeam: Team("Παναιτωλικός", 10, 5, 3, 2, 3,2000,0, [
+        Player("Αντώνης", "Ρουμπής",2, 2),
+        Player("Σταύρος", "Θεοδώρου",2, 1),
       ]),
-      hasMatchStarted: true,
-      time: 1210,
-      day: 3,
+      hasMatchStarted: false,
+      time: 1900,
+      day: 28,
       month: 3,
-      year: 2015),
-  Match(
-      homeTeam:  Team("Ολυμπιακός", 10, 7, 2, 1, 1, [
-        Player("Γιώργος", "Παπαδόπουλος", 5),
-        Player("Νίκος", "Λαμπρόπουλος", 3),
-      ]),
-      awayTeam:  Team("Ολυμπιακός", 10, 7, 2, 1, 1, [
-        Player("Γιώργος", "Παπαδόπουλος", 5),
-        Player("Νίκος", "Λαμπρόπουλος", 3),
-      ]),
-      hasMatchStarted: true,
-      time: 1210,
-      day: 3,
-      month: 3,
-      year: 2015),
-  Match(
-      homeTeam:  Team("Ολυμπιακός", 10, 7, 2, 1, 1, [
-        Player("Γιώργος", "Παπαδόπουλος", 5),
-        Player("Νίκος", "Λαμπρόπουλος", 3),
-      ]),
-      awayTeam:  Team("Ολυμπιακός", 10, 7, 2, 1, 1, [
-        Player("Γιώργος", "Παπαδόπουλος", 5),
-        Player("Νίκος", "Λαμπρόπουλος", 3),
-      ]),
-      hasMatchStarted: true,
-      time: 1210,
-      day: 3,
-      month: 3,
-      year: 2015),
-  Match(
-      homeTeam:  Team("Ολυμπιακός", 10, 7, 2, 1, 1, [
-        Player("Γιώργος", "Παπαδόπουλος", 5),
-        Player("Νίκος", "Λαμπρόπουλος", 3),
-      ]),
-      awayTeam:  Team("Ολυμπιακός", 10, 7, 2, 1, 1, [
-        Player("Γιώργος", "Παπαδόπουλος", 5),
-        Player("Νίκος", "Λαμπρόπουλος", 3),
-      ]),
-      hasMatchStarted: true,
-      time: 1210,
-      day: 3,
-      month: 3,
-      year: 2015),
-  Match(
-      homeTeam:  Team("Ολυμπιακός", 10, 7, 2, 1, 1, [
-        Player("Γιώργος", "Παπαδόπουλος", 5),
-        Player("Νίκος", "Λαμπρόπουλος", 3),
-      ]),
-      awayTeam:  Team("Ολυμπιακός", 10, 7, 2, 1, 1, [
-        Player("Γιώργος", "Παπαδόπουλος", 5),
-        Player("Νίκος", "Λαμπρόπουλος", 3),
-      ]),
-      hasMatchStarted: true,
-      time: 1210,
-      day: 3,
-      month: 3,
-      year: 2015),
-  Match(
-      homeTeam:  Team("Ολυμπιακός", 10, 7, 2, 1, 1, [
-      Player("Γιώργος", "Παπαδόπουλος", 5),
-  Player("Νίκος", "Λαμπρόπουλος", 3),
-]),
-      awayTeam:  Team("Ολυμπιακός", 10, 7, 2, 1, 1, [
-        Player("Γιώργος", "Παπαδόπουλος", 5),
-        Player("Νίκος", "Λαμπρόπουλος", 3),
-      ]),
-      hasMatchStarted: true,
-      time: 1210,
-      day: 3,
-      month: 3,
-      year: 2015),
-  Match(
-      homeTeam:  Team("Ολυμπιακός", 10, 7, 2, 1, 1, [
-        Player("Γιώργος", "Παπαδόπουλος", 5),
-        Player("Νίκος", "Λαμπρόπουλος", 3),
-      ]),
-      awayTeam:  Team("Ολυμπιακός", 10, 7, 2, 1, 1, [
-        Player("Γιώργος", "Παπαδόπουλος", 5),
-        Player("Νίκος", "Λαμπρόπουλος", 3),
-      ]),
-      hasMatchStarted: true,
-      time: 1210,
-      day: 3,
-      month: 3,
-      year: 2015)
+      year: 2025)
 ];
+List<Match> previousMatches = [
+  Match(
+      homeTeam: Team("Ολυμπιακός", 10, 7, 2, 1, 1,2000,0, [
+        Player("Γιώργος", "Παπαδόπουλος",2, 5),
+        Player("Νίκος", "Λαμπρόπουλος",2, 3),
+      ]),
+      awayTeam: Team("Παναθηναϊκός", 10, 6, 3, 1, 1,2000, 0,[
+        Player("Αλέξανδρος", "Βασιλείου",2, 4),
+        Player("Δημήτρης", "Κωνσταντίνου",2, 2),
+      ]),
+      hasMatchStarted: false,
+      time: 1500,
+      day: 5,
+      month: 3,
+      year: 2025),
+
+  Match(
+      homeTeam: Team("ΑΕΚ", 10, 5, 4, 1, 1,2000, 0,[
+        Player("Στέφανος", "Αντωνίου",1, 6),
+        Player("Μιχάλης", "Γεωργίου",2, 3),
+      ]),
+      awayTeam: Team("ΠΑΟΚ", 10, 4, 4, 2, 1, 2000,0,[
+        Player("Χρήστος", "Καραμανλής",1, 2),
+        Player("Παναγιώτης", "Σωτηρίου",2, 5),
+      ]),
+      hasMatchStarted: false,
+      time: 1700,
+      day: 5,
+      month: 3,
+      year: 2025),
+
+  Match(
+      homeTeam: Team("Άρης", 10, 6, 2, 2, 2, 2000,0,[
+        Player("Λευτέρης", "Διαμαντής",1, 4),
+        Player("Θοδωρής", "Αναστασίου", 2,2),
+      ]),
+      awayTeam: Team("ΟΦΗ", 10, 4, 5, 1, 2,2000,0, [
+        Player("Μανώλης", "Στρατής",2, 2),
+        Player("Δημήτρης", "Φωτεινός",1, 1),
+        Player("Λευτέρης", "Διαμαντής",3, 4),
+      ]),
+      hasMatchStarted: false,
+      time: 1600,
+      day: 7,
+      month: 3,
+      year: 2025),
+
+  Match(
+      homeTeam: Team("Βόλος", 10, 7, 2, 1, 3,2015,0, [
+        Player("Γιώργος", "Δημητρίου",1, 5),
+        Player("Χάρης", "Νικολάου",2, 4),
+      ]),
+      awayTeam: Team("Ιωνικός", 10, 4, 4, 2, 3,2000,0, [
+        Player("Νεκτάριος", "Παπανικολάου", 2,3),
+        Player("Άρης", "Λεμονής",1, 2),
+      ]),
+      hasMatchStarted: false,
+      time: 1800,
+      day: 8,
+      month: 3,
+      year: 2025),
+
+  Match(
+      homeTeam: Team("Καλαμάτα", 10, 8, 1, 1, 4,2000,0, [
+        Player("Στέργιος", "Κυριαζής",2, 6),
+        Player("Διονύσης", "Μαρκόπουλος",2, 3),
+      ]),
+      awayTeam: Team("Χανιά", 10, 6, 3, 1, 4,2000,0, [
+        Player("Ευθύμης", "Ανδριανός",2, 5),
+        Player("Νίκος", "Σφακιανάκης",2, 2),
+      ]),
+      hasMatchStarted: false,
+      time: 1900,
+      day: 9,
+      month: 3,
+      year: 2025),
+  Match(
+      homeTeam: Team("Ολυμπιακός", 10, 7, 2, 1, 1,2000, 0,[
+        Player("Γιώργος", "Παπαδόπουλος",2, 5),
+        Player("Νίκος", "Λαμπρόπουλος",2, 3),
+      ]),
+      awayTeam: Team("Παναθηναϊκός", 10, 6, 3, 1, 1,2000,0, [
+        Player("Αλέξανδρος", "Βασιλείου",2, 4),
+        Player("Δημήτρης", "Κωνσταντίνου",2, 2),
+      ]),
+      hasMatchStarted: true,
+      time: 1500,
+      day: 12,
+      month: 3,
+      year: 2025),
+
+  Match(
+      homeTeam: Team("ΑΕΚ", 10, 5, 4, 1, 1,2000,0, [
+        Player("Στέφανος", "Αντωνίου",2, 6),
+        Player("Μιχάλης", "Γεωργίου",2, 3),
+      ]),
+      awayTeam: Team("ΠΑΟΚ", 10, 4, 4, 2, 1,2000, 0,[
+        Player("Χρήστος", "Καραμανλής",2, 2),
+        Player("Παναγιώτης", "Σωτηρίου",2, 5),
+      ]),
+      hasMatchStarted: false,
+      time: 1700,
+      day: 15,
+      month: 3,
+      year: 2025),
+
+  Match(
+      homeTeam: Team("Άρης", 10, 6, 2, 2, 2,2000, 0,[
+        Player("Λευτέρης", "Διαμαντής",2, 4),
+        Player("Θοδωρής", "Αναστασίου",2, 2),
+      ]),
+      awayTeam: Team("Αστέρας Τρίπολης", 10, 5, 3, 2, 2,2000, 0,[
+        Player("Βασίλης", "Κυριακίδης",2, 3),
+        Player("Γιάννης", "Χατζηδάκης",2, 2),
+      ]),
+      hasMatchStarted: false,
+      time: 1600,
+      day: 20,
+      month: 3,
+      year: 2025),
+
+  Match(
+      homeTeam: Team("ΟΦΗ", 10, 4, 5, 1, 2,2000,0, [
+        Player("Μανώλης", "Στρατής",2, 2),
+        Player("Δημήτρης", "Φωτεινός",2, 1),
+      ]),
+      awayTeam: Team("Λαμία", 10, 3, 6, 1, 2,2000, 0,[
+        Player("Πέτρος", "Αγγελόπουλος",2, 1),
+        Player("Σωτήρης", "Μιχαηλίδης",2, 1),
+      ]),
+      hasMatchStarted: true,
+      time: 1800,
+      day: 25,
+      month: 3,
+      year: 2025),
+
+  Match(
+      homeTeam: Team("Βόλος", 10, 7, 2, 1, 3,2000, 0,[
+        Player("Γιώργος", "Δημητρίου",2, 5),
+        Player("Χάρης", "Νικολάου",2, 4),
+      ]),
+      awayTeam: Team("Παναιτωλικός", 10, 5, 3, 2, 3,2000,0, [
+        Player("Αντώνης", "Ρουμπής",2, 2),
+        Player("Σταύρος", "Θεοδώρου",2, 1),
+      ]),
+      hasMatchStarted: false,
+      time: 1900,
+      day: 28,
+      month: 3,
+      year: 2025)
+];
+List<List<Match>> matches=[upcomingMatches,previousMatches];
+
 
 class MyApp extends StatelessWidget {
-
-  const MyApp({super.key});
+  MyApp({super.key}){
+    MatchHandle().initializeMatces(matches);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -310,15 +455,15 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final Function(String) onOptionSelected;
   final String selectedOption;
 
-  CustomAppBar({required this.onOptionSelected, required this.selectedOption});
+  const CustomAppBar({super.key, required this.onOptionSelected, required this.selectedOption});
 
   @override
   Widget build(BuildContext context) {
     return AppBar(
       title: Text("AUTH Score",style: TextStyle(fontSize: 26,fontWeight: FontWeight.bold, color:  Colors.white)),
-      backgroundColor: const Color.fromARGB(255, 177, 37, 32),
+      backgroundColor: const Color.fromARGB(250, 50, 120, 90),
       actions: [
-        Padding(
+        /* Padding(
           padding: const EdgeInsets.symmetric(horizontal: 5),
           child: PopupMenuButton<String>(
             onSelected: onOptionSelected,
@@ -354,13 +499,14 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
               ],
             ),
           ),
-        ),
+        ),*/
         Padding(padding: const EdgeInsets.symmetric(horizontal: 5),
           child: IconButton(
             icon: Icon(Icons.search, color: Colors.white,), // Μεγεθυντικός φακός
             onPressed: () {
               // Εδώ προσθέτεις τη λειτουργία αναζήτησης
-              print('Πατήθηκε το κουμπί αναζήτησης');
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => SearchPage()));
             },
           ),
         )
@@ -382,7 +528,7 @@ class CustomBottomNavigationBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BottomNavigationBar(
-      backgroundColor: const Color.fromARGB(255, 223, 87, 82),
+      backgroundColor: const Color.fromARGB(255, 10, 28, 21),
       selectedFontSize:
       14, // Αυξάνει το μέγεθος της γραμματοσειράς του επιλεγμένου
       unselectedFontSize: 12, // Μικρότερη γραμματοσειρά για τα μη επιλεγμένα
@@ -396,7 +542,7 @@ class CustomBottomNavigationBar extends StatelessWidget {
         BottomNavigationBarItem(icon: Icon(Icons.person), label: "Προφίλ"),
       ],
       currentIndex: currentIndex,
-      selectedItemColor: Colors.black,
+      selectedItemColor: Colors.blue,
       unselectedItemColor: Colors.white,
       onTap: onTap,
     );
@@ -413,12 +559,12 @@ Widget _buildBody(int selectedIndex) {
     case 2:
       return FavoritePage();
     case 3:
-      return ProfilePage();
+      return ProfilePage(user: User("Kosm","Kero","Kosmkero","pass"),);
     default:
       return HomePage();
   }
 }
-
+/*
 class profilePage extends StatelessWidget {
   const profilePage({super.key});
 
@@ -432,6 +578,7 @@ class profilePage extends StatelessWidget {
     );
   }
 }
+*/
 //----------------------------------------------------------------------------------
 
 

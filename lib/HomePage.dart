@@ -2,20 +2,17 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:untitled1/TopScorersContainer.dart';
 import 'package:untitled1/matchesContainer.dart';
+import 'API/Match_Handle.dart';
 import 'Scorer.dart';
-import 'main.dart';
+
 
 class HomePage extends StatefulWidget {
-
-
-
   @override
   State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
-
-
+  bool upcomingMatches = true;
   List<Scorer> topScorers = [
     Scorer("paulos", 30, "c"),
     Scorer("lito", 15, "c"),
@@ -25,14 +22,48 @@ class _HomePageState extends State<HomePage> {
     Scorer("lama", 15, "csd"),
   ];
 
+  void changeMatches(){
+
+    setState(() {
+      upcomingMatches = !upcomingMatches;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
         Container(
+            color: Color.fromARGB(150, 60, 80, 150),
+            width: double.infinity,
+            child: TextButton(
+                onPressed: () {
+                  changeMatches();
+                },
+                child: upcomingMatches
+                    ? Row(
+                        children: [
+                          Icon(CupertinoIcons.back),
+                          Text(
+                            "Προηγούμενοι αγώνες",
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ],
+                      )
+                    : Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Text(
+                            "Επερχόμενοι αγώνες",
+                            style: TextStyle(color: Colors.white),
+                          ),
+                          Icon(CupertinoIcons.right_chevron),
+                        ],
+                      ))),
+        /* Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
-              colors: [ Color.fromARGB(255, 177, 37, 32), Colors.deepOrange], // Δύο χρώματα
+              colors: [ Color.fromARGB(150, 105, 165, 227), Color.fromARGB(150, 105, 165, 227)], // Δύο χρώματα
               begin: Alignment.topCenter, // Ξεκινάει από πάνω
               end: Alignment.bottomCenter, // Καταλήγει κάτω
               stops: [0.5, 0.5], // Χωρίζει το container 50-50
@@ -43,11 +74,17 @@ class _HomePageState extends State<HomePage> {
             topScorers: topScorers,
           ),
         ),
+         */
+
         Expanded(
           // flex: 5, // Το κάτω μέρος είναι μικρότερο
           child: Container(
-            color: Colors.deepOrange,
-            child: matchesContainer(matches: matches,),
+            color: Color.fromARGB(150, 60, 80, 150),
+            child: upcomingMatches? matchesContainer(
+              matches: MatchHandle().getUpcomingMatches(),
+            ) : matchesContainer(
+              matches: MatchHandle().getPreviousMatches(),
+            ),
           ),
         ),
       ],

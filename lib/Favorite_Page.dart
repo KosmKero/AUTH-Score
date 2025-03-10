@@ -1,8 +1,8 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:untitled1/API/Match_Handle.dart';
 import 'package:untitled1/main.dart';
-import 'Match.dart';
-import 'Team.dart';
+import 'Data_Classes/Match.dart';
+import 'Data_Classes/Team.dart';
 import 'matchesContainer.dart';
 
 class FavoritePage extends StatefulWidget {
@@ -31,7 +31,7 @@ class _FavoriteContainerState extends State<FavoritePage> {
       children: [
         Expanded(
           flex: 1,
-          child: DropdownButton<Team>(
+          child:  favouriteTeams.isNotEmpty ? DropdownButton<Team>(
               value: selectedTeam,
               items: favouriteTeams.map<DropdownMenuItem<Team>>((Team team) {
                 return DropdownMenuItem<Team>(
@@ -45,13 +45,13 @@ class _FavoriteContainerState extends State<FavoritePage> {
                   selectedTeam = newValue; // Ενημέρωση του επιλεγμένου παίκτη
                   refreshList();
                 });
-              }),
+              }) : SizedBox.shrink(),
         ),
         Expanded(
           flex: 10,
-          child: matchesContainer(
-            matches: teamMatches,
-          ),
+          child: favouriteTeams.isNotEmpty ? matchesContainer(
+            matches: teamMatches ,
+          ) : Center(child: Text("Δεν έχεις ακόμα αγαπημένες ομάδες",style:  TextStyle(fontSize: 25,fontWeight: FontWeight.bold),textAlign: TextAlign.center,)),
         ),
       ],
     );
@@ -59,10 +59,14 @@ class _FavoriteContainerState extends State<FavoritePage> {
 
   List<Match> refreshList() {
     teamMatches.clear();
-    for (Match match in matches) {
-      if (match.homeTeam.name == selectedTeam?.name || match.awayTeam.name == selectedTeam?.name) {
-        teamMatches.add(match);
-      }
+    if (favouriteTeams.isNotEmpty) {
+        for (Match match in MatchHandle().getAllMatches()) {
+          if (match.homeTeam.name == selectedTeam?.name ||
+              match.awayTeam.name == selectedTeam?.name) {
+            teamMatches.add(match);
+          }
+        }
+
     }
     return teamMatches;
   }

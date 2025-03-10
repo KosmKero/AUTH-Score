@@ -1,40 +1,21 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:untitled1/Team_Display_Page_Package/TeamDisplayPage.dart';
-import 'package:untitled1/main.dart';
+import '../Data_Classes/Team.dart';
+import '../Team_Display_Page_Package/TeamDisplayPage.dart';
+import '../main.dart';
+import '../Data_Classes/Match.dart';
 
-import 'Data_Classes/Team.dart';
-
-class StandingsPage extends StatefulWidget {
+class StandingPageOneGroup extends StatefulWidget {
+  const StandingPageOneGroup({super.key,required this.team});
+  final Team team;
   @override
-  State<StandingsPage> createState() => _StandingsPage();
+  State<StandingPageOneGroup> createState() => _StandingPageOneGroupState();
 }
 
-class _StandingsPage extends State<StandingsPage> {
+class _StandingPageOneGroupState extends State<StandingPageOneGroup> {
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: Color.fromARGB(150, 60, 80, 150),
-      child: Column(children: [
-        Text("Βαθμολογικός Πίνακας",
-            style: TextStyle(
-                fontSize: 23,
-                fontWeight: FontWeight.bold,
-                color: Colors.white)),
-        Expanded(
-            child: SingleChildScrollView(
-                child: Column(
-          children: [
-            _buildGroupStandings(1),
-            _buildGroupStandings(2),
-            _buildGroupStandings(3),
-            _buildGroupStandings(4)
-          ],
-        )))
-      ]),
-    );
+    return _buildGroupStandings(widget.team.group);
   }
-
   Widget _buildGroupStandings(int group) {
     List<Team> groupTeams = [];
     for (Team team in teams) {
@@ -78,23 +59,23 @@ class _StandingsPage extends State<StandingsPage> {
                 rows: groupTeams
                     .map(
                       (team) => DataRow(cells: [
-                        DataCell(TextButton(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => TeamDisplayPage(team)),
-                            );
-                          },
-                          child: Text(team.name),
-                        )),
-                        DataCell(Text(team.totalGames.toString())),
-                        DataCell(Text(team.wins.toString())),
-                        DataCell(Text(team.draws.toString())),
-                        DataCell(Text(team.losses.toString())),
-                        DataCell(Text(team.totalPoints.toString())),
-                      ]),
-                    )
+                    DataCell(TextButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => TeamDisplayPage(team)),
+                        );
+                      },
+                      child: Text(team.name,),
+                    )),
+                    DataCell(Text(team.totalGames.toString())),
+                    DataCell(Text(team.wins.toString())),
+                    DataCell(Text(team.draws.toString())),
+                    DataCell(Text(team.losses.toString())),
+                    DataCell(Text(team.totalPoints.toString())),
+                  ]),
+                )
                     .toList(),
               )
             ],

@@ -1,50 +1,90 @@
 import 'package:flutter/material.dart';
-import 'package:untitled1/Match_Details_Page.dart';
-import 'Match.dart';
+import 'package:provider/provider.dart';
+import 'package:untitled1/Match_Details_Package/Match_Details_Page.dart';
+import 'Data_Classes/Match.dart';
 
-class matchesContainer extends StatefulWidget {
-  matchesContainer({super.key, required this.matches});
+class matchesContainer extends StatelessWidget {
+  matchesContainer({super.key, required this.matches}){
+    sortMatches();
+  }
   final List<Match> matches;
 
-  @override
-  State<matchesContainer> createState() => _matchesContainerState();
-}
-
-class _matchesContainerState extends State<matchesContainer> {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       scrollDirection: Axis.vertical,
-      child: Column(children: _buildMatches()),
+      child: _buildMatches(),
     );
   }
 
-  List<Widget> _buildMatches() {
-    List<Widget> widgets = [];
-    for (int i = 0; i < widget.matches.length; i++) {
-      widgets.add(eachMatchContainer(widget.matches[i]));
-    }
-    return widgets;
+  Column _buildMatches() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        for (int i = 0; i < matches.length; i++) ...[
+          if (i == 0 ||
+              matches[i].day != matches[i - 1].day ||
+              matches[i].month != matches[i - 1].month ||
+              matches[i].year != matches[i - 1].year)
+            Text(
+              " ${matches[i].day}/${matches[i].month}/${matches[i].year}",
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold,color: Colors.white),
+            ),
+          // Create Container for the match
+          eachMatchContainer(matches[i]),
+        ],
+
+      ],
+    );
+
+
+
+
+
+
+  }
+
+  void sortMatches(){
+    matches.sort((a, b) {
+      if (a.year != b.year) {
+        return a.year.compareTo(b.year);
+      } else if (a.month != b.month) {
+        return a.month.compareTo(b.month);
+      } else if (a.day!=b.day){
+        return a.day.compareTo(b.day);
+      }else{
+        return a.time.compareTo(b.time);
+      }
+    });
   }
 }
 
-class eachMatchContainer extends StatefulWidget {
-  const eachMatchContainer(this.match, {super.key});
+class eachMatchContainer extends StatelessWidget {
   final Match match;
+  const eachMatchContainer(this.match, {Key? key,}): super(key: key);
 
-  @override
-  State<eachMatchContainer> createState() => _eachMatchContainerState();
-}
 
-class _eachMatchContainerState extends State<eachMatchContainer> {
   @override
   Widget build(BuildContext context) {
+    return ChangeNotifierProvider.value(
+      value: match,
+      child: eachMatchContainerView(),
+    );
+  }
+}
+
+class eachMatchContainerView extends StatelessWidget {
+  const eachMatchContainerView({Key? key}) : super(key: key);
+  @override
+  Widget build(BuildContext context) {
+    final match = Provider.of<Match>(context);
+
     return InkWell(
         onTap: () {
           Navigator.push(
             context,
             MaterialPageRoute(
-                builder: (context) => MatchDetailsPage(match: widget.match, )
+                builder: (context) => matchDetailsPage(match, )
             )
           );
         },
@@ -60,10 +100,7 @@ class _eachMatchContainerState extends State<eachMatchContainer> {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Text(
-              ("${widget.match.time % 100}:${(widget.match.time / 100).toInt()}"),
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
+            MatchContainerTime(match: match),
             SizedBox(width: 20),
             Container(height: 50, width: 1.5, color: Colors.black26),
             SizedBox(width: 20),
@@ -73,38 +110,38 @@ class _eachMatchContainerState extends State<eachMatchContainer> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    widget.match.homeTeam.name,
+                    match.homeTeam.name,
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                   ),
                   Text(
-                    widget.match.awayTeam.name,
+                    match.awayTeam.name,
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                   ),
                 ],
               ),
             ),
-            Spacer(),
-            Column(
+            const SizedBox(width: 20),
+            match.hasMatchStarted ? Column(
               children: [
                 Text(
-                  widget.match.scoreHome.toString(),
+                  match.scoreHome.toString(),
                   style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: Colors.black),
+                      color: match.hasMatchFinished ? Colors.black : Colors.red),
                 ),
                 Text(
-                  widget.match.scoreAway.toString(),
+                  match.scoreAway.toString(),
                   style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: Colors.black),
+                      color: match.hasMatchFinished ? Colors.black : Colors.red),
                 ),
               ],
-            ),
+            ):SizedBox.shrink() ,
             Padding(
                 padding: EdgeInsetsDirectional.only(start: 5,end:0),
-                child: notificationIcon(),
+                child: notificationIcon(match: match,),
             )
           ],
         ),
@@ -112,23 +149,61 @@ class _eachMatchContainerState extends State<eachMatchContainer> {
     )
     );
   }
-
 }
-class notificationIcon extends StatefulWidget {
-  const notificationIcon({super.key});
+
+class MatchContainerTime extends StatefulWidget {
+  late final Color color;
+  MatchContainerTime({super.key,required this.match}){
+    match.hasMatchFinished ? color =Colors.black : color=Colors.red;
+  }
+
+  final Match match;
 
   @override
-  State<notificationIcon> createState() => _notificationIconState();
+  State<MatchContainerTime> createState() => _MatchContainerTimeState();
 }
 
-class _notificationIconState extends State<notificationIcon> {
-  late bool notifonoroff;
+class _MatchContainerTimeState extends State<MatchContainerTime> {
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Text(
+          widget.match.timeString,
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+        if(widget.match.hasMatchStarted) Text(" timer",style: TextStyle(color: widget.color),)
+      ],
+    );
+  }
+}
+
+
+class notificationIcon extends StatefulWidget {
+  final Match match;
+  const notificationIcon({super.key, required this.match});
+
+  @override
+  State<notificationIcon> createState() => _NotificationIconState();
+}
+
+class _NotificationIconState extends State<notificationIcon> {
+  bool isNotified = false;
 
   @override
   Widget build(BuildContext context) {
     return IconButton(
-        onPressed: () {},
-        icon: Icon(Icons.notification_add_outlined));
+      onPressed: () {
+        setState(() {
+          isNotified = !isNotified;
+        });
+      },
+      icon: Icon(
+        isNotified ? Icons.notifications_active : Icons.notification_add_outlined,
+        color: isNotified ? Colors.blue : Colors.black,
+      ),
+    );
   }
 }
 

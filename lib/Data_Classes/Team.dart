@@ -1,16 +1,20 @@
-import 'package:untitled1/TeamDisplayPage.dart';
+import 'package:untitled1/Team_Display_Page_Package/TeamDisplayPage.dart';
+
+import 'Player.dart';
 
 class Team {
 
   late List<Player> _players;
+  List<String>  last5Results=["W","D","L","W","D"];
 
 
   // Constructor with optional values
-  Team(this.name,this._matches, this._wins, this._losses, this._draws,this._group, [List<Player>? players]) {
+  Team(this.name,this._matches, this._wins, this._losses, this._draws,this._group,this._foundationYear,this._titles, [List<Player>? players] ) {
     _players = players ?? []; // Initialize players list if null
   }
+  int? _foundationYear;
   String name;
-  int _matches, _wins, _losses, _draws;
+  int _matches, _wins, _losses, _draws, _titles;
   final int _group;
   bool _isFavourite=false;
 
@@ -24,7 +28,8 @@ class Team {
   int get totalPoints=> (3*_wins+_draws);
   int get totalGames=> ( _wins + _draws + _losses );
   bool get isFavourite => _isFavourite;
-
+  int? get foundationYear=> _foundationYear;
+  int get titles=>_titles;
 
   // Method to add a player
   void addPlayer(Player player) {
@@ -43,24 +48,5 @@ class Team {
     _isFavourite=!_isFavourite;
     return _isFavourite;
   }
-
-}
-class Player {
-  final String _name, _surname;
-  late int _goals, _numOfYellowCards, _numOfRedCards;
-
-  // Constructor
-  Player(this._name, this._surname, this._goals,
-      {int numOfYellowCards = 0, int numOfRedCards = 0}) {
-    _numOfYellowCards = numOfYellowCards;
-    _numOfRedCards = numOfRedCards;
-  }
-
-  // Getters
-  String get name => _name;
-  String get surname => _surname;
-  int get goals => _goals;
-  int get numOfYellowCards => _numOfYellowCards;
-  int get numOfRedCards => _numOfRedCards;
 
 }
