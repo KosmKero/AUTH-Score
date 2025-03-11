@@ -90,32 +90,52 @@ class eachMatchContainerView extends StatelessWidget {
         },
         borderRadius: BorderRadius.circular(10),
         child: Card(
+
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(10),
       ),
       elevation: 10,
       margin: EdgeInsets.symmetric(vertical: 2, horizontal: 2),
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
+        padding: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 16.0),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             MatchContainerTime(match: match),
-            SizedBox(width: 20),
+            SizedBox(width: 15),
             Container(height: 50, width: 1.5, color: Colors.black26),
-            SizedBox(width: 20),
+            SizedBox(width: 15),
             Expanded(
               flex: 3,
               child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    match.homeTeam.name,
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                  Row(
+                    children: [
+                      SizedBox(
+                          height: 25,
+                          width: 25,
+                          child: Image.asset('fotos/teamlogo.png')
+                      ),
+                      Text(" ${match.homeTeam.name}",
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                      ),
+                    ],
                   ),
-                  Text(
-                    match.awayTeam.name,
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                  SizedBox(height: 2),
+                  Row(
+                    children: [
+                      SizedBox(
+                        height: 25,
+                        width: 25,
+                        child: Image.asset('fotos/teamlogo.png')
+                      ),
+
+                      Text(" ${match.awayTeam.name}",
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                      ),
+                    ],
                   ),
                 ],
               ),
