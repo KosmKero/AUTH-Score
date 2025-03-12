@@ -11,7 +11,7 @@ import 'Team.dart';
 class Match extends ChangeNotifier{
   //με το _ γινεται private
 
-  late bool _hasMatchStarted;
+  bool _hasMatchStarted=false;
   bool _hasMatchFinished=false,_hasSecondhalfStarted=false;
   late int _scoreHome, _scoreAway, _day, _month, _year, _time;
   late Team _homeTeam,_awayTeam;
@@ -28,7 +28,7 @@ class Match extends ChangeNotifier{
         required year}) {
     _homeTeam = homeTeam;
     _awayTeam = awayTeam;
-    _hasMatchStarted = hasMatchStarted;
+    _hasMatchStarted = false;
     _scoreAway = 0;
     _scoreHome = 0;
     _time = time;
@@ -48,6 +48,8 @@ class Match extends ChangeNotifier{
   int get day => _day;
   int get month => _month;
   int get year => _year;
+  int get startTimeInSeconds=>_startTimeInSeconds;
+
   Map<int,List<Goal>> get goalsList => _goalsList;
 
   String get timeString {
@@ -75,9 +77,12 @@ class Match extends ChangeNotifier{
   }
 
   void matchFinished(){
+    if (!_hasMatchFinished) {
+      MatchHandle().matchFinished(this);
+    }
     _hasMatchFinished=true;
+
     notifyListeners();
-    MatchHandle().matchFinished(this);
   }
 
 
@@ -86,7 +91,7 @@ class Match extends ChangeNotifier{
     (!_hasSecondhalfStarted)? half=0:half=1;
 
     _scoreHome++;
-    _goalsList[half]?.add(Goal(name, _scoreHome, _scoreAway, (DateTime.now().millisecondsSinceEpoch -0)~/ 1000 , null, true)); //θελει διορθωση
+    _goalsList[half]?.add(Goal(name, _scoreHome, _scoreAway, DateTime.now().millisecondsSinceEpoch~/ 1000-startTimeInSeconds  , null, true)); //θελει διορθωση
     notifyListeners();
 
 
@@ -96,7 +101,7 @@ class Match extends ChangeNotifier{
     (!_hasSecondhalfStarted)? half=0:half=1;
 
     _scoreAway++;
-    _goalsList[half]?.add(Goal(name, _scoreHome, _scoreAway, (DateTime.now().millisecondsSinceEpoch -0)~/ 1000 , null, false));
+    _goalsList[half]?.add(Goal(name, _scoreHome, _scoreAway, DateTime.now().millisecondsSinceEpoch~/ 1000-startTimeInSeconds  , null, false));
      notifyListeners();
   }
 
@@ -120,6 +125,6 @@ class Goal {
 
 
   String get timeString {
-    return (_minute ~/ 60).toString().padLeft(2, '0');
+    return ((_minute ~/ 60)+1).toString().padLeft(2, '0');
   }
 }

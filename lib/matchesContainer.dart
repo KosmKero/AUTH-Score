@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:untitled1/Match_Details_Package/Match_Details_Page.dart';
@@ -90,32 +92,52 @@ class eachMatchContainerView extends StatelessWidget {
         },
         borderRadius: BorderRadius.circular(10),
         child: Card(
+
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(10),
       ),
       elevation: 10,
       margin: EdgeInsets.symmetric(vertical: 2, horizontal: 2),
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
+        padding: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 16.0),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             MatchContainerTime(match: match),
-            SizedBox(width: 20),
+            SizedBox(width: 15),
             Container(height: 50, width: 1.5, color: Colors.black26),
-            SizedBox(width: 20),
+            SizedBox(width: 15),
             Expanded(
               flex: 3,
               child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    match.homeTeam.name,
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                  Row(
+                    children: [
+                      SizedBox(
+                          height: 25,
+                          width: 25,
+                          child: Image.asset('fotos/teamlogo.png')
+                      ),
+                      Text(" ${match.homeTeam.name}",
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                      ),
+                    ],
                   ),
-                  Text(
-                    match.awayTeam.name,
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                  SizedBox(height: 2),
+                  Row(
+                    children: [
+                      SizedBox(
+                        height: 25,
+                        width: 25,
+                        child: Image.asset('fotos/csdfootball.png')
+                      ),
+
+                      Text(" ${match.awayTeam.name}",
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -152,6 +174,8 @@ class eachMatchContainerView extends StatelessWidget {
 }
 
 class MatchContainerTime extends StatefulWidget {
+
+
   late final Color color;
   MatchContainerTime({super.key,required this.match}){
     match.hasMatchFinished ? color =Colors.black : color=Colors.red;
@@ -165,15 +189,59 @@ class MatchContainerTime extends StatefulWidget {
 
 class _MatchContainerTimeState extends State<MatchContainerTime> {
 
+  late int _secondsElapsed;
+  Timer? _timer;
+
+
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Ελέγχει αν το ματς έχει ξεκινήσει και αρχίζει το χρονόμετρο
+    if (widget.match.hasMatchStarted) {
+      _startTimer();
+    } else {
+      _secondsElapsed = 0;
+    }
+
+    // Listener για να ξεκινησει το χρονομετρο του αγώνα
+    widget.match.addListener(() {
+      if (widget.match.hasMatchStarted && _timer == null) {
+        _startTimer(); // Ξεκινά το χρονόμετρο αν το ματς ξεκινήσει
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  void _startTimer() {
+    _secondsElapsed = (DateTime.now().millisecondsSinceEpoch ~/ 1000) - widget.match.startTimeInSeconds;
+
+    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+      setState(() {
+        _secondsElapsed++;
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+
     return Column(
       children: [
         Text(
           widget.match.timeString,
           style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
-        if(widget.match.hasMatchStarted) Text(" timer",style: TextStyle(color: widget.color),)
+        if(widget.match.hasMatchStarted) Text(
+            '${(_secondsElapsed ~/ 60).toString().padLeft(2, '0')}:${(_secondsElapsed % 60).toString().padLeft(2, '0')}',
+            style: const TextStyle(
+                fontWeight: FontWeight.bold, fontSize: 8, color: Colors.red),)
       ],
     );
   }
