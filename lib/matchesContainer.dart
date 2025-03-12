@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:untitled1/Match_Details_Package/Match_Details_Page.dart';
@@ -129,7 +131,7 @@ class eachMatchContainerView extends StatelessWidget {
                       SizedBox(
                         height: 25,
                         width: 25,
-                        child: Image.asset('fotos/teamlogo.png')
+                        child: Image.asset('fotos/csdfootball.png')
                       ),
 
                       Text(" ${match.awayTeam.name}",
@@ -172,6 +174,8 @@ class eachMatchContainerView extends StatelessWidget {
 }
 
 class MatchContainerTime extends StatefulWidget {
+
+
   late final Color color;
   MatchContainerTime({super.key,required this.match}){
     match.hasMatchFinished ? color =Colors.black : color=Colors.red;
@@ -185,15 +189,59 @@ class MatchContainerTime extends StatefulWidget {
 
 class _MatchContainerTimeState extends State<MatchContainerTime> {
 
+  late int _secondsElapsed;
+  Timer? _timer;
+
+
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Ελέγχει αν το ματς έχει ξεκινήσει και αρχίζει το χρονόμετρο
+    if (widget.match.hasMatchStarted) {
+      _startTimer();
+    } else {
+      _secondsElapsed = 0;
+    }
+
+    // Listener για να ξεκινησει το χρονομετρο του αγώνα
+    widget.match.addListener(() {
+      if (widget.match.hasMatchStarted && _timer == null) {
+        _startTimer(); // Ξεκινά το χρονόμετρο αν το ματς ξεκινήσει
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  void _startTimer() {
+    _secondsElapsed = (DateTime.now().millisecondsSinceEpoch ~/ 1000) - widget.match.startTimeInSeconds;
+
+    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+      setState(() {
+        _secondsElapsed++;
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+
     return Column(
       children: [
         Text(
           widget.match.timeString,
           style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
-        if(widget.match.hasMatchStarted) Text(" timer",style: TextStyle(color: widget.color),)
+        if(widget.match.hasMatchStarted) Text(
+            '${(_secondsElapsed ~/ 60).toString().padLeft(2, '0')}:${(_secondsElapsed % 60).toString().padLeft(2, '0')}',
+            style: const TextStyle(
+                fontWeight: FontWeight.bold, fontSize: 8, color: Colors.red),)
       ],
     );
   }
