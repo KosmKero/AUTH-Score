@@ -7,6 +7,8 @@ import '../../main.dart';
 import '../Standings_Card_1Group.dart';
 import '../Starting__11_Display_Card.dart';
 
+
+//ΟΛΟ ΕΔΩ ΑΦΟΡΑ ΤΟ ΕΠΑΝΩ ΚΟΜΜΑΤΙ ΤΗΣ ΣΕΛΙΔΑΣ. ΓΙΑ ΤΗΝ ΩΡΑ =,ΜΕΡΑ ΚΙΑ ΤΙς ΟΜΑΔΕΣ. ΤΟ ΜΠΛΕ ΠΛΑΙΣΙΟ ΣΤΗΝ ΑΡΧΗ ΑΡΧΗ ΠΑΝΩ
 class MatchNotStartedDetails extends StatefulWidget {
   final Match match;
 
@@ -26,26 +28,24 @@ class _MatchNotStartedDetailsState extends State<MatchNotStartedDetails> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return Scaffold( //Button to begin the match countdown
         body: Column(children: [
       TextButton(
           onPressed: () {
             widget.match.matchStarted();
             setState(() {});
           },
-          child: Text("patatohome")),
+          child: Text("Begin Match")),
       Container(
         color: Color.fromARGB(50, 5, 150, 200),
         child: Padding(
-          padding: const EdgeInsets.all(1.0),
+          padding: const EdgeInsets.all(2.5),
           child: Column(
             children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  buildHomeTeamName(
-                    team: widget.match.homeTeam,
-                  ),
+                  buildHomeTeamName(team: widget.match.homeTeam,),
                   _buildMatchDateTime(),
                   buildAwayTeamName(team: widget.match.awayTeam),
                 ],
@@ -65,9 +65,13 @@ class _MatchNotStartedDetailsState extends State<MatchNotStartedDetails> {
 
   Widget _buildMatchDateTime() {
     return Column(
-      children: [
-        Text('${widget.match.day}.${widget.match.month}.${widget.match.year}',
-            style: TextStyle(fontWeight: FontWeight.w400, fontSize: 13)),
+      children: [  //Sets the text for the date of the match
+        Text(
+            '${widget.match.day}.${widget.match.month}.${widget.match.year}',
+            style: TextStyle(
+                fontWeight: FontWeight.w400,
+                fontSize: 14)
+        ),
         Text(
           widget.match.timeString,
           style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
@@ -98,7 +102,7 @@ class _NavigationButtonsState extends State<NavigationButtons> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) {  //
     return SizedBox(
       height: 60,
       width: double.infinity,
@@ -127,14 +131,15 @@ class _NavigationButtonsState extends State<NavigationButtons> {
             text,
             style: TextStyle(
               fontSize: 16,
+              //fontFamily: 'Montserrat',
               color: isSelected ? Colors.blue : Colors.black,
               fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
             ),
           ),
-          SizedBox(height: 4), // Απόσταση μεταξύ κειμένου και γραμμής
+          SizedBox(height: 3), // Απόσταση μεταξύ κειμένου και γραμμής
           if (isSelected)
             Container(
-              width: 60, // Μήκος γραμμής
+              width: 80, // Μήκος γραμμής
               height: 3, // Πάχος γραμμής
               color: Colors.blue, // Χρώμα γραμμής
             ),
@@ -144,6 +149,7 @@ class _NavigationButtonsState extends State<NavigationButtons> {
   }
 }
 
+//ΦΤΙΑΧΝΕΙ ΤΟ ΠΤΑΜΠΛΟ ΓΙΑ ΤΗΝ ΟΜΑΔΑ ΕΔΡΑΣ ΣΤΟ ΜΠΛΕ ΠΛΑΙΣΙΟ
 class buildHomeTeamName extends StatefulWidget {
   const buildHomeTeamName({super.key, required this.team});
   final Team team;
@@ -167,18 +173,8 @@ class _buildHomeTeamName extends State<buildHomeTeamName> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
-        Transform.translate(
+        Transform.translate( //ΑΦΟΡΑ ΤΟ ΕΙΚΟΝΙΔΙΟ ΤΗΣ ΚΑΡΔΙΑΣ
           offset: Offset(16, 0), // Μετακινεί το εικονίδιο πιο κοντά στο κείμενο
-          child: IconButton(
-            padding: EdgeInsets.zero, // Αφαιρεί το default padding
-            constraints: BoxConstraints(), // Αποτρέπει την επέκταση του κουμπιού
-            onPressed: _toggleFavorite,
-            icon: Icon(
-              size: 17,
-              widget.team.isFavourite ? Icons.favorite : Icons.favorite_border,
-              color: widget.team.isFavourite ? Colors.red : null,
-            ),
-          ),
         ),
         Column(
           children: [
@@ -187,9 +183,9 @@ class _buildHomeTeamName extends State<buildHomeTeamName> {
                   context,
                   MaterialPageRoute(
                       builder: (context) => TeamDisplayPage(widget.team)),
-                ); },
+                ); },//ΑΦΟΡΑ ΤΟ ΤΟ ΟΝΟΜΑ
                 child: Text(widget.team.name,
-                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600,color: Colors.black),)
+                  style: TextStyle(fontSize: 17 , fontWeight: FontWeight.w600,color: Colors.black),)
             ),
           ],
         ),
@@ -198,6 +194,7 @@ class _buildHomeTeamName extends State<buildHomeTeamName> {
   }
 }
 
+//ΦΤΙΑΧΝΕΙ ΤΟ ΠΕΔΙΟ ΓΙΑ ΤΗΝ ΟΜΑΔΑ ΕΚΤΟΣ ΣΤΟ ΜΠΛΕ ΠΛΑΙΣΙΟ !!!
 class buildAwayTeamName extends StatefulWidget {
   const buildAwayTeamName({super.key, required this.team});
   final Team team;
@@ -230,22 +227,12 @@ class _buildAwayTeamName extends State<buildAwayTeamName> {
                       builder: (context) => TeamDisplayPage(widget.team)),
                 ); },
                 child: Text(widget.team.name,
-                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600,color: Colors.black),)
+                  style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600,color: Colors.black),)
             ),
           ],
         ),
         Transform.translate(
           offset: Offset(-16, 0), // Μετακινεί το εικονίδιο πιο κοντά στο κείμενο
-          child: IconButton(
-            padding: EdgeInsets.zero, // Αφαιρεί το default padding
-            constraints: BoxConstraints(), // Αποτρέπει την επέκταση του κουμπιού
-            onPressed: () => _toggleFavorite(),
-            icon: Icon(
-              size: 17,
-              widget.team.isFavourite ? Icons.favorite : Icons.favorite_border,
-              color: widget.team.isFavourite ? Colors.red : null,
-            ),
-          ),
         ),
       ],
     );
