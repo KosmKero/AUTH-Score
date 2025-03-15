@@ -27,8 +27,19 @@ class _TeamDisplayPageState extends State<TeamDisplayPage> {
   @override
   Widget build(BuildContext context) {
     return
-      Scaffold(
-        appBar: AppBar(title: Text(widget.team.name),actions: [isFavourite(team: widget.team,)]),
+      Scaffold( //ΑΦΟΡΑ ΤΟ ΟΝΟΜΑ ΠΑΝΩ ΣΤΗΝ ΣΕΛΙΔΑ
+        appBar: AppBar(
+            title: Text(
+            widget.team.name,
+          style: TextStyle(
+            fontSize: 23,
+            fontWeight: FontWeight.bold,
+            fontFamily: 'Montserrat',
+            fontStyle: FontStyle.italic,
+          ),
+        ),
+            actions: [isFavourite(team: widget.team,)]
+        ),
         body:Column(
       children: [
         //Text(team.name,style: TextStyle(color: Color.fromARGB(100, 255, 10, 40),)),
@@ -44,7 +55,7 @@ class _TeamDisplayPageState extends State<TeamDisplayPage> {
 
 }
 
-
+//ΑΦΟΡΑ ΤΑ 3 ΚΟΥΜΠΙΑ ΚΑΤΩ ΑΠΟ ΤΟ ΟΝΟΜΑ!!
 class _NavigationButtons extends StatefulWidget {
   final Function(int) onSectionChange;
 
@@ -65,10 +76,11 @@ class _NavigationButtonsState extends State<_NavigationButtons> {
     widget.onSectionChange(index); // Notify parent widget
   }
 
+  //ΔΗΜΙΟΥΡΓΕΙ ΤΟΝ ΧΩΡΟ ΤΩΝ 3 ΚΟΥΜΠΙΩΝ
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 60,
+      height: 65,
       width: double.infinity,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -81,6 +93,7 @@ class _NavigationButtonsState extends State<_NavigationButtons> {
     );
   }
 
+  //ΔΗΜΙΟΥΡΓΕΙ ΤΑ 3 ΚΟΥΜΠΙΑ(ΛΕΠΤΟΜΕΡΕΙΕΣ ΑΓΩΝΕΣ ΚΑΙ ΠΑΙΧΤΕΣ)
   Widget _buildTextButton(String text, int index) {
     bool isSelected = selectedIndex == index;
 
@@ -94,12 +107,12 @@ class _NavigationButtonsState extends State<_NavigationButtons> {
           Text(
             text,
             style: TextStyle(
-              fontSize: 16,
+              fontSize: 17,
               color: isSelected ? Colors.blue : Colors.black,
               fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
             ),
           ),
-          SizedBox(height: 4), // Απόσταση μεταξύ κειμένου και γραμμής
+          SizedBox(height: 3), // Απόσταση μεταξύ κειμένου και γραμμής
           if (isSelected)
             Container(
               width: 60, // Μήκος γραμμής
@@ -113,6 +126,7 @@ class _NavigationButtonsState extends State<_NavigationButtons> {
 }
 
 
+//ελεγχει την κατασταση για το αν η ομαδα ειναι στα αγαπημενα ή οχι.
 class isFavourite extends StatefulWidget{
     final Team team;
    const isFavourite({super.key, required this.team});
