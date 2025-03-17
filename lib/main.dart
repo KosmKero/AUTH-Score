@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:untitled1/API/Match_Handle.dart';
 import 'package:untitled1/Data_Classes/Team.dart';
+import 'package:untitled1/knock_outs_page.dart';
 import 'Data_Classes/User.dart';
 import 'Favorite_Page.dart';
 import 'HomePage.dart';
@@ -9,6 +10,9 @@ import 'Profile/Profile_Page.dart';
 import 'Search_Page.dart';
 import 'StandingsPage.dart';
 import 'Data_Classes/Match.dart';
+
+
+
 void main() {
   runApp(MyApp());
 }
@@ -555,7 +559,8 @@ Widget _buildBody(int selectedIndex) {
     case 0:
       return HomePage();
     case 1:
-      return StandingsPage();
+      return KnockOutsPage();
+      //return StandingsPage();
     case 2:
       return FavoritePage();
     case 3:
