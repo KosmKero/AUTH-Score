@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:untitled1/API/Match_Handle.dart';
-import 'Data_Classes/Match.dart';
+import '../Data_Classes/Match.dart';
 
 class KnockOutsPage extends StatelessWidget {
   const KnockOutsPage({super.key});

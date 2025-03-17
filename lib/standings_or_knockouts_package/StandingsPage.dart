@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:untitled1/Team_Display_Page_Package/TeamDisplayPage.dart';
 import 'package:untitled1/main.dart';
 
-import 'Data_Classes/Team.dart';
+import '../Data_Classes/Team.dart';
 
 class StandingsPage extends StatefulWidget {
   @override
