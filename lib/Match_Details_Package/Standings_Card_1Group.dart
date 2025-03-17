@@ -11,6 +11,7 @@ class StandingPageOneGroup extends StatefulWidget {
   State<StandingPageOneGroup> createState() => _StandingPageOneGroupState();
 }
 
+//ΑΦΟΡΑ ΤΗΝ ΚΑΡΤΕΛΑ ΓΙΑ ΤΙΣ ΒΑΘΜΟΛΟΓΙΕΣ !!!
 class _StandingPageOneGroupState extends State<StandingPageOneGroup> {
   @override
   Widget build(BuildContext context) {
@@ -33,16 +34,35 @@ class _StandingPageOneGroupState extends State<StandingPageOneGroup> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text("Όμιλος $group",
+              Padding(
+                padding: EdgeInsets.only(left: 10),
+                child:
+                Text("Όμιλος $group",
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              ),
+              SizedBox(height: 9,),
               DataTable(
-                columnSpacing: 20.0,
-                headingRowHeight: 40.0,
+                columnSpacing: 23.0,
+                headingRowColor: WidgetStateColor.resolveWith((states) => Colors.blueGrey[300]!),
+                headingRowHeight: 45.0,
+                dataRowHeight: 53.0,
                 columns: const [
-                  DataColumn(label: Text("Ομάδα")),
+                  DataColumn( //ΣΤΗΝΟΥΜΕ ΤΙΣ ΣΤΗΛΕΣΣ
+
+                      label:
+                      Padding(
+                        padding: EdgeInsets.only(left:10),
+                          child: Text("Ομάδα",textAlign: TextAlign.start,
+                      )),
+                  ),
                   DataColumn(
-                      label: Text("Π", textAlign: TextAlign.center),
-                      numeric: true),
+                      label: Padding(
+                        padding: EdgeInsets.only(left:10),
+                        child:
+                          Text("Π", textAlign: TextAlign.start),),
+                      numeric: true,
+
+                  ),
                   DataColumn(
                       label: Text("Ν", textAlign: TextAlign.center),
                       numeric: true),
@@ -55,10 +75,13 @@ class _StandingPageOneGroupState extends State<StandingPageOneGroup> {
                   DataColumn(
                       label: Text("Πόντοι", textAlign: TextAlign.center),
                       numeric: true)
-                ],
-                rows: groupTeams
-                    .map(
-                      (team) => DataRow(cells: [
+                ], //ΠΑΟ Ε
+                rows: groupTeams.map( //ΒΑΖΟΥΜΕ ΤΑ ΣΤΟΙΧΕΙΑ ΓΙΑ ΤΗΝ ΚΑΘΕ ΟΜΑΔΑ!! ΣΟΣΟΣΣΣ
+                      (team) => DataRow(color:WidgetStateColor.resolveWith(
+                              (states) => groupTeams.indexOf(team) % 2 == 0
+                              ? Colors.teal[50]!
+                              : Colors.white),
+                          cells: [
                     DataCell(TextButton(
                       onPressed: () {
                         Navigator.push(
@@ -67,13 +90,20 @@ class _StandingPageOneGroupState extends State<StandingPageOneGroup> {
                               builder: (context) => TeamDisplayPage(team)),
                         );
                       },
-                      child: Text(team.name,),
+                      child: Padding(
+                        padding:EdgeInsets.only(right: 8) ,
+                        child:
+                        Text(team.name,),)
                     )),
                     DataCell(Text(team.totalGames.toString())),
                     DataCell(Text(team.wins.toString())),
                     DataCell(Text(team.draws.toString())),
                     DataCell(Text(team.losses.toString())),
-                    DataCell(Text(team.totalPoints.toString())),
+                    DataCell(
+                      Padding(
+                        padding: EdgeInsets.only(right: 12),
+                        child:
+                        Text(team.totalPoints.toString()))),
                   ]),
                 )
                     .toList(),
