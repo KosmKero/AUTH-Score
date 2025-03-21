@@ -238,7 +238,7 @@ class _MatchContainerTimeState extends State<MatchContainerTime> {
         if(widget.match.hasMatchStarted) Text(
             '${(_secondsElapsed ~/ 60).toString().padLeft(2, '0')}:${(_secondsElapsed % 60).toString().padLeft(2, '0')}',
             style: const TextStyle(
-                fontWeight: FontWeight.bold, fontSize: 8, color: Colors.red),)
+                fontWeight: FontWeight.bold, fontSize: 12, color: Colors.red),)
       ],
     );
   }

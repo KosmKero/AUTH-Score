@@ -31,7 +31,7 @@ class _MatchStartedView extends StatefulWidget {
 
 class _MatchStartedViewState extends State<_MatchStartedView> {
   int selectedIndex = 0;
-  int _secondsElapsed = 0;
+  late int _secondsElapsed;
   Timer? _timer;
 
 
@@ -39,6 +39,7 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
   @override
   void initState() {
     super.initState();
+    _secondsElapsed= (DateTime.now().millisecondsSinceEpoch ~/ 1000)-widget.match.startTimeInSeconds;
     _startTimer();
   }
 

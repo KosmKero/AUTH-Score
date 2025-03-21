@@ -50,6 +50,11 @@ class Match extends ChangeNotifier{
   int get year => _year;
   int get startTimeInSeconds=>_startTimeInSeconds;
 
+  //debug
+  String get homeInitials=>"CSD";
+  String get awayInitials=>"NMK";
+
+
   Map<int,List<Goal>> get goalsList => _goalsList;
 
   String get timeString {
