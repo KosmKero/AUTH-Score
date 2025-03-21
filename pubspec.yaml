@@ -98,5 +98,7 @@ flutter:
     - fotos/teamlogo.png
     - fotos/csdfootball.png
     - fotos/randomUserPic.png
+    - fotos/default_image.jpg
+    - fotos/user.jpg
 
 
