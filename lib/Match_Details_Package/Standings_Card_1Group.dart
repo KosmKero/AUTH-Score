@@ -4,6 +4,7 @@ import '../Team_Display_Page_Package/TeamDisplayPage.dart';
 import '../main.dart';
 import '../Data_Classes/Match.dart';
 
+//ΑΥΤΗ Η ΚΛΑΣΗ ΑΦΟΡΑ ΟΤΑΝ ΠΟΑΤΑΕΙ ΤΟ ΚΟΥΜΠΙ ¨ΒΑΘΜΟΛΟΓΙΑ" ΓΙΑ ΤΟΝ ΚΑΘΕ ΑΓΩΝΑ
 class StandingPageOneGroup extends StatefulWidget {
   const StandingPageOneGroup({super.key,required this.team});
   final Team team;
@@ -28,7 +29,7 @@ class _StandingPageOneGroupState extends State<StandingPageOneGroup> {
 
     return Card(
         margin: EdgeInsets.symmetric(horizontal: 5.0, vertical: 2.0),
-        elevation: 4,
+        elevation: 6,
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: 5, vertical: 10),
           child: Column(
@@ -40,12 +41,12 @@ class _StandingPageOneGroupState extends State<StandingPageOneGroup> {
                 Text("Όμιλος $group",
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               ),
-              SizedBox(height: 9,),
+              SizedBox(height: 16,),
               DataTable(
                 columnSpacing: 23.0,
                 headingRowColor: WidgetStateColor.resolveWith((states) => Colors.blueGrey[300]!),
                 headingRowHeight: 45.0,
-                dataRowHeight: 53.0,
+                dataRowHeight: 55.0,
                 columns: const [
                   DataColumn( //ΣΤΗΝΟΥΜΕ ΤΙΣ ΣΤΗΛΕΣΣ
 

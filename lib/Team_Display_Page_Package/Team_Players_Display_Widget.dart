@@ -36,7 +36,7 @@ class TeamPlayersDisplayWidget extends StatelessWidget {
 
     return Container(
       width: double.infinity,
-      margin: EdgeInsets.symmetric(vertical: 5, horizontal: 7),
+      margin: EdgeInsets.symmetric(vertical: 10, horizontal: 8),
       decoration:( ShapeDecoration(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),color: Color.fromARGB(70, 10, 50, 15))),
 
       //elevation: 4,
@@ -45,23 +45,26 @@ class TeamPlayersDisplayWidget extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.all(10.0),
             child: Text(
               pos,
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+              style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'Montserrat',
+                  fontStyle: FontStyle.italic,
+              ),
             ),
           ),
           Padding(
               padding: EdgeInsets.symmetric(vertical: 10.0,horizontal: 16),
               child: DataTable(
                 columns: const [
-                  DataColumn(label: Text("Όνομα", style: TextStyle(fontWeight: FontWeight.bold)), ),
-                  DataColumn(label: Text('Επίθετο', style: TextStyle(fontWeight: FontWeight.bold))),
-                  DataColumn(label: Text('Γκολ', style: TextStyle(fontWeight: FontWeight.bold))),
+                  DataColumn(label: Text("Όνομα", style: TextStyle(fontWeight: FontWeight.bold,fontSize: 15)), ),
+                  DataColumn(label: Text('Επίθετο', style: TextStyle(fontWeight: FontWeight.bold,fontSize: 15))),
+                  DataColumn(label: Text('Γκολ', style: TextStyle(fontWeight: FontWeight.bold,fontSize: 15))),
                 ],
-                rows: players
-                    .map(
-                      (player) => DataRow(cells: [
+                rows: players.map((player) => DataRow(cells: [
                     DataCell(Text(player.name)),
                     DataCell(Text(player.surname)),
                     DataCell(Text(player.goals.toString())),

@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:untitled1/Match_Details_Package/Match_Details_Page.dart';
 import 'Data_Classes/Match.dart';
+import 'API/NotificationService.dart';
 
+//ΑΥΤΗ Η ΚΛΑΣΗ ΑΦΟΡΑ ΤΑ CONTAINER ΤΩΝ ΜΑΤΣ ΣΤΗΝ ΑΡΧΙΚΗ ΟΘΟΝΗ
 class matchesContainer extends StatelessWidget {
   matchesContainer({super.key, required this.matches}){
     sortMatches();
@@ -19,7 +21,7 @@ class matchesContainer extends StatelessWidget {
     );
   }
 
-  Column _buildMatches() {
+  Column _buildMatches() { //ΒΑΖΕΙ ΤΑ ΣΤΟΙΧΕΙΑ ΤΗΣ ΚΑΘΕ ΟΜΑΔΑΣ ΣΤΟ ΚΟΥΤΑΚΙ
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -38,12 +40,6 @@ class matchesContainer extends StatelessWidget {
 
       ],
     );
-
-
-
-
-
-
   }
 
   void sortMatches(){
@@ -61,7 +57,8 @@ class matchesContainer extends StatelessWidget {
   }
 }
 
-class eachMatchContainer extends StatelessWidget {
+class eachMatchContainer extends StatelessWidget
+{
   final Match match;
   const eachMatchContainer(this.match, {Key? key,}): super(key: key);
 
@@ -93,11 +90,11 @@ class eachMatchContainerView extends StatelessWidget {
         borderRadius: BorderRadius.circular(10),
         child: Card(
 
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10),
-      ),
-      elevation: 10,
-      margin: EdgeInsets.symmetric(vertical: 2, horizontal: 2),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+      elevation: 8,
+      margin: EdgeInsets.symmetric(vertical: 2, horizontal: 6),
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 16.0),
         child: Row(
@@ -113,7 +110,7 @@ class eachMatchContainerView extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
+                  Row( //ΦΤΙΑΧΝΕΙ ΤΗΝ HOME TEAM
                     children: [
                       SizedBox(
                           height: 25,
@@ -126,7 +123,7 @@ class eachMatchContainerView extends StatelessWidget {
                     ],
                   ),
                   SizedBox(height: 2),
-                  Row(
+                  Row( //ΦΤΙΑΧΝΕΙ ΤΗΝ AWAY TEAM
                     children: [
                       SizedBox(
                         height: 25,
@@ -163,7 +160,7 @@ class eachMatchContainerView extends StatelessWidget {
             ):SizedBox.shrink() ,
             Padding(
                 padding: EdgeInsetsDirectional.only(start: 5,end:0),
-                child: notificationIcon(match: match,),
+                child: notificationIcon(match: match,matchTime:match.startTimeInSeconds,matchDate: match.day,),
             )
           ],
         ),
@@ -173,7 +170,9 @@ class eachMatchContainerView extends StatelessWidget {
   }
 }
 
-class MatchContainerTime extends StatefulWidget {
+//ΦΤΙΑΧΝΕΙ ΤΗΝ ΩΡΑ ΤΟΥ MATCH
+class MatchContainerTime extends StatefulWidget
+{
 
 
   late final Color color;
@@ -191,8 +190,6 @@ class _MatchContainerTimeState extends State<MatchContainerTime> {
 
   late int _secondsElapsed;
   Timer? _timer;
-
-
 
   @override
   void initState() {
@@ -248,13 +245,19 @@ class _MatchContainerTimeState extends State<MatchContainerTime> {
 }
 
 
+//ΦΤΙΑΧΝΕΙ ΤΗΝ NOTIFICATION ICON ΤΟΥ MATCH
 class notificationIcon extends StatefulWidget {
   final Match match;
-  const notificationIcon({super.key, required this.match});
+  final int matchTime;
+  final int matchDate;
+
+
+  const notificationIcon({super.key, required this.match,required this.matchDate,required this.matchTime});
 
   @override
   State<notificationIcon> createState() => _NotificationIconState();
 }
+
 
 class _NotificationIconState extends State<notificationIcon> {
   bool isNotified = false;
@@ -263,9 +266,19 @@ class _NotificationIconState extends State<notificationIcon> {
   Widget build(BuildContext context) {
     return IconButton(
       onPressed: () {
-        setState(() {
+        setState(()
+        {
           isNotified = !isNotified;
+          if(isNotified)
+            {
+             // NotificationService().scheduleNotification(widget.matchDate as DateTime, widget.match as String);
+            }
         });
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Reminder set for ${widget.match}'),
+              duration: Duration(seconds: 2),
+            ));
       },
       icon: Icon(
         isNotified ? Icons.notifications_active : Icons.notification_add_outlined,
@@ -274,4 +287,3 @@ class _NotificationIconState extends State<notificationIcon> {
     );
   }
 }
-

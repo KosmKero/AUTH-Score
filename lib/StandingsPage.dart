@@ -57,6 +57,7 @@ class _StandingsPage extends State<StandingsPage> {
               DataTable(
                 columnSpacing: 20.0,
                 headingRowHeight: 40.0,
+                dataRowHeight: 60,
                 columns: const [
                   DataColumn(label: Text("Ομάδα")),
                   DataColumn(

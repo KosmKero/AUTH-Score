@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 
-
+//ΑΥΤΟ ΤΟ ΚΟΜΜΑΤΙ ΑΦΟΡΑ ΤΙΣ ΣΥΝΘΕΣΕΙΣ ΠΟΥ ΘΑ ΕΜΦΑΝΙΖΟΝΤΑΙ ΓΙΑ ΤΗΝ ΚΑΘΕ ΟΜΆΔΑ
 
 class Starting11Display extends StatelessWidget {
   const Starting11Display({super.key});

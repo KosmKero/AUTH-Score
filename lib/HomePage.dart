@@ -36,7 +36,7 @@ class _HomePageState extends State<HomePage> {
         Container(
             color: Color.fromARGB(150, 60, 80, 150),
             width: double.infinity,
-            child: TextButton(
+            child: TextButton( //ΚΑΤΩ ΑΠΟ ΤΟ APPBAR
                 onPressed: () {
                   changeMatches();
                 },
@@ -76,7 +76,7 @@ class _HomePageState extends State<HomePage> {
         ),
          */
 
-        Expanded(
+        Expanded( //βαζει ολα τα match που ακολουθουν
           // flex: 5, // Το κάτω μέρος είναι μικρότερο
           child: Container(
             color: Color.fromARGB(150, 60, 80, 150),
