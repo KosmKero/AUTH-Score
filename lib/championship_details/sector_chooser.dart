@@ -1,7 +1,7 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:untitled1/standings_or_knockouts_package/StandingsPage.dart';
-import 'package:untitled1/standings_or_knockouts_package/knock_outs_page.dart';
+import 'package:untitled1/championship_details/StandingsPage.dart';
+import 'package:untitled1/championship_details/knock_outs_page.dart';
+import 'package:untitled1/championship_details/top_players_page.dart';
 
 
 
@@ -25,27 +25,22 @@ class _StandingsOrKnockoutsChooserPageState extends State<StandingsOrKnockoutsCh
     return Column(
       children: [
         Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
             TextButton(onPressed:() {
               buttonPushed(0);
             }, child: Text("Βαθμολογία")),
             TextButton(onPressed:() {
               buttonPushed(1);
-            }, child: Text("Νοκ Άουτς"))
+            }, child: Text("Νοκ Άουτς")),
+            TextButton(onPressed:() {
+              buttonPushed(2);
+            }, child: Text("Κορυφαίοι Παίχτες"))
           ],
         ),
-        Expanded(child: _bodyChooser(indexChoice))
+        Expanded(child: (indexChoice==0)? StandingsPage() : (indexChoice==1)? KnockOutsPage():TopPlayersProvider())
       ],
     );
-  }
-
-  Widget _bodyChooser(int index){
-    if (index==0){
-      return StandingsPage();
-    }
-    else {
-      return KnockOutsPage();
-    }
   }
 
 }

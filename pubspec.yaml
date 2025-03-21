@@ -97,5 +97,6 @@ flutter:
   assets:
     - fotos/teamlogo.png
     - fotos/csdfootball.png
+    - fotos/randomUserPic.png
 
 

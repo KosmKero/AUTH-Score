@@ -1,4 +1,8 @@
+import 'package:untitled1/main.dart';
+
+import '../Data_Classes/Team.dart';
 import '../Data_Classes/User.dart';
+
 
 class UserHandle{
 
@@ -7,10 +11,13 @@ class UserHandle{
 
   // Μέθοδος για επιστροφή του ίδιου instance
   UserHandle() {
-
+    _user=User("Kosm","Kero","KosmKero","Pass");
+    _user?.makeAdmin(teams.first);
+    _user?.addControlledTeam(teams[2]);
+    _user?.addControlledTeam(teams[4]);
   }
 
-  User? user;
+  User? _user;
 
   void initializeUsers(List<User> list){
     userList=list;
@@ -37,15 +44,17 @@ class UserHandle{
   bool login(String username, String password) {
     for (User users in userList) {
       if (users.username == username && users.password==password) {
-        user = users;
-        user?.userLoggedIn();
+        _user = users;
+        _user?.userLoggedIn();
         return true;
       }
     }
     return false;
   }
 
-
+  User? getLoggedUser(){
+    return _user;
+  }
 
 
 }

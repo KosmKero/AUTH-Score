@@ -86,7 +86,7 @@ class eachMatchContainerView extends StatelessWidget {
           Navigator.push(
             context,
             MaterialPageRoute(
-                builder: (context) => matchDetailsPage(match, )
+                builder: (context) => matchDetailsPage(match)
             )
           );
         },
@@ -118,7 +118,7 @@ class eachMatchContainerView extends StatelessWidget {
                       SizedBox(
                           height: 25,
                           width: 25,
-                          child: Image.asset('fotos/teamlogo.png')
+                          child: match.homeTeam.image
                       ),
                       Text(" ${match.homeTeam.name}",
                         style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
@@ -131,7 +131,7 @@ class eachMatchContainerView extends StatelessWidget {
                       SizedBox(
                         height: 25,
                         width: 25,
-                        child: Image.asset('fotos/csdfootball.png')
+                        child:  match.awayTeam.image
                       ),
 
                       Text(" ${match.awayTeam.name}",
@@ -202,12 +202,12 @@ class _MatchContainerTimeState extends State<MatchContainerTime> {
     if (widget.match.hasMatchStarted) {
       _startTimer();
     } else {
-      _secondsElapsed = 0;
+      _secondsElapsed = 5;
     }
 
     // Listener για να ξεκινησει το χρονομετρο του αγώνα
     widget.match.addListener(() {
-      if (widget.match.hasMatchStarted && _timer == null) {
+      if (widget.match.hasMatchStarted) {
         _startTimer(); // Ξεκινά το χρονόμετρο αν το ματς ξεκινήσει
       }
     });
@@ -216,6 +216,7 @@ class _MatchContainerTimeState extends State<MatchContainerTime> {
   @override
   void dispose() {
     _timer?.cancel();
+    _timer = null;
     super.dispose();
   }
 
@@ -223,6 +224,10 @@ class _MatchContainerTimeState extends State<MatchContainerTime> {
     _secondsElapsed = (DateTime.now().millisecondsSinceEpoch ~/ 1000) - widget.match.startTimeInSeconds;
 
     _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+      if (!mounted) {
+        _timer?.cancel(); // Cancel the timer if the widget is no longer mounted
+        return;
+      }
       setState(() {
         _secondsElapsed++;
       });
@@ -238,10 +243,14 @@ class _MatchContainerTimeState extends State<MatchContainerTime> {
           widget.match.timeString,
           style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
-        if(widget.match.hasMatchStarted) Text(
+
+        if(widget.match.isHalfTime()) Text("Ημίχρονο",style:TextStyle(color: Colors.red,fontSize: 9,fontWeight: FontWeight.bold))
+        else if (widget.match.hasMatchFinished) SizedBox.shrink()
+        else if(widget.match.hasMatchStarted) Text(
             '${(_secondsElapsed ~/ 60).toString().padLeft(2, '0')}:${(_secondsElapsed % 60).toString().padLeft(2, '0')}',
             style: const TextStyle(
                 fontWeight: FontWeight.bold, fontSize: 12, color: Colors.red),)
+
       ],
     );
   }

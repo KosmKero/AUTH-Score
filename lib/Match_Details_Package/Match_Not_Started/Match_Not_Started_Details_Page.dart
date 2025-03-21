@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:untitled1/API/user_handle.dart';
 import 'package:untitled1/Match_Details_Package/Match_Not_Started/DetailsMatchNotStarted.dart';
 import '../../Data_Classes/Match.dart';
 import '../../Data_Classes/Team.dart';
@@ -6,7 +7,6 @@ import '../../Team_Display_Page_Package/TeamDisplayPage.dart';
 import '../../main.dart';
 import '../Standings_Card_1Group.dart';
 import '../Starting__11_Display_Card.dart';
-
 
 //ΟΛΟ ΕΔΩ ΑΦΟΡΑ ΤΟ ΕΠΑΝΩ ΚΟΜΜΑΤΙ ΤΗΣ ΣΕΛΙΔΑΣ. ΓΙΑ ΤΗΝ ΩΡΑ =,ΜΕΡΑ ΚΙΑ ΤΙς ΟΜΑΔΕΣ. ΤΟ ΜΠΛΕ ΠΛΑΙΣΙΟ ΣΤΗΝ ΑΡΧΗ ΑΡΧΗ ΠΑΝΩ
 class MatchNotStartedDetails extends StatefulWidget {
@@ -39,20 +39,23 @@ class _MatchNotStartedDetailsState extends State<MatchNotStartedDetails> {
       Container(
         color: Color.fromARGB(50, 5, 150, 200),
         child: Padding(
-          padding: const EdgeInsets.all(2.5),
+          padding: const EdgeInsets.all(0.5),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              Center(child: Text(widget.match.matchweekInfo(),style: TextStyle(fontSize: 13,color: Colors.grey[800]),)),
+              SizedBox(height: 5),
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  buildHomeTeamName(team: widget.match.homeTeam,),
-                  _buildMatchDateTime(),
-                  buildAwayTeamName(team: widget.match.awayTeam),
+                  Expanded(child: buildTeamName(team: widget.match.homeTeam)),
+                  Flexible(fit: FlexFit.tight, child:_buildMatchDateTime()),
+                  Expanded(child:buildTeamName(team: widget.match.awayTeam)),
                 ],
               ),
-              SizedBox(
-                height: 50,
-              ),
+              Center(child: _isAdminWidget()),
               const Divider(),
               NavigationButtons(onSectionChange: _changeSection),
             ],
@@ -63,15 +66,34 @@ class _MatchNotStartedDetailsState extends State<MatchNotStartedDetails> {
     ]));
   }
 
+  Widget _isAdminWidget() {
+    // Check if the user is logged in
+    if (UserHandle().getLoggedUser() == null) {
+      return SizedBox(
+        height: 50,
+      );
+    } else if (UserHandle().getLoggedUser()!.controlTheseTeams(
+        widget.match.homeTeam.name, widget.match.awayTeam.name)) {
+      return TextButton(
+        child: Text("Εκκινηση Αγώνα"),
+        onPressed: () {
+          widget.match.matchStarted();
+          setState(() {});
+        },
+      );
+    } else {
+      return SizedBox(
+        height: 50,
+      );
+    }
+  }
+
   Widget _buildMatchDateTime() {
     return Column(
-      children: [  //Sets the text for the date of the match
-        Text(
-            '${widget.match.day}.${widget.match.month}.${widget.match.year}',
-            style: TextStyle(
-                fontWeight: FontWeight.w400,
-                fontSize: 14)
-        ),
+      children: [
+        //Sets the text for the date of the match
+        Text('${widget.match.day}.${widget.match.month}.${widget.match.year}',
+            style: TextStyle(fontWeight: FontWeight.w400, fontSize: 14)),
         Text(
           widget.match.timeString,
           style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
@@ -102,7 +124,8 @@ class _NavigationButtonsState extends State<NavigationButtons> {
   }
 
   @override
-  Widget build(BuildContext context) {  //
+  Widget build(BuildContext context) {
+    //
     return SizedBox(
       height: 60,
       width: double.infinity,
@@ -150,15 +173,15 @@ class _NavigationButtonsState extends State<NavigationButtons> {
 }
 
 //ΦΤΙΑΧΝΕΙ ΤΟ ΠΤΑΜΠΛΟ ΓΙΑ ΤΗΝ ΟΜΑΔΑ ΕΔΡΑΣ ΣΤΟ ΜΠΛΕ ΠΛΑΙΣΙΟ
-class buildHomeTeamName extends StatefulWidget {
-  const buildHomeTeamName({super.key, required this.team});
+class buildTeamName extends StatefulWidget {
+  const buildTeamName({super.key, required this.team});
   final Team team;
 
   @override
-  State<buildHomeTeamName> createState() => _buildHomeTeamName();
+  State<buildTeamName> createState() => _buildTeamName();
 }
 
-class _buildHomeTeamName extends State<buildHomeTeamName> {
+class _buildTeamName extends State<buildTeamName> {
   void _toggleFavorite() {
     setState(() {
       widget.team.changeFavourite();
@@ -171,24 +194,38 @@ class _buildHomeTeamName extends State<buildHomeTeamName> {
   @override
   Widget build(BuildContext context) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Transform.translate( //ΑΦΟΡΑ ΤΟ ΕΙΚΟΝΙΔΙΟ ΤΗΣ ΚΑΡΔΙΑΣ
-          offset: Offset(16, 0), // Μετακινεί το εικονίδιο πιο κοντά στο κείμενο
-        ),
-        Column(
-          children: [
-            TextButton(
-                onPressed: () { Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => TeamDisplayPage(widget.team)),
-                ); },//ΑΦΟΡΑ ΤΟ ΤΟ ΟΝΟΜΑ
-                child: Text(widget.team.name,
-                  style: TextStyle(fontSize: 17 , fontWeight: FontWeight.w600,color: Colors.black),)
-            ),
-          ],
-        ),
+        // Transform.translate(
+        //   //ΑΦΟΡΑ ΤΟ ΕΙΚΟΝΙΔΙΟ ΤΗΣ ΚΑΡΔΙΑΣ
+        //   offset: Offset(16, 0), // Μετακινεί το εικονίδιο πιο κοντά στο κείμενο
+        // ),
+        GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => TeamDisplayPage(widget.team)),
+              );
+            },
+            child: Container(
+              child: Column(
+                children: [
+                  SizedBox(
+                    child: SizedBox(
+                        height: 50, width: 50, child: widget.team.image),
+                  ),
+                     SizedBox(height: 3,),
+                     Text(
+                        widget.team.name,
+                        style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.black),
+                      ),
+                ],
+              ),
+            ))
       ],
     );
   }
@@ -221,18 +258,25 @@ class _buildAwayTeamName extends State<buildAwayTeamName> {
         Column(
           children: [
             TextButton(
-                onPressed: () { Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => TeamDisplayPage(widget.team)),
-                ); },
-                child: Text(widget.team.name,
-                  style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600,color: Colors.black),)
-            ),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => TeamDisplayPage(widget.team)),
+                  );
+                },
+                child: Text(
+                  widget.team.name,
+                  style: TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black),
+                )),
           ],
         ),
         Transform.translate(
-          offset: Offset(-16, 0), // Μετακινεί το εικονίδιο πιο κοντά στο κείμενο
+          offset:
+              Offset(-16, 0), // Μετακινεί το εικονίδιο πιο κοντά στο κείμενο
         ),
       ],
     );
