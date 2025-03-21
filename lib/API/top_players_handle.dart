@@ -27,7 +27,6 @@ class TopPlayersHandle extends ChangeNotifier {
         if ("${player.name.substring(0,1)}. ${player.surname}"==scorerName){
           player.scoredGoal();
           sortTopPlayers();
-          print("olakala");
           return;
         }
       }
