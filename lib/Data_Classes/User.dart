@@ -4,10 +4,10 @@ import 'Team.dart';
 
 class User{
 
-  User(this._name,this._lastName,this._username,this._password){
+  User(this._name,this._lastName,this._username,this._password,this._university){
     _isAdmin=false;
   }
-  String _name,_lastName,_username,_password;
+  String _name,_lastName,_username,_password,_university;
   bool _isLoggedIn=false;
   late bool _isAdmin;
 
@@ -21,6 +21,7 @@ class User{
   String get lastName => _lastName;
   String get username => _username;
   String get password => _password;
+  String get university => _university;
   bool get isLoggedIn => _isLoggedIn;
   bool get isAdmin=> _isAdmin;
   List<Team> get controlledTeams=> _controlledTeams;
