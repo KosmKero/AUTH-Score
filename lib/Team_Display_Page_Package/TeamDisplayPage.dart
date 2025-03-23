@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:untitled1/Team_Display_Page_Package/Team_Details_Widget.dart';
 import 'package:untitled1/Team_Display_Page_Package/Team_Matches_Widget.dart';
 import 'package:untitled1/Team_Display_Page_Package/Team_Players_Display_Widget.dart';
+import 'package:untitled1/championship_details/top_players_page.dart';
 import 'package:untitled1/main.dart';
 
 import '../Data_Classes/Team.dart';
@@ -45,9 +46,7 @@ class _TeamDisplayPageState extends State<TeamDisplayPage> {
         //Text(team.name,style: TextStyle(color: Color.fromARGB(100, 255, 10, 40),)),
         _NavigationButtons(onSectionChange: _changeSection),
         _sectionChooser(selectedIndex , widget.team,)
-
       ],
-
     )
       );
   }
@@ -82,13 +81,22 @@ class _NavigationButtonsState extends State<_NavigationButtons> {
     return SizedBox(
       height: 65,
       width: double.infinity,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          _buildTextButton("Λεπτομέρειες", 0),
-          _buildTextButton("Αγώνες", 1),
-          _buildTextButton("Παίχτες", 2),
-        ],
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            SizedBox(width: 10),
+            _buildTextButton("Λεπτομέρειες", 0),
+            SizedBox(width: 15),
+            _buildTextButton("Αγώνες", 1),
+            SizedBox(width: 15),
+            _buildTextButton("Παίχτες", 2),
+            SizedBox(width: 15),
+            _buildTextButton("Κορυφαίοι Παίχτες", 3),
+            SizedBox(width: 10),
+          ],
+        ),
       ),
     );
   }
@@ -161,6 +169,8 @@ Widget _sectionChooser(int selectedIndex, Team team) {
       return TeamMatchesWidget(team: team);
     case 2:
       return TeamPlayersDisplayWidget(team: team);
+    case 3:
+      return TopPlayersPage(team.players);
     default:
       return TeamDetailsWidget(team: team);
   }

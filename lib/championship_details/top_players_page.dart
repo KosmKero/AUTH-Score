@@ -16,46 +16,49 @@ class TopPlayersProvider extends StatelessWidget {
       create: (_) => TopPlayersHandle(),
       child: Consumer<TopPlayersHandle>(
         builder: (context, topPlayersHandle, child) {
-          return _TopPlayersPage(topPlayersHandle.topPlayers);
+          return TopPlayersPage(topPlayersHandle.topPlayers);
         },
       ),
     );
   }
 }
 
-class _TopPlayersPage extends StatefulWidget {
-  _TopPlayersPage(this.playersList){
-    print(playersList.length);
-  }
+class TopPlayersPage extends StatefulWidget {
+  const TopPlayersPage(this.playersList, {super.key});
   final List<Player> playersList;
   @override
-  State<_TopPlayersPage> createState() => _TopPlayersView();
+  State<TopPlayersPage> createState() => _TopPlayersView();
 }
 
-class _TopPlayersView extends State<_TopPlayersPage> {
+class _TopPlayersView extends State<TopPlayersPage> {
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.all(16),
-      child: Column(
-        children: [
-          SizedBox(height: 20),
-          Expanded(
-            child: ListView.builder(
-              itemCount: widget.playersList.length,
-              itemBuilder: (context, index) {
-                return Column(
-                  children: [
-                    playerCard(widget.playersList[index], index),
-                    Divider(thickness: 1, color: Colors.black),
-                  ],
-                );
-              },
-            ),
-          ),
-        ],
-      ),
+    return Expanded(
+        child: Padding(
+        padding: EdgeInsets.symmetric(vertical: 10,horizontal: 16),
+    child: Column(
+    crossAxisAlignment: CrossAxisAlignment.start, // Ευθυγραμμίζει το κείμενο αριστερά
+    children: [
+    // Προσθήκη του τίτλου
+    Text(
+    "Γκολ",
+    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+    ),
+    SizedBox(height: 10), // Απόσταση πριν από τη λίστα
+
+    // Λίστα παικτών
+    Expanded(
+    child: ListView.builder(
+    itemCount: widget.playersList.length,
+    itemBuilder: (context, index) {
+    return Column(
+    children: [
+    playerCard(widget.playersList[index], index),
+    Divider(thickness: 1, color: Colors.black),
+    ],
     );
+    }))]),
+    ));
   }
 
   Widget playerCard(Player player, int i) {
@@ -77,11 +80,11 @@ class _TopPlayersView extends State<_TopPlayersPage> {
         Column(
           children: [
             Text("${player.name} ${player.surname}"),
-            Text(player.position == 2
+            Text(player.position == 3
                 ? "Επιθετικός"
-                : player.position == 1
+                : player.position == 2
                     ? "Μέσος"
-                    : "Τερματοφύλακας")
+                    : player.position == 1?"Αμυντικός":"Τερματοφύλακας")
           ],
         ),
         Text(player.goals.toString())

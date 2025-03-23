@@ -19,6 +19,10 @@ class MatchHandle {
     matchesList[0].remove(match);
     matchesList[1].add(match);
   }
+  void matchNotFinished(Match match){
+    matchesList[1].remove(match);
+    matchesList[0].add(match);
+  }
 
   // Μέθοδοι για πρόσβαση στα δεδομένα
   List<Match> getUpcomingMatches() => matchesList[0];

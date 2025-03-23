@@ -13,25 +13,27 @@ class StandingsPage extends StatefulWidget {
 class _StandingsPage extends State<StandingsPage> {
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: Color.fromARGB(150, 60, 80, 150),
-      child: Column(children: [
-        Text("Βαθμολογικός Πίνακας",
-            style: TextStyle(
-                fontSize: 23,
-                fontWeight: FontWeight.bold,
-                color: Colors.white)),
-        Expanded(
-            child: SingleChildScrollView(
-                child: Column(
-          children: [
-            _buildGroupStandings(1),
-            _buildGroupStandings(2),
-            _buildGroupStandings(3),
-            _buildGroupStandings(4)
-          ],
-        )))
-      ]),
+    return Expanded(
+      child: Container(
+        color: Color.fromARGB(150, 60, 80, 150),
+        child: Column(children: [
+          Text("Βαθμολογικός Πίνακας",
+              style: TextStyle(
+                  fontSize: 23,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white)),
+          Expanded(
+              child: SingleChildScrollView(
+                  child: Column(
+            children: [
+              _buildGroupStandings(1),
+              _buildGroupStandings(2),
+              _buildGroupStandings(3),
+              _buildGroupStandings(4)
+            ],
+          )))
+        ]),
+      ),
     );
   }
 

@@ -14,9 +14,9 @@ class StandingsOrKnockoutsChooserPage extends StatefulWidget {
 
 class _StandingsOrKnockoutsChooserPageState extends State<StandingsOrKnockoutsChooserPage> {
   int indexChoice=0;
-  void buttonPushed(int index){
+  void _changeSection(int index) {
     setState(() {
-      indexChoice=index;
+      indexChoice = index;
     });
   }
 
@@ -24,23 +24,82 @@ class _StandingsOrKnockoutsChooserPageState extends State<StandingsOrKnockoutsCh
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            TextButton(onPressed:() {
-              buttonPushed(0);
-            }, child: Text("Βαθμολογία")),
-            TextButton(onPressed:() {
-              buttonPushed(1);
-            }, child: Text("Νοκ Άουτς")),
-            TextButton(onPressed:() {
-              buttonPushed(2);
-            }, child: Text("Κορυφαίοι Παίχτες"))
-          ],
-        ),
-        Expanded(child: (indexChoice==0)? StandingsPage() : (indexChoice==1)? KnockOutsPage():TopPlayersProvider())
+        _NavigationButtons(onSectionChange: _changeSection),
+        (indexChoice==0)? StandingsPage() : (indexChoice==1)? KnockOutsPage():TopPlayersProvider()
       ],
     );
   }
 
+}
+
+//ΑΦΟΡΑ ΤΑ 3 ΚΟΥΜΠΙΑ ΚΑΤΩ ΑΠΟ ΤΟ ΟΝΟΜΑ!!
+class _NavigationButtons extends StatefulWidget {
+  final Function(int) onSectionChange;
+
+  const _NavigationButtons({Key? key, required this.onSectionChange})
+      : super(key: key);
+
+  @override
+  State<_NavigationButtons> createState() => _NavigationButtonsState();
+}
+
+class _NavigationButtonsState extends State<_NavigationButtons> {
+  int selectedIndex = 0;
+
+  void _onButtonPressed(int index) {
+    setState(() {
+      selectedIndex = index;
+    });
+    widget.onSectionChange(index); // Notify parent widget
+  }
+
+  //ΔΗΜΙΟΥΡΓΕΙ ΤΟΝ ΧΩΡΟ ΤΩΝ 3 ΚΟΥΜΠΙΩΝ
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 65,
+      width: double.infinity,
+      child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            _buildTextButton("Βαθμολογία", 0),
+            SizedBox(width: 15),
+            _buildTextButton("Νοκ Άουτς", 1),
+            SizedBox(width: 15),
+            _buildTextButton("Κορυφαίοι Παίχτες", 2),
+          ],
+        ),
+    );
+  }
+
+  //ΔΗΜΙΟΥΡΓΕΙ ΤΑ 3 ΚΟΥΜΠΙΑ(ΛΕΠΤΟΜΕΡΕΙΕΣ ΑΓΩΝΕΣ ΚΑΙ ΠΑΙΧΤΕΣ)
+  Widget _buildTextButton(String text, int index) {
+    bool isSelected = selectedIndex == index;
+
+    return GestureDetector(
+      onTap: () {
+        _onButtonPressed(index);
+      },
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            text,
+            style: TextStyle(
+              fontSize: 17,
+              color: isSelected ? Colors.blue : Colors.black,
+              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+            ),
+          ),
+          SizedBox(height: 3), // Απόσταση μεταξύ κειμένου και γραμμής
+          if (isSelected)
+            Container(
+              width: 60, // Μήκος γραμμής
+              height: 3, // Πάχος γραμμής
+              color: Colors.blue, // Χρώμα γραμμής
+            ),
+        ],
+      ),
+    );
+  }
 }

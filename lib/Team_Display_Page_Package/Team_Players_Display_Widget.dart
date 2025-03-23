@@ -12,13 +12,15 @@ class TeamPlayersDisplayWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(child: SingleChildScrollView(
+    return Expanded(
+        child: SingleChildScrollView(
       scrollDirection: Axis.vertical,
       child: Column(
         children: [
           playersCard(0, posisionList(0)),
           playersCard(1, posisionList(1)),
           playersCard(2, posisionList(2)),
+          playersCard(3, posisionList(3)),
         ],
       ),
     ));
@@ -29,52 +31,89 @@ class TeamPlayersDisplayWidget extends StatelessWidget {
     if (position == 0) {
       pos = "Τερματοφύλακας";
     } else if (position == 1) {
+      pos = "Αμυντικός";
+    } else if (position == 2) {
       pos = "Μέσος";
     } else {
       pos = "Επιθετικός";
     }
 
-    return Container(
-      width: double.infinity,
-      margin: EdgeInsets.symmetric(vertical: 10, horizontal: 8),
-      decoration:( ShapeDecoration(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),color: Color.fromARGB(70, 10, 50, 15))),
+    return SingleChildScrollView(
+      scrollDirection: Axis.vertical,
+      child: Container(
+        width: double.infinity,
+        margin: EdgeInsets.symmetric(vertical: 5, horizontal: 8),
+        decoration: (ShapeDecoration(
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            color: Color.fromARGB(20, 10, 20, 15))),
 
-      //elevation: 4,
-      //shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(10.0),
-            child: Text(
-              pos,
-              style: TextStyle(
+        //elevation: 4,
+        //shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(5.0),
+              child: Text(
+                pos,
+                style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                   fontFamily: 'Montserrat',
                   fontStyle: FontStyle.italic,
+                ),
               ),
             ),
-          ),
-          Padding(
-              padding: EdgeInsets.symmetric(vertical: 10.0,horizontal: 16),
-              child: DataTable(
-                columns: const [
-                  DataColumn(label: Text("Όνομα", style: TextStyle(fontWeight: FontWeight.bold,fontSize: 15)), ),
-                  DataColumn(label: Text('Επίθετο', style: TextStyle(fontWeight: FontWeight.bold,fontSize: 15))),
-                  DataColumn(label: Text('Γκολ', style: TextStyle(fontWeight: FontWeight.bold,fontSize: 15))),
-                ],
-                rows: players.map((player) => DataRow(cells: [
-                    DataCell(Text(player.name)),
-                    DataCell(Text(player.surname)),
-                    DataCell(Text(player.goals.toString())),
-                  ]),
-                )
+            Padding(
+              padding: EdgeInsets.symmetric(vertical: 5.0, horizontal: 8),
+              child: Column(
+                children: players
+                    .map((player) => Column(
+                          children: [
+                            playerName(player),
+                            Divider(height: 10,thickness: 1,color: Colors.black45,)
+                          ],
+                        ))
                     .toList(),
               ),
             ),
-        ],
+          ],
+        ),
       ),
+    );
+  }
+
+  Widget playerName(Player player) {
+    return Column(
+      children: [
+        Row(children: [
+          SizedBox(
+              width: 31, height: 31, child: Image.asset('fotos/randomUserPic.png')),
+          SizedBox(
+            width: 10,
+          ),
+          Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text("${player.name} ${player.surname}",),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Text("${player.number}",style: TextStyle(color: Colors.black45),),
+                  Text("   ${player.age} έτη",style: TextStyle(color: Colors.black45)),
+                ],
+              ),
+            ],
+          )
+        ]),
+        SizedBox(height: 3,),
+        // Padding(
+        //   padding: const EdgeInsets.symmetric(horizontal: 20.0),
+        //   child: Container(height: 1,width: double.infinity,color: Colors.black,),
+        // )
+      ],
     );
   }
 }

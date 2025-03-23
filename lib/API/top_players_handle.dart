@@ -34,6 +34,19 @@ class TopPlayersHandle extends ChangeNotifier {
     sortTopPlayers();
   }
 
+  void goalCancelled(String scorerName){
+    for (Team team in _teamsList){
+      for (Player player in team.players){
+        if ("${player.name.substring(0,1)}. ${player.surname}"==scorerName){
+          player.goalCancelled();
+          sortTopPlayers();
+          return;
+        }
+      }
+    }
+    sortTopPlayers();
+  }
+
   // **Ταξινόμηση των κορυφαίων 15 σκόρερ με Min-Heap**
   void sortTopPlayers() {
     PriorityQueue<Player> minHeap =

@@ -16,7 +16,11 @@ class Match extends ChangeNotifier{
   late bool _isGroupPhase; //μεταβλητη που δειχνει αν ειμαστε στη φαση των ομιλων ή στα νοκ αουτς (true->όμιλοι,false->νοκ αουτς)
   late int _game;  //αν ειμαστε σε ομιλους δειχνει την αγωνιστικη, αλλιως δειχνει τη φαση των νοκα ουτς (16 , 8 ,4 η τελικός)
 
-  final Map<int,List<Goal>> _goalsList={0:[],1:[]};
+  //final Map<int,List<Goal>> _goalsList={0:[],1:[]};
+  //final Map<int, List<CardP>> _cardList = {0:[],1:[]};
+
+  final Map<int, List<MatchFact>> _matchFacts = {0:[],1:[]};
+
   Match(
       {required Team homeTeam,
         required Team awayTeam,
@@ -66,7 +70,8 @@ class Match extends ChangeNotifier{
     return false;
   }
 
-  Map<int,List<Goal>> get goalsList => _goalsList;
+  //Map<int,List<Goal>> get goalsList => _goalsList;
+  Map<int,List<MatchFact>> get matchFact => _matchFacts;
 
   String get timeString {
     int hour = time ~/ 100;
@@ -100,22 +105,13 @@ class Match extends ChangeNotifier{
     _hasFirstHalfFinished=true;
   }
 
-  void matchFinished(){
-    if (!_hasMatchFinished) {
-      MatchHandle().matchFinished(this);
-    }
-    _hasMatchFinished=true;
-
-    notifyListeners();
-  }
-
 
   void homeScored(String name){
     int half;
     (!_hasSecondHalfStarted)? half=0:half=1;
 
     _scoreHome++;
-    _goalsList[half]?.add(Goal(name, _scoreHome, _scoreAway, DateTime.now().millisecondsSinceEpoch~/ 1000-startTimeInSeconds  , null, true,homeTeam)); //θελει διορθωση
+    _matchFacts[half]?.add(Goal(scorerName: name, homeScore: _scoreHome, awayScore: _scoreAway, minute: DateTime.now().millisecondsSinceEpoch~/ 1000-startTimeInSeconds, isHomeTeam:  true, team: homeTeam,half: half ));
     notifyListeners();
 
 
@@ -125,19 +121,44 @@ class Match extends ChangeNotifier{
     (!_hasSecondHalfStarted)? half=0:half=1;
 
     _scoreAway++;
-    _goalsList[half]?.add(Goal(name, _scoreHome, _scoreAway, DateTime.now().millisecondsSinceEpoch~/ 1000-startTimeInSeconds  , null, false,awayTeam));
+    _matchFacts[half]?.add(Goal(scorerName: name, homeScore: _scoreHome, awayScore: _scoreAway, minute: DateTime.now().millisecondsSinceEpoch~/ 1000-startTimeInSeconds, isHomeTeam:  false, team: awayTeam,half: half ));
      notifyListeners();
   }
 
   void matchProgressed(){
     if (_hasSecondHalfStarted){
-      matchFinished();
+      if (!_hasMatchFinished) {
+        MatchHandle().matchFinished(this);
+      }
+      _hasMatchFinished=true;
+      notifyListeners();
     }
     else if (_hasFirstHalfFinished){
       _hasSecondHalfStarted=true;
     }
     else if (_hasMatchStarted){
       _hasFirstHalfFinished=true;
+    }
+
+  }
+
+  void matchCancelProgressed(){
+    if (_hasMatchFinished && (DateTime.now().millisecondsSinceEpoch~/ 1000)-startTimeInSeconds<120){
+      if (_hasMatchFinished) {
+        MatchHandle().matchNotFinished(this);
+      }
+      _hasMatchFinished=false;
+      notifyListeners();
+    }
+    else if (_hasSecondHalfStarted){
+      _hasSecondHalfStarted=false;
+    }
+    else if (_hasFirstHalfFinished){
+      _hasFirstHalfFinished=false;
+    }
+    else if (_hasMatchStarted){
+      _hasMatchStarted=false;
+      notifyListeners();
     }
 
   }
@@ -149,36 +170,116 @@ class Match extends ChangeNotifier{
 
   }
 
+  void playerGotCard(String name,Team team,bool isYellow,int? minute,bool isHomeTeam){
 
+
+    for (Player player in team.players){
+      if ("${player.name.substring(0,1)}. ${player.surname}"==name){
+        isYellow? player.gotYellowCard() : player.gotRedCard();
+        break;
+      }
+    }
+    int half;
+    (!_hasSecondHalfStarted) ? half=0 : half=1;
+    _matchFacts[half]?.add(CardP(playerName: name, team: team, isYellow: isYellow, minute: minute??  (DateTime.now().millisecondsSinceEpoch~/ 1000)-startTimeInSeconds, isHomeTeam: isHomeTeam,half: half));
+    notifyListeners();
+  }
+
+  void cancelGoal(Goal goal1) {
+    if (_matchFacts.containsKey(goal1.half)) {
+        _matchFacts[goal1.half]!.removeWhere((goal) => goal is Goal && goal == goal1);
+        goal1.isHomeTeam? _scoreHome-- : _scoreAway--;
+        for (Player player in goal1.team.players) {
+          if ("${player.name.substring(0, 1)}. ${player.surname}" == goal1.scorerName) {
+            player.goalCancelled();
+            TopPlayersHandle().goalCancelled(goal1.scorerName);
+            break;
+          }
+        }
+
+      notifyListeners(); // Ενημέρωση των listeners για την αλλαγή
+    }
+  }
+
+  void cancelCard(CardP card1) {
+    if (_matchFacts.containsKey(card1.half)) {
+      _matchFacts[card1.half]!.removeWhere((card) => card is CardP && card == card1);
+
+      for (Player player in card1.team.players){
+        if ("${player.name.substring(0,1)}. ${player.surname}"==card1.name){
+          card1.isYellow? player.cancelYellowCard() : player.cancelRedCard();
+          break;
+        }
+      }
+
+      notifyListeners(); // Ενημέρωση των listeners για την αλλαγή
+    }
+  }
 
 
 }
 
-
-class Goal extends ChangeNotifier{
-  Goal(this._scorerName, this._homeScore, this._awayScore, this._minute, this._assistName, this._isHomeTeam,Team team){
-    for (Player player in team.players){
-      if ("${player.name.substring(0,1)}. ${player.surname}"==scorerName){
+class Goal extends MatchFact {
+  Goal({
+    required String scorerName,
+    required int homeScore,
+    required int awayScore,
+    required int minute,
+    String? assistName,
+    required bool isHomeTeam,
+    required Team team,
+    required int half
+  })  : _homeScore = homeScore,
+        _awayScore = awayScore,
+        _assistName = assistName,
+        super(scorerName, team, minute, isHomeTeam,half) {
+    // Ενημέρωση του παίκτη που σκόραρε
+    for (Player player in team.players) {
+      if ("${player.name.substring(0, 1)}. ${player.surname}" == scorerName) {
         player.scoredGoal();
+        break;
       }
     }
     TopPlayersHandle().playerScored(scorerName);
   }
 
-  final bool _isHomeTeam;
-  final int _homeScore, _awayScore, _minute;
-  final String _scorerName;
+  final int _homeScore, _awayScore;
   final String? _assistName;
 
+  String get scorerName => _name;
   int get homeScore => _homeScore;
   int get awayScore => _awayScore;
-  int get minute => _minute;
-  bool get isHomeTeam=>_isHomeTeam;
-  String get scorerName => _scorerName;
   String? get assistName => _assistName;
+}
 
+class CardP extends MatchFact {
+  CardP({
+    required String playerName,
+    required Team team,
+    required bool isYellow,
+    required int minute,
+    required bool isHomeTeam,
+    required int half
+  })  : _isYellow = isYellow,
+        super(playerName, team, minute, isHomeTeam,half);
 
+  final bool _isYellow;
+  bool get isYellow => _isYellow;
+}
+
+class MatchFact extends ChangeNotifier {
+  MatchFact(this._name, this._team, this._minute, this._isHomeTeam,this._half);
+
+  final String _name;
+  final Team _team;
+  final int _minute;
+  final bool _isHomeTeam;
+  final int _half;
   String get timeString {
     return ((_minute ~/ 60)+1).toString().padLeft(2, '0');
   }
+  String get name => _name;
+  Team get team=> _team;
+  bool get isHomeTeam => _isHomeTeam;
+  int get half => _half;
 }
