@@ -11,7 +11,7 @@ class UserHandle{
 
   // Μέθοδος για επιστροφή του ίδιου instance
   UserHandle() {
-    _user=User("Kosm","Kero","KosmKero","Pass");
+    _user=User("Kosm","Kero","KosmKero","Pass","auth");
     _user?.makeAdmin(teams.first);
     _user?.addControlledTeam(teams[2]);
     _user?.addControlledTeam(teams[4]);
@@ -25,8 +25,8 @@ class UserHandle{
 
 
 
-  int signUp(String name, String lastName, String username, String password) {
-    if (name.isEmpty || lastName.isEmpty || username.isEmpty || password.isEmpty) {
+  int signUp(String name, String lastName, String username, String password,String uni) {
+    if (name.isEmpty || lastName.isEmpty || username.isEmpty || password.isEmpty || uni.isEmpty) {
       return 2; // Ένα κενο πεδίο
     }
     for (User user in userList) {
@@ -34,7 +34,7 @@ class UserHandle{
         return 0;   // το username υπάρχει ήδη
       }
     }
-    User user=User(name, lastName, username, password);
+    User user=User(name, lastName, username, password,uni);
     userList.add(user);
     login(username, password);
     return 1;  // το sign up γίνεται σωστά

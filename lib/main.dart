@@ -1,7 +1,9 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:untitled1/API/Match_Handle.dart';
 import 'package:untitled1/API/top_players_handle.dart';
 import 'package:untitled1/Data_Classes/Team.dart';
+import 'package:untitled1/Data_Classes/User.dart';
 import 'package:untitled1/championship_details/knock_outs_page.dart';
 import 'package:untitled1/championship_details/sector_chooser.dart';
 import 'Data_Classes/User.dart';
@@ -13,9 +15,39 @@ import 'Search_Page.dart';
 import 'championship_details/StandingsPage.dart';
 import 'Data_Classes/Match.dart';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 
-void main() {
+
+void main() async{
+
+  WidgetsFlutterBinding.ensureInitialized();
+  try {
+    await Firebase.initializeApp();
+    print("✅ Firebase initialized successfully!");
+  } catch (e) {
+    print("❌ Firebase initialization failed: $e");
+  }
+
+  //ΒΑΖΟΥΜΕ ΧΡΗΣΤΗ ΣΤΗΝ ΒΑΣΗ ΔΕΔΟΜΕΝΩΝ
+  /*
+  User User1 = new User("alex", "damos", "adamo", "aD");
+
+  CollectionReference users = FirebaseFirestore.instance.collection('UserDocument');
+  await users.doc(User1.username).set({
+    'LastName': User1.lastName,
+    'Name': User1.name,
+    'Role': 'No role', // Αν υπάρχει ρόλος, προσθέστε τον εδώ
+    'UserName': User1.username,
+    'password': User1.password,
+  });
+
+   */
+
+
+
+
+
   runApp(MyApp());
 }
 List<Team> teams = [
@@ -614,7 +646,7 @@ Widget _buildBody(int selectedIndex) {
     case 2:
       return FavoritePage();
     case 3:
-      return ProfilePage(user: User("Kosm","Kero","Kosmkero","pass"),);
+      return ProfilePage(user: User("Kosm","Kero","Kosmkero","pass","auth"),);
     default:
       return HomePage();
   }
