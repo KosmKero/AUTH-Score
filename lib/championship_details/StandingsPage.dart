@@ -15,7 +15,7 @@ class _StandingsPage extends State<StandingsPage> {
   Widget build(BuildContext context) {
     return Expanded(
       child: Container(
-        color: Color.fromARGB(150, 60, 80, 150),
+        color: Color.fromARGB(70, 60, 80, 150),
         child: Column(children: [
           Text("Βαθμολογικός Πίνακας",
               style: TextStyle(

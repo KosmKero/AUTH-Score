@@ -426,8 +426,8 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
       return GestureDetector(
         onTap: () {
           homeTeamScored
-              ? _showInputDialog(context, widget.match.homeTeam, homeTeamScored)
-              : _showInputDialog(
+              ? _showInputDialogForGoal(context, widget.match.homeTeam, homeTeamScored)
+              : _showInputDialogForGoal(
                   context, widget.match.awayTeam, homeTeamScored);
           setState(() {});
         },
@@ -556,7 +556,7 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
   }
 
   TextEditingController _controller = TextEditingController();
-  void _showInputDialog(BuildContext context, Team team, bool homeTeamScored) {
+  void _showInputDialogForGoal(BuildContext context, Team team, bool homeTeamScored) {
     String? goalScorer;
     showDialog(
         context: context,

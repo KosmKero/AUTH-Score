@@ -56,7 +56,8 @@ class _NavigationButtonsState extends State<_NavigationButtons> {
   //ΔΗΜΙΟΥΡΓΕΙ ΤΟΝ ΧΩΡΟ ΤΩΝ 3 ΚΟΥΜΠΙΩΝ
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
+    return Container(
+      color: Color.fromARGB(70, 60, 80, 150),
       height: 65,
       width: double.infinity,
       child: Row(
@@ -87,7 +88,7 @@ class _NavigationButtonsState extends State<_NavigationButtons> {
             text,
             style: TextStyle(
               fontSize: 17,
-              color: isSelected ? Colors.blue : Colors.black,
+              color: isSelected ? Colors.blue : Colors.black87,
               fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
             ),
           ),
