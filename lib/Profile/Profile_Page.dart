@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:untitled1/Profile/Profile_Edit_Page.dart';
 import 'package:untitled1/Profile/Settings_Page.dart';
 import '../Data_Classes/User.dart';
-import 'lib/Profile/LogInScreen.dart';
+import 'Profile_Page.dart';
 import 'LogInScreen.dart';
 
 String selectedLanguage = "Ελληνικά";
