@@ -648,7 +648,7 @@ void checkBase(BuildContext context,controller1,controller2,controller3) async
         SnackBar( //ΕΜΦΑΝΙΖΩ ΜΗΝΥΜΑ ΛΑΘΟΥΣ ΑΝ ΕΧΕΙ ΚΑΠΟΙΟ ΠΕΔΙΟ ΚΕΝΟ
           content: Text('The username or the password is incorrect!'),
           backgroundColor: Colors.red,
-          duration: Duration(seconds: 3),
+          duration: Duration(seconds: 2),
         ),
       );
     }
@@ -687,7 +687,7 @@ void addInBase(BuildContext context, controller1, controller2, controller3) asyn
       SnackBar( //ΕΜΦΑΝΙΖΩ ΜΗΝΥΜΑ ΛΑΘΟΥΣ ΑΝ ΕΧΕΙ ΚΑΠΟΙΟ ΠΕΔΙΟ ΚΕΝΟ
         content: Text('Please fill in all fields'),
         backgroundColor: Colors.red,
-        duration: Duration(seconds: 3),
+        duration: Duration(seconds: 2),
       ),
     );
   }
@@ -697,7 +697,7 @@ void addInBase(BuildContext context, controller1, controller2, controller3) asyn
         SnackBar( //ΕΜΦΑΝΙΖΩ ΜΗΝΥΜΑ ΛΑΘΟΥΣ ΑΝ ΕΧΕΙ ΚΑΠΟΙΟ ΠΕΔΙΟ ΚΕΝΟ
           content: Text('This username already exists! Please pick another username.'),
           backgroundColor: Colors.red,
-          duration: Duration(seconds: 3),
+          duration: Duration(seconds: 2),
         ),
       );
     }
@@ -731,14 +731,6 @@ void addInBase(BuildContext context, controller1, controller2, controller3) asyn
     }).catchError((error)
     {
       print("Error adding document: $error");
-      // Show error SnackBar for Firebase add error
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error registering user: $error'),
-          backgroundColor: Colors.red,
-          duration: Duration(seconds: 3),
-        ),
-      );
     });
   }
 }
