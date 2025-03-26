@@ -3,6 +3,7 @@ import 'package:untitled1/API/Match_Handle.dart';
 import 'package:untitled1/main.dart';
 import 'Data_Classes/Match.dart';
 import 'Data_Classes/Team.dart';
+import 'globals.dart';
 import 'matchesContainer.dart';
 
 class FavoritePage extends StatefulWidget {
@@ -49,9 +50,11 @@ class _FavoriteContainerState extends State<FavoritePage> {
         ),
         Expanded(
           flex: 10,
-          child: favouriteTeams.isNotEmpty ? matchesContainer(
-            matches: teamMatches ,
-          ) : Center(child: Text("Δεν έχεις ακόμα αγαπημένες ομάδες",style:  TextStyle(fontSize: 25,fontWeight: FontWeight.bold),textAlign: TextAlign.center,)),
+          child: favouriteTeams.isNotEmpty ? matchesContainer(matches: teamMatches ,) :
+          Center(
+              child: Text( !isLoggedIn? "Πρέπει να είσαι συνδεδεμένος για να δείς τις αγαπημένες σου ομάδες":"Δεν έχεις ακόμα αγαπημένες ομάδες",
+                style:  TextStyle(fontSize: 23, fontWeight: FontWeight.bold),
+                textAlign: TextAlign.center,)),
         ),
       ],
     );

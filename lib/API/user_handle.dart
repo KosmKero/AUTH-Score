@@ -1,25 +1,25 @@
 import 'package:untitled1/main.dart';
 
 import '../Data_Classes/Team.dart';
-import '../Data_Classes/User.dart';
+import '../Data_Classes/AppUser.dart';
 
 
 class UserHandle{
 
 
-  static List<User> userList=[];
+  static List<AppUser> userList=[];
 
   // Μέθοδος για επιστροφή του ίδιου instance
   UserHandle() {
-    _user=User("Kosm","Kero","KosmKero","Pass","auth");
+    _user=AppUser("KosmKero","Pass","auth");
     _user?.makeAdmin(teams.first);
     _user?.addControlledTeam(teams[2]);
     _user?.addControlledTeam(teams[4]);
   }
 
-  User? _user;
+  AppUser? _user;
 
-  void initializeUsers(List<User> list){
+  void initializeUsers(List<AppUser> list){
     userList=list;
   }
 
@@ -29,12 +29,12 @@ class UserHandle{
     if (name.isEmpty || lastName.isEmpty || username.isEmpty || password.isEmpty || uni.isEmpty) {
       return 2; // Ένα κενο πεδίο
     }
-    for (User user in userList) {
+    for (AppUser user in userList) {
       if (user.username==username) {
         return 0;   // το username υπάρχει ήδη
       }
     }
-    User user=User(name, lastName, username, password,uni);
+    AppUser user=AppUser(username, password,uni);
     userList.add(user);
     login(username, password);
     return 1;  // το sign up γίνεται σωστά
@@ -42,7 +42,7 @@ class UserHandle{
 
 
   bool login(String username, String password) {
-    for (User users in userList) {
+    for (AppUser users in userList) {
       if (users.username == username && users.password==password) {
         _user = users;
         _user?.userLoggedIn();
@@ -52,7 +52,7 @@ class UserHandle{
     return false;
   }
 
-  User? getLoggedUser(){
+  AppUser? getLoggedUser(){
     return _user;
   }
 

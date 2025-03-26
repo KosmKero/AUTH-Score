@@ -12,11 +12,12 @@ class Team {
 
 
   // Constructor with optional values
-  Team(this.name,this._matches, this._wins, this._losses, this._draws,this._group,this._foundationYear,this._titles, [List<Player>? players] ) {
+  Team(this.name,this._matches, this._wins, this._losses, this._draws,this._group,this._foundationYear,this._titles,this._coach,[List<Player>? players] ) {
     _players = players ?? []; // Initialize players list if null
   }
   final int? _foundationYear;
   String name;
+  String _coach;
   int _matches, _wins, _losses, _draws, _titles;
   final int _group;
   bool _isFavourite=false;
@@ -36,6 +37,8 @@ class Team {
   bool get isFavourite => _isFavourite;
   int? get foundationYear=> _foundationYear;
   int get titles=>_titles;
+
+  String get coach => _coach;
 
   Image get image {
     if (n%2==0) {

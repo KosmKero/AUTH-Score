@@ -67,7 +67,7 @@ class TeamDetailsWidget extends StatelessWidget {
                         ),
                     ),
                     Padding(
-                      padding: EdgeInsets.only(left: 120),
+                      padding: EdgeInsets.only(left: 130),
                       child: Text(
                       '${team.foundationYear}',
                       style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
@@ -85,18 +85,43 @@ class TeamDetailsWidget extends StatelessWidget {
                     ),
                     Padding(
                         padding: EdgeInsets.only(left: 9),
-                    child:
-                      Text(
+                      child:
+                        Text(
                         'Τίτλοι:',
                         style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                       ),
                     ),
                     Padding(
-                      padding: EdgeInsets.only(left: 185),
+                      padding: EdgeInsets.only(left: 225),
                       child: Text(
                       '${team.titles}',
                       style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                       )
+                    ),
+                  ],
+                ),
+                //ΓΙΑ ΤΟΝ ΠΡΟΠΟΝΗΤΗ!!
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start, // Στοίχιση αριστερά-δεξιά
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.only(left: 2),
+                      child: Icon(Icons.person,color: Colors.blueAccent),
+                    ),
+                    Padding(
+                      padding:EdgeInsets.only(left: 10),
+                      child:
+                      Text(
+                        'Προπονητής:',
+                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    Padding(
+                        padding: EdgeInsets.only(left: 90),
+                        child: Text(
+                          '${team.coach}',
+                          style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+                        )
                     ),
                   ],
                 ),

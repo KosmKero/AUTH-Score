@@ -1,12 +1,13 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:untitled1/API/Match_Handle.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:untitled1/API/top_players_handle.dart';
 import 'package:untitled1/Data_Classes/Team.dart';
-import 'package:untitled1/Data_Classes/User.dart';
+import 'package:untitled1/Data_Classes/AppUser.dart';
 import 'package:untitled1/championship_details/knock_outs_page.dart';
 import 'package:untitled1/championship_details/sector_chooser.dart';
-import 'Data_Classes/User.dart';
+import 'Data_Classes/AppUser.dart';
 import 'Favorite_Page.dart';
 import 'HomePage.dart';
 import 'Data_Classes/Player.dart';
@@ -14,8 +15,8 @@ import 'Profile/Profile_Page.dart';
 import 'Search_Page.dart';
 import 'championship_details/StandingsPage.dart';
 import 'Data_Classes/Match.dart';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'globals.dart';
 
 
 
@@ -29,31 +30,15 @@ void main() async{
     print("❌ Firebase initialization failed: $e");
   }
 
-  //ΒΑΖΟΥΜΕ ΧΡΗΣΤΗ ΣΤΗΝ ΒΑΣΗ ΔΕΔΟΜΕΝΩΝ
-  /*
-  User User1 = new User("alex", "damos", "adamo", "aD");
-
-  CollectionReference users = FirebaseFirestore.instance.collection('UserDocument');
-  await users.doc(User1.username).set({
-    'LastName': User1.lastName,
-    'Name': User1.name,
-    'Role': 'No role', // Αν υπάρχει ρόλος, προσθέστε τον εδώ
-    'UserName': User1.username,
-    'password': User1.password,
-  });
-
-   */
-
-
-
-
-
   runApp(MyApp());
 }
 
 //0 τερμας, 1 αμυντικος, 2 μεσος, 3 επιθετικος
+
+
+
 List<Team> teams = [
-  Team("Ολυμπιακός", 10, 7, 2, 1, 1, 2000, 0, [
+  Team("Ολυμπιακός", 10, 7, 2, 1, 1, 2000, 0,"coach1",[
     Player("Γιώργαρας", "Παπαδόπgουλος", 2, 5, 10, 22,"Olympiacos"),
     Player("Πετsρος", "Ππgα", 2, 5, 5, 21, "Olympiacos"),
     Player("Φανηsς", "Κωfνστα", 2, 5, 5, 20, "Olympiacos"),
@@ -72,77 +57,77 @@ List<Team> teams = [
     Player("Νίκος", "Λαμπρόποhυλος", 2, 3 ,3  , 22, "Olympiacos"),
   ]),
 
-  Team("Παναθηναϊκός", 10, 6, 3, 1, 1, 2010, 0, [
+  Team("Παναθηναϊκός", 10, 6, 3, 1, 1, 2010, 0,"coach2", [
     Player("Αλέξανδρος", "Βασιλείου", 2, 4,  7, 23, "Panathinaikos"),
     Player("Δημήτρης", "Κωνσταντίνου", 2, 2, 2, 24, "Panathinaikos"),
   ]),
 
-  Team("ΑΕΚ", 10, 5, 4, 1, 1, 2015, 0, [
+  Team("ΑΕΚ", 10, 5, 4, 1, 1, 2015, 0, "A.Damousis",[
     Player("Στέφανος", "Αντωνίου", 2, 6, 8, 22, "AEK"),
     Player("Μιχάλης", "Γεωργίου", 2, 3,  3, 25, "AEK"),
   ]),
 
-  Team("ΠΑΟΚ", 10, 4, 4, 2, 1, 2000, 0, [
+  Team("ΠΑΟΚ", 10, 4, 4, 2, 1, 2000, 0, "coach4",[
     Player("Χρήστος", "Καραμανλής", 2, 2,  4, 28, "PAOK"),
     Player("Παναγιώτης", "Σωτηρίου", 2, 5, 5, 26, "PAOK"),
   ]),
 
-  Team("Άρης", 10, 6, 2, 2, 2, 2000, 0, [
+  Team("Άρης", 10, 6, 2, 2, 2, 2000, 0, "coach5",[
     Player("Felipe", "Bakas",   2,   4,   6, 29, "Aris"),
     Player("Θοδωρής", "Αναστασίου", 2, 2, 3, 30, "Aris"),
   ]),
 
-  Team("Αστέρας Τρίπολης", 10, 5, 3, 2, 2, 2000, 0, [
+  Team("Αστέρας Τρίπολης", 10, 5, 3, 2, 2, 2000, 0,"coach6" ,[
     Player("Βασίλης", "Κυριακίδης", 2, 3,  4, 31, "Asteras Tripolis"),
     Player("Γιάννης", "Χατζηδάκης", 2, 2,  2, 32, "Asteras Tripolis"),
   ]),
 
-  Team("ΟΦΗ", 10, 4, 5, 1, 2, 2000, 0, [
+  Team("ΟΦΗ", 10, 4, 5, 1, 2, 2000, 0, "coach7",[
     Player("Μανώλης", "Στρατής", 2, 2,   3,   33, "OFI"),
     Player("Δημήτρης", "Φωτεινός", 2, 1, 1, 34,   "OFI"),
   ]),
 
-  Team("Λαμία", 10, 3, 6, 1, 2, 2000, 0, [
+  Team("Λαμία", 10, 3, 6, 1, 2, 2000, 0,"coach8", [
     Player("Πέτρος", "Αγγελόπουλος", 2, 1, 2, 35, "Λαμία"),
     Player("Σωτήρης", "Μιχαηλίδης", 2, 1,  1, 36, "Λαμία"),
   ]),
 
-  Team("Βόλος", 10, 7, 2, 1, 3, 2000, 0, [
+  Team("Βόλος", 10, 7, 2, 1, 3, 2000, 0, "coach9",[
     Player("Γιώργος", "Δημητρίου", 2, 5,5, 37, "Βόλος"),
     Player("Χάρης", "Νικολάου", 2, 4,    4, 38, "Βόλος"),
   ]),
 
-  Team("Παναιτωλικός", 10, 5, 3, 2, 3, 2000, 0, [
+  Team("Παναιτωλικός", 10, 5, 3, 2, 3, 2000, 0,"coach10", [
     Player("Αντώνης", "Ρουμπής", 2, 2,   2, 39, "Παναιτωλικός"),
     Player("Σταύρος", "Θεοδώρου", 2, 1,  1, 40, "Παναιτωλικός"),
   ]),
 
-  Team("Ιωνικός", 10, 4, 4, 2, 3, 2000, 0, [
+  Team("Ιωνικός", 10, 4, 4, 2, 3, 2000, 0,"coach11", [
     Player("Νεκτάριος", "Παπανικολάου", 2, 3,3, 41, "Ιωνικός"),
     Player("Άρης", "Λεμονής",           2, 2,2, 42, "Ιωνικός"),
   ]),
 
-  Team("Απόλλων Σμύρνης", 10, 2, 6, 2, 3, 2000, 0, [
+  Team("Απόλλων Σμύρνης", 10, 2, 6, 2, 3, 2000, 0,"coach12", [
     Player("Χριστόφορος", "Δούκας", 2, 1, 1, 43, "Απόλλων Σμύρνης"),
     Player("Φώτης", "Σταματόπουλος", 2, 1, 1, 44, "Απόλλων Σμύρνης"),
   ]),
 
-  Team("Καλαμάτα", 10, 8, 1, 1, 4, 2000, 0, [
+  Team("Καλαμάτα", 10, 8, 1, 1, 4, 2000, 0,"coach13", [
     Player("Στέργιος", "Κυριαζής", 2, 6,    8, 45, "Καλαμάτα"),
     Player("Διονύσης", "Μαρκόπουλος", 2, 3, 3, 46, "Καλαμάτα"),
   ]),
 
-  Team("Χανιά", 10, 6, 3, 1, 4, 2000, 0, [
+  Team("Χανιά", 10, 6, 3, 1, 4, 2000, 0,"coach14", [
     Player("Ευθύμης", "Ανδριανός", 2, 5, 5, 47, "Χανιά"),
     Player("Νίκος", "Σφακιανάκης", 2, 2, 2, 48, "Χανιά"),
   ]),
 
-  Team("Αναγέννηση Καρδίτσας", 10, 5, 4, 1, 4, 2000, 0, [
+  Team("Αναγέννηση Καρδίτσας", 10, 5, 4, 1, 4, 2000, 0,"coach15", [
     Player("Λάμπρος", "Παπαγεωργίου", 2, 2, 2, 49, "Αναγέννηση Καρδίτσας"),
     Player("Μάριος", "Ξανθόπουλος",    2, 1,1, 50, "Αναγέννηση Καρδίτσας"),
   ]),
 
-  Team("Δόξα Δράμας", 10, 3, 6, 1, 4, 2000, 0, [
+  Team("Δόξα Δράμας", 10, 3, 6, 1, 4, 2000, 0, "coach16",[
     Player("Χρήστος", "Καλογερόπουλος", 2, 2,  2, 51, "Δόξα Δράμας"),
     Player("Σπύρος", "Αρβανίτης",       2, 1,  1, 52, "Δόξα Δράμας"),
   ]),
@@ -378,17 +363,20 @@ List<Match> previousMatches = [
 List<List<Match>> matches=[upcomingMatches,previousMatches];
 
 
+
 class MyApp extends StatelessWidget {
-  MyApp({super.key}){
+  final AppUser? user;
+  MyApp({super.key,this.user}){
     MatchHandle().initializeMatces(matches);
     TopPlayersHandle().initializeList(teams);
+    print(user?.password);
   }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: MainScreen(),
-    );
+        );
   }
 }
 
@@ -538,12 +526,12 @@ Widget _buildBody(int selectedIndex) {
       return HomePage();
     case 1:
       return StandingsOrKnockoutsChooserPage();
-      //return KnockOutsPage();
-      //return StandingsPage();
+  //return KnockOutsPage();
+  //return StandingsPage();
     case 2:
       return FavoritePage();
     case 3:
-      return ProfilePage(user: User("Kosm","Kero","Kosmkero","pass","auth"),);
+      return ProfilePage(user: AppUser("Kosmkero","pass","auth"),);
     default:
       return HomePage();
   }
@@ -564,7 +552,6 @@ class profilePage extends StatelessWidget {
 }
 */
 //----------------------------------------------------------------------------------
-
 
 
 

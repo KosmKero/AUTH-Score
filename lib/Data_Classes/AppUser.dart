@@ -2,12 +2,13 @@ import 'dart:ffi';
 
 import 'Team.dart';
 
-class User{
+class AppUser
+{
 
-  User(this._name,this._lastName,this._username,this._password,this._university){
+  AppUser(this._username,this._password,this._university){
     _isAdmin=false;
   }
-  String _name,_lastName,_username,_password,_university;
+  String _username,_password,_university;
   bool _isLoggedIn=false;
   late bool _isAdmin;
 
@@ -16,9 +17,6 @@ class User{
   final List<Team> _controlledTeams=[];
 
 
-
-  String get name => _name;
-  String get lastName => _lastName;
   String get username => _username;
   String get password => _password;
   String get university => _university;
