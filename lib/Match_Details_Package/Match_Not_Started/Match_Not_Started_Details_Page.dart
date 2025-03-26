@@ -29,41 +29,46 @@ class _MatchNotStartedDetailsState extends State<MatchNotStartedDetails> {
   @override
   Widget build(BuildContext context) {
     return Scaffold( //Button to begin the match countdown
-        body: Column(children: [
-      TextButton(
-          onPressed: () {
-            widget.match.matchStarted();
-            setState(() {});
-          },
-          child: Text("Begin Match")),
-      Container(
-        color: Color.fromARGB(50, 5, 150, 200),
-        child: Padding(
-          padding: const EdgeInsets.all(0.5),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Center(child: Text(widget.match.matchweekInfo(),style: TextStyle(fontSize: 13,color: Colors.grey[800]),)),
-              SizedBox(height: 5),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                crossAxisAlignment: CrossAxisAlignment.center,
+        body: SingleChildScrollView(
+          scrollDirection: Axis.vertical,
+          child:
+            Column(children: [
+                  TextButton(
+              onPressed: () {
+                widget.match.matchStarted();
+                setState(() {});
+              },
+              child: Text("Begin Match")),
+                  Container(
+            color: Color.fromARGB(50, 5, 150, 200),
+            child: Padding(
+              padding: const EdgeInsets.all(0.5),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Expanded(child: buildTeamName(team: widget.match.homeTeam)),
-                  Flexible(fit: FlexFit.tight, child:_buildMatchDateTime()),
-                  Expanded(child:buildTeamName(team: widget.match.awayTeam)),
+                  Center(child: Text(widget.match.matchweekInfo(),style: TextStyle(fontSize: 13,color: Colors.grey[800]),)),
+                  SizedBox(height: 5),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Expanded(child: buildTeamName(team: widget.match.homeTeam)),
+                      Flexible(fit: FlexFit.tight, child:_buildMatchDateTime()),
+                      Expanded(child:buildTeamName(team: widget.match.awayTeam)),
+                    ],
+                  ),
+                  Center(child: _isAdminWidget()),
+                  const Divider(),
+                  NavigationButtons(onSectionChange: _changeSection),
                 ],
               ),
-              Center(child: _isAdminWidget()),
-              const Divider(),
-              NavigationButtons(onSectionChange: _changeSection),
-            ],
-          ),
-        ),
-      ),
-      _sectionChooser(selectedIndex, widget.match)
-    ]));
+            ),
+                  ),
+                  _sectionChooser(selectedIndex, widget.match)
+                ]),
+
+        ));
   }
 
   Widget _isAdminWidget() {
@@ -288,7 +293,7 @@ Widget _sectionChooser(int selectedIndex, Match match) {
     case 0:
       return DetailsMatchNotStarted(match: match);
     case 1:
-      return Starting11Display();
+      return Starting11Display(match: match,);
     case 2:
       return StandingPageOneGroup(
         team: match.homeTeam,

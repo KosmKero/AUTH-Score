@@ -72,80 +72,81 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
     return Scaffold(
         body: Container(
       //color: Colors.blueGrey,
-      child: Column(
-        children: [
-          Column(children: [
-            Container(
-              color: Color.fromARGB(50, 5, 150, 200),
-              child: Padding(
-                padding: const EdgeInsets.all(5.0),
-                child: Column(
-                  children: [
-                    // Row(
-                    //   children: [
-                    //     TextButton(onPressed:()
-                    //     {widget.match.homeScored("name");
-                    //     setState(() {});}, child: Text("patatohome")),
-                    //     TextButton(onPressed:()
-                    //     {widget.match.awayScored("name2");
-                    //     setState(() {});}, child: Text("patatoaway")),
-                    //     TextButton(onPressed:()
-                    //     {widget.match.secondHalfStarted();
-                    //     }, child: Text("2ohalf")),
-                    //     TextButton(onPressed:()
-                    //     {widget.match.matchFinished();
-                    //     setState(() {});}, child: Text("finished")),
-                    //   ],
-                    // ),
-                    Center(
-                        child: Text(
-                      widget.match.matchweekInfo(),
-                      style: TextStyle(fontSize: 13, color: Colors.grey[800]),
-                    )),
-                    SizedBox(
-                      height: 10,
-                    ),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        Expanded(
-                          child: Column(children: [
-                            buildTeamName(team: widget.match.homeTeam),
-                            _isAdminWidgetGoal(true)
-                          ]),
-                        ),
-                        Flexible(
-                          fit: FlexFit.tight,
-                          child: widget.match.hasMatchFinished
-                              ? _buildMatchFinishedScore()
-                              : _buildMatchTimer(),
-                        ),
-                        Expanded(
-                          child: Column(children: [
-                            buildTeamName(team: widget.match.awayTeam),
-                            _isAdminWidgetGoal(false)
-                          ]),
-                        ),
-                      ],
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        _cardAdmin(true),
-                        _matchProgressAdmin(),
-                        _cardAdmin(false)
-                      ],
-                    ),
-                    const Divider(),
-                    NavigationButtons(onSectionChange: _changeSection),
-                  ],
+      child: SingleChildScrollView(
+        scrollDirection: Axis.vertical,
+        child: Column(
+          children: [
+              Container(
+                color: Color.fromARGB(50, 5, 150, 200),
+                child: Padding(
+                  padding: const EdgeInsets.all(5.0),
+                  child: Column(
+                    children: [
+                      // Row(
+                      //   children: [
+                      //     TextButton(onPressed:()
+                      //     {widget.match.homeScored("name");
+                      //     setState(() {});}, child: Text("patatohome")),
+                      //     TextButton(onPressed:()
+                      //     {widget.match.awayScored("name2");
+                      //     setState(() {});}, child: Text("patatoaway")),
+                      //     TextButton(onPressed:()
+                      //     {widget.match.secondHalfStarted();
+                      //     }, child: Text("2ohalf")),
+                      //     TextButton(onPressed:()
+                      //     {widget.match.matchFinished();
+                      //     setState(() {});}, child: Text("finished")),
+                      //   ],
+                      // ),
+                      Center(
+                          child: Text(
+                        widget.match.matchweekInfo(),
+                        style: TextStyle(fontSize: 13, color: Colors.grey[800]),
+                      )),
+                      SizedBox(
+                        height: 10,
+                      ),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Expanded(
+                            child: Column(children: [
+                              buildTeamName(team: widget.match.homeTeam),
+                              _isAdminWidgetGoal(true)
+                            ]),
+                          ),
+                          Flexible(
+                            fit: FlexFit.tight,
+                            child: widget.match.hasMatchFinished
+                                ? _buildMatchFinishedScore()
+                                : _buildMatchTimer(),
+                          ),
+                          Expanded(
+                            child: Column(children: [
+                              buildTeamName(team: widget.match.awayTeam),
+                              _isAdminWidgetGoal(false)
+                            ]),
+                          ),
+                        ],
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          _cardAdmin(true),
+                          _matchProgressAdmin(),
+                          _cardAdmin(false)
+                        ],
+                      ),
+                      const Divider(),
+                      NavigationButtons(onSectionChange: _changeSection),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ]),
-          _sectionChooser(selectedIndex, widget.match)
-        ],
+            _sectionChooser(selectedIndex, widget.match)
+          ],
+        ),
       ),
     ));
   }
@@ -220,18 +221,14 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
   }
 
   Widget _buildMatchdetails() {
-    return Expanded(
-      child: SingleChildScrollView(
-        child: Column(
+    return Column(
           children: [
             widget.match.hasSecondHalfStarted
                 ? _halfBuilder(2)
                 : SizedBox.shrink(),
             _halfBuilder(1), // Always display the first half
           ],
-        ),
-      ),
-    );
+        );
   }
 
   Widget _halfBuilder(int half) {
@@ -405,7 +402,7 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
       case 0:
         return _buildMatchdetails();
       case 1:
-        return Starting11Display();
+        return Starting11Display(match: match,);
       case 2:
         return StandingPageOneGroup(
           team: match.homeTeam,
@@ -429,7 +426,7 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
               ? _showInputDialogForGoal(context, widget.match.homeTeam, homeTeamScored)
               : _showInputDialogForGoal(
                   context, widget.match.awayTeam, homeTeamScored);
-          setState(() {});
+
         },
         child: Card(
             elevation: 10,

@@ -21,6 +21,12 @@ class Match extends ChangeNotifier{
 
   final Map<int, List<MatchFact>> _matchFacts = {0:[],1:[]};
 
+  //Μαπ που θα δειχνει ποιοι παιχτες επιλέχθηκαν απο τον αντμιν για την αρχικη ενδεκαδα,
+  // για να μη ντου εμφανιζονται σαν επιλογη στο gui
+    List<Map<Player,bool>> playersSelected=[{},{}];
+
+    List<List<Player?>> players11=[[],[]];
+
   Match(
       {required Team homeTeam,
         required Team awayTeam,
@@ -42,6 +48,18 @@ class Match extends ChangeNotifier{
 
     _isGroupPhase=isGroupPhase;
     _game=game;
+
+    for (Player player in homeTeam.players) {
+      playersSelected[0][player]=false;
+    }
+    for (Player player in awayTeam.players) {
+      playersSelected[1][player]=false;
+    }
+    for (int i=0;i<2;i++){
+      for (int j=0;j<11;j++){
+        players11[i].add(null);
+      }
+    }
   }
   Team get homeTeam => _homeTeam;
   Team get awayTeam => _awayTeam;
@@ -82,8 +100,6 @@ class Match extends ChangeNotifier{
   String get dateString{
      return "${_day.toString().padLeft(2, '0')}.${_month.toString().padLeft(2, '0')}.${_year.toString().padLeft(4, '0')}";
   }
-
-
 
 
   void setScoreHome(int score){

@@ -195,12 +195,6 @@ class _MatchContainerTimeState extends State<MatchContainerTime> {
   void initState() {
     super.initState();
 
-    // Ελέγχει αν το ματς έχει ξεκινήσει και αρχίζει το χρονόμετρο
-    if (widget.match.hasMatchStarted) {
-      _startTimer();
-    } else {
-      _secondsElapsed = 5;
-    }
 
     // Listener για να ξεκινησει το χρονομετρο του αγώνα
     widget.match.addListener(() {
@@ -218,6 +212,7 @@ class _MatchContainerTimeState extends State<MatchContainerTime> {
   }
 
   void _startTimer() {
+    _timer?.cancel();
     _secondsElapsed = (DateTime.now().millisecondsSinceEpoch ~/ 1000) - widget.match.startTimeInSeconds;
 
     _timer = Timer.periodic(Duration(seconds: 1), (timer) {
