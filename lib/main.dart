@@ -1,12 +1,13 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:untitled1/API/Match_Handle.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:untitled1/API/top_players_handle.dart';
 import 'package:untitled1/Data_Classes/Team.dart';
-import 'package:untitled1/Data_Classes/User.dart';
+import 'package:untitled1/Data_Classes/AppUser.dart';
 import 'package:untitled1/championship_details/knock_outs_page.dart';
 import 'package:untitled1/championship_details/sector_chooser.dart';
-import 'Data_Classes/User.dart';
+import 'Data_Classes/AppUser.dart';
 import 'Favorite_Page.dart';
 import 'HomePage.dart';
 import 'Data_Classes/Player.dart';
@@ -14,8 +15,8 @@ import 'Profile/Profile_Page.dart';
 import 'Search_Page.dart';
 import 'championship_details/StandingsPage.dart';
 import 'Data_Classes/Match.dart';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'globals.dart';
 
 
 
@@ -29,29 +30,13 @@ void main() async{
     print("❌ Firebase initialization failed: $e");
   }
 
-  //ΒΑΖΟΥΜΕ ΧΡΗΣΤΗ ΣΤΗΝ ΒΑΣΗ ΔΕΔΟΜΕΝΩΝ
-  /*
-  User User1 = new User("alex", "damos", "adamo", "aD");
-
-  CollectionReference users = FirebaseFirestore.instance.collection('UserDocument');
-  await users.doc(User1.username).set({
-    'LastName': User1.lastName,
-    'Name': User1.name,
-    'Role': 'No role', // Αν υπάρχει ρόλος, προσθέστε τον εδώ
-    'UserName': User1.username,
-    'password': User1.password,
-  });
-
-   */
-
-
-
-
-
   runApp(MyApp());
 }
 
 //0 τερμας, 1 αμυντικος, 2 μεσος, 3 επιθετικος
+
+
+
 List<Team> teams = [
   Team("Ολυμπιακός", 10, 7, 2, 1, 1, 2000, 0, [
     Player("Γιώργαρας", "Παπαδόπgουλος", 2, 5, 10, 22,"Olympiacos"),
@@ -378,17 +363,20 @@ List<Match> previousMatches = [
 List<List<Match>> matches=[upcomingMatches,previousMatches];
 
 
+
 class MyApp extends StatelessWidget {
-  MyApp({super.key}){
+  final AppUser? user;
+  MyApp({super.key,this.user}){
     MatchHandle().initializeMatces(matches);
     TopPlayersHandle().initializeList(teams);
+    print(user?.password);
   }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: MainScreen(),
-    );
+        );
   }
 }
 
@@ -538,12 +526,12 @@ Widget _buildBody(int selectedIndex) {
       return HomePage();
     case 1:
       return StandingsOrKnockoutsChooserPage();
-      //return KnockOutsPage();
-      //return StandingsPage();
+  //return KnockOutsPage();
+  //return StandingsPage();
     case 2:
       return FavoritePage();
     case 3:
-      return ProfilePage(user: User("Kosm","Kero","Kosmkero","pass","auth"),);
+      return ProfilePage(user: AppUser("Kosmkero","pass","auth"),);
     default:
       return HomePage();
   }
@@ -564,7 +552,6 @@ class profilePage extends StatelessWidget {
 }
 */
 //----------------------------------------------------------------------------------
-
 
 
 

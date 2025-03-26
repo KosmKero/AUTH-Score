@@ -2,7 +2,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:untitled1/Profile/Profile_Edit_Page.dart';
 import 'package:untitled1/Profile/Settings_Page.dart';
-import '../Data_Classes/User.dart';
+import 'package:untitled1/globals.dart';
+import '../Data_Classes/AppUser.dart';
 import 'Profile_Page.dart';
 import 'LogInScreen.dart';
 
@@ -10,7 +11,7 @@ String selectedLanguage = "Ελληνικά";
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key, required this.user});
-  final User user;
+  final AppUser user;
 
   @override
   State<ProfilePage> createState() => _ProfilePageState();
@@ -50,7 +51,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
             SizedBox(height: 20), // Διάστημα μεταξύ εικόνας και κουμπιών
 
-            if (widget.user.isLoggedIn)
+            if (isLoggedIn)
               Padding(
                 padding: EdgeInsets.only(bottom: 1, top: 5, right: 220),
                 child: TextButton(
@@ -61,7 +62,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
                 ),
               ),
-            if (widget.user.isLoggedIn)
+            if (isLoggedIn)
               Padding(
                 padding: EdgeInsets.only(bottom: 25, top: 1, right: 220),
                 child: TextButton(
@@ -185,7 +186,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
 // LOGIN BUTTON THAT TRIGGERS PAGE REFRESH
 class LogInButton extends StatefulWidget {
-  final User user;
+  final AppUser user;
   final VoidCallback onLoginStateChanged; // Callback to refresh the page
 
   const LogInButton({super.key, required this.user, required this.onLoginStateChanged});
@@ -197,6 +198,7 @@ class LogInButton extends StatefulWidget {
 class _LogInButtonState extends State<LogInButton> {
   @override
   Widget build(BuildContext context) {
+
     return Column(
         children:[
           Padding(
@@ -205,18 +207,19 @@ class _LogInButtonState extends State<LogInButton> {
             TextButton(
               onPressed: () {
                 setState(() {
-                  Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => LogInScreen(user:widget.user)));
+                  if(isLoggedIn)
+                    isLoggedIn=false;
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => LogInScreen(user:widget.user)));
                   //widget.user.changeLogIn(); // Toggle login state
                 });
                 widget.onLoginStateChanged(); // Notify ProfilePage to refresh
               },
               child: Text(
-                widget.user.isLoggedIn ? "Αποσύνδεση" : "Σύνδεση/Δημιουργία Λογαριασμού",
+                isLoggedIn ? "Αποσύνδεση" : "Σύνδεση/Δημιουργία Λογαριασμού",
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w500,
-                  color: widget.user.isLoggedIn ? Colors.red : Colors.blue,
+                  color: isLoggedIn ? Colors.red : Colors.blue,
                 ),
               ),
             ),
