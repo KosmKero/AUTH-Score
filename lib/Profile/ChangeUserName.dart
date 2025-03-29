@@ -93,9 +93,9 @@ class _CreateBody extends State<CreateBody>
     return Column(
       children: [
         Padding(
-          padding: EdgeInsets.only(right: 180,top: 60),
+          padding: EdgeInsets.only(right: greek?150:180,top: 60),
           child: Text(
-            "Current Username",
+            greek?"Τωρινό όνομα χρήστη":"Current Username",
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold
@@ -123,9 +123,9 @@ class _CreateBody extends State<CreateBody>
         ),
 
         Padding(
-            padding: EdgeInsets.only(right: 200,top: 60),
+            padding: EdgeInsets.only(right: greek?120:200,top: 60),
             child: Text(
-                "New Username",
+                greek?"Καινούριο όνομα χρήστη":"New Username",
                 style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold
@@ -213,7 +213,7 @@ class CreateConfrimButton extends StatelessWidget {
           elevation: 6, // Shadow effect
         ),
         child: Text(
-          "Confirm",
+          greek?"Επιβεβαίωση":"Confirm",
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,

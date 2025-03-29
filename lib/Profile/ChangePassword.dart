@@ -60,7 +60,7 @@ class CreateAppBar extends StatelessWidget implements PreferredSizeWidget
         title: Padding(
           padding: EdgeInsets.only(left: 0,top: 10),
           child: Text(
-              "Αλλαγή κωδικού πρόσβασης",
+              greek?"Αλλαγή κωδικού πρόσβασης":"Change password",
               style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.w600,
@@ -95,9 +95,9 @@ class _CreateBody extends State<CreateBody>
     return Column(
       children: [
         Padding(
-            padding: EdgeInsets.only(right: 225,top: 20),
+            padding: EdgeInsets.only(right: greek?225:250,top: 20),
             child: Text(
-                "Όνομα χρήστη",
+                greek?"Όνομα χρήστη":"Username",
                 style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold
@@ -126,9 +126,9 @@ class _CreateBody extends State<CreateBody>
         SizedBox(height: 20,),
 
         Padding(
-            padding: EdgeInsets.only(right: 200,top: 20),
+            padding: EdgeInsets.only(right: greek?200:220,top: 20),
             child: Text(
-                "Παλιός κωδικός",
+                greek?"Παλιός κωδικός":"Old password",
                 style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold
@@ -157,9 +157,9 @@ class _CreateBody extends State<CreateBody>
         SizedBox(height: 20,),
 
         Padding(
-            padding: EdgeInsets.only(right: 170,top: 20),
+            padding: EdgeInsets.only(right: greek?170:210,top: 20),
             child: Text(
-                "Καινούριος κωδικός",
+                greek?"Καινούριος κωδικός":"New password",
                 style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold
@@ -248,7 +248,7 @@ class CreateConfrimButton extends StatelessWidget
           elevation: 5, // Shadow effect
         ),
         child: Text(
-          "Confirm",
+          greek?"Επιβεβαίωση":"Confirm",
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,

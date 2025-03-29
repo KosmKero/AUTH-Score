@@ -4,6 +4,7 @@ import 'package:untitled1/Team_Display_Page_Package/TeamDisplayPage.dart';
 import 'package:untitled1/main.dart';
 
 import '../Data_Classes/Team.dart';
+import '../globals.dart';
 
 class StandingsPage extends StatefulWidget {
   @override
@@ -17,11 +18,13 @@ class _StandingsPage extends State<StandingsPage> {
       child: Container(
         color: Color.fromARGB(70, 60, 80, 150),
         child: Column(children: [
-          Text("Βαθμολογικός Πίνακας",
+          SizedBox(height: 5,),
+          Text(greek?"Βαθμολογικός Πίνακας":"Standings Table",
               style: TextStyle(
                   fontSize: 23,
                   fontWeight: FontWeight.bold,
                   color: Colors.white)),
+          SizedBox(height: 8,),
           Expanded(
               child: SingleChildScrollView(
                   child: Column(
@@ -54,28 +57,29 @@ class _StandingsPage extends State<StandingsPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text("Όμιλος $group",
+              Text(greek?"Όμιλος $group":"Group $group",
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              SizedBox(height: 2),
               DataTable(
                 columnSpacing: 20.0,
                 headingRowHeight: 40.0,
                 dataRowHeight: 60,
-                columns: const [
-                  DataColumn(label: Text("Ομάδα")),
-                  DataColumn(
-                      label: Text("Π", textAlign: TextAlign.center),
+                columns: [
+                  DataColumn(label: Text(greek?"Ομάδα":"Team")),
+                   DataColumn(
+                      label: Text(greek?"Π":"P", textAlign: TextAlign.center),
                       numeric: true),
-                  DataColumn(
-                      label: Text("Ν", textAlign: TextAlign.center),
+                   DataColumn(
+                      label: Text(greek?"Ν":"W", textAlign: TextAlign.center),
                       numeric: true),
-                  DataColumn(
-                      label: Text("Ι", textAlign: TextAlign.center),
+                   DataColumn(
+                      label: Text(greek?"Ι":"T", textAlign: TextAlign.center),
                       numeric: true),
-                  DataColumn(
-                      label: Text("Η", textAlign: TextAlign.center),
+                   DataColumn(
+                      label: Text(greek?"Η":"L", textAlign: TextAlign.center),
                       numeric: true),
-                  DataColumn(
-                      label: Text("Πόντοι", textAlign: TextAlign.center),
+                   DataColumn(
+                      label: Text(greek?"Πόντοι":"Points", textAlign: TextAlign.center),
                       numeric: true)
                 ],
                 rows: groupTeams

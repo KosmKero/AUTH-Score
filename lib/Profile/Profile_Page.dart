@@ -1,4 +1,6 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:untitled1/Profile/ChangePassword.dart';
 import 'package:untitled1/Profile/ChangeUserName.dart';
@@ -9,7 +11,7 @@ import '../Data_Classes/AppUser.dart';
 import 'Profile_Page.dart';
 import 'LogInScreen.dart';
 
-String selectedLanguage = "Ελληνικά";
+String selectedLanguage = greek?"Ελληνικά":"English";
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key, required this.user});
@@ -31,8 +33,9 @@ class _ProfilePageState extends State<ProfilePage> {
             Padding(
               padding: EdgeInsets.only(bottom: 5, top: 15, left: 5),
               child: Text(
-                "Επεξεργασία Προφίλ",
-                style: TextStyle(fontSize: 21,
+                greek? "Επεξεργασία Προφίλ" : "Edit profile",
+                style: TextStyle(
+                    fontSize: greek? 21:23,
                     fontWeight: FontWeight.bold,
                     fontFamily: 'Trajan Pro',
                   fontStyle: FontStyle.italic,
@@ -55,7 +58,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
             if (isLoggedIn)
               Padding(
-                padding: EdgeInsets.only(bottom: 1, top: 5, right: 220),
+                padding: EdgeInsets.only(bottom: 1, top: 5, right: greek?170:220),
                 child: TextButton(
                   onPressed: () {
                     Navigator.push(
@@ -66,14 +69,14 @@ class _ProfilePageState extends State<ProfilePage> {
                     );
                   },
                   child: Text(
-                    "Αλλαγή Username",
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                    greek?"Αλλαγή ονόματος χρήστη": "Change username",
+                    style: TextStyle(fontSize: greek?16:18, fontWeight: FontWeight.w600),
                   ),
                 ),
               ),
             if (isLoggedIn)
               Padding(
-                padding: EdgeInsets.only(bottom: 25, top: 1, right: 220),
+                padding: EdgeInsets.only(bottom: 25, top: 1, right: greek?170: 220),
                 child: TextButton(
                   onPressed: () {
                     Navigator.push(
@@ -84,8 +87,8 @@ class _ProfilePageState extends State<ProfilePage> {
                     );
                   },
                   child: Text(
-                    "Αλλαγή password",
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                    greek?"Αλλαγή κωδικού σύνδεσης":"Change password",
+                    style: TextStyle(fontSize:greek?16:18, fontWeight: FontWeight.w600),
                   ),
                 ),
               ),
@@ -94,14 +97,14 @@ class _ProfilePageState extends State<ProfilePage> {
               setState(() {}); // Refresh ProfilePage
             }),
 
-            SizedBox(height: 40),
+            SizedBox(height: 20),
 
             Row(
               children: [
                 Padding(
                     padding: EdgeInsets.only(left: 5),
                     child: Text(
-                        "Επιλογή Γλώσσας ",
+                        greek?"Επιλογή Γλώσσας":"Choose Language",
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -114,11 +117,21 @@ class _ProfilePageState extends State<ProfilePage> {
                     padding: EdgeInsets.only(left: 30),
                     child:
                     DropdownButton<String>(
-                      value: selectedLanguage, // Αποθηκευμένη επιλογή
-                      onChanged: (String? newValue) {
+                      value: greek?"Ελληνικά":"English", // Αποθηκευμένη επιλογή
+                      onChanged: (String? newValue)
+                      {
                         selectedLanguage = newValue!;
-                        setState(() {
-                        });
+                        setState(()
+                        {
+                          if(selectedLanguage == "English")
+                            greek=false;
+                          else
+                            greek=true;
+
+                          if(isLoggedIn)
+                            updateUserChar(globalUser.username,"Language");
+                        }
+                        );
                       },
                     items:
                         [
@@ -154,7 +167,7 @@ class _ProfilePageState extends State<ProfilePage> {
               child: Row(
                 children: [
                   Text(
-                    "Σκοτεινή λειτουργία",
+                    greek?"Σκοτεινή λειτουργία":"Dark mode",
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   SizedBox(width: 20),
@@ -175,7 +188,7 @@ class _ProfilePageState extends State<ProfilePage> {
               child: Column(
                 children: [
                   Text(
-                    "Επικοινωνία για προβλήματα",
+                    greek?"Επικοινωνία για προβλήματα":"Communication for problems",
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   SizedBox(height: 30),
@@ -188,6 +201,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     padding: EdgeInsets.only(right: 45),
                     child: Text("Email: kosma pes email"),
                   ),
+                  SizedBox(height: 30,)
                 ],
               ),
             ),
@@ -231,9 +245,9 @@ class _LogInButtonState extends State<LogInButton> {
                 widget.onLoginStateChanged(); // Notify ProfilePage to refresh
               },
               child: Text(
-                isLoggedIn ? "Αποσύνδεση" : "Σύνδεση/Δημιουργία Λογαριασμού",
+                isLoggedIn ? greek?"Αποσύνδεση":"Disconnect" : greek?"Σύνδεση/Δημιουργία Λογαριασμού":"Login/Create an account",
                 style: TextStyle(
-                  fontSize: 18,
+                  fontSize: 19,
                   fontWeight: FontWeight.w500,
                   color: isLoggedIn ? Colors.red : Colors.blue,
                 ),
