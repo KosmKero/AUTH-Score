@@ -3,6 +3,8 @@ import 'package:untitled1/championship_details/StandingsPage.dart';
 import 'package:untitled1/championship_details/knock_outs_page.dart';
 import 'package:untitled1/championship_details/top_players_page.dart';
 
+import '../globals.dart';
+
 
 
 class StandingsOrKnockoutsChooserPage extends StatefulWidget {
@@ -63,11 +65,11 @@ class _NavigationButtonsState extends State<_NavigationButtons> {
       child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            _buildTextButton("Βαθμολογία", 0),
+            _buildTextButton(greek?"Βαθμολογία":"Standings", 0),
             SizedBox(width: 15),
-            _buildTextButton("Νοκ Άουτς", 1),
+            _buildTextButton(greek?"Νοκ Άουτς":"Knock outs", 1),
             SizedBox(width: 15),
-            _buildTextButton("Κορυφαίοι Παίχτες", 2),
+            _buildTextButton(greek?"Κορυφαίοι Παίχτες":"Best players", 2),
           ],
         ),
     );

@@ -4,6 +4,7 @@ import 'package:untitled1/Match_Details_Package/Match_Not_Started/DetailsMatchNo
 import '../../Data_Classes/Match.dart';
 import '../../Data_Classes/Team.dart';
 import '../../Team_Display_Page_Package/TeamDisplayPage.dart';
+import '../../globals.dart';
 import '../../main.dart';
 import '../Standings_Card_1Group.dart';
 import '../Starting__11_Display_Card.dart';
@@ -38,7 +39,8 @@ class _MatchNotStartedDetailsState extends State<MatchNotStartedDetails> {
                 widget.match.matchStarted();
                 setState(() {});
               },
-              child: Text("Begin Match")),
+              child: Text(
+                  greek?"Έναρξη αγώνα":"Begin Match")),
                   Container(
             color: Color.fromARGB(50, 5, 150, 200),
             child: Padding(
@@ -47,7 +49,9 @@ class _MatchNotStartedDetailsState extends State<MatchNotStartedDetails> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Center(child: Text(widget.match.matchweekInfo(),style: TextStyle(fontSize: 13,color: Colors.grey[800]),)),
+                  Center(child: Text(
+                    widget.match.matchweekInfo(),
+                    style: TextStyle(fontSize: 13,color: Colors.grey[800]),)),
                   SizedBox(height: 5),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -137,9 +141,9 @@ class _NavigationButtonsState extends State<NavigationButtons> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          _buildTextButton("Λεπτομέρειες", 0),
-          _buildTextButton("Συνθέσεις", 1),
-          _buildTextButton("Βαθμολογία", 2),
+          _buildTextButton(greek?"Λεπτομέρειες":"Details", 0),
+          _buildTextButton(greek?"Συνθέσεις":"Teams", 1),
+          _buildTextButton(greek?"Βαθμολογία":"Standing", 2),
         ],
       ),
     );

@@ -11,7 +11,6 @@ class UserHandle{
 
   // Μέθοδος για επιστροφή του ίδιου instance
   UserHandle() {
-    _user=AppUser("KosmKero","Pass","auth");
     _user?.makeAdmin(teams.first);
     _user?.addControlledTeam(teams[2]);
     _user?.addControlledTeam(teams[4]);

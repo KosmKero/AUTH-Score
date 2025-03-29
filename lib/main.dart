@@ -20,7 +20,8 @@ import 'globals.dart';
 
 
 
-void main() async{
+void main() async
+{
 
   WidgetsFlutterBinding.ensureInitialized();
   try {
@@ -31,11 +32,8 @@ void main() async{
   }
 
   runApp(MyApp());
+
 }
-
-//0 τερμας, 1 αμυντικος, 2 μεσος, 3 επιθετικος
-
-
 
 List<Team> teams = [
   Team("Ολυμπιακός", 10, 7, 2, 1, 1, 2000, 0,"coach1",[
@@ -364,12 +362,12 @@ List<List<Match>> matches=[upcomingMatches,previousMatches];
 
 
 
-class MyApp extends StatelessWidget {
-  final AppUser? user;
-  MyApp({super.key,this.user}){
+class MyApp extends StatelessWidget
+{
+  MyApp({super.key})
+  {
     MatchHandle().initializeMatces(matches);
     TopPlayersHandle().initializeList(teams);
-    print(user?.password);
   }
 
   @override
@@ -381,13 +379,15 @@ class MyApp extends StatelessWidget {
 }
 
 class MainScreen extends StatefulWidget {
+
   const MainScreen({super.key});
 
   @override
   State<MainScreen> createState() => _MainScreenState();
 }
 
-class _MainScreenState extends State<MainScreen> {
+class _MainScreenState extends State<MainScreen>
+{
   int _selectedIndex = 0;
   String _selectedOption = "Ποδόσφαιρο";
 
@@ -422,6 +422,7 @@ class _MainScreenState extends State<MainScreen> {
 
 // ------------------------ APP BAR ------------------------
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
+
   final Function(String) onOptionSelected;
   final String selectedOption;
 
@@ -503,13 +504,13 @@ class CustomBottomNavigationBar extends StatelessWidget {
       14, // Αυξάνει το μέγεθος της γραμματοσειράς του επιλεγμένου
       unselectedFontSize: 12, // Μικρότερη γραμματοσειρά για τα μη επιλεγμένα
       type: BottomNavigationBarType.fixed,
-      items: const [
+      items: [
         BottomNavigationBarItem(
-            icon: Icon(Icons.sports_soccer), label: "Αγώνες"),
+            icon: const Icon(Icons.sports_soccer), label: greek?"Αγώνες":"Games"),
         BottomNavigationBarItem(
-            icon: Icon(Icons.emoji_events), label: "Πρωτάθλημα"),
-        BottomNavigationBarItem(icon: Icon(Icons.favorite), label: "Αγαπημένα"),
-        BottomNavigationBarItem(icon: Icon(Icons.person), label: "Προφίλ"),
+            icon: const Icon(Icons.emoji_events), label: greek?"Πρωτάθλημα":"Championship"),
+         BottomNavigationBarItem(icon: Icon(Icons.favorite), label: greek?"Αγαπημένα":"favourite"),
+         BottomNavigationBarItem(icon: Icon(Icons.person), label: greek?"Προφίλ":"Profile"),
       ],
       currentIndex: currentIndex,
       selectedItemColor: Colors.blue,
@@ -520,7 +521,9 @@ class CustomBottomNavigationBar extends StatelessWidget {
 }
 
 // ------------------------ BODY CONTENT ------------------------
-Widget _buildBody(int selectedIndex) {
+Widget _buildBody(int selectedIndex)
+{
+
   switch (selectedIndex) {
     case 0:
       return HomePage();
@@ -531,7 +534,7 @@ Widget _buildBody(int selectedIndex) {
     case 2:
       return FavoritePage();
     case 3:
-      return ProfilePage(user: AppUser("Kosmkero","pass","auth"),);
+      return ProfilePage(user:globalUser);
     default:
       return HomePage();
   }

@@ -108,7 +108,7 @@ class _CreateSignIn extends State<CreateSignIn> {
         Padding(
           padding: EdgeInsets.only(right: 30, top: 30),
           child: Text(
-            "Sign in",
+            greek?"Σύνδεση":"Sign in",
             style: TextStyle(
               fontSize: 25,
               fontWeight: FontWeight.bold,
@@ -118,9 +118,9 @@ class _CreateSignIn extends State<CreateSignIn> {
         ),
         SizedBox(height: 50),
         Padding(
-          padding: EdgeInsets.only(right: 250),
+          padding: EdgeInsets.only(right: greek?210: 250),
           child: Text(
-            "Username",
+            greek?"Όνομα χρήστη":"Username",
             style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold
@@ -148,10 +148,11 @@ class _CreateSignIn extends State<CreateSignIn> {
           ),
         ),
         SizedBox(height: 40),
+
         Padding(
-          padding: EdgeInsets.only(right: 250),
+          padding: EdgeInsets.only(right: greek?140:250),
           child: Text(
-            "Password",
+            greek?"Κωδικός πρόσβασης":"Password",
             style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold
@@ -191,11 +192,11 @@ class _CreateSignIn extends State<CreateSignIn> {
         ),
         SizedBox(height: 10),
         Padding(
-          padding: EdgeInsets.only(right: 200),
+          padding: EdgeInsets.only(right: greek?190:200),
           child: TextButton(
             onPressed: () {},
             child: Text(
-              "Forgot Password?",
+              greek?"Ξέχασες τον κωδικό":"Forgot Password?",
               style: TextStyle(
                   fontSize: 15,
                   color: Colors.blueAccent
@@ -215,7 +216,7 @@ class _CreateSignIn extends State<CreateSignIn> {
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
               Text(
-                "If you don't have an account",
+                greek?"Άμα δεν έχεις λογαριασμό":"If you don't have an account",
                 style: TextStyle(
                     fontSize: 16,
                     color: Colors.black,
@@ -228,7 +229,7 @@ class _CreateSignIn extends State<CreateSignIn> {
                     widget.toggleSignIn();
                   },
                   child: Text(
-                    "Click here",
+                    greek?"Πάτα εδώ":"Click here",
                     style: TextStyle(
                       color: Colors.blueAccent,
                       fontSize: 16,
@@ -263,7 +264,7 @@ class _CreateSignUp extends State<CreateSignUp> {
         Padding(
           padding: EdgeInsets.only(right: 30, top: 10),
           child: Text(
-            "Sign Up",
+            greek?"Δημιουργία λογαριασμού":"Create an account",
             style: TextStyle(
               fontSize: 25,
               fontWeight: FontWeight.bold,
@@ -271,12 +272,12 @@ class _CreateSignUp extends State<CreateSignUp> {
             ),
           ),
         ),
-        SizedBox(height: 30),
+        SizedBox(height: 40),
 
         Padding(
-          padding: EdgeInsets.only(right: 250),
+          padding: EdgeInsets.only(right: greek?200: 250),
           child: Text(
-            "Username",
+            greek?"Όνομα χρήστη":"Username",
             style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold
@@ -307,9 +308,9 @@ class _CreateSignUp extends State<CreateSignUp> {
         SizedBox(height: 30),
 
         Padding(
-          padding: EdgeInsets.only(right: 250),
+          padding: EdgeInsets.only(right: greek?150:250),
           child: Text(
-            "Password",
+            greek?"Κωδικός πρόσβασης":"Password",
             style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold
@@ -352,20 +353,20 @@ class _CreateSignUp extends State<CreateSignUp> {
         SizedBox(height: 30),
 
         Padding(
-          padding: EdgeInsets.only(right: 270),
+          padding: EdgeInsets.only(right: greek?280: 260),
           child:
           Text(
-            "Σχολή",
+            greek?"Σχολή":"University",
             style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold
             ),
           ),
         ),
-        SizedBox(height: 20),
+        SizedBox(height: 10),
 
         Padding(
-          padding: EdgeInsets.only(left: 10, right: 30),
+          padding: EdgeInsets.only(left: 5, right: 25),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -488,7 +489,7 @@ class _CreateSignUp extends State<CreateSignUp> {
             ],
           ),
         ),
-        SizedBox(height: 70),
+        SizedBox(height: 50),
 
         CreateButton(
           signIn: false,
@@ -503,7 +504,7 @@ class _CreateSignUp extends State<CreateSignUp> {
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
               Text(
-                "Already have an account?",
+                greek?"Έχεις ήδη λογαριασμό?" :"Already have an account?",
                 style: TextStyle(
                     fontSize: 16,
                     color: Colors.black,
@@ -516,7 +517,7 @@ class _CreateSignUp extends State<CreateSignUp> {
                     widget.toggleSignIn();
                   },
                   child: Text(
-                    "Sign in",
+                    greek?"Σύνδεση":"Sign in",
                     style: TextStyle(
                       color: Colors.blueAccent,
                       fontSize: 16,
@@ -568,7 +569,7 @@ class CreateButton extends StatelessWidget {
             elevation: 3,
           ),
           child: Text(
-            signIn ? "SIGN IN" : "SIGN UP",
+            signIn ? greek?"Σύνδεση":"SIGN IN" : greek?"Εγγραγή":"SIGN UP",
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
@@ -610,7 +611,6 @@ void checkBase(BuildContext context,controller1,controller2,controller3) async
       /*print('Checking against stored credentials:');
       print('Stored Username: $username');
       print('Stored Password: $password');
-
        */
 
       if (username == text1.trim() && password == text2.trim())
@@ -626,12 +626,16 @@ void checkBase(BuildContext context,controller1,controller2,controller3) async
           doc.get("Password").toString(),
           doc.get("University").toString(),
         );
+        globalUser = currentUser;
+        username = doc.get("Username").toString();
 
         //ΕΠΙΣΤΡΕΦΩ ΣΤΗΝ ΑΡΧΙΚΗ ΣΕΛΙΔΑ!!
-        try {
+        try
+        {
+          greek = await getValue(globalUser.username,"Language");
           Navigator.of(context).pushAndRemoveUntil(
             MaterialPageRoute(
-              builder: (context) => MyApp(user: currentUser),
+              builder: (context) => MyApp(),
             ),
                 (Route<dynamic> route) => false,
           );
@@ -707,7 +711,8 @@ void addInBase(BuildContext context, controller1, controller2, controller3) asyn
       "Username": text1,
       "Password": text2,
       "Role": "Viewer",
-      "University": text3
+      "University": text3,
+      "Language": greek
     }).then((_)
     {
 
@@ -719,10 +724,11 @@ void addInBase(BuildContext context, controller1, controller2, controller3) asyn
       controller2.clear();
       controller3.clear();
 
+      username = text1;
       print("Data successfully added!");
       Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(
-          builder: (context) => MyApp(user: currentUser),
+          builder: (context) => MyApp(),
         ),
             (Route<dynamic> route) => false,
       );

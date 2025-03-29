@@ -52,8 +52,9 @@ class _FavoriteContainerState extends State<FavoritePage> {
           flex: 10,
           child: favouriteTeams.isNotEmpty ? matchesContainer(matches: teamMatches ,) :
           Center(
-              child: Text( !isLoggedIn? "Πρέπει να είσαι συνδεδεμένος για να δείς τις αγαπημένες σου ομάδες":"Δεν έχεις ακόμα αγαπημένες ομάδες",
-                style:  TextStyle(fontSize: 23, fontWeight: FontWeight.bold),
+              child: Text( !isLoggedIn? greek?"Πρέπει να είσαι συνδεδεμένος για να δείς τις αγαπημένες σου ομάδες":"You must be signed in to see your favorite teams!":greek?"Δεν έχεις ακόμα αγαπημένες ομάδες":
+                "You don't have any favorite teams yet",
+                style:  TextStyle(fontSize: greek?23:21, fontWeight: FontWeight.bold),
                 textAlign: TextAlign.center,)),
         ),
       ],

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../Data_Classes/Match.dart';
 import '../../Data_Classes/Team.dart';
 import '../../Team_Display_Page_Package/TeamDisplayPage.dart';
+import '../../globals.dart';
 
 
 //ΤΟ ΚΟΜΜΑΤΙ ΑΥΤΟ ΑΦΟΡΑ ΟΛΟ ΤΟ ΥΠΟΛΟΙΠΟ ΜΕΡΟΣ ΤΗΣ ΣΕΛΙΔΑΣ
@@ -18,7 +19,7 @@ class DetailsMatchNotStarted extends StatelessWidget {
             Padding(
               padding: EdgeInsets.only(right: 10),
               child:Text(
-                'Ποιός Θα κερδίσει?🏆',
+                greek?'Ποιός Θα κερδίσει?🏆':"Who will win?🏆",
                 style: TextStyle(
                     fontSize: 19,
                     fontWeight: FontWeight.bold,
@@ -33,7 +34,7 @@ class DetailsMatchNotStarted extends StatelessWidget {
               height: 70,
             ),
             Text(
-              'Αποτελέσματα τελευταίων 5 αγωνιστικών:',
+              greek?'Αποτελέσματα τελευταίων 5 αγωνιστικών:':"Result of the last 5 games:",
               style: TextStyle(
                 fontSize: 18,
               ),
