@@ -610,7 +610,6 @@ void checkBase(BuildContext context,controller1,controller2,controller3) async
       /*print('Checking against stored credentials:');
       print('Stored Username: $username');
       print('Stored Password: $password');
-
        */
 
       if (username == text1.trim() && password == text2.trim())
@@ -626,12 +625,15 @@ void checkBase(BuildContext context,controller1,controller2,controller3) async
           doc.get("Password").toString(),
           doc.get("University").toString(),
         );
+        globalUser = currentUser;
+        username = doc.get("Username").toString();
 
         //ΕΠΙΣΤΡΕΦΩ ΣΤΗΝ ΑΡΧΙΚΗ ΣΕΛΙΔΑ!!
-        try {
+        try
+        {
           Navigator.of(context).pushAndRemoveUntil(
             MaterialPageRoute(
-              builder: (context) => MyApp(user: currentUser),
+              builder: (context) => MyApp(),
             ),
                 (Route<dynamic> route) => false,
           );
@@ -719,10 +721,11 @@ void addInBase(BuildContext context, controller1, controller2, controller3) asyn
       controller2.clear();
       controller3.clear();
 
+      username = text1;
       print("Data successfully added!");
       Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(
-          builder: (context) => MyApp(user: currentUser),
+          builder: (context) => MyApp(),
         ),
             (Route<dynamic> route) => false,
       );

@@ -20,7 +20,9 @@ import 'globals.dart';
 
 
 
-void main() async{
+
+void main() async
+{
 
   WidgetsFlutterBinding.ensureInitialized();
   try {
@@ -31,7 +33,40 @@ void main() async{
   }
 
   runApp(MyApp());
+
 }
+
+/*Future<AppUser?> getUserByUsername(String username) async {
+  try
+  {
+    // Reference to the users collection in Firestore
+    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .where('username', isEqualTo: username)
+        .limit(1)
+        .get();
+
+    // Check if any documents match the username
+    if (querySnapshot.docs.isNotEmpty)
+    {
+      // Get the first matching document
+      DocumentSnapshot userDoc = querySnapshot.docs.first;
+
+      print(userDoc.data());
+      // Convert Firestore document to AppUser object
+      return AppUser(
+          userDoc['Username'],
+          userDoc['University'],
+          userDoc['Password']
+      );
+    }
+
+    return null; // No user found with this username
+  } catch (e) {
+    print('Error retrieving user by username: $e');
+    return null;
+  }
+}*/
 
 //0 τερμας, 1 αμυντικος, 2 μεσος, 3 επιθετικος
 
@@ -364,12 +399,13 @@ List<List<Match>> matches=[upcomingMatches,previousMatches];
 
 
 
-class MyApp extends StatelessWidget {
-  final AppUser? user;
-  MyApp({super.key,this.user}){
+class MyApp extends StatelessWidget
+{
+
+  MyApp({super.key})
+  {
     MatchHandle().initializeMatces(matches);
     TopPlayersHandle().initializeList(teams);
-    print(user?.password);
   }
 
   @override
@@ -381,6 +417,7 @@ class MyApp extends StatelessWidget {
 }
 
 class MainScreen extends StatefulWidget {
+
   const MainScreen({super.key});
 
   @override
@@ -520,7 +557,9 @@ class CustomBottomNavigationBar extends StatelessWidget {
 }
 
 // ------------------------ BODY CONTENT ------------------------
-Widget _buildBody(int selectedIndex) {
+Widget _buildBody(int selectedIndex)
+{
+
   switch (selectedIndex) {
     case 0:
       return HomePage();
@@ -531,7 +570,7 @@ Widget _buildBody(int selectedIndex) {
     case 2:
       return FavoritePage();
     case 3:
-      return ProfilePage(user: AppUser("Kosmkero","pass","auth"),);
+      return ProfilePage(user:globalUser);
     default:
       return HomePage();
   }

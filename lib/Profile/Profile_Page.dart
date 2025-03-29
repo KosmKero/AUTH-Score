@@ -1,5 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:untitled1/Profile/ChangePassword.dart';
+import 'package:untitled1/Profile/ChangeUserName.dart';
 import 'package:untitled1/Profile/Profile_Edit_Page.dart';
 import 'package:untitled1/Profile/Settings_Page.dart';
 import 'package:untitled1/globals.dart';
@@ -55,7 +57,14 @@ class _ProfilePageState extends State<ProfilePage> {
               Padding(
                 padding: EdgeInsets.only(bottom: 1, top: 5, right: 220),
                 child: TextButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ChangeUserName(user: widget.user),
+                      )
+                    );
+                  },
                   child: Text(
                     "Αλλαγή Username",
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
@@ -66,7 +75,14 @@ class _ProfilePageState extends State<ProfilePage> {
               Padding(
                 padding: EdgeInsets.only(bottom: 25, top: 1, right: 220),
                 child: TextButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ChangePassword(user: widget.user),
+                        )
+                    );
+                  },
                   child: Text(
                     "Αλλαγή password",
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
