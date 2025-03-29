@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:untitled1/API/user_handle.dart';
+import 'package:untitled1/main.dart';
 import '../../Data_Classes/Match.dart';
 import '../Data_Classes/Player.dart';
 
@@ -27,7 +28,6 @@ class _Starting11DisplayState extends State<Starting11Display> {
     "5-3-2": [1, 5, 3, 2]
   };
 
-  String selectedFormation = "4-3-3"; // Προεπιλεγμένο σύστημα
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +35,7 @@ class _Starting11DisplayState extends State<Starting11Display> {
       children: [
         // Dropdown για την επιλογή συστήματος
         DropdownButton<String>(
-          value: selectedFormation,
+          value: widget.match.selectedFormationHome,
           items: formations.keys.map((String formation) {
             return DropdownMenuItem<String>(
               value: formation,
@@ -45,8 +45,8 @@ class _Starting11DisplayState extends State<Starting11Display> {
           onChanged: (String? newFormation) {
             if (newFormation != null) {
               setState(() {
-                selectedFormation = newFormation;
-                updateFormation(newFormation); // Ενημέρωση του γηπέδου
+                widget.match.selectedFormationHome = newFormation;
+                updateFormation(newFormation , true); // Ενημέρωση του γηπέδου
               });
             }
           },
@@ -61,60 +61,102 @@ class _Starting11DisplayState extends State<Starting11Display> {
                   Positioned.fill(
                     child: Image.asset("fotos/γηπεδο.png", fit: BoxFit.cover),
                   ),
-                  buildFormation(), // Δημιουργεί τη διάταξη των παικτών
+                  Column(
+                   // crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      buildFormation(true), // Δημιουργεί τη διάταξη των παικτών
+                      buildFormation(false),
+                    ],
+                  )
                 ],
               ),
             ),
           ),
+        DropdownButton<String>(
+          value: widget.match.selectedFormationAway,
+          items: formations.keys.map((String formation) {
+            return DropdownMenuItem<String>(
+              value: formation,
+              child: Text(formation),
+            );
+          }).toList(),
+          onChanged: (String? newFormation) {
+            if (newFormation != null) {
+              setState(() {
+                widget.match.selectedFormationAway = newFormation;
+                updateFormation(newFormation,false); // Ενημέρωση του γηπέδου
+              });
+            }
+          },
+        ),
+        SizedBox(height: 10,)
 
       ],
     );
   }
 
   // Ενημέρωση της λίστας των παικτών σύμφωνα με το νέο σύστημα
-  void updateFormation(String formation) {
+  void updateFormation(String formation,bool isHomeTeam) {
     List<int> positions = formations[formation]!;
     List<Player?> newPlayers = List.generate(11, (index) => null);
 
     int count = 0;
+    int lim =(isHomeTeam) ? widget.match.players11[0].length: widget.match.players11[1].length;
+
     for (int i = 0; i < positions.length; i++) {
       for (int j = 0; j < positions[i]; j++) {
-        if (count < widget.match.players11[0].length) {
-          newPlayers[count] = widget.match.players11[0][count];
+        if (count < lim ) {
+         // newPlayers[count] = widget.match.players11[0][count];
+          newPlayers[count]=null;
+
           count++;
         }
       }
     }
+    (isHomeTeam) ? widget.match.makeAllFalse(0) : widget.match.makeAllFalse(1);
+
+
     setState(() {
-      widget.match.players11[0] = newPlayers;
+      if (isHomeTeam) {
+        widget.match.players11[0] = newPlayers;
+      }
+      else {
+        widget.match.players11[1] = newPlayers;
+      }
     });
   }
 
   // Κατασκευή των σειρών των παικτών στο γήπεδο
-  Widget buildFormation() {
-    List<int> formation = formations[selectedFormation]!;
+  Widget buildFormation(bool isHomeTeam) {
+    List<int> formation = (isHomeTeam) ? formations[widget.match.selectedFormationHome]! : formations[widget.match.selectedFormationAway]!;
     List<Widget> rows = [];
-    int index = 0;
 
-    for (int numPlayers in formation) {
+
+    int index = (isHomeTeam) ? 0 : 11; // Ξεκινά από 0
+    for (int numPlayers in (isHomeTeam) ? formation : formation.reversed) {
       rows.add(
         Column(
           children: [
+            SizedBox(height: 5,),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
+              textDirection: (isHomeTeam) ? TextDirection.ltr : TextDirection.rtl,
               children: List.generate(numPlayers, (i) {
+                // Αποθηκεύουμε την τρέχουσα τιμή πριν την αυξήσουμε
+                (isHomeTeam) ? index++ : index--; // Αυξάνουμε το index κατά 1 ή τομειωνουμε
                 return PlayerWidget(
-                  players: widget.match.playersSelected[0],
-                  playersList: widget.match.players11[0],
-                  ind: index,
+                  players: (isHomeTeam) ? widget.match.playersSelected[0] : widget.match.playersSelected[1],
+                  playersList: (isHomeTeam) ? widget.match.players11[0] : widget.match.players11[1],
+                  ind: (isHomeTeam) ? index-1: index, // Χρησιμοποιούμε το σωστό index
+                  profColor: (isHomeTeam)? Colors.black : Colors.blueGrey,
                 );
               }),
             ),
-            SizedBox(height: 40,)
+            SizedBox(height: 18),
           ],
         ),
       );
-      index += numPlayers;
     }
 
     return Column(
@@ -126,10 +168,11 @@ class _Starting11DisplayState extends State<Starting11Display> {
 
 
 class PlayerWidget extends StatefulWidget {
-  Map<Player?, bool> players;
-  List<Player?> playersList;
-  int ind;
-  PlayerWidget({super.key, required this.players,required this.playersList,required this.ind});
+  final Map<Player?, bool> players;
+  final List<Player?> playersList;
+  final  int ind;
+  final Color profColor;
+  const PlayerWidget({super.key, required this.players,required this.playersList,required this.ind,required this.profColor});
 
   @override
   State<PlayerWidget> createState() => _PlayerWidgetState();
@@ -215,27 +258,49 @@ class _PlayerWidgetState extends State<PlayerWidget> {
           }
         }
       },
-      child: Column(
-        children: [
-          Container(
-            width:  70, // Ορίζει το πλάτος του κύκλου
-            height: 40, // Ορίζει το ύψος του κύκλου
-            decoration: BoxDecoration(
-              color: Colors.white70, // Χρώμα του κύκλου
-              shape: BoxShape.circle, // Ορίζει το σχήμα ως κύκλο
-            ),
-            child: Icon(Icons.person, size: 40, color: (currentPlayer != null)? Colors.black87 : Colors.blue),
-          ),
-          if (currentPlayer != null) // Εμφανίζει τον παίκτη μόνο αν υπάρχει
-            Text(
-              "${currentPlayer.number} ${currentPlayer.name.substring(0, 1)}. ${currentPlayer.surname}",
-              style: TextStyle(
-                color: Colors.white70,
-                fontWeight: FontWeight.bold,
-                fontSize: 9,
+      child: SizedBox(
+        height: 68,
+        child: Column(
+          children: [
+            Container(
+              width:  70, // Ορίζει το πλάτος του κύκλου
+              height: 40, // Ορίζει το ύψος του κύκλου
+              decoration: BoxDecoration(
+                color: Colors.white70, // Χρώμα του κύκλου
+                shape: BoxShape.circle, // Ορίζει το σχήμα ως κύκλο
               ),
+              child: Icon(Icons.person, size: 40, color: (currentPlayer != null) ? widget.profColor : Colors.blue),
             ),
-        ],
+            if (currentPlayer != null) // Εμφανίζει τον παίκτη μόνο αν υπάρχει
+              Column(
+                children: [
+                  (currentPlayer.surname.length<5)?Text(
+                    "${currentPlayer.number} ${currentPlayer.name.substring(0, 1)}. ${currentPlayer.surname}",
+                    style: TextStyle(
+                      color: Colors.white70,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 10,
+                    ),
+                  ):Text(
+                    "${currentPlayer.number} ${currentPlayer.name.substring(0, 1)}.",
+                    style: TextStyle(
+                      color: Colors.white70,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 10,
+                    ),
+                  ),
+                  if (currentPlayer.surname.length>=5)Text(
+                    currentPlayer.surname,
+                    style: TextStyle(
+                      color: Colors.white70,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 10,
+                    ),
+                  )
+                ],
+              ),
+          ],
+        ),
       ),
     );
   }

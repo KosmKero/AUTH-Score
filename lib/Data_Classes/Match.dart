@@ -16,6 +16,9 @@ class Match extends ChangeNotifier{
   late bool _isGroupPhase; //μεταβλητη που δειχνει αν ειμαστε στη φαση των ομιλων ή στα νοκ αουτς (true->όμιλοι,false->νοκ αουτς)
   late int _game;  //αν ειμαστε σε ομιλους δειχνει την αγωνιστικη, αλλιως δειχνει τη φαση των νοκα ουτς (16 , 8 ,4 η τελικός)
 
+
+  String selectedFormationHome = "4-3-3"; // Προεπιλεγμένο σύστημα
+  String selectedFormationAway="4-3-3";
   //final Map<int,List<Goal>> _goalsList={0:[],1:[]};
   //final Map<int, List<CardP>> _cardList = {0:[],1:[]};
 
@@ -229,6 +232,12 @@ class Match extends ChangeNotifier{
       }
 
       notifyListeners(); // Ενημέρωση των listeners για την αλλαγή
+    }
+  }
+
+  void makeAllFalse(int i){
+    for (Player player in (i==0)? homeTeam.players: awayTeam.players) {
+      playersSelected[i][player]=false;
     }
   }
 
