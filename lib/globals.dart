@@ -5,7 +5,7 @@ import 'Data_Classes/AppUser.dart';
 
 bool isLoggedIn=false;
 String username = "";
-AppUser globalUser= AppUser("","","");
+AppUser globalUser= AppUser("","",[],[]);
 
 
 bool greek = true;
@@ -23,8 +23,9 @@ void updateUserChar(String username,String key) async
   if(querySnapshot.docs.isNotEmpty)
     {
       DocumentReference userDocRef = querySnapshot.docs.first.reference;
-      if(key=="Language")
+      if(key=="Language") {
         await userDocRef.update({key:greek});
+      }
     }
 
 }

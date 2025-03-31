@@ -1,10 +1,14 @@
+
+
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:untitled1/API/Match_Handle.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:untitled1/API/top_players_handle.dart';
+import 'package:untitled1/API/user_handle.dart';
 import 'package:untitled1/Data_Classes/Team.dart';
 import 'package:untitled1/Data_Classes/AppUser.dart';
+import 'package:untitled1/Firebase_Handle/user_handle_in_base.dart';
 import 'package:untitled1/championship_details/knock_outs_page.dart';
 import 'package:untitled1/championship_details/sector_chooser.dart';
 import 'Data_Classes/AppUser.dart';
@@ -15,10 +19,10 @@ import 'Profile/Profile_Page.dart';
 import 'Search_Page.dart';
 import 'championship_details/StandingsPage.dart';
 import 'Data_Classes/Match.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+//import 'package:cloud_firestore/cloud_firestore.dart';
 import 'globals.dart';
 
-
+//import 'Firebase_Handle/user_handle_in_base.dart';
 
 void main() async
 {
@@ -368,6 +372,12 @@ class MyApp extends StatelessWidget
   {
     MatchHandle().initializeMatces(matches);
     TopPlayersHandle().initializeList(teams);
+    if (globalUser== null) {
+        print ("αδειο  ειανι");
+    }
+    else{
+      print (globalUser.username);
+    }
   }
 
   @override

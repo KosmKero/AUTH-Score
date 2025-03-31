@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:untitled1/API/user_handle.dart';
+import 'package:untitled1/Firebase_Handle/user_handle_in_base.dart';
 import 'package:untitled1/main.dart';
 import '../../Data_Classes/Match.dart';
 import '../Data_Classes/Player.dart';
@@ -9,6 +10,7 @@ import '../Data_Classes/Player.dart';
 import 'package:flutter/material.dart';
 import '../../Data_Classes/Match.dart';
 import '../Data_Classes/Player.dart';
+import '../globals.dart';
 
 class Starting11Display extends StatefulWidget {
   final Match match;
@@ -34,7 +36,7 @@ class _Starting11DisplayState extends State<Starting11Display> {
     return Column(
       children: [
         // Dropdown για την επιλογή συστήματος
-        DropdownButton<String>(
+        (globalUser.controlTheseTeams(widget.match.homeTeam.name, widget.match.awayTeam.name) ?? false )?DropdownButton<String>(
           value: widget.match.selectedFormationHome,
           items: formations.keys.map((String formation) {
             return DropdownMenuItem<String>(
@@ -50,7 +52,7 @@ class _Starting11DisplayState extends State<Starting11Display> {
               });
             }
           },
-        ),
+        ) : SizedBox.shrink(),
         Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8.0),
             child: Container(
@@ -73,7 +75,7 @@ class _Starting11DisplayState extends State<Starting11Display> {
               ),
             ),
           ),
-        DropdownButton<String>(
+        (globalUser.controlTheseTeams(widget.match.homeTeam.name, widget.match.awayTeam.name))?DropdownButton<String>(
           value: widget.match.selectedFormationAway,
           items: formations.keys.map((String formation) {
             return DropdownMenuItem<String>(
@@ -89,7 +91,7 @@ class _Starting11DisplayState extends State<Starting11Display> {
               });
             }
           },
-        ),
+        ) : SizedBox.shrink(),
         SizedBox(height: 10,)
 
       ],
@@ -247,7 +249,7 @@ class _PlayerWidgetState extends State<PlayerWidget> {
 
     return InkWell(
       onTap: () {
-        if (UserHandle().getLoggedUser()?.isAdmin ?? false) {
+        if (globalUser.isAdmin) {
           if (currentPlayer == null) {
             tapped(); // Εμφάνιση διαθέσιμων παικτών αν δεν υπάρχει επιλεγμένος
           } else {

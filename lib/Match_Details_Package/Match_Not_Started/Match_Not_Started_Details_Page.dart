@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:untitled1/API/user_handle.dart';
+import 'package:untitled1/Firebase_Handle/user_handle_in_base.dart';
 import 'package:untitled1/Match_Details_Package/Match_Not_Started/DetailsMatchNotStarted.dart';
 import '../../Data_Classes/Match.dart';
 import '../../Data_Classes/Team.dart';
@@ -77,12 +78,7 @@ class _MatchNotStartedDetailsState extends State<MatchNotStartedDetails> {
 
   Widget _isAdminWidget() {
     // Check if the user is logged in
-    if (UserHandle().getLoggedUser() == null) {
-      return SizedBox(
-        height: 50,
-      );
-    } else if (UserHandle().getLoggedUser()!.controlTheseTeams(
-        widget.match.homeTeam.name, widget.match.awayTeam.name)) {
+    if (globalUser.controlTheseTeams(widget.match.homeTeam.name, widget.match.awayTeam.name)){
       return TextButton(
         child: Text("Εκκινηση Αγώνα"),
         onPressed: () {
@@ -90,7 +86,8 @@ class _MatchNotStartedDetailsState extends State<MatchNotStartedDetails> {
           setState(() {});
         },
       );
-    } else {
+    }
+    else{
       return SizedBox(
         height: 50,
       );

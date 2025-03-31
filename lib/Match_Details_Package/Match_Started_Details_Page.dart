@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:untitled1/Data_Classes/Player.dart';
+import 'package:untitled1/Firebase_Handle/user_handle_in_base.dart';
+import 'package:untitled1/globals.dart';
 import '../../Data_Classes/Match.dart';
 import 'package:provider/provider.dart';
 import '../API/user_handle.dart';
@@ -76,74 +78,74 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
         scrollDirection: Axis.vertical,
         child: Column(
           children: [
-              Container(
-                color: Color.fromARGB(50, 5, 150, 200),
-                child: Padding(
-                  padding: const EdgeInsets.all(5.0),
-                  child: Column(
-                    children: [
-                      // Row(
-                      //   children: [
-                      //     TextButton(onPressed:()
-                      //     {widget.match.homeScored("name");
-                      //     setState(() {});}, child: Text("patatohome")),
-                      //     TextButton(onPressed:()
-                      //     {widget.match.awayScored("name2");
-                      //     setState(() {});}, child: Text("patatoaway")),
-                      //     TextButton(onPressed:()
-                      //     {widget.match.secondHalfStarted();
-                      //     }, child: Text("2ohalf")),
-                      //     TextButton(onPressed:()
-                      //     {widget.match.matchFinished();
-                      //     setState(() {});}, child: Text("finished")),
-                      //   ],
-                      // ),
-                      Center(
-                          child: Text(
-                        widget.match.matchweekInfo(),
-                        style: TextStyle(fontSize: 13, color: Colors.grey[800]),
-                      )),
-                      SizedBox(
-                        height: 10,
-                      ),
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          Expanded(
-                            child: Column(children: [
-                              buildTeamName(team: widget.match.homeTeam),
-                              _isAdminWidgetGoal(true)
-                            ]),
-                          ),
-                          Flexible(
-                            fit: FlexFit.tight,
-                            child: widget.match.hasMatchFinished
-                                ? _buildMatchFinishedScore()
-                                : _buildMatchTimer(),
-                          ),
-                          Expanded(
-                            child: Column(children: [
-                              buildTeamName(team: widget.match.awayTeam),
-                              _isAdminWidgetGoal(false)
-                            ]),
-                          ),
-                        ],
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          _cardAdmin(true),
-                          _matchProgressAdmin(),
-                          _cardAdmin(false)
-                        ],
-                      ),
-                      const Divider(),
-                      NavigationButtons(onSectionChange: _changeSection),
-                    ],
-                  ),
+            Container(
+              color: Color.fromARGB(50, 5, 150, 200),
+              child: Padding(
+                padding: const EdgeInsets.all(5.0),
+                child: Column(
+                  children: [
+                    // Row(
+                    //   children: [
+                    //     TextButton(onPressed:()
+                    //     {widget.match.homeScored("name");
+                    //     setState(() {});}, child: Text("patatohome")),
+                    //     TextButton(onPressed:()
+                    //     {widget.match.awayScored("name2");
+                    //     setState(() {});}, child: Text("patatoaway")),
+                    //     TextButton(onPressed:()
+                    //     {widget.match.secondHalfStarted();
+                    //     }, child: Text("2ohalf")),
+                    //     TextButton(onPressed:()
+                    //     {widget.match.matchFinished();
+                    //     setState(() {});}, child: Text("finished")),
+                    //   ],
+                    // ),
+                    Center(
+                        child: Text(
+                      widget.match.matchweekInfo(),
+                      style: TextStyle(fontSize: 13, color: Colors.grey[800]),
+                    )),
+                    SizedBox(
+                      height: 10,
+                    ),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Expanded(
+                          child: Column(children: [
+                            buildTeamName(team: widget.match.homeTeam),
+                            _isAdminWidgetGoal(true)
+                          ]),
+                        ),
+                        Flexible(
+                          fit: FlexFit.tight,
+                          child: widget.match.hasMatchFinished
+                              ? _buildMatchFinishedScore()
+                              : _buildMatchTimer(),
+                        ),
+                        Expanded(
+                          child: Column(children: [
+                            buildTeamName(team: widget.match.awayTeam),
+                            _isAdminWidgetGoal(false)
+                          ]),
+                        ),
+                      ],
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        _cardAdmin(true),
+                        _matchProgressAdmin(),
+                        _cardAdmin(false)
+                      ],
+                    ),
+                    const Divider(),
+                    NavigationButtons(onSectionChange: _changeSection),
+                  ],
                 ),
               ),
+            ),
             _sectionChooser(selectedIndex, widget.match)
           ],
         ),
@@ -222,13 +224,11 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
 
   Widget _buildMatchdetails() {
     return Column(
-          children: [
-            widget.match.hasSecondHalfStarted
-                ? _halfBuilder(2)
-                : SizedBox.shrink(),
-            _halfBuilder(1), // Always display the first half
-          ],
-        );
+      children: [
+        widget.match.hasSecondHalfStarted ? _halfBuilder(2) : SizedBox.shrink(),
+        _halfBuilder(1), // Always display the first half
+      ],
+    );
   }
 
   Widget _halfBuilder(int half) {
@@ -281,45 +281,47 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
 
   Widget buildGoalIndicator(Goal goal) {
     return InkWell(
-        onLongPress: (UserHandle().getLoggedUser()?.controlTheseTeams(
-        widget.match.homeTeam.name, widget.match.awayTeam.name)?? false)
-    ? () {
-    setState(() {
-    _cancelGoalDialog(context, goal);
-    });
-    }
-    : null
-    ,
-    child: Row(
-      mainAxisAlignment:
-          goal.isHomeTeam ? MainAxisAlignment.start : MainAxisAlignment.end,
-      children: [
-        if (!goal.isHomeTeam)
-          Spacer(), // Αν είναι η εκτός έδρας ομάδα, μετακινεί το κείμενο δεξιά
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 2),
-          child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-            decoration: BoxDecoration(
-              color: Color.fromARGB(10, 15, 35, 30),
-              borderRadius: BorderRadius.circular(10),
+        onLongPress: (globalUser.controlTheseTeams(
+                    widget.match.homeTeam.name, widget.match.awayTeam.name) ??
+                false)
+            ? () {
+                setState(() {
+                  _cancelGoalDialog(context, goal);
+                });
+              }
+            : null,
+        child: Row(
+          mainAxisAlignment:
+              goal.isHomeTeam ? MainAxisAlignment.start : MainAxisAlignment.end,
+          children: [
+            if (!goal.isHomeTeam)
+              Spacer(), // Αν είναι η εκτός έδρας ομάδα, μετακινεί το κείμενο δεξιά
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 2),
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                decoration: BoxDecoration(
+                  color: Color.fromARGB(10, 15, 35, 30),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                //border: Border.all(color: Colors.grey)),
+                child: goal.isHomeTeam
+                    ? Text(
+                        '${goal.timeString} \u0301 ⚽ ${goal.scorerName} (${goal.homeScore}-${goal.awayScore})',
+                        style: TextStyle(
+                            fontSize: 15, fontWeight: FontWeight.w600),
+                      )
+                    : Text(
+                        '(${goal.homeScore}-${goal.awayScore}) ${goal.scorerName} ⚽ ${goal.timeString} \u0301 ',
+                        style: TextStyle(
+                            fontSize: 15, fontWeight: FontWeight.w600),
+                      ),
+              ),
             ),
-            //border: Border.all(color: Colors.grey)),
-            child: goal.isHomeTeam
-                ? Text(
-                    '${goal.timeString} \u0301 ⚽ ${goal.scorerName} (${goal.homeScore}-${goal.awayScore})',
-                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
-                  )
-                : Text(
-                    '(${goal.homeScore}-${goal.awayScore}) ${goal.scorerName} ⚽ ${goal.timeString} \u0301 ',
-                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
-                  ),
-          ),
-        ),
-        if (goal.isHomeTeam)
-          Spacer(), // Αν είναι η γηπεδούχος ομάδα, μετακινεί το κείμενο αριστερά
-      ],
-    ));
+            if (goal.isHomeTeam)
+              Spacer(), // Αν είναι η γηπεδούχος ομάδα, μετακινεί το κείμενο αριστερά
+          ],
+        ));
   }
 
   Widget buildCardIndicator(CardP card) {
@@ -329,7 +331,7 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
     return InkWell(
       onLongPress: () {
         setState(() {
-          _cancelCardDialog(context,card);
+          _cancelCardDialog(context, card);
         });
       },
       child: Row(
@@ -402,7 +404,9 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
       case 0:
         return _buildMatchdetails();
       case 1:
-        return Starting11Display(match: match,);
+        return Starting11Display(
+          match: match,
+        );
       case 2:
         return StandingPageOneGroup(
           team: match.homeTeam,
@@ -414,19 +418,17 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
 
   Widget _isAdminWidgetGoal(bool homeTeamScored) {
     // Check if the user is logged in
-    if (UserHandle().getLoggedUser() == null || widget.match.hasMatchFinished) {
-      return SizedBox(
-        height: 50,
-      );
-    } else if (UserHandle().getLoggedUser()!.controlTheseTeams(
-        widget.match.homeTeam.name, widget.match.awayTeam.name)) {
+
+    if (globalUser.controlTheseTeams(
+            widget.match.homeTeam.name, widget.match.awayTeam.name) ??
+        false) {
       return GestureDetector(
         onTap: () {
           homeTeamScored
-              ? _showInputDialogForGoal(context, widget.match.homeTeam, homeTeamScored)
+              ? _showInputDialogForGoal(
+                  context, widget.match.homeTeam, homeTeamScored)
               : _showInputDialogForGoal(
                   context, widget.match.awayTeam, homeTeamScored);
-
         },
         child: Card(
             elevation: 10,
@@ -456,11 +458,9 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
 
   Widget _matchProgressAdmin() {
     // Check if the user is logged in
-    if (UserHandle().getLoggedUser() == null ) {
-      return SizedBox(
-        height: 10,
-      );
-    }else if(widget.match.hasMatchFinished){
+    if (widget.match.hasMatchFinished &&
+        (globalUser.controlTheseTeams(
+                widget.match.homeTeam.name, widget.match.awayTeam.name))) {
       return ElevatedButton(
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.redAccent, // Γκρι για "Ακύρωση"
@@ -474,24 +474,27 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
           widget.match.matchCancelProgressed();
           setState(() {});
         },
-        child:
-        Text(
+        child: Text(
           "Ματς δεν τελείωσε",
           style: TextStyle(color: Colors.white, fontSize: 9),
         ),
-
       );
-
-     } else if (UserHandle().getLoggedUser()!.controlTheseTeams(
+    } else if (globalUser.controlTheseTeams(
         widget.match.homeTeam.name, widget.match.awayTeam.name)) {
       Match match = widget.match;
       String progress = " ";
-      String cancelProgress=" ";
+      String cancelProgress = " ";
       match.hasSecondHalfStarted
-          ?( progress = "Τέλος Αγώνα", cancelProgress="Ημίχρονο")
+          ? (progress = "Τέλος Αγώνα", cancelProgress = "Ημίχρονο")
           : match.hasFirstHalfFinished
-              ? (progress = "Εκκίννηση 2ου Ημιχρόνου", cancelProgress="1ο ημίχρονο")
-              : (progress = "Τέλος 1ου Ημιχρόνου", cancelProgress="Tο ματς δεν ξεκίνησε");
+              ? (
+                  progress = "Εκκίννηση 2ου Ημιχρόνου",
+                  cancelProgress = "1ο ημίχρονο"
+                )
+              : (
+                  progress = "Τέλος 1ου Ημιχρόνου",
+                  cancelProgress = "Tο ματς δεν ξεκίνησε"
+                );
 
       return Column(
         children: [
@@ -499,7 +502,8 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.redAccent, // Γκρι για "Ακύρωση"
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10), // Στρογγυλεμένες γωνίες
+                borderRadius:
+                    BorderRadius.circular(10), // Στρογγυλεμένες γωνίες
               ),
               padding: EdgeInsets.symmetric(horizontal: 2, vertical: 0),
               elevation: 5, // Ελαφριά σκιά
@@ -508,18 +512,17 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
               match.matchCancelProgressed();
               setState(() {});
             },
-            child:
-                Text(
-                  cancelProgress,
-                  style: TextStyle(color: Colors.white, fontSize: 9),
-                ),
-
+            child: Text(
+              cancelProgress,
+              style: TextStyle(color: Colors.white, fontSize: 9),
             ),
+          ),
           ElevatedButton(
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.grey[200], // Γκρι για "Ακύρωση"
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(50), // Στρογγυλεμένες γωνίες
+                  borderRadius:
+                      BorderRadius.circular(50), // Στρογγυλεμένες γωνίες
                 ),
                 padding: EdgeInsets.symmetric(horizontal: 9, vertical: 4),
                 elevation: 5, // Ελαφριά σκιά
@@ -553,7 +556,8 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
   }
 
   TextEditingController _controller = TextEditingController();
-  void _showInputDialogForGoal(BuildContext context, Team team, bool homeTeamScored) {
+  void _showInputDialogForGoal(
+      BuildContext context, Team team, bool homeTeamScored) {
     String? goalScorer;
     showDialog(
         context: context,
@@ -645,12 +649,9 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
   }
 
   Widget _cardAdmin(bool homeTeamCard) {
-    if (UserHandle().getLoggedUser() == null || widget.match.hasMatchFinished) {
-      return SizedBox(
-        height: 10,
-      );
-    } else if (UserHandle().getLoggedUser()!.controlTheseTeams(
-        widget.match.homeTeam.name, widget.match.awayTeam.name)) {
+    if (globalUser.controlTheseTeams(
+            widget.match.homeTeam.name, widget.match.awayTeam.name) ??
+        false) {
       return TextButton(
           onPressed: () {
             homeTeamCard
@@ -833,8 +834,6 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
         });
   }
 
-
-
   void _cancelGoalDialog(BuildContext context, Goal goal) {
     String? goalScorer;
     showDialog(
@@ -847,9 +846,9 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text("Ακύρωση του γκολ του"),
-                  Text("${goal.scorerName} στο ${goal.timeString} \u0301 ")],
-              )
-                  ,
+                  Text("${goal.scorerName} στο ${goal.timeString} \u0301 ")
+                ],
+              ),
               actions: [
                 TextButton(
                   child: Text("Ακύρωση"),
@@ -873,7 +872,7 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
         });
   }
 
-  void _cancelCardDialog(BuildContext context,CardP card) {
+  void _cancelCardDialog(BuildContext context, CardP card) {
     showDialog(
         context: context,
         builder: (context) {
@@ -884,9 +883,9 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text("Ακύρωση της κάρτας:"),
-                  Text("${card.name} ${card.timeString} \u0301 ")],
-              )
-              ,
+                  Text("${card.name} ${card.timeString} \u0301 ")
+                ],
+              ),
               actions: [
                 TextButton(
                   child: Text("Ακύρωση"),
@@ -909,5 +908,4 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
           });
         });
   }
-
 }

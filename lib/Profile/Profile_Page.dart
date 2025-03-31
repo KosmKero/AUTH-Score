@@ -1,14 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:untitled1/Firebase_Handle/user_handle_in_base.dart';
 import 'package:untitled1/Profile/ChangePassword.dart';
 import 'package:untitled1/Profile/ChangeUserName.dart';
-import 'package:untitled1/Profile/Profile_Edit_Page.dart';
-import 'package:untitled1/Profile/Settings_Page.dart';
 import 'package:untitled1/globals.dart';
 import '../Data_Classes/AppUser.dart';
-import 'Profile_Page.dart';
 import 'LogInScreen.dart';
 
 String selectedLanguage = greek?"Ελληνικά":"English";
@@ -22,6 +18,11 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
+  void pressed(){
+    UserHandleBase().addControlledTeamToFirestore(["Ολυμπιακός"] );
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return ListView(
@@ -30,6 +31,9 @@ class _ProfilePageState extends State<ProfilePage> {
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            TextButton( onPressed: () {
+               pressed();
+          }, child: Text("Kane me admin tou thryloy")),
             Padding(
               padding: EdgeInsets.only(bottom: 5, top: 15, left: 5),
               child: Text(
@@ -237,9 +241,14 @@ class _LogInButtonState extends State<LogInButton> {
             TextButton(
               onPressed: () {
                 setState(() {
-                  if(isLoggedIn)
+                  if(!isLoggedIn) {
+                    Navigator.push(context, MaterialPageRoute(
+                        builder: (context) => LogInScreen(user: widget.user)));
+                  }
+                  else{
                     isLoggedIn=false;
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => LogInScreen(user:widget.user)));
+                    globalUser=AppUser(" "," ",[ ], []);
+                  }
                   //widget.user.changeLogIn(); // Toggle login state
                 });
                 widget.onLoginStateChanged(); // Notify ProfilePage to refresh

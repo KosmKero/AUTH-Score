@@ -188,7 +188,7 @@ class MatchContainerTime extends StatefulWidget
 
 class _MatchContainerTimeState extends State<MatchContainerTime> {
 
-  late int _secondsElapsed;
+  int _secondsElapsed=7;
   Timer? _timer;
 
   @override

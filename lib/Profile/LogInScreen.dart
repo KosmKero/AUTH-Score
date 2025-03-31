@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:untitled1/Data_Classes/Team.dart';
+import 'package:untitled1/Firebase_Handle/user_handle_in_base.dart';
 import 'package:untitled1/globals.dart';
 import '../Data_Classes/AppUser.dart';
 import '../main.dart';
@@ -588,46 +590,23 @@ void checkBase(BuildContext context,controller1,controller2,controller3) async
 
   try
   {
-    String text1 = controller1.text;
-    String text2 = controller2.text;
+    String username = controller1.text;
+    String password = controller2.text;
 
     /*print('Attempting login with:');
-    print('Username: $text1');
+    print('Username: $username');
     print('Password: $text2');
 
      */
 
-    QuerySnapshot querySnapshot = await FirebaseFirestore.instance.collection("users").get(); //ΠΑΙΡΝΩ ΟΛΕΣ ΤΙΣ ΔΟΜΕΣ ΑΠΟ ΤΗΝ ΒΑΣΗ
+      bool loginSuccess = await UserHandleBase().login(username, password);
+      if (loginSuccess) {
 
-    bool found = false;
-
-    for (var doc in querySnapshot.docs)
-    {
-      //ΠΑΙΡΝΩ ΤΑ ΔΕΔΟΜΕΝΑ ΜΕ ΒΑΣΗ ΤΟ ΚΛΕΙΔΙ
-      String username = doc.get("Username").toString().trim();
-      String password = doc.get("Password").toString().trim();
-
-
-      /*print('Checking against stored credentials:');
-      print('Stored Username: $username');
-      print('Stored Password: $password');
-       */
-
-      if (username == text1.trim() && password == text2.trim())
-      {
         print('✅ ton brhkameeee!'); //ΥΠΑΡΧΕΙ ΑΝΤΙΣΤΟΙΧΙΑ ΔΕΔΟΜΕΝΩΝ
         isLoggedIn = true;
         controller1.clear();
         controller2.clear();
 
-        //ΔΗΜΙΟΠΥΡΓΩ ΤΟΝ ΧΡΗΣΗΤΗ ΕΚΕΙΝΗ ΤΗΝ ΩΡΑ
-        AppUser currentUser = AppUser(
-          doc.get("Username").toString(),
-          doc.get("Password").toString(),
-          doc.get("University").toString(),
-        );
-        globalUser = currentUser;
-        username = doc.get("Username").toString();
 
         //ΕΠΙΣΤΡΕΦΩ ΣΤΗΝ ΑΡΧΙΚΗ ΣΕΛΙΔΑ!!
         try
@@ -639,14 +618,11 @@ void checkBase(BuildContext context,controller1,controller2,controller3) async
             ),
                 (Route<dynamic> route) => false,
           );
-          found = true;
-          break; // Exit the loop after successful navigation
         } catch (navError) {
           print('🚨 Navigation Error: $navError');
         }
       }
-    }
-    if (!found)
+      else
     {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar( //ΕΜΦΑΝΙΖΩ ΜΗΝΥΜΑ ΛΑΘΟΥΣ ΑΝ ΕΧΕΙ ΚΑΠΟΙΟ ΠΕΔΙΟ ΚΕΝΟ
@@ -659,7 +635,13 @@ void checkBase(BuildContext context,controller1,controller2,controller3) async
   }
   catch (e)
   {
-    print("🔥 Error: $e");
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar( //ΕΜΦΑΝΙΖΩ ΜΗΝΥΜΑ ΛΑΘΟΥΣ ΑΝ ΕΧΕΙ ΚΑΠΟΙΟ ΠΕΔΙΟ ΚΕΝΟ
+        content: Text('Something went wrong!'),
+        backgroundColor: Colors.red,
+        duration: Duration(seconds: 2),
+      ),
+    );
   }
 }
 
@@ -670,19 +652,9 @@ void addInBase(BuildContext context, controller1, controller2, controller3) asyn
   String text1 = controller1.text;
   String text2 = controller2.text;
   String text3 = controller3.text;
-  bool found = false;
 
-  QuerySnapshot querySnapshot = await FirebaseFirestore.instance.collection("users").get(); //ΠΑΙΡΝΩ ΟΛΕΣ ΤΙΣ ΔΟΜΕΣ ΑΠΟ ΤΗΝ ΒΑΣΗ
-  for (var doc in querySnapshot.docs)
-  {
-      String username = doc.get("Username").toString().trim();
-      if (username.trim() == text1.trim())
-      {
-        found = true;
-        break;
-      }
-  }
 
+  bool found = await UserHandleBase().signUpWithUsername(text1,text2,text3);
 
   if(text1.isEmpty || text2.isEmpty || text3.isEmpty)
   {
@@ -695,7 +667,7 @@ void addInBase(BuildContext context, controller1, controller2, controller3) asyn
       ),
     );
   }
-  else if(found)
+  else if(!found)
     {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar( //ΕΜΦΑΝΙΖΩ ΜΗΝΥΜΑ ΛΑΘΟΥΣ ΑΝ ΕΧΕΙ ΚΑΠΟΙΟ ΠΕΔΙΟ ΚΕΝΟ
@@ -707,16 +679,7 @@ void addInBase(BuildContext context, controller1, controller2, controller3) asyn
     }
   else
   {
-    FirebaseFirestore.instance.collection("users").add({
-      "Username": text1,
-      "Password": text2,
-      "Role": "Viewer",
-      "University": text3,
-      "Language": greek
-    }).then((_)
-    {
-
-      AppUser currentUser = AppUser(text1,text2,text3);
+      //AppUser currentUser = AppUser(text1,text2,text3);
       isLoggedIn = true; //ΑΛΛΑΖΩ ΚΑΤΑΣΤΑΣΗ ΧΡΗΣΤΗ
 
       //ΚΑΘΑΡΙΖΩ ΤΑ ΠΕΔΙΑ ΟΤΑΝ ΠΑΤΗΣΕΙ ΤΟ ΚΟΥΜΠΙ ΕΓΓΡΑΦΗΣ
@@ -732,12 +695,6 @@ void addInBase(BuildContext context, controller1, controller2, controller3) asyn
         ),
             (Route<dynamic> route) => false,
       );
-
-      // Optionally, show a success message
-    }).catchError((error)
-    {
-      print("Error adding document: $error");
-    });
   }
 }
 

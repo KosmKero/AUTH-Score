@@ -3,29 +3,26 @@ import 'Team.dart';
 
 class AppUser
 {
-
-  AppUser(this._username,this._password,this._university){
-    _isAdmin=false;
-  }
-  String _username,_password,_university;
-  bool _isLoggedIn=false;
+  String _username,_university;
+  bool _isLoggedIn=true;
   late bool _isAdmin;
 
+  List<String> favoriteList=[];
+  List<String> _controlledTeams=[];
 
-  List<Team> favoriteList=[];
-  final List<Team> _controlledTeams=[];
-
+  AppUser(this._username,this._university,this.favoriteList,this._controlledTeams){
+    _isAdmin=true; //θελει αλλαγη
+  }
 
   String get username => _username;
-  String get password => _password;
   String get university => _university;
   bool get isLoggedIn => _isLoggedIn;
   bool get isAdmin=> _isAdmin;
-  List<Team> get controlledTeams=> _controlledTeams;
+  List<String> get controlledTeams=> _controlledTeams;
 
 
   void addFavoriteTeam(Team team){
-    favoriteList.add(team);
+    favoriteList.add(team.name);
   }
 
   void changeLogIn(){
@@ -35,17 +32,17 @@ class AppUser
     _isLoggedIn=true;
   }
 
-  List<Team> getFavoriteTeamList(){
+  List<String> getFavoriteTeamList(){
     return favoriteList;
   }
 
 
   void addControlledTeam(Team team){
-    _controlledTeams.add(team);
+    _controlledTeams.add(team.name);
   }
 
-  void addControlledTeams(List<Team> teams){
-    _controlledTeams.addAll(teams);
+  void addControlledTeams(List<String> teamsName){
+    _controlledTeams.addAll(teamsName);
   }
 
   void makeAdmin(Team team){
@@ -60,8 +57,8 @@ class AppUser
 
   bool controlTheseTeams(String team1,String team2) {
     if (!_isAdmin) return false;
-    for (Team team in controlledTeams){
-      if (team.name==team1 || team.name==team2){
+    for (String name in controlledTeams){
+      if (name==team1 || name==team2){
         return true;
       }
     }
