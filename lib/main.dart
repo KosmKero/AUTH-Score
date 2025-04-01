@@ -8,6 +8,7 @@ import 'package:untitled1/API/top_players_handle.dart';
 import 'package:untitled1/API/user_handle.dart';
 import 'package:untitled1/Data_Classes/Team.dart';
 import 'package:untitled1/Data_Classes/AppUser.dart';
+import 'package:untitled1/Firebase_Handle/FireBaseMessage.dart';
 import 'package:untitled1/Firebase_Handle/user_handle_in_base.dart';
 import 'package:untitled1/championship_details/knock_outs_page.dart';
 import 'package:untitled1/championship_details/sector_chooser.dart';
@@ -33,6 +34,15 @@ void main() async
     print("✅ Firebase initialized successfully!");
   } catch (e) {
     print("❌ Firebase initialization failed: $e");
+  }
+
+  try{
+    print("✅ All good!");
+    await Messages().initNotification();
+  }
+  catch(e)
+  {
+    print("❌ Could not load messages $e");
   }
 
   runApp(MyApp());
