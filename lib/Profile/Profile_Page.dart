@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:untitled1/Firebase_Handle/user_handle_in_base.dart';
 import 'package:untitled1/Profile/ChangePassword.dart';
 import 'package:untitled1/Profile/ChangeUserName.dart';
+import 'package:untitled1/Profile/admin_request_screen.dart';
+import 'package:untitled1/Profile/requests_and_admins_package/requests_and_admins_page.dart';
 import 'package:untitled1/globals.dart';
 import '../Data_Classes/AppUser.dart';
 import 'LogInScreen.dart';
@@ -31,9 +33,29 @@ class _ProfilePageState extends State<ProfilePage> {
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            TextButton( onPressed: () {
-               pressed();
-          }, child: Text("Kane me admin tou thryloy")),
+            Row(
+              children: [
+                TextButton( onPressed: () {
+                   pressed();
+                          }, child: Text("Kane me admin tou thryloy")),
+                TextButton(onPressed: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>RequestApprovalScreen(),
+                      )
+                  );
+                }, child: Text("see Requests")),
+                TextButton(onPressed: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>AdminRequestScreen(),
+                      )
+                  );
+                }, child: Text("req"))
+              ],
+            ),
             Padding(
               padding: EdgeInsets.only(bottom: 5, top: 15, left: 5),
               child: Text(

@@ -1,6 +1,7 @@
 
 
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:untitled1/API/Match_Handle.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -25,6 +26,11 @@ import 'globals.dart';
 
 //import 'Firebase_Handle/user_handle_in_base.dart';
 
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  print("Λάβαμε ένα μήνυμα στο background: ${message.messageId}");
+  // Πρόσθεσε εδώ τον κώδικα που θέλεις να εκτελείται εκτός του main thread
+}
+
 void main() async
 {
 
@@ -44,7 +50,7 @@ void main() async
   {
     print("❌ Could not load messages $e");
   }
-
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   runApp(MyApp());
 
 }
@@ -382,11 +388,13 @@ class MyApp extends StatelessWidget
   {
     MatchHandle().initializeMatces(matches);
     TopPlayersHandle().initializeList(teams);
-    if (globalUser== null) {
+
+    final user = FirebaseAuth.instance.currentUser;
+    if (user== null) {
         print ("αδειο  ειανι");
     }
     else{
-      print (globalUser.username);
+      print (user.email);
     }
   }
 

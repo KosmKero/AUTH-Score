@@ -96,8 +96,7 @@ class UserHandleBase {
       }
       
       print("${userDoc.get("username")} ${userDoc.get("University")} ${(userDoc['Favourite Teams'] as List<dynamic>).map((e) => e.toString()).toList().first} ${(userDoc['Controlled Teams'] as List<dynamic>).map((e) => e.toString()).toList().first}");
-      print(globalUser==null);
-      globalUser = globalUser!;
+      globalUser = globalUser;
 
 
       print("object");
@@ -116,17 +115,19 @@ class UserHandleBase {
   Future<void> addControlledTeamToFirestore(List<String> list) async {
     // Convert the list of Team objects to a list of maps
 
-    await FirebaseFirestore.instance
-        .collection('users')
-        .doc(FirebaseAuth.instance.currentUser!.uid)
-        .set({
-      'Controlled Teams': FieldValue.arrayUnion(list)
-    }, SetOptions(merge: true)); // Use merge to avoid overwriting other fields
 
-    globalUser.addControlledTeams(list);
+    if (globalUser.isAdmin && globalUser.isLoggedIn){
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(FirebaseAuth.instance.currentUser!.uid)
+          .set(
+              {'Controlled Teams': FieldValue.arrayUnion(list)},
+              SetOptions(
+                  merge: true)); // Use merge to avoid overwriting other fields
+
+      globalUser.addControlledTeams(list);
+    }
   }
-
-
 
   //AppUser? get getLoggedUser=> _loggedUser;
 }
