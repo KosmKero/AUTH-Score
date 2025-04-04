@@ -5,7 +5,7 @@ import 'package:untitled1/Data_Classes/Player.dart';
 
 import 'Team.dart';
 
-class Match extends ChangeNotifier{
+class MatchDetails extends ChangeNotifier{
   //με το _ γινεται private
 
   bool _hasMatchStarted=false;
@@ -30,7 +30,7 @@ class Match extends ChangeNotifier{
 
     List<List<Player?>> players11=[[],[]];
 
-  Match(
+  MatchDetails(
       {required Team homeTeam,
         required Team awayTeam,
         required bool hasMatchStarted,

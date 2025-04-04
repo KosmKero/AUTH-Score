@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:untitled1/API/Match_Handle.dart';
 import 'package:untitled1/main.dart';
-import 'Data_Classes/Match.dart';
+import 'Data_Classes/MatchDetails.dart';
 import 'Data_Classes/Team.dart';
 import 'globals.dart';
 import 'matchesContainer.dart';
@@ -14,7 +14,7 @@ class FavoritePage extends StatefulWidget {
 }
 
 class _FavoriteContainerState extends State<FavoritePage> {
-  late List<Match> teamMatches = [];
+  late List<MatchDetails> teamMatches = [];
   Team? selectedTeam;
 
   @override
@@ -61,10 +61,10 @@ class _FavoriteContainerState extends State<FavoritePage> {
     );
   }
 
-  List<Match> refreshList() {
+  List<MatchDetails> refreshList() {
     teamMatches.clear();
     if (favouriteTeams.isNotEmpty) {
-        for (Match match in MatchHandle().getAllMatches()) {
+        for (MatchDetails match in MatchHandle().getAllMatches()) {
           if (match.homeTeam.name == selectedTeam?.name ||
               match.awayTeam.name == selectedTeam?.name) {
             teamMatches.add(match);

@@ -38,6 +38,8 @@ class Team {
   int? get foundationYear=> _foundationYear;
   int get titles=>_titles;
 
+  List<Player> get getPlayers => _players;
+
   String get coach => _coach;
 
   Image get image {

@@ -4,7 +4,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../Data_Classes/AppUser.dart';
 import '../globals.dart';
 
-class UserHandleBase {
+class UserHandleBase
+{
 
   User? user;
 

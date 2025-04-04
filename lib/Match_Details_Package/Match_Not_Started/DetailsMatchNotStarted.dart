@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../Data_Classes/Match.dart';
+import '../../Data_Classes/MatchDetails.dart';
 import '../../Data_Classes/Team.dart';
 import '../../Team_Display_Page_Package/TeamDisplayPage.dart';
 import '../../globals.dart';
@@ -8,7 +8,7 @@ import '../../globals.dart';
 //ΤΟ ΚΟΜΜΑΤΙ ΑΥΤΟ ΑΦΟΡΑ ΟΛΟ ΤΟ ΥΠΟΛΟΙΠΟ ΜΕΡΟΣ ΤΗΣ ΣΕΛΙΔΑΣ
 class DetailsMatchNotStarted extends StatelessWidget {
   const DetailsMatchNotStarted({super.key, required this.match});
-  final Match match;
+  final MatchDetails match;
   @override
   Widget build(BuildContext context) {
     return Container(

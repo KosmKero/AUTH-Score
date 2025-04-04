@@ -1,6 +1,7 @@
 library my_project.globals;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'Data_Classes/AppUser.dart';
+import 'Data_Classes/Team.dart';
 
 
 bool isLoggedIn=false;
@@ -9,6 +10,7 @@ AppUser globalUser= AppUser("","",[],[]);
 
 
 bool greek = true;
+List<Team> teams = [];
 
 
 

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:untitled1/API/Match_Handle.dart';
-import '../Data_Classes/Match.dart';
+import '../Data_Classes/MatchDetails.dart';
 import '../Match_Details_Package/Match_Details_Page.dart';
 
 class KnockOutsPage extends StatelessWidget {
@@ -199,7 +199,7 @@ class KnockOutsPage extends StatelessWidget {
 
 class knockOutMatchUp extends StatefulWidget {
   const knockOutMatchUp({super.key,required this.match});
-  final Match match;
+  final MatchDetails match;
 
   @override
   State<knockOutMatchUp> createState() => _knockOutMatchUpState();

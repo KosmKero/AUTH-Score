@@ -1,5 +1,3 @@
-
-
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -10,6 +8,7 @@ import 'package:untitled1/API/user_handle.dart';
 import 'package:untitled1/Data_Classes/Team.dart';
 import 'package:untitled1/Data_Classes/AppUser.dart';
 import 'package:untitled1/Firebase_Handle/FireBaseMessage.dart';
+import 'package:untitled1/Firebase_Handle/TeamsHandle.dart';
 import 'package:untitled1/Firebase_Handle/user_handle_in_base.dart';
 import 'package:untitled1/championship_details/knock_outs_page.dart';
 import 'package:untitled1/championship_details/sector_chooser.dart';
@@ -20,21 +19,19 @@ import 'Data_Classes/Player.dart';
 import 'Profile/Profile_Page.dart';
 import 'Search_Page.dart';
 import 'championship_details/StandingsPage.dart';
-import 'Data_Classes/Match.dart';
-//import 'package:cloud_firestore/cloud_firestore.dart';
+import 'Data_Classes/MatchDetails.dart';
 import 'globals.dart';
 
-//import 'Firebase_Handle/user_handle_in_base.dart';
 
-Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  print("Λάβαμε ένα μήνυμα στο background: ${message.messageId}");
-  // Πρόσθεσε εδώ τον κώδικα που θέλεις να εκτελείται εκτός του main thread
-}
+List<MatchDetails> upcomingMatches = [];
+List<MatchDetails> previousMatches = [];
+List<List<MatchDetails>> matches = [];
+List<Team> favouriteTeams = [];
+List<Player> players = [];
 
-void main() async
-{
-
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
   try {
     await Firebase.initializeApp();
     print("✅ Firebase initialized successfully!");
@@ -42,380 +39,199 @@ void main() async
     print("❌ Firebase initialization failed: $e");
   }
 
-  try{
+  try {
     print("✅ All good!");
     await Messages().initNotification();
-  }
-  catch(e)
-  {
+  } catch(e) {
     print("❌ Could not load messages $e");
   }
-  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-  runApp(MyApp());
 
+  runApp(const MyApp());
 }
 
-List<Team> teams = [
-  Team("Ολυμπιακός", 10, 7, 2, 1, 1, 2000, 0,"coach1",[
-    Player("Γιώργαρας", "Παπαδόπgουλος", 2, 5, 10, 22,"Olympiacos"),
-    Player("Πετsρος", "Ππgα", 2, 5, 5, 21, "Olympiacos"),
-    Player("Φανηsς", "Κωfνστα", 2, 5, 5, 20, "Olympiacos"),
-    Player("Ποαaλ", "Ποjλο", 2, 5, 5, 19, "Olympiacos"),
-    Player("Γιώργaος", "Παπαδόπουgλος", 0, 5, 5, 25, "Olympiacos"),
-    Player("Γιώργοdς", "Παπαδόπgουλος", 0, 5, 5, 24, "Olympiacos"),
-    Player("Γιώργοdς", "Παπαδgόπουλος", 1, 5, 5, 23, "Olympiacos"),
-    Player("Νίκοςd", "Λαμπρόπουλοwς", 2, 3 ,3  , 22, "Olympiacos"),
-    Player("Γιώργaαρας", "Παπαδόπgουλος", 2, 5, 10, 22,"Olympiacos"),
-    Player("Πετροgς", "Ππα", 2, 5, 5, 21, "Olympiacos"),
-    Player("Φανης", "sdΚωνστα", 2, 5, 5, 20, "Olympiacos"),
-    Player("Ποαλ", "Πολfο", 2, 5, 5, 19, "Olympiacos"),
-    Player("Γιώργος", "Πfdαπαδόπουλος", 0, 5, 5, 25, "Olympiacos"),
-    Player("Γιώργος", "Παπfαδόπουλος", 0, 5, 5, 24, "Olympiacos"),
-    Player("Γιώργος", "Παπαfgδόπουλος", 1, 5, 5, 23, "Olympiacos"),
-    Player("Νίκος", "Λαμπρόποhυλος", 2, 3 ,3  , 22, "Olympiacos"),
-  ]),
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
 
-  Team("Παναθηναϊκός", 10, 6, 3, 1, 1, 2010, 0,"coach2", [
-    Player("Αλέξανδρος", "Βασιλείου", 2, 4,  7, 23, "Panathinaikos"),
-    Player("Δημήτρης", "Κωνσταντίνου", 2, 2, 2, 24, "Panathinaikos"),
-  ]),
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: LoadingScreen(),
+    );
+  }
+}
 
-  Team("ΑΕΚ", 10, 5, 4, 1, 1, 2015, 0, "A.Damousis",[
-    Player("Στέφανος", "Αντωνίου", 2, 6, 8, 22, "AEK"),
-    Player("Μιχάλης", "Γεωργίου", 2, 3,  3, 25, "AEK"),
-  ]),
+// New loading screen widget
+class LoadingScreen extends StatefulWidget {
+  const LoadingScreen({super.key});
 
-  Team("ΠΑΟΚ", 10, 4, 4, 2, 1, 2000, 0, "coach4",[
-    Player("Χρήστος", "Καραμανλής", 2, 2,  4, 28, "PAOK"),
-    Player("Παναγιώτης", "Σωτηρίου", 2, 5, 5, 26, "PAOK"),
-  ]),
+  @override
+  State<LoadingScreen> createState() => _LoadingScreenState();
+}
 
-  Team("Άρης", 10, 6, 2, 2, 2, 2000, 0, "coach5",[
-    Player("Felipe", "Bakas",   2,   4,   6, 29, "Aris"),
-    Player("Θοδωρής", "Αναστασίου", 2, 2, 3, 30, "Aris"),
-  ]),
+class _LoadingScreenState extends State<LoadingScreen> {
+  bool _isLoading = true;
+  String _loadingMessage = "Initializing...";
+  bool _hasError = false;
+  String _errorMessage = "";
 
-  Team("Αστέρας Τρίπολης", 10, 5, 3, 2, 2, 2000, 0,"coach6" ,[
-    Player("Βασίλης", "Κυριακίδης", 2, 3,  4, 31, "Asteras Tripolis"),
-    Player("Γιάννης", "Χατζηδάκης", 2, 2,  2, 32, "Asteras Tripolis"),
-  ]),
+  @override
+  void initState() {
+    super.initState();
+    _loadData();
+  }
 
-  Team("ΟΦΗ", 10, 4, 5, 1, 2, 2000, 0, "coach7",[
-    Player("Μανώλης", "Στρατής", 2, 2,   3,   33, "OFI"),
-    Player("Δημήτρης", "Φωτεινός", 2, 1, 1, 34,   "OFI"),
-  ]),
+  Future<void> _loadData() async {
+    try {
+      setState(() {
+        _loadingMessage = "Loading teams...";
+      });
+      await loadTeams();
 
-  Team("Λαμία", 10, 3, 6, 1, 2, 2000, 0,"coach8", [
-    Player("Πέτρος", "Αγγελόπουλος", 2, 1, 2, 35, "Λαμία"),
-    Player("Σωτήρης", "Μιχαηλίδης", 2, 1,  1, 36, "Λαμία"),
-  ]),
+      setState(() {
+        _loadingMessage = "Loading matches...";
+      });
+      await loadMatches();
 
-  Team("Βόλος", 10, 7, 2, 1, 3, 2000, 0, "coach9",[
-    Player("Γιώργος", "Δημητρίου", 2, 5,5, 37, "Βόλος"),
-    Player("Χάρης", "Νικολάου", 2, 4,    4, 38, "Βόλος"),
-  ]),
+      setState(() {
+        _loadingMessage = "Setting up data...";
+      });
+      MatchHandle().initializeMatces(matches);
+      TopPlayersHandle().initializeList(teams);
 
-  Team("Παναιτωλικός", 10, 5, 3, 2, 3, 2000, 0,"coach10", [
-    Player("Αντώνης", "Ρουμπής", 2, 2,   2, 39, "Παναιτωλικός"),
-    Player("Σταύρος", "Θεοδώρου", 2, 1,  1, 40, "Παναιτωλικός"),
-  ]),
+      // Add a small delay so users can see the loading completed message
+      setState(() {
+        _loadingMessage = "All set!";
+      });
+      await Future.delayed(Duration(milliseconds: 500));
 
-  Team("Ιωνικός", 10, 4, 4, 2, 3, 2000, 0,"coach11", [
-    Player("Νεκτάριος", "Παπανικολάου", 2, 3,3, 41, "Ιωνικός"),
-    Player("Άρης", "Λεμονής",           2, 2,2, 42, "Ιωνικός"),
-  ]),
-
-  Team("Απόλλων Σμύρνης", 10, 2, 6, 2, 3, 2000, 0,"coach12", [
-    Player("Χριστόφορος", "Δούκας", 2, 1, 1, 43, "Απόλλων Σμύρνης"),
-    Player("Φώτης", "Σταματόπουλος", 2, 1, 1, 44, "Απόλλων Σμύρνης"),
-  ]),
-
-  Team("Καλαμάτα", 10, 8, 1, 1, 4, 2000, 0,"coach13", [
-    Player("Στέργιος", "Κυριαζής", 2, 6,    8, 45, "Καλαμάτα"),
-    Player("Διονύσης", "Μαρκόπουλος", 2, 3, 3, 46, "Καλαμάτα"),
-  ]),
-
-  Team("Χανιά", 10, 6, 3, 1, 4, 2000, 0,"coach14", [
-    Player("Ευθύμης", "Ανδριανός", 2, 5, 5, 47, "Χανιά"),
-    Player("Νίκος", "Σφακιανάκης", 2, 2, 2, 48, "Χανιά"),
-  ]),
-
-  Team("Αναγέννηση Καρδίτσας", 10, 5, 4, 1, 4, 2000, 0,"coach15", [
-    Player("Λάμπρος", "Παπαγεωργίου", 2, 2, 2, 49, "Αναγέννηση Καρδίτσας"),
-    Player("Μάριος", "Ξανθόπουλος",    2, 1,1, 50, "Αναγέννηση Καρδίτσας"),
-  ]),
-
-  Team("Δόξα Δράμας", 10, 3, 6, 1, 4, 2000, 0, "coach16",[
-    Player("Χρήστος", "Καλογερόπουλος", 2, 2,  2, 51, "Δόξα Δράμας"),
-    Player("Σπύρος", "Αρβανίτης",       2, 1,  1, 52, "Δόξα Δράμας"),
-  ]),
-];
-List<Team> favouriteTeams=[];
-List<Player> players=[];
-List<Match> upcomingMatches = [
-  Match(
-    homeTeam: teams[0],
-    awayTeam: teams[1],
-    hasMatchStarted: false,
-    time: 1500,
-    day: 5,
-    month: 3,
-    year: 2025,
-    isGroupPhase: true,
-    game: 8,
-  ),
-  Match(
-    homeTeam: teams[2],
-    awayTeam: teams[3],
-    hasMatchStarted: false,
-    time: 1700,
-    day: 5,
-    month: 3,
-    year: 2025,
-    isGroupPhase: true,
-    game: 1,
-  ),
-  Match(
-    homeTeam: teams[4],
-    awayTeam: teams[6],
-    hasMatchStarted: false,
-    time: 1600,
-    day: 7,
-    month: 3,
-    year: 2025,
-    isGroupPhase: true,
-    game: 2,
-  ),
-  Match(
-    homeTeam: teams[8],
-    awayTeam: teams[10],
-    hasMatchStarted: false,
-    time: 1800,
-    day: 8,
-    month: 3,
-    year: 2025,
-    isGroupPhase: true,
-    game: 3,
-  ),
-  Match(
-    homeTeam: teams[11],
-    awayTeam: teams[12],
-    hasMatchStarted: false,
-    time: 1900,
-    day: 9,
-    month: 3,
-    year: 2025,
-    isGroupPhase: true,
-    game: 4,
-  ),
-  Match(
-    homeTeam: teams[0],
-    awayTeam: teams[1],
-    hasMatchStarted: true,
-    time: 1500,
-    day: 12,
-    month: 3,
-    year: 2025,
-    isGroupPhase: true,
-    game: 5,
-  ),
-  Match(
-    homeTeam: teams[2],
-    awayTeam:teams[3],
-    hasMatchStarted: false,
-    time: 1700,
-    day: 15,
-    month: 3,
-    year: 2025,
-    isGroupPhase: true,
-    game: 6,
-  ),
-  Match(
-    homeTeam: teams[4],
-    awayTeam: teams[5],
-    hasMatchStarted: false,
-    time: 1600,
-    day: 20,
-    month: 3,
-    year: 2025,
-    isGroupPhase: true,
-    game: 7,
-  ),
-  Match(
-    homeTeam: teams[6],
-    awayTeam: teams[7],
-    hasMatchStarted: true,
-    time: 1800,
-    day: 25,
-    month: 3,
-    year: 2025,
-    isGroupPhase: true,
-    game: 8,
-  ),
-  Match(
-    homeTeam: teams[8],
-    awayTeam: teams[9],
-    hasMatchStarted: false,
-    time: 1900,
-    day: 28,
-    month: 3,
-    year: 2025,
-    isGroupPhase: true,
-    game: 9,
-  ),
-];
-
-List<Match> previousMatches = [
-  Match(
-    homeTeam: teams[0],
-    awayTeam: teams[1],
-    hasMatchStarted: false,
-    time: 1500,
-    day: 5,
-    month: 3,
-    year: 2025,
-    isGroupPhase: false,
-    game: 10,
-  ),
-  Match(
-    homeTeam: teams[2],
-    awayTeam: teams[3],
-    hasMatchStarted: false,
-    time: 1700,
-    day: 5,
-    month: 3,
-    year: 2025,
-    isGroupPhase: false,
-    game: 11,
-  ),
-  Match(
-    homeTeam: teams[4],
-    awayTeam: teams[6],
-    hasMatchStarted: false,
-    time: 1600,
-    day: 7,
-    month: 3,
-    year: 2025,
-    isGroupPhase: false,
-    game: 12,
-  ),
-  Match(
-    homeTeam:teams[8],
-    awayTeam: teams[9],
-    hasMatchStarted: false,
-    time: 1800,
-    day: 8,
-    month: 3,
-    year: 2025,
-    isGroupPhase: false,
-    game: 13,
-  ),
-  Match(
-    homeTeam: teams[11],
-    awayTeam: teams[12],
-    hasMatchStarted: false,
-    time: 1900,
-    day: 9,
-    month: 3,
-    year: 2025,
-    isGroupPhase: false,
-    game: 14,
-  ),
-  Match(
-    homeTeam: teams[0],
-    awayTeam: teams[1],
-    hasMatchStarted: true,
-    time: 1500,
-    day: 12,
-    month: 3,
-    year: 2025,
-    isGroupPhase: false,
-    game: 15,
-  ),
-  Match(
-    homeTeam: teams[2],
-    awayTeam: teams[3],
-    hasMatchStarted: false,
-    time: 1700,
-    day: 15,
-    month: 3,
-    year: 2025,
-    isGroupPhase: false,
-    game: 16,
-  ),
-  Match(
-    homeTeam: teams[4],
-    awayTeam: teams[5],
-    hasMatchStarted: false,
-    time: 1600,
-    day: 20,
-    month: 3,
-    year: 2025,
-    isGroupPhase: false,
-    game: 17,
-  ),
-  Match(
-    homeTeam: teams[6],
-    awayTeam: teams[7],
-    hasMatchStarted: true,
-    time: 1800,
-    day: 25,
-    month: 3,
-    year: 2025,
-    isGroupPhase: false,
-    game: 18,
-  ),
-  Match(
-    homeTeam: teams[8],
-    awayTeam: teams[9],
-    hasMatchStarted: false,
-    time: 1900,
-    day: 28,
-    month: 3,
-    year: 2025,
-    isGroupPhase: false,
-    game: 19,
-  ),
-];
-
-List<List<Match>> matches=[upcomingMatches,previousMatches];
-
-
-
-class MyApp extends StatelessWidget
-{
-  MyApp({super.key})
-  {
-    MatchHandle().initializeMatces(matches);
-    TopPlayersHandle().initializeList(teams);
-
-    final user = FirebaseAuth.instance.currentUser;
-    if (user== null) {
-        print ("αδειο  ειανι");
-    }
-    else{
-      print (user.email);
+      // Navigate to main screen once loading is complete
+      if (mounted) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => MainScreen()),
+        );
+      }
+    } catch (e) {
+      print("Error loading data: $e");
+      setState(() {
+        _hasError = true;
+        _errorMessage = "Failed to load data: $e";
+        _isLoading = false;
+      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: MainScreen(),
-        );
+    return Scaffold(
+      backgroundColor: const Color.fromARGB(250, 50, 120, 90),
+      body: Center(
+        child: _hasError
+            ? _buildErrorWidget()
+            : _buildLoadingWidget(),
+      ),
+    );
+  }
+
+  Widget _buildLoadingWidget() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text(
+          "AUTH Score",
+          style: TextStyle(
+            fontSize: 30,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+        SizedBox(height: 40),
+        CircularProgressIndicator(
+          color: Colors.white,
+        ),
+        SizedBox(height: 20),
+        Text(
+          _loadingMessage,
+          style: TextStyle(
+            fontSize: 16,
+            color: Colors.white,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildErrorWidget() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(
+          Icons.error_outline,
+          size: 70,
+          color: Colors.red,
+        ),
+        SizedBox(height: 20),
+        Text(
+          "Error Loading Data",
+          style: TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+        SizedBox(height: 10),
+        Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Text(
+            _errorMessage,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 16,
+              color: Colors.white,
+            ),
+          ),
+        ),
+        SizedBox(height: 20),
+        ElevatedButton(
+          onPressed: () {
+            setState(() {
+              _hasError = false;
+              _isLoading = true;
+              _loadingMessage = "Retrying...";
+            });
+            _loadData();
+          },
+          child: Text("Retry"),
+        ),
+      ],
+    );
   }
 }
 
-class MainScreen extends StatefulWidget {
+// Original team loading function
+Future<void> loadTeams() async {
+  TeamsHandle teamsHandle = TeamsHandle();
+  teams = await teamsHandle.getAllTeams();
+  print(teams.length);
+}
 
+// Original matches loading function
+Future<void> loadMatches() async {
+  TeamsHandle teamsHandle = TeamsHandle();
+  upcomingMatches = await teamsHandle.getMatches("upcoming");
+  previousMatches = await teamsHandle.getMatches("previous");
+  matches = [upcomingMatches, previousMatches];
+  print("Matches loaded: $matches");
+}
+
+// Original MainScreen and other classes
+class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
 
   @override
   State<MainScreen> createState() => _MainScreenState();
 }
 
-class _MainScreenState extends State<MainScreen>
-{
+class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
   String _selectedOption = "Ποδόσφαιρο";
 
@@ -433,7 +249,6 @@ class _MainScreenState extends State<MainScreen>
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       appBar: CustomAppBar(
         onOptionSelected: onOptionSelected,
@@ -450,7 +265,6 @@ class _MainScreenState extends State<MainScreen>
 
 // ------------------------ APP BAR ------------------------
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
-
   final Function(String) onOptionSelected;
   final String selectedOption;
 
@@ -459,53 +273,15 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      title: Text("AUTH Score",style: TextStyle(fontSize: 26,fontWeight: FontWeight.bold, color:  Colors.white)),
+      title: Text("AUTH Score", style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: Colors.white)),
       backgroundColor: const Color.fromARGB(250, 50, 120, 90),
       actions: [
-        /* Padding(
+        Padding(
           padding: const EdgeInsets.symmetric(horizontal: 5),
-          child: PopupMenuButton<String>(
-            onSelected: onOptionSelected,
-            itemBuilder: (BuildContext context) => [
-              PopupMenuItem(
-                value: "Ποδόσφαιρο",
-                child: Row(
-                  children: [
-                    Icon(Icons.sports_soccer, color: Colors.black),
-                    SizedBox(width: 10),
-                    Text("Ποδόσφαιρο"),
-                  ],
-                ),
-              ),
-              PopupMenuItem(
-                value: "Μπάσκετ",
-                child: Row(
-                  children: [
-                    Icon(Icons.sports_basketball, color: Colors.black),
-                    SizedBox(width: 10),
-                    Text("Μπάσκετ"),
-                  ],
-                ),
-              ),
-            ],
-            child: Row(
-              children: [
-                Text(
-                  selectedOption,
-                  style: TextStyle(color: Colors.white, fontSize: 16),
-                ),
-                Icon(Icons.arrow_drop_down, color: Colors.white),
-              ],
-            ),
-          ),
-        ),*/
-        Padding(padding: const EdgeInsets.symmetric(horizontal: 5),
           child: IconButton(
-            icon: Icon(Icons.search, color: Colors.white,), // Μεγεθυντικός φακός
+            icon: Icon(Icons.search, color: Colors.white),
             onPressed: () {
-              // Εδώ προσθέτεις τη λειτουργία αναζήτησης
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => SearchPage()));
+              Navigator.push(context, MaterialPageRoute(builder: (context) => SearchPage()));
             },
           ),
         )
@@ -528,17 +304,14 @@ class CustomBottomNavigationBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return BottomNavigationBar(
       backgroundColor: const Color.fromARGB(255, 10, 28, 21),
-      selectedFontSize:
-      14, // Αυξάνει το μέγεθος της γραμματοσειράς του επιλεγμένου
-      unselectedFontSize: 12, // Μικρότερη γραμματοσειρά για τα μη επιλεγμένα
+      selectedFontSize: 14,
+      unselectedFontSize: 12,
       type: BottomNavigationBarType.fixed,
       items: [
-        BottomNavigationBarItem(
-            icon: const Icon(Icons.sports_soccer), label: greek?"Αγώνες":"Games"),
-        BottomNavigationBarItem(
-            icon: const Icon(Icons.emoji_events), label: greek?"Πρωτάθλημα":"Championship"),
-         BottomNavigationBarItem(icon: Icon(Icons.favorite), label: greek?"Αγαπημένα":"favourite"),
-         BottomNavigationBarItem(icon: Icon(Icons.person), label: greek?"Προφίλ":"Profile"),
+        BottomNavigationBarItem(icon: const Icon(Icons.sports_soccer), label: greek ? "Αγώνες" : "Games"),
+        BottomNavigationBarItem(icon: const Icon(Icons.emoji_events), label: greek ? "Πρωτάθλημα" : "Championship"),
+        BottomNavigationBarItem(icon: Icon(Icons.favorite), label: greek ? "Αγαπημένα" : "Favorite"),
+        BottomNavigationBarItem(icon: Icon(Icons.person), label: greek ? "Προφίλ" : "Profile"),
       ],
       currentIndex: currentIndex,
       selectedItemColor: Colors.blue,
@@ -549,42 +322,17 @@ class CustomBottomNavigationBar extends StatelessWidget {
 }
 
 // ------------------------ BODY CONTENT ------------------------
-Widget _buildBody(int selectedIndex)
-{
-
+Widget _buildBody(int selectedIndex) {
   switch (selectedIndex) {
     case 0:
       return HomePage();
     case 1:
       return StandingsOrKnockoutsChooserPage();
-  //return KnockOutsPage();
-  //return StandingsPage();
     case 2:
       return FavoritePage();
     case 3:
-      return ProfilePage(user:globalUser);
+      return ProfilePage(user: globalUser);
     default:
       return HomePage();
   }
 }
-/*
-class profilePage extends StatelessWidget {
-  const profilePage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Text(
-        "profile",
-        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-      ),
-    );
-  }
-}
-*/
-//----------------------------------------------------------------------------------
-
-
-
-
-

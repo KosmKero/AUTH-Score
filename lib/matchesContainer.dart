@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:untitled1/Match_Details_Package/Match_Details_Page.dart';
-import 'Data_Classes/Match.dart';
+import 'Data_Classes/MatchDetails.dart';
 import 'API/NotificationService.dart';
 
 //ΑΥΤΗ Η ΚΛΑΣΗ ΑΦΟΡΑ ΤΑ CONTAINER ΤΩΝ ΜΑΤΣ ΣΤΗΝ ΑΡΧΙΚΗ ΟΘΟΝΗ
@@ -11,7 +11,7 @@ class matchesContainer extends StatelessWidget {
   matchesContainer({super.key, required this.matches}){
     sortMatches();
   }
-  final List<Match> matches;
+  final List<MatchDetails> matches;
 
   @override
   Widget build(BuildContext context) {
@@ -59,7 +59,7 @@ class matchesContainer extends StatelessWidget {
 
 class eachMatchContainer extends StatelessWidget
 {
-  final Match match;
+  final MatchDetails match;
   const eachMatchContainer(this.match, {Key? key,}): super(key: key);
 
 
@@ -76,7 +76,7 @@ class eachMatchContainerView extends StatelessWidget {
   const eachMatchContainerView({Key? key}) : super(key: key);
   @override
   Widget build(BuildContext context) {
-    final match = Provider.of<Match>(context);
+    final match = Provider.of<MatchDetails>(context);
 
     return InkWell(
         onTap: () {
@@ -180,7 +180,7 @@ class MatchContainerTime extends StatefulWidget
     match.hasMatchFinished ? color =Colors.black : color=Colors.red;
   }
 
-  final Match match;
+  final MatchDetails match;
 
   @override
   State<MatchContainerTime> createState() => _MatchContainerTimeState();
@@ -251,7 +251,7 @@ class _MatchContainerTimeState extends State<MatchContainerTime> {
 
 //ΦΤΙΑΧΝΕΙ ΤΗΝ NOTIFICATION ICON ΤΟΥ MATCH
 class notificationIcon extends StatefulWidget {
-  final Match match;
+  final MatchDetails match;
   final int matchTime;
   final int matchDate;
 

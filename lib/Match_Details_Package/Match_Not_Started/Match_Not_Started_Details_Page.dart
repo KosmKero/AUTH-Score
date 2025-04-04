@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:untitled1/API/user_handle.dart';
 import 'package:untitled1/Firebase_Handle/user_handle_in_base.dart';
 import 'package:untitled1/Match_Details_Package/Match_Not_Started/DetailsMatchNotStarted.dart';
-import '../../Data_Classes/Match.dart';
+import '../../Data_Classes/MatchDetails.dart';
 import '../../Data_Classes/Team.dart';
 import '../../Team_Display_Page_Package/TeamDisplayPage.dart';
 import '../../globals.dart';
@@ -12,7 +12,7 @@ import '../Starting__11_Display_Card.dart';
 
 //ΟΛΟ ΕΔΩ ΑΦΟΡΑ ΤΟ ΕΠΑΝΩ ΚΟΜΜΑΤΙ ΤΗΣ ΣΕΛΙΔΑΣ. ΓΙΑ ΤΗΝ ΩΡΑ =,ΜΕΡΑ ΚΙΑ ΤΙς ΟΜΑΔΕΣ. ΤΟ ΜΠΛΕ ΠΛΑΙΣΙΟ ΣΤΗΝ ΑΡΧΗ ΑΡΧΗ ΠΑΝΩ
 class MatchNotStartedDetails extends StatefulWidget {
-  final Match match;
+  final MatchDetails match;
 
   const MatchNotStartedDetails({super.key, required this.match});
 
@@ -289,7 +289,7 @@ class _buildAwayTeamName extends State<buildAwayTeamName> {
   }
 }
 
-Widget _sectionChooser(int selectedIndex, Match match) {
+Widget _sectionChooser(int selectedIndex, MatchDetails match) {
   switch (selectedIndex) {
     case 0:
       return DetailsMatchNotStarted(match: match);

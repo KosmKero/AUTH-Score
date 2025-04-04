@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:untitled1/API/Match_Handle.dart';
-import 'Data_Classes/Match.dart';
+import 'Data_Classes/MatchDetails.dart';
 import 'Data_Classes/Player.dart';
 import 'Data_Classes/Team.dart';
 import 'Team_Display_Page_Package/TeamDisplayPage.dart';
+import 'globals.dart';
 import 'main.dart';
 import 'matchesContainer.dart';
 import 'dart:async';
@@ -236,7 +237,7 @@ class searchDetails extends StatefulWidget {
 class _searchDetailsState extends State<searchDetails> {
   List<Team> teamSearchList = [];
   List<Player> playerSearchList = [];
-  List<Match> matchSearchList = [];
+  List<MatchDetails> matchSearchList = [];
   Timer? _debounce;
 
   @override
@@ -296,9 +297,9 @@ class _searchDetailsState extends State<searchDetails> {
     return teamSearchList;
   }
 
-  List<Match> matchSearch(String name) {
+  List<MatchDetails> matchSearch(String name) {
     matchSearchList.clear();
-    for (Match match in MatchHandle().getAllMatches()) {
+    for (MatchDetails match in MatchHandle().getAllMatches()) {
       if (match.homeTeam.name.toLowerCase().contains(name.toLowerCase()) ||
           match.awayTeam.name.toLowerCase().contains(name.toLowerCase())) {
         matchSearchList.add(match);

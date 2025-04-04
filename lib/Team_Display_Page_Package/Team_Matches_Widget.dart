@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:untitled1/Data_Classes/Team.dart';
-import 'package:untitled1/Data_Classes/Match.dart';
+import 'package:untitled1/Data_Classes/MatchDetails.dart';
 import 'package:untitled1/API/Match_Handle.dart';
 
 
@@ -22,7 +22,7 @@ class _TeamMatchesWidgetState extends State<TeamMatchesWidget> {
     refreshList();
   }
 
-  List<Match> matchList=[];
+  List<MatchDetails> matchList=[];
   @override
   Widget build(BuildContext context) {
     return Expanded(child: matchesContainer(
@@ -32,7 +32,7 @@ class _TeamMatchesWidgetState extends State<TeamMatchesWidget> {
 
   void refreshList() {
     matchList.clear();
-      for (Match match in MatchHandle().getAllMatches()) {
+      for (MatchDetails match in MatchHandle().getAllMatches()) {
         if (match.homeTeam.name == widget.team.name ||
             match.awayTeam.name == widget.team.name) {
           matchList.add(match);

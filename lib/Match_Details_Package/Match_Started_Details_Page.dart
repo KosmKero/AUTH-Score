@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:untitled1/Data_Classes/Player.dart';
 import 'package:untitled1/Firebase_Handle/user_handle_in_base.dart';
 import 'package:untitled1/globals.dart';
-import '../../Data_Classes/Match.dart';
+import '../../Data_Classes/MatchDetails.dart';
 import 'package:provider/provider.dart';
 import '../API/user_handle.dart';
 import '../Data_Classes/Team.dart';
@@ -13,7 +13,7 @@ import 'Standings_Card_1Group.dart';
 import 'Starting__11_Display_Card.dart';
 
 class matchStartedPage extends StatelessWidget {
-  final Match match;
+  final MatchDetails match;
 
   const matchStartedPage({Key? key, required this.match}) : super(key: key);
 
@@ -28,7 +28,7 @@ class matchStartedPage extends StatelessWidget {
 
 class _MatchStartedView extends StatefulWidget {
   const _MatchStartedView(this.match);
-  final Match match;
+  final MatchDetails match;
   @override
   State<_MatchStartedView> createState() => _MatchStartedViewState();
 }
@@ -399,7 +399,7 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
     setState(() {});
   }
 
-  Widget _sectionChooser(int selectedIndex, Match match) {
+  Widget _sectionChooser(int selectedIndex, MatchDetails match) {
     switch (selectedIndex) {
       case 0:
         return _buildMatchdetails();
@@ -481,7 +481,7 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
       );
     } else if (globalUser.controlTheseTeams(
         widget.match.homeTeam.name, widget.match.awayTeam.name)) {
-      Match match = widget.match;
+      MatchDetails match = widget.match;
       String progress = " ";
       String cancelProgress = " ";
       match.hasSecondHalfStarted

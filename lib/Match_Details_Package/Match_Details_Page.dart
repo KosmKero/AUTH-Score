@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:untitled1/Match_Details_Package/Match_Not_Started/Match_Not_Started_Details_Page.dart';
 import 'package:untitled1/Match_Details_Package/Match_Started_Details_Page.dart';
-import '../Data_Classes/Match.dart';
+import '../Data_Classes/MatchDetails.dart';
 
 class matchDetailsPage extends StatelessWidget {
-  final Match match;
+  final MatchDetails match;
   const matchDetailsPage(this.match, {Key? key,}): super(key: key);
 
 
@@ -26,7 +26,7 @@ class _matchDetailsPageView extends StatelessWidget {
   
   @override
   Widget build(BuildContext context) {
-    final match = Provider.of<Match>(context);
+    final match = Provider.of<MatchDetails>(context);
     return Scaffold(
       appBar: AppBar(backgroundColor: Color.fromARGB(50, 5, 150, 200),),
       body: matchProgress(match),
@@ -35,7 +35,7 @@ class _matchDetailsPageView extends StatelessWidget {
     );
   }
 
-  Widget matchProgress(Match match){
+  Widget matchProgress(MatchDetails match){
     if (!match.hasMatchStarted) {
       return MatchNotStartedDetails(match: match,);
     }

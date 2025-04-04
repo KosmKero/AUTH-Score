@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import '../Data_Classes/Team.dart';
 import '../Team_Display_Page_Package/TeamDisplayPage.dart';
+import '../globals.dart';
 import '../main.dart';
-import '../Data_Classes/Match.dart';
+import '../Data_Classes/MatchDetails.dart';
 
 //ΑΥΤΗ Η ΚΛΑΣΗ ΑΦΟΡΑ ΟΤΑΝ ΠΟΑΤΑΕΙ ΤΟ ΚΟΥΜΠΙ ¨ΒΑΘΜΟΛΟΓΙΑ" ΓΙΑ ΤΟΝ ΚΑΘΕ ΑΓΩΝΑ
 class StandingPageOneGroup extends StatefulWidget {

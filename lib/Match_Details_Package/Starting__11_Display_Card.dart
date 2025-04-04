@@ -2,18 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:untitled1/API/user_handle.dart';
 import 'package:untitled1/Firebase_Handle/user_handle_in_base.dart';
 import 'package:untitled1/main.dart';
-import '../../Data_Classes/Match.dart';
+import '../../Data_Classes/MatchDetails.dart';
 import '../Data_Classes/Player.dart';
 
 //ΑΥΤΟ ΤΟ ΚΟΜΜΑΤΙ ΑΦΟΡΑ ΤΙΣ ΣΥΝΘΕΣΕΙΣ ΠΟΥ ΘΑ ΕΜΦΑΝΙΖΟΝΤΑΙ ΓΙΑ ΤΗΝ ΚΑΘΕ ΟΜΆΔΑ
 
 import 'package:flutter/material.dart';
-import '../../Data_Classes/Match.dart';
+import '../../Data_Classes/MatchDetails.dart';
 import '../Data_Classes/Player.dart';
 import '../globals.dart';
 
 class Starting11Display extends StatefulWidget {
-  final Match match;
+  final MatchDetails match;
 
   Starting11Display({super.key, required this.match});
 
