@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:untitled1/Match_Details_Package/Match_Details_Page.dart';
+import 'package:untitled1/globals.dart';
 import 'Data_Classes/MatchDetails.dart';
 import 'API/NotificationService.dart';
 
@@ -23,6 +24,7 @@ class matchesContainer extends StatelessWidget {
 
   Column _buildMatches() { //ΒΑΖΕΙ ΤΑ ΣΤΟΙΧΕΙΑ ΤΗΣ ΚΑΘΕ ΟΜΑΔΑΣ ΣΤΟ ΚΟΥΤΑΚΙ
     return Column(
+
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         for (int i = 0; i < matches.length; i++) ...[
@@ -89,7 +91,7 @@ class eachMatchContainerView extends StatelessWidget {
         },
         borderRadius: BorderRadius.circular(10),
         child: Card(
-
+          color: darkModeOn?darkModeMatches:Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
@@ -118,8 +120,24 @@ class eachMatchContainerView extends StatelessWidget {
                           child: match.homeTeam.image
                       ),
                       Text(" ${match.homeTeam.name}",
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                        style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: darkModeOn? Colors.white: Colors.black87
+                        ),
                       ),
+                      SizedBox(width: 10),
+                      Padding(
+                        padding: EdgeInsets.only(left: 0),
+                        child:Text(
+                          match.scoreHome!=-1?match.scoreHome.toString():"",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                              color: darkModeOn? Colors.white: Colors.black87
+                          ),
+                        )
+                      )
                     ],
                   ),
                   SizedBox(height: 2),
@@ -130,10 +148,24 @@ class eachMatchContainerView extends StatelessWidget {
                         width: 25,
                         child:  match.awayTeam.image
                       ),
-
                       Text(" ${match.awayTeam.name}",
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                        style: TextStyle(fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: darkModeOn? Colors.white: Colors.black87
+                        ),
                       ),
+                      SizedBox(width: 10),
+                      Padding(
+                          padding: EdgeInsets.only(left: 0),
+                          child:Text(
+                            match.scoreAway!=-1?match.scoreAway.toString():"",
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                                color: darkModeOn? Colors.white: Colors.black87
+                            ),
+                          )
+                      )
                     ],
                   ),
                 ],
@@ -228,7 +260,6 @@ class _MatchContainerTimeState extends State<MatchContainerTime> {
 
   @override
   Widget build(BuildContext context) {
-
     return Column(
       children: [
         Text(
@@ -269,6 +300,7 @@ class _NotificationIconState extends State<notificationIcon> {
   @override
   Widget build(BuildContext context) {
     return IconButton(
+      color: darkModeOn? Colors.white: Colors.black87,
       onPressed: () {
         setState(()
         {
@@ -285,8 +317,9 @@ class _NotificationIconState extends State<notificationIcon> {
             ));
       },
       icon: Icon(
+
         isNotified ? Icons.notifications_active : Icons.notification_add_outlined,
-        color: isNotified ? Colors.blue : Colors.black,
+        color: isNotified ? Colors.blue :darkModeOn? Colors.white: Colors.black87,
       ),
     );
   }

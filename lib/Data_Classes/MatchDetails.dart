@@ -37,7 +37,12 @@ class MatchDetails extends ChangeNotifier{
         required int time,
         required int day,
         required int month,
-        required year,required isGroupPhase,required game}) {
+        required year,
+        required isGroupPhase,
+        required game,
+        required int scoreHome,
+        required int scoreAway,
+      }) {
     _homeTeam = homeTeam;
     _awayTeam = awayTeam;
     _hasMatchStarted = false;
@@ -48,6 +53,8 @@ class MatchDetails extends ChangeNotifier{
     _month = month;
     _year = year;
     _startTimeInSeconds= DateTime.now().millisecondsSinceEpoch;
+    _scoreHome = scoreHome;
+    _scoreAway = scoreAway;
 
     _isGroupPhase=isGroupPhase;
     _game=game;

@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 
 import '../Data_Classes/AppUser.dart';
 import '../globals.dart';
@@ -14,8 +15,10 @@ class UserHandleBase
 
 
   //Επιστρέφει true αν συνδεθει και false αν το username υπάρχει ήδη ή συναντήσει πρόβλημα
-  Future<bool> signUpWithUsername(String username, String password,String uni) async {
-    if (await isUsernameAvailable(username)) {
+  Future<bool> signUpWithUsername(String username, String password,String uni,BuildContext context) async
+  {
+    if (await isUsernameAvailable(username))
+    {
       try {
         String email = "$username@myapp.com"; // Αυτόματη μετατροπή σε email
 
@@ -37,20 +40,34 @@ class UserHandleBase
             "University": uni,
             "Favourite Teams":[" "],
             "Controlled Teams":[" "]
-
-
           });
 
 
           globalUser = AppUser(username, uni, [], []);
           return true;
         }
-      } catch (e) {
-        print ("LathosQ:$e");
+      }
+      catch (e) {
+        if(password.length<6 && password.isNotEmpty) {
+          ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                backgroundColor: Colors.red,
+                content: Text(greek
+                    ? "Ο κωδικός πρέπει να έχει μήκος τουλάχιστον 6."
+                    : "Password must be at least 6 characters long"),
+                duration: Duration(seconds: 2),
+              ));
+        }
         return false;
       }
-    } else {
-      print ("yparxei");
+    }
+    else
+    {
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(greek?"Αυτό το όνομα χρησιμοποιείται ήδη! Επέλεξε κάποιο άλλο.":'This username already exists! Please try another one.'),
+            duration: Duration(seconds: 2),
+          ));
       return false;
     }
     return false;

@@ -654,7 +654,7 @@ void addInBase(BuildContext context, controller1, controller2, controller3) asyn
   String text3 = controller3.text;
 
 
-  bool found = await UserHandleBase().signUpWithUsername(text1,text2,text3);
+  bool found = await UserHandleBase().signUpWithUsername(text1,text2,text3,context);
 
   if(text1.isEmpty || text2.isEmpty || text3.isEmpty)
   {
@@ -669,13 +669,7 @@ void addInBase(BuildContext context, controller1, controller2, controller3) asyn
   }
   else if(!found)
     {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar( //ΕΜΦΑΝΙΖΩ ΜΗΝΥΜΑ ΛΑΘΟΥΣ ΑΝ ΕΧΕΙ ΚΑΠΟΙΟ ΠΕΔΙΟ ΚΕΝΟ
-          content: Text('This username already exists! Please pick another username.'),
-          backgroundColor: Colors.red,
-          duration: Duration(seconds: 2),
-        ),
-      );
+      //κενη για τωρα για να εμφανιζουμε σωστο μηνυμα λαθους ρε
     }
   else
   {

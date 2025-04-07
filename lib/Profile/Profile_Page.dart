@@ -20,220 +20,245 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  void pressed(){
-    UserHandleBase().addControlledTeamToFirestore(["Ολυμπιακός"] );
+  void pressed() {
+    UserHandleBase().addControlledTeamToFirestore(["Ολυμπιακός"]);
   }
 
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      scrollDirection: Axis.vertical,
-      children: [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                TextButton( onPressed: () {
-                   pressed();
-                          }, child: Text("Kane me admin tou thryloy")),
-                TextButton(onPressed: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>RequestApprovalScreen(),
-                      )
-                  );
-                }, child: Text("see Requests")),
-                TextButton(onPressed: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>AdminRequestScreen(),
-                      )
-                  );
-                }, child: Text("req"))
-              ],
-            ),
-            Padding(
-              padding: EdgeInsets.only(bottom: 5, top: 15, left: 5),
-              child: Text(
-                greek? "Επεξεργασία Προφίλ" : "Edit profile",
-                style: TextStyle(
-                    fontSize: greek? 21:23,
-                    fontWeight: FontWeight.bold,
-                    fontFamily: 'Trajan Pro',
-                  fontStyle: FontStyle.italic,
-                ),
-              ),
-            ),
-
-            // --- Εικόνα κάτω από το "Επεξεργασία Προφίλ" ---
-            Padding(
-              padding: EdgeInsets.only(top: 30,left: 130),// Κεντράρει την εικόνα
-              child: Image.asset(
-                "fotos/user.jpg",
-                // Σιγουρέψου ότι είναι στη σωστή διαδρομή!
-                width: 100,
-                height: 100,
-              ),
-            ),
-
-            SizedBox(height: 20), // Διάστημα μεταξύ εικόνας και κουμπιών
-
-            if (isLoggedIn)
-              Padding(
-                padding: EdgeInsets.only(bottom: 1, top: 5, right: greek?170:220),
-                child: TextButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => ChangeUserName(user: widget.user),
-                      )
-                    );
-                  },
-                  child: Text(
-                    greek?"Αλλαγή ονόματος χρήστη": "Change username",
-                    style: TextStyle(fontSize: greek?16:18, fontWeight: FontWeight.w600),
+    return Scaffold(
+      backgroundColor: darkModeOn? darkModeBackGround : Colors.white, // Dark background
+      body: ListView(
+        scrollDirection: Axis.vertical,
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  TextButton(
+                    onPressed: () {
+                      pressed();
+                    },
+                    child: Text(
+                      "Kane me admin tou thryloy",
+                      style: TextStyle(
+                          color: darkModeOn? Colors.white : Colors.black87,
+                      ),
+                    ),
                   ),
-                ),
-              ),
-            if (isLoggedIn)
-              Padding(
-                padding: EdgeInsets.only(bottom: 25, top: 1, right: greek?170: 220),
-                child: TextButton(
-                  onPressed: () {
-                    Navigator.push(
+                  TextButton(
+                    onPressed: () {
+                      Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => ChangePassword(user: widget.user),
-                        )
-                    );
-                  },
-                  child: Text(
-                    greek?"Αλλαγή κωδικού σύνδεσης":"Change password",
-                    style: TextStyle(fontSize:greek?16:18, fontWeight: FontWeight.w600),
+                            builder: (context) => RequestApprovalScreen()),
+                      );
+                    },
+                    child: Text(
+                        "see Requests", style: TextStyle(color: darkModeOn? Colors.white : Colors.black87,)),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => AdminRequestScreen()),
+                      );
+                    },
+                    child: Text("req", style: TextStyle(color: darkModeOn? Colors.white : Colors.black87,)),
+                  ),
+                ],
+              ),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 5, top: 15, left: 5),
+                child: Text(
+                  greek ? "Επεξεργασία Προφίλ" : "Edit profile",
+                  style: TextStyle(
+                    fontSize: greek ? 21 : 23,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: 'Trajan Pro',
+                    fontStyle: FontStyle.italic,
+                      color: darkModeOn? Colors.white : Colors.black87,
                   ),
                 ),
               ),
-
-            LogInButton(user: widget.user, onLoginStateChanged: () {
-              setState(() {}); // Refresh ProfilePage
-            }),
-
-            SizedBox(height: 20),
-
-            Row(
-              children: [
+              Padding(
+                padding: const EdgeInsets.only(top: 30, left: 130),
+                child: Image.asset(
+                  "fotos/user.jpg",
+                  width: 100,
+                  height: 100,
+                ),
+              ),
+              const SizedBox(height: 20),
+              if (isLoggedIn)
                 Padding(
-                    padding: EdgeInsets.only(left: 5),
+                  padding: EdgeInsets.only(
+                      bottom: 1, top: 5, right: greek ? 170 : 220),
+                  child: TextButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) =>
+                            ChangeUserName(user: widget.user)),
+                      );
+                    },
                     child: Text(
-                        greek?"Επιλογή Γλώσσας":"Choose Language",
+                      greek ? "Αλλαγή ονόματος χρήστη" : "Change username",
+                      style: TextStyle(fontSize: greek ? 16 : 18,
+                          fontWeight: FontWeight.w600,
+                        color: darkModeOn? Colors.white : Colors.black87,),
+                    ),
+                  ),
+                ),
+              if (isLoggedIn)
+                Padding(
+                  padding: EdgeInsets.only(
+                      bottom: 25, top: 1, right: greek ? 170 : 220),
+                  child: TextButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) =>
+                            ChangePassword(user: widget.user)),
+                      );
+                    },
+                    child: Text(
+                      greek ? "Αλλαγή κωδικού σύνδεσης" : "Change password",
+                      style: TextStyle(fontSize: greek ? 16 : 18,
+                          fontWeight: FontWeight.w600,
+                        color: darkModeOn? Colors.white : Colors.black87,),
+                    ),
+                  ),
+                ),
+              LogInButton(
+                user: widget.user,
+                onLoginStateChanged: () {
+                  setState(() {}); // Refresh ProfilePage
+                },
+              ),
+              const SizedBox(height: 20),
+
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                child: Row(
+                  children: [
+                    Padding(
+                        padding: EdgeInsets.only(right:50),
+                      child:
+                      Text(
+                        greek ? "Επιλογή Γλώσσας" : "Choose Language",
                         style: TextStyle(
                           fontSize: 18,
-                          fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.w600,
+                          color: darkModeOn ? Colors.white : Colors.black87,
                         ),
+                      ),
                     ),
-                ),
-                SizedBox(width: 10),
-
-                Padding(
-                    padding: EdgeInsets.only(left: 30),
-                    child:
-                    DropdownButton<String>(
-                      value: greek?"Ελληνικά":"English", // Αποθηκευμένη επιλογή
-                      onChanged: (String? newValue)
-                      {
-                        selectedLanguage = newValue!;
-                        setState(()
-                        {
-                          if(selectedLanguage == "English")
-                            greek=false;
-                          else
-                            greek=true;
-
-                          if(isLoggedIn)
-                            updateUserChar(globalUser.username,"Language");
-                        }
-                        );
-                      },
-                    items:
-                        [
-                          DropdownMenuItem<String>(
+                    DropdownButtonHideUnderline(
+                      child: DropdownButton<String>(
+                        dropdownColor: darkModeOn ? Colors.grey[850] : Colors.white,
+                        value: greek ? "Ελληνικά" : "English",
+                        icon: Icon(Icons.language, color: darkModeOn ? Colors.white : Colors.black87),
+                        style: TextStyle(
+                          color: darkModeOn ? Colors.white : Colors.black87,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        borderRadius: BorderRadius.circular(12),
+                        onChanged: (String? newValue) {
+                          setState(() {
+                            selectedLanguage = newValue!;
+                            greek = selectedLanguage == "Ελληνικά";
+                            if (isLoggedIn) {
+                              updateUserChar(globalUser.username, "Language");
+                            }
+                          });
+                        },
+                        items: [
+                          DropdownMenuItem(
                             value: "Ελληνικά",
                             child: Row(
-                              children: [
+                              children: const [
+                                Icon(Icons.flag, color: Colors.blue),
                                 SizedBox(width: 8),
                                 Text("Ελληνικά"),
                               ],
                             ),
                           ),
-                          DropdownMenuItem<String>(
+                          DropdownMenuItem(
                             value: "English",
                             child: Row(
-                              children: [
+                              children: const [
+                                Icon(Icons.flag, color: Colors.red),
                                 SizedBox(width: 8),
                                 Text("English"),
                               ],
                             ),
                           ),
-                        ]
+                        ],
+                      ),
                     ),
+                  ],
                 ),
-              ]
-            ),
-
-            SizedBox(height: 30,),
-
-
-            Padding(
-              padding: EdgeInsets.only(left: 5, bottom: 30),
-              child: Row(
-                children: [
-                  Text(
-                    greek?"Σκοτεινή λειτουργία":"Dark mode",
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  SizedBox(width: 20),
-                  OvalToggleButton(),
-                ],
               ),
-            ),
 
-            Container(
-              width: double.infinity,
-              height: 2,
-              color: Colors.black87,
-            ),
-            SizedBox(height: 20),
-
-            Padding(
-              padding: EdgeInsets.only(left: 10),
-              child: Column(
-                children: [
-                  Text(
-                    greek?"Επικοινωνία για προβλήματα":"Communication for problems",
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  SizedBox(height: 30),
-                  Padding(
-                    padding: EdgeInsets.only(right: 25),
-                    child: Text("Email: adamo@csd.auth.gr"),
-                  ),
-                  SizedBox(height: 30),
-                  Padding(
-                    padding: EdgeInsets.only(right: 45),
-                    child: Text("Email: kosma pes email"),
-                  ),
-                  SizedBox(height: 30,)
-                ],
+              const SizedBox(height: 30),
+              Padding(
+                padding:  EdgeInsets.only(left: 21, bottom: 30),
+                child: Row(
+                  children: [
+                    Text(
+                      greek ? "Σκοτεινή λειτουργία" : "Dark mode",
+                      style: TextStyle(fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        color: darkModeOn? Colors.white : Colors.black87,),
+                    ),
+                    SizedBox(width: 25),
+                    OvalToggleButton(),
+                  ],
+                ),
               ),
-            ),
-          ],
-        ),
-      ],
+              Container(
+                width: double.infinity,
+                height: 2,
+                color: Colors.black87,
+              ),
+              SizedBox(height: 20),
+              Padding(
+                padding: const EdgeInsets.only(left: 10),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      greek
+                          ? "Επικοινωνία για προβλήματα"
+                          : "Communication for problems",
+                      style: TextStyle(fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white),
+                    ),
+                    const SizedBox(height: 30),
+                    Padding(
+                      padding: EdgeInsets.only(right: 25),
+                      child: Text("Email: adamo@csd.auth.gr",
+                          style: TextStyle(color: darkModeOn? Colors.white : Colors.black87,)),
+                    ),
+                    const SizedBox(height: 30),
+                    Padding(
+                      padding: EdgeInsets.only(right: 45),
+                      child: Text("Email: kosma pes email",
+                          style: TextStyle(color: darkModeOn? Colors.white : Colors.black87,)),
+                    ),
+                    const SizedBox(height: 30),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }
@@ -260,30 +285,39 @@ class _LogInButtonState extends State<LogInButton> {
           Padding(
             padding: EdgeInsets.only(bottom: widget.user.isLoggedIn ? 70 : 70),
             child:
-            TextButton(
-              onPressed: () {
-                setState(() {
-                  if(!isLoggedIn) {
-                    Navigator.push(context, MaterialPageRoute(
-                        builder: (context) => LogInScreen(user: widget.user)));
-                  }
-                  else{
-                    isLoggedIn=false;
-                    globalUser=AppUser(" "," ",[ ], []);
-                  }
-                  //widget.user.changeLogIn(); // Toggle login state
-                });
-                widget.onLoginStateChanged(); // Notify ProfilePage to refresh
-              },
-              child: Text(
-                isLoggedIn ? greek?"Αποσύνδεση":"Disconnect" : greek?"Σύνδεση/Δημιουργία Λογαριασμού":"Login/Create an account",
-                style: TextStyle(
-                  fontSize: 19,
-                  fontWeight: FontWeight.w500,
-                  color: isLoggedIn ? Colors.red : Colors.blue,
-                ),
-              ),
-            ),
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 30),
+                  child:
+                    TextButton(
+
+                      style: ButtonStyle(
+                        backgroundColor: MaterialStateProperty.all<Color>(
+                            widget.user.isLoggedIn ? Colors.blue : Colors.red),
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          if(!isLoggedIn) {
+                            Navigator.push(context, MaterialPageRoute(
+                                builder: (context) => LogInScreen(user: widget.user)));
+                          }
+                          else{
+                            isLoggedIn=false;
+                            globalUser=AppUser(" "," ",[ ], []);
+                          }
+                          //widget.user.changeLogIn(); // Toggle login state
+                        });
+                        widget.onLoginStateChanged(); // Notify ProfilePage to refresh
+                      },
+                      child: Text(
+                        isLoggedIn ? greek?"Αποσύνδεση":"Disconnect" : greek?"Σύνδεση/Δημιουργία Λογαριασμού":"Login/Create an account",
+                        style: TextStyle(
+                          fontSize: 19,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                )
           ),
         ]
     );
@@ -306,6 +340,7 @@ class _OvalToggleButtonState extends State<OvalToggleButton> {
       onTap: () {
         setState(() {
           isToggled = !isToggled;
+
         });
       },
       child: AnimatedContainer(

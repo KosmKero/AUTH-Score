@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:untitled1/Firebase_Handle/TeamsHandle.dart';
 import 'package:untitled1/Team_Display_Page_Package/Team_Details_Widget.dart';
 import 'package:untitled1/Team_Display_Page_Package/Team_Matches_Widget.dart';
 import 'package:untitled1/Team_Display_Page_Package/Team_Players_Display_Widget.dart';
 import 'package:untitled1/championship_details/top_players_page.dart';
+import 'package:untitled1/globals.dart';
 import 'package:untitled1/main.dart';
 
 import '../Data_Classes/Team.dart';
@@ -135,30 +137,58 @@ class _NavigationButtonsState extends State<_NavigationButtons> {
 
 
 //ελεγχει την κατασταση για το αν η ομαδα ειναι στα αγαπημενα ή οχι.
-class isFavourite extends StatefulWidget{
-    final Team team;
-   const isFavourite({super.key, required this.team});
+class isFavourite extends StatefulWidget {
+  final Team team;
+
+  const isFavourite({super.key, required this.team});
+
   @override
   State<isFavourite> createState() => _isFavouriteState();
 }
 
 class _isFavouriteState extends State<isFavourite> {
+  bool isFavourite = false;
+  final TeamsHandle teamsHandle = TeamsHandle();
+
+  @override
+  void initState() {
+    super.initState();
+    _checkIfFavourite(); // Κάνε τον αρχικό έλεγχο εδώ
+  }
+
+  Future<void> _checkIfFavourite() async {
+    if (isLoggedIn) {
+      bool result = await teamsHandle.isFavouriteTeam(widget.team.name);
+      setState(() {
+        isFavourite = result;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return IconButton(
-      onPressed: () {
-        setState(() {
-          widget.team.changeFavourite(); // Toggle the favorite state
-        });
-        widget.team.isFavourite ? favouriteTeams.add(widget.team) : favouriteTeams.remove(widget.team);
+      onPressed: () async {
+        if (isLoggedIn) {
+          if (isFavourite) {
+            await teamsHandle.removeFavouriteTeam(widget.team.name);
+          } else {
+            await teamsHandle.addFavouriteTeam(widget.team.name);
+          }
+
+          setState(() {
+            isFavourite = !isFavourite;
+          });
+        }
       },
       icon: Icon(
-        widget.team.isFavourite ?  Icons.favorite:  Icons.favorite_border, // Change icon based on state
-        color: widget.team.isFavourite ? Colors.red : null , // Change color based on state
+        isFavourite ? Icons.favorite : Icons.favorite_border,
+        color: isFavourite ? Colors.red : null,
       ),
     );
   }
 }
+
 
 
 Widget _sectionChooser(int selectedIndex, Team team) {

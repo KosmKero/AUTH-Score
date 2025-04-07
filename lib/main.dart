@@ -123,7 +123,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(250, 50, 120, 90),
+      backgroundColor: Color.fromARGB(250, 50, 120, 90),
       body: Center(
         child: _hasError
             ? _buildErrorWidget()
@@ -221,7 +221,12 @@ Future<void> loadMatches() async {
   previousMatches = await teamsHandle.getMatches("previous");
   matches = [upcomingMatches, previousMatches];
   print("Matches loaded: $matches");
+
+
+  teamsHandle.addMatch("ΠΟΛΙΤΙΚΩΝ ΜΗΧΑΝ.", "ΠΛΗΡΟΦΟΡΙΚΗ", 30, 4, 2025, 1, false, true, 1510, "upcoming", -1, -1);
+  //teamsHandle.addMatch("ΕΜΠΟΡ.ΝΑΥΤΙΚΟ", "ΜΗΧΑΝ.ΜΗΧΑΝ.", 29, 4, 2025, 1, false, true, 1510, "upcoming", -1, -1);
 }
+
 
 // Original MainScreen and other classes
 class MainScreen extends StatefulWidget {
@@ -274,7 +279,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     return AppBar(
       title: Text("AUTH Score", style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: Colors.white)),
-      backgroundColor: const Color.fromARGB(250, 50, 120, 90),
+      backgroundColor: Color.fromARGB(250, 50, 120, 90),
       actions: [
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 5),
@@ -303,7 +308,7 @@ class CustomBottomNavigationBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BottomNavigationBar(
-      backgroundColor: const Color.fromARGB(255, 10, 28, 21),
+      backgroundColor:  darkModeOn?darkModeWidgets: Color.fromARGB(255, 10, 28, 21),
       selectedFontSize: 14,
       unselectedFontSize: 12,
       type: BottomNavigationBarType.fixed,

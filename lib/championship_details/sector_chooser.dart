@@ -59,13 +59,13 @@ class _NavigationButtonsState extends State<_NavigationButtons> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Color.fromARGB(70, 60, 80, 150),
+      color:darkModeOn?darkModeBackGround: Color.fromARGB(70, 60, 80, 150),
       height: 65,
       width: double.infinity,
       child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            _buildTextButton(greek?"Βαθμολογία":"Standings", 0),
+            _buildTextButton(greek?"Βαθμολογία":"Standings", 0,),
             SizedBox(width: 15),
             _buildTextButton(greek?"Νοκ Άουτς":"Knock outs", 1),
             SizedBox(width: 15),
@@ -90,14 +90,14 @@ class _NavigationButtonsState extends State<_NavigationButtons> {
             text,
             style: TextStyle(
               fontSize: 17,
-              color: isSelected ? Colors.blue : Colors.black87,
+              color: isSelected ? Colors.blue :darkModeOn?Colors.white: Colors.black87,
               fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
             ),
           ),
           SizedBox(height: 3), // Απόσταση μεταξύ κειμένου και γραμμής
           if (isSelected)
             Container(
-              width: 60, // Μήκος γραμμής
+              width: 70, // Μήκος γραμμής
               height: 3, // Πάχος γραμμής
               color: Colors.blue, // Χρώμα γραμμής
             ),

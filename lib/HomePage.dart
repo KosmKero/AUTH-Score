@@ -4,6 +4,7 @@ import 'package:untitled1/TopScorersContainer.dart';
 import 'package:untitled1/matchesContainer.dart';
 import 'API/Match_Handle.dart';
 import 'Scorer.dart';
+import 'globals.dart';
 
 
 class HomePage extends StatefulWidget {
@@ -34,8 +35,9 @@ class _HomePageState extends State<HomePage> {
     return Column(
       children: [
         Container(
-            color: Color.fromARGB(150, 60, 80, 150),
+            color: darkModeOn?darkModeBackGround: Color.fromARGB(150, 60, 80, 150),
             width: double.infinity,
+            height: 60,
             child: TextButton( //ΚΑΤΩ ΑΠΟ ΤΟ APPBAR
                 onPressed: () {
                   changeMatches();
@@ -75,11 +77,10 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
          */
-
         Expanded( //βαζει ολα τα match που ακολουθουν
           // flex: 5, // Το κάτω μέρος είναι μικρότερο
           child: Container(
-            color: Color.fromARGB(150, 60, 80, 150),
+            color: darkModeOn?darkModeBackGround:Color.fromARGB(150, 60, 80, 150),
             child: upcomingMatches? matchesContainer(
               matches: MatchHandle().getUpcomingMatches(),
             ) : matchesContainer(

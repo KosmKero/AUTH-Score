@@ -16,14 +16,17 @@ class _StandingsPage extends State<StandingsPage> {
   Widget build(BuildContext context) {
     return Expanded(
       child: Container(
-        color: Color.fromARGB(70, 60, 80, 150),
+        color:darkModeOn?darkModeBackGround: Color.fromARGB(70, 60, 80, 150),
         child: Column(children: [
           SizedBox(height: 5,),
           Text(greek?"Βαθμολογικός Πίνακας":"Standings Table",
               style: TextStyle(
                   fontSize: 23,
                   fontWeight: FontWeight.bold,
-                  color: Colors.white)),
+                  color: Color.fromARGB(255, 245, 245, 245),
+                  fontFamily: 'Montserrat',
+                  fontStyle: FontStyle.italic
+              )),
           SizedBox(height: 8,),
           Expanded(
               child: SingleChildScrollView(
@@ -59,27 +62,35 @@ class _StandingsPage extends State<StandingsPage> {
             children: [
               Text(greek?"Όμιλος $group":"Group $group",
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-              SizedBox(height: 2),
+              SizedBox(height: 4),
               DataTable(
                 columnSpacing: 20.0,
                 headingRowHeight: 40.0,
                 dataRowHeight: 60,
                 columns: [
-                  DataColumn(label: Text(greek?"Ομάδα":"Team")),
+                  DataColumn(label: Text(
+                      greek?"Ομάδα":"Team",
+                      style: TextStyle(fontWeight: FontWeight.bold),),
+                  ),
                    DataColumn(
-                      label: Text(greek?"Π":"P", textAlign: TextAlign.center),
+                      label: Text(greek?"Π":"P", textAlign: TextAlign.center,
+                        style: TextStyle(fontWeight: FontWeight.bold),),
                       numeric: true),
                    DataColumn(
-                      label: Text(greek?"Ν":"W", textAlign: TextAlign.center),
+                      label: Text(greek?"Ν":"W", textAlign: TextAlign.center,
+                            style: TextStyle(fontWeight: FontWeight.bold),),
                       numeric: true),
                    DataColumn(
-                      label: Text(greek?"Ι":"T", textAlign: TextAlign.center),
+                      label: Text(greek?"Ι":"T", textAlign: TextAlign.center,
+                        style: TextStyle(fontWeight: FontWeight.bold),),
                       numeric: true),
                    DataColumn(
-                      label: Text(greek?"Η":"L", textAlign: TextAlign.center),
+                      label: Text(greek?"Η":"L", textAlign: TextAlign.center,
+                        style: TextStyle(fontWeight: FontWeight.bold),),
                       numeric: true),
                    DataColumn(
-                      label: Text(greek?"Πόντοι":"Points", textAlign: TextAlign.center),
+                      label: Text(greek?"Πόντοι":"Points", textAlign: TextAlign.center,
+                        style: TextStyle(fontWeight: FontWeight.bold),),
                       numeric: true)
                 ],
                 rows: groupTeams

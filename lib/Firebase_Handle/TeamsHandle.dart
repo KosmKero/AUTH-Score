@@ -3,6 +3,7 @@ import 'package:untitled1/Data_Classes/MatchDetails.dart';
 
 import '../Data_Classes/Player.dart';
 import '../Data_Classes/Team.dart';
+import '../globals.dart';
 
 class TeamsHandle {
 
@@ -99,14 +100,14 @@ class TeamsHandle {
   }
 
 
-  Future<void> addMatch(Team team1, Team team2, int day, int month, int year, int game, bool hasStarted, bool isGroupPhase, int time, String type) async {
+  Future<void> addMatch(String name1, String name2, int day, int month, int year, int game, bool hasStarted, bool isGroupPhase, int time, String type,int goalHome,int goalAway) async {
     try {
       await FirebaseFirestore.instance
           .collection('matches')
-          .doc(team1.name+day.toString()+month.toString()+year.toString()+game.toString()+team2.name) // Improved unique ID
+          .doc(name1+day.toString()+month.toString()+year.toString()+game.toString()+name2) // Improved unique ID
           .set({
-        'Awayteam': team2.name,
-        'Hometeam': team1.name,
+        'Awayteam': name2,
+        'Hometeam': name1,
         'Day': day,
         'Month': month,
         'Year': year,
@@ -115,8 +116,10 @@ class TeamsHandle {
         'IsGroupPhase': isGroupPhase,
         'Time': time,
         'Type': type,
+        'GoalHome': goalHome,
+        'GoalAway': goalAway
       });
-      print("✅ Match added successfully: ${team1.name} vs ${team2.name}");
+      print("✅ Match added successfully: ${name1} vs ${name2}");
     } catch (e) {
       print("❌ Error adding match: $e");
     }
@@ -169,7 +172,6 @@ class TeamsHandle {
   }
 
 
-  /// ✅ Get Matches from Firestore with Error Handling
   Future<List<MatchDetails>> getMatches(String type) async {
     List<MatchDetails> matches = [];
 
@@ -184,20 +186,20 @@ class TeamsHandle {
         return matches;
       }
 
-      for (var matchDoc in matchDocs.docs)
-      {
-        var data = matchDoc.data();
+      // Χρησιμοποιούμε Future.wait για να κάνουμε τις κλήσεις παράλληλα
+      List<Future<MatchDetails?>> matchFutures = matchDocs.docs.map((matchDoc) async {
+        var data = matchDoc.data() as Map<String, dynamic>;
+        String homeTeamName = data["Hometeam"] ?? "";
+        String awayTeamName = data["Awayteam"] ?? "";
+        Team? homeTeam = await getTeam(homeTeamName);
+        Team? awayTeam = await getTeam(awayTeamName);
 
-        Team? homeTeam = await getTeam(data["Hometeam"]);
-        Team? awayTeam = await getTeam(data["Awayteam"]);
-
-        if (homeTeam == null || awayTeam == null)
-        {
-          print("⚠️ Skipping match due to missing team data: ${data["HomeTeam"]} vs ${data["AwayTeam"]}");
-          continue;
+        if (homeTeam == null || awayTeam == null) {
+          print("⚠️ Skipping match due to missing team data: $homeTeamName vs $awayTeamName");
+          return null;
         }
 
-        matches.add(MatchDetails(
+        return MatchDetails(
           homeTeam: homeTeam,
           awayTeam: awayTeam,
           hasMatchStarted: data['HasMatchStarted'] ?? false,
@@ -207,14 +209,135 @@ class TeamsHandle {
           year: data["Year"] ?? 0,
           isGroupPhase: data["IsGroupPhase"] ?? false,
           game: data["Game"] ?? 0,
-        ));
-      }
+          scoreHome: data["GoalHome"] ?? -1,
+          scoreAway: data["GoalAway"] ?? -1,
+        );
+      }).toList();
+
+      // Εκτελούνται όλες παράλληλα
+      var completedMatches = await Future.wait(matchFutures);
+
+      // Φιλτράρουμε τα null (όσα απορρίψαμε λόγω ελλιπών δεδομένων)
+      matches = completedMatches.whereType<MatchDetails>().toList();
+
       print("✅ Loaded ${matches.length} matches for type '$type'.");
     } catch (e) {
       print("❌ Error fetching matches of type '$type': $e");
     }
 
     return matches;
+  }
+
+
+  Future<bool> isFavouriteTeam(String teamName) async {
+
+    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+        .collection("users")
+        .where("username", isEqualTo: globalUser.username)
+        .where("Favourite Teams", arrayContains: teamName)
+        .get();
+
+
+    if(querySnapshot.docs.isNotEmpty) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+
+  Future<void> addFavouriteTeam(String teamName) async {
+    try {
+      // Βρες το έγγραφο του χρήστη με βάση το username
+      QuerySnapshot userSnapshot = await FirebaseFirestore.instance
+          .collection("users")
+          .where("username", isEqualTo: globalUser.username)
+          .get();
+
+      if (userSnapshot.docs.isNotEmpty) {
+        // Υποθέτουμε ότι το username είναι μοναδικό, οπότε παίρνουμε το πρώτο
+        DocumentReference userDocRef = userSnapshot.docs.first.reference;
+
+        // Κάνε ενημέρωση της λίστας των αγαπημένων ομάδων
+        await userDocRef.update({
+          "Favourite Teams": FieldValue.arrayUnion([teamName]),
+        });
+      } else {
+        print("User not found");
+      }
+    } catch (e) {
+      print("Error adding favourite team: $e");
+    }
+  }
+
+
+  Future<void> removeFavouriteTeam(String teamName) async {
+    try {
+      // Βρες το έγγραφο του χρήστη με βάση το username
+      QuerySnapshot userSnapshot = await FirebaseFirestore.instance
+          .collection("users")
+          .where("username", isEqualTo: globalUser.username)
+          .get();
+
+      if (userSnapshot.docs.isNotEmpty) {
+        // Υποθέτουμε ότι το username είναι μοναδικό
+        DocumentReference userDocRef = userSnapshot.docs.first.reference;
+
+        // Αφαίρεσε την ομάδα από τη λίστα
+        await userDocRef.update({
+          "Favourite Teams": FieldValue.arrayRemove([teamName]),
+        });
+      } else {
+        print("User not found");
+      }
+    } catch (e) {
+      print("Error removing favourite team: $e");
+    }
+  }
+
+
+
+  Future<List<String>> getAllFavouriteTeamsNames(String name) async {
+    List<String> fTeams = [];
+
+    QuerySnapshot userSnapshot = await FirebaseFirestore.instance
+        .collection("users")
+        .where("username", isEqualTo: name)  // Use the passed name parameter
+        .get();
+
+    if (userSnapshot.docs.isNotEmpty) {
+      // Assuming username is unique
+      DocumentSnapshot userDoc = userSnapshot.docs.first;
+
+      // Check if the field exists and is a List
+      if (userDoc.data() != null && (userDoc.data() as Map<String, dynamic>).containsKey("Favourite Teams")) {
+        // Convert to List<String>
+        List<dynamic> teamList = userDoc.get("Favourite Teams");
+        fTeams = teamList.map((team) => team.toString()).toList();
+      }
+    }
+
+    return fTeams;
+  }
+
+
+  Future<List<Team>> getAllFavouriteTeams(String name) async {
+    List<Team> fTeams = [];
+
+    List<String> teamNames = await getAllFavouriteTeamsNames(globalUser.username);
+
+    for (String teamName in teamNames) {
+      Team? fTeam = await getTeam(teamName);
+      if (fTeam != null) {
+        fTeams.add(fTeam);
+      }
+    }
+
+    return fTeams;
+
+
+
+
   }
 
 
