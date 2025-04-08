@@ -39,7 +39,9 @@ class UserHandleBase
             'email': email,
             "University": uni,
             "Favourite Teams":[" "],
-            "Controlled Teams":[" "]
+            "Controlled Teams":[" "],
+            "darkMode":false,
+            "Language":true
           });
 
 
@@ -97,9 +99,9 @@ class UserHandleBase
         password: password,
       );
 
+
+
       user = userCredential.user;
-
-
 
       DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection("users").doc(FirebaseAuth.instance.currentUser!.uid).get();
       if (userDoc.exists && userDoc.data() != null) {
@@ -109,10 +111,25 @@ class UserHandleBase
           (userDoc['Favourite Teams'] as List<dynamic>).map((e) => e.toString()).toList(),
           (userDoc['Controlled Teams'] as List<dynamic>).map((e) => e.toString()).toList(),
         );
+
+        darkModeNotifier.value = userDoc.get("darkMode");
+        if(darkModeNotifier.value) {
+          isToggled = true;
+        }
+        else{isToggled =false;}
+
+
+        greek = userDoc.get("Language");
+
+
+        print("HEEEEEYY");
+        print(greek);
+
       } else {
         print("Error: User document does not exist or is empty.");
       }
-      
+
+
       print("${userDoc.get("username")} ${userDoc.get("University")} ${(userDoc['Favourite Teams'] as List<dynamic>).map((e) => e.toString()).toList().first} ${(userDoc['Controlled Teams'] as List<dynamic>).map((e) => e.toString()).toList().first}");
       globalUser = globalUser;
 
@@ -147,5 +164,91 @@ class UserHandleBase
     }
   }
 
-  //AppUser? get getLoggedUser=> _loggedUser;
+
+  Future<void> changeDarkMode(String username) async {
+    final querySnapshot = await FirebaseFirestore.instance
+        .collection("users")
+        .where("username", isEqualTo: username)
+        .get();
+
+    if (querySnapshot.docs.isNotEmpty) {
+      final userDoc = querySnapshot.docs.first;
+
+      if (userDoc.data().containsKey("darkMode")) {
+        bool currentDarkMode = userDoc["darkMode"];
+        bool newDarkMode = !currentDarkMode;
+
+        await FirebaseFirestore.instance
+            .collection("users")
+            .doc(userDoc.id)
+            .update({"darkMode": newDarkMode});
+
+        darkModeNotifier.value = !darkModeNotifier.value;
+      } else {
+        // Αν δεν υπάρχει, ορίζουμε την πρώτη τιμή (π.χ. true)
+        await FirebaseFirestore.instance
+            .collection("users")
+            .doc(userDoc.id)
+            .update({"darkMode": false});
+
+        print(
+            "darkMode field did not exist, so it was created and set to true.");
+      }
+    }
+  }
+
+
+
+  //true == greek  else english
+  Future<void> updateLanguageChoice(String username,String language) async {
+    final querySnapshot = await FirebaseFirestore.instance
+        .collection("users")
+        .where("username", isEqualTo: username)
+        .get();
+
+    if (querySnapshot.docs.isNotEmpty) {
+      final userDoc = querySnapshot.docs.first;
+
+      if (userDoc.data().containsKey("Language")) {
+
+        bool nextLanguage = false;
+        if(language=="English") {
+          nextLanguage = false;
+        } else {
+          nextLanguage = true;
+        }
+
+        await FirebaseFirestore.instance
+            .collection("users")
+            .doc(userDoc.id)
+            .update({"Language": nextLanguage});
+
+
+
+      }
+      else {
+        // Αν δεν υπάρχει, ορίζουμε την πρώτη τιμή (π.χ. true)
+        await FirebaseFirestore.instance
+            .collection("users")
+            .doc(userDoc.id)
+            .update({"Language": true});
+      }
+    }
+  }
+
+
+  Future<String> getSelectedLanguage(String username) async {
+    final querySnapshot = await FirebaseFirestore.instance
+        .collection("users")
+        .where("username", isEqualTo: username)
+        .get();
+
+    if (querySnapshot.docs.first.get("Language")==true) {
+      return "Ελληνικά";
+    }
+
+    return "English";
+  }
+
 }
+

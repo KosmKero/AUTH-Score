@@ -335,12 +335,108 @@ class TeamsHandle {
 
     return fTeams;
 
-
-
-
   }
 
 
+  List<MatchDetails> getMatchUps() {
+
+    List<Team> firstBracket = [];
+    List<Team> secondBracket = [];
+    List<List<Team>> bracketResults = [];
+
+    for(Team team in topTeams)
+      {
+        if(team.group ==1 || team.group ==2) {
+          firstBracket.add(team);
+        }
+        else {
+          secondBracket.add(team);
+        }
+      }
+
+    bracketResults.add(firstBracket);
+    bracketResults.add(secondBracket);
+
+    List<MatchDetails> matches1 = [];
+    List<MatchDetails> matches2 = [];
+
+    for(var i=0;i<2;i++)
+      {
+        matches1.add(MatchDetails(
+            homeTeam: firstBracket[i],
+            awayTeam: firstBracket[firstBracket.length-i-1],
+            hasMatchStarted: false,
+            time: 1510,
+            day: 1,
+            month: 6,
+            year: 2025,
+            isGroupPhase: false,
+            game: 1,
+            scoreHome: -1,
+            scoreAway: -1));
+
+        matches1.add(MatchDetails(
+            homeTeam: firstBracket[i==0?4-i:5],
+            awayTeam: firstBracket[i==0?4-i-1:2],
+            hasMatchStarted: false,
+            time: 1510,
+            day: 1,
+            month: 6,
+            year: 2025,
+            isGroupPhase: false,
+            game: 1,
+            scoreHome: -1,
+            scoreAway: -1));
+      }
 
 
+    for(var i=0;i<2;i++)
+    {
+      matches2.add(MatchDetails(
+          homeTeam: secondBracket[i],
+          awayTeam: secondBracket[firstBracket.length-i-1],
+          hasMatchStarted: false,
+          time: 1510,
+          day: 1,
+          month: 6,
+          year: 2025,
+          isGroupPhase: false,
+          game: 1,
+          scoreHome: -1,
+          scoreAway: -1));
+
+      matches2.add(MatchDetails(
+          homeTeam: secondBracket[i==0?4-i:5],
+          awayTeam: secondBracket[i==0?4-i-1:2],
+          hasMatchStarted: false,
+          time: 1510,
+          day: 1,
+          month: 6,
+          year: 2025,
+          isGroupPhase: false,
+          game: 1,
+          scoreHome: -1,
+          scoreAway: -1));
+    }
+
+    int i=0;
+    int j=0;
+    List<MatchDetails> finalBracket = [];
+    while(i<matches1.length && j<matches2.length)
+      {
+        if(i==j) {
+          finalBracket.add(matches1[i]);
+          i++;
+        }
+        else{
+          finalBracket.add(matches2[j]);
+          j++;
+        }
+
+      }
+
+      finalBracket.add(matches2[j]);
+      return finalBracket;
+
+  }
 }

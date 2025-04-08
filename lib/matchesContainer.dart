@@ -91,7 +91,7 @@ class eachMatchContainerView extends StatelessWidget {
         },
         borderRadius: BorderRadius.circular(10),
         child: Card(
-          color: darkModeOn?darkModeMatches:Colors.white,
+          color: darkModeNotifier.value?darkModeMatches:Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
@@ -123,7 +123,7 @@ class eachMatchContainerView extends StatelessWidget {
                         style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
-                            color: darkModeOn? Colors.white: Colors.black87
+                            color: darkModeNotifier.value? Colors.white: Colors.black87
                         ),
                       ),
                       SizedBox(width: 10),
@@ -134,7 +134,7 @@ class eachMatchContainerView extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
-                              color: darkModeOn? Colors.white: Colors.black87
+                              color: darkModeNotifier.value? Colors.white: Colors.black87
                           ),
                         )
                       )
@@ -151,7 +151,7 @@ class eachMatchContainerView extends StatelessWidget {
                       Text(" ${match.awayTeam.name}",
                         style: TextStyle(fontSize: 16,
                             fontWeight: FontWeight.w600,
-                            color: darkModeOn? Colors.white: Colors.black87
+                            color: darkModeNotifier.value? Colors.white: Colors.black87
                         ),
                       ),
                       SizedBox(width: 10),
@@ -162,7 +162,7 @@ class eachMatchContainerView extends StatelessWidget {
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
-                                color: darkModeOn? Colors.white: Colors.black87
+                                color: darkModeNotifier.value? Colors.white: Colors.black87
                             ),
                           )
                       )
@@ -300,7 +300,7 @@ class _NotificationIconState extends State<notificationIcon> {
   @override
   Widget build(BuildContext context) {
     return IconButton(
-      color: darkModeOn? Colors.white: Colors.black87,
+      color: darkModeNotifier.value? Colors.white: Colors.black87,
       onPressed: () {
         setState(()
         {
@@ -319,7 +319,7 @@ class _NotificationIconState extends State<notificationIcon> {
       icon: Icon(
 
         isNotified ? Icons.notifications_active : Icons.notification_add_outlined,
-        color: isNotified ? Colors.blue :darkModeOn? Colors.white: Colors.black87,
+        color: isNotified ? Colors.blue :darkModeNotifier.value? Colors.white: Colors.black87,
       ),
     );
   }

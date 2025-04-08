@@ -16,7 +16,7 @@ class _StandingsPage extends State<StandingsPage> {
   Widget build(BuildContext context) {
     return Expanded(
       child: Container(
-        color:darkModeOn?darkModeBackGround: Color.fromARGB(70, 60, 80, 150),
+        color:darkModeNotifier.value?darkModeBackGround: Color.fromARGB(70, 60, 80, 150),
         child: Column(children: [
           SizedBox(height: 5,),
           Text(greek?"Βαθμολογικός Πίνακας":"Standings Table",
@@ -51,6 +51,9 @@ class _StandingsPage extends State<StandingsPage> {
       }
     }
     groupTeams.sort((a, b) => b.totalPoints.compareTo(a.totalPoints));
+    for (var i = 0; i < 4; i++) {
+      topTeams.add(groupTeams[i]);
+    }
 
     return Card(
         margin: EdgeInsets.symmetric(horizontal: 5.0, vertical: 2.0),

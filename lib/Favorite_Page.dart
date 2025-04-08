@@ -44,7 +44,7 @@ class _FavoriteContainerState extends State<FavoritePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: darkModeOn? darkModeBackGround:Colors.white, // Dark mode background
+      backgroundColor: darkModeNotifier.value? darkModeBackGround:Colors.white, // Dark mode background
       body: Column(
         children: [
           Expanded(
@@ -82,7 +82,7 @@ class _FavoriteContainerState extends State<FavoritePage> {
                 style: TextStyle(
                   fontSize: greek ? 23 : 21,
                   fontWeight: FontWeight.bold,
-                  color:darkModeOn? Colors.white : Colors.black87, // Text color
+                  color:darkModeNotifier.value? Colors.white : Colors.black87, // Text color
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -95,7 +95,7 @@ class _FavoriteContainerState extends State<FavoritePage> {
                 style: TextStyle(
                   fontSize: greek ? 23 : 21,
                   fontWeight: FontWeight.bold,
-                    color:darkModeOn? Colors.white : Colors.black87,
+                    color:darkModeNotifier.value? Colors.white : Colors.black87,
                 ),
                 textAlign: TextAlign.center,
               ),

@@ -35,7 +35,7 @@ class _HomePageState extends State<HomePage> {
     return Column(
       children: [
         Container(
-            color: darkModeOn?darkModeBackGround: Color.fromARGB(150, 60, 80, 150),
+            color: darkModeNotifier.value?darkModeBackGround: Color.fromARGB(150, 60, 80, 150),
             width: double.infinity,
             height: 60,
             child: TextButton( //ΚΑΤΩ ΑΠΟ ΤΟ APPBAR
@@ -80,7 +80,7 @@ class _HomePageState extends State<HomePage> {
         Expanded( //βαζει ολα τα match που ακολουθουν
           // flex: 5, // Το κάτω μέρος είναι μικρότερο
           child: Container(
-            color: darkModeOn?darkModeBackGround:Color.fromARGB(150, 60, 80, 150),
+            color: darkModeNotifier.value?darkModeBackGround:Color.fromARGB(150, 60, 80, 150),
             child: upcomingMatches? matchesContainer(
               matches: MatchHandle().getUpcomingMatches(),
             ) : matchesContainer(

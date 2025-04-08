@@ -8,12 +8,15 @@ import 'Data_Classes/Team.dart';
 
 
 bool isLoggedIn=false;
-bool darkModeOn=false;
+ValueNotifier<bool> darkModeNotifier = ValueNotifier<bool>(false);
+bool greek = true;
 String username = "";
 AppUser globalUser= AppUser("","",[],[]);
+bool isToggled = false;
+
+List<Team> topTeams = [];
 
 
-bool greek = true;
 List<Team> teams = [];
 
 
@@ -23,25 +26,6 @@ Color darkModeMatches = Color.fromARGB(255, 150, 150, 150);
 Color darkModeText = Colors.white;
 
 
-
-
-void updateUserChar(String username,String key) async
-{
-  QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-      .collection('users')
-      .where('Username', isEqualTo: username)
-      .limit(1)
-      .get();
-
-  if(querySnapshot.docs.isNotEmpty)
-    {
-      DocumentReference userDocRef = querySnapshot.docs.first.reference;
-      if(key=="Language") {
-        await userDocRef.update({key:greek});
-      }
-    }
-
-}
 
 
 Future<bool> getValue(String username, String key) async
