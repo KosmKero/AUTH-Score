@@ -122,6 +122,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       backgroundColor: Color.fromARGB(250, 50, 120, 90),
       body: Center(
@@ -211,7 +212,6 @@ class _LoadingScreenState extends State<LoadingScreen> {
 Future<void> loadTeams() async {
   TeamsHandle teamsHandle = TeamsHandle();
   teams = await teamsHandle.getAllTeams();
-  print(teams.length);
 }
 
 // Original matches loading function
@@ -220,10 +220,8 @@ Future<void> loadMatches() async {
   upcomingMatches = await teamsHandle.getMatches("upcoming");
   previousMatches = await teamsHandle.getMatches("previous");
   matches = [upcomingMatches, previousMatches];
-  print("Matches loaded: $matches");
 
 
-  teamsHandle.addMatch("ΠΟΛΙΤΙΚΩΝ ΜΗΧΑΝ.", "ΠΛΗΡΟΦΟΡΙΚΗ", 30, 4, 2025, 1, false, true, 1510, "upcoming", -1, -1);
   //teamsHandle.addMatch("ΕΜΠΟΡ.ΝΑΥΤΙΚΟ", "ΜΗΧΑΝ.ΜΗΧΑΝ.", 29, 4, 2025, 1, false, true, 1510, "upcoming", -1, -1);
 }
 

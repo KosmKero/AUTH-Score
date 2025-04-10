@@ -20,10 +20,10 @@ List<Team> topTeams = [];
 List<Team> teams = [];
 
 
-Color darkModeBackGround = const Color.fromARGB(250, 64, 64, 64);
-Color darkModeWidgets = Color.fromARGB(255, 80, 80, 80);
-Color darkModeMatches = Color.fromARGB(255, 150, 150, 150);
-Color darkModeText = Colors.white;
+Color darkModeBackGround = Color.fromARGB(250, 50, 50, 50);
+Color darkModeWidgets = Color.fromARGB(255, 40, 40, 40);
+Color darkModeMatches =  Colors.grey.shade50;
+Color darkModeText = Colors.blueGrey;
 
 
 

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:untitled1/Firebase_Handle/TeamsHandle.dart';
 import '../../Data_Classes/MatchDetails.dart';
 import '../../Data_Classes/Team.dart';
 import '../../Team_Display_Page_Package/TeamDisplayPage.dart';
@@ -29,7 +30,7 @@ class DetailsMatchNotStarted extends StatelessWidget {
               ),
             ),
             SizedBox(height: 8),
-            BettingChooser(), //TO KOYMΠΙ ΜΕ ΤΙΣ 3 ΕΠΙΛΟΓΕΣ (1Χ2)
+            BettingChooser(homeTeam:match.homeTeam.name,awayTeam:  match.awayTeam.name), //TO KOYMΠΙ ΜΕ ΤΙΣ 3 ΕΠΙΛΟΓΕΣ (1Χ2)
             SizedBox(
               height: 70,
             ),
@@ -46,9 +47,9 @@ class DetailsMatchNotStarted extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal:10.0),
               child: Column(
                 children: [ //ΔΗΜΙΟΥΡΓΕΙ ΤΙΣ ΟΜΑΔΕΣ
-                  TeamFormWidget(team: match.homeTeam, results: match.homeTeam.last5Results),
+                  TeamFormWidget(team: match.homeTeam),
                   SizedBox(height: 5),
-                  TeamFormWidget(team: match.awayTeam, results: match.awayTeam.last5Results),
+                  TeamFormWidget(team: match.awayTeam),
                 ],
               ),
             ),
@@ -60,40 +61,50 @@ class DetailsMatchNotStarted extends StatelessWidget {
   }
 }
 
+
+Future<List<num>> loadPercentages(String homeTeam, String awayTeam, String selection) async {
+  TeamsHandle teamsHandle = TeamsHandle();
+  return teamsHandle.getPercentages(homeTeam, awayTeam, selection);
+}
+
 class BettingChooser extends StatefulWidget {
-  const BettingChooser({super.key});
+  final String homeTeam;
+  final String awayTeam;
+
+  const BettingChooser({
+    super.key,
+    required this.homeTeam,
+    required this.awayTeam,
+  });
 
   @override
   State<BettingChooser> createState() => _BettingChooserState();
 }
 
-//ΥΛΟΠΟΙΕ ΤΟ ΚΟΥΜΠΙ ΜΕ ΤΙΣ 3 ΕΠΟΙΛΟΓΕΣ
 class _BettingChooserState extends State<BettingChooser> {
+  TeamsHandle teamsHandle = TeamsHandle();
   String _selected = '';
-  int count1 = 0;
-  int countX = 0;
-  int count2 = 0;
   bool hasChosen = false;
+  List<num> percentages = [];
 
-  void _updateCount(String value) {
-    if(hasChosen)return;
-    setState(() {
-      hasChosen =true;
-      _selected  = value;
-      if(_selected=='1') count1++;
-      if(_selected=='X') countX++;
-      if(_selected=='2') count2++;
-    });
-  }
+  void _updateCount(String value) async {
+    if (hasChosen) return;
 
-  double getTotalCount() => (count1 + countX + count2).toDouble();
+    // First perform the async work
+    final loadedPercentages = await loadPercentages(
+      widget.homeTeam,
+      widget.awayTeam,
+      value,
+    );
 
-  String getPercentage(String value){
-    if (getTotalCount() == 0) return "0";
-    if (value=='X') return ((countX / getTotalCount()) * 100).toStringAsFixed(1)+"%";
-    if (value=='1') return ((count1 / getTotalCount()) * 100).toStringAsFixed(1)+"%";
-    if (value=='2') return ((count2 / getTotalCount()) * 100).toStringAsFixed(1)+"%";
-    return "0";
+    // Then update the state
+    if (mounted) {
+      setState(() {
+        hasChosen = true;
+        _selected = value;
+        percentages = loadedPercentages;
+      });
+    }
   }
 
   @override
@@ -106,16 +117,16 @@ class _BettingChooserState extends State<BettingChooser> {
           width: 320,
         child: SegmentedButton<String>(
           segments: [
-            ButtonSegment(value: '1', label: Text(hasChosen ? getPercentage("1") : "1",
+            ButtonSegment(value: '1', label: Text(hasChosen ? percentages[0].toStringAsFixed(2)  : "1",
               style:  TextStyle(fontSize: 15,),
               textAlign: TextAlign.center,
               overflow: TextOverflow.ellipsis,
               ),
             ),
 
-            ButtonSegment(value: 'X', label: Text(hasChosen ? getPercentage("X") :'X',style: TextStyle(fontSize: 15),)),
+            ButtonSegment(value: 'X', label: Text(hasChosen ? percentages[2].toStringAsFixed(2) :'X',style: TextStyle(fontSize: 15),)),
 
-            ButtonSegment(value: '2', label: Text(hasChosen ? getPercentage("2") :'2',style: TextStyle(fontSize: 15,))),
+            ButtonSegment(value: '2', label: Text(hasChosen ? percentages[1].toStringAsFixed(2) :'2',style: TextStyle(fontSize: 15,))),
           ],
           style: ButtonStyle(
               fixedSize: WidgetStateProperty.all(Size(540, 50)),
@@ -139,53 +150,74 @@ class _BettingChooserState extends State<BettingChooser> {
 }
 
 
+Future<List<String>> getFinalFive(String teamName) async{
+
+  TeamsHandle teamsHandle = TeamsHandle();
+  return teamsHandle.getPreviousResults(teamName);
+}
+
+
 //ΑΦΟΡΑ ΤΗΝ ΚΑΤΑΣΚΕΥΗ ΤΩΝ ΟΝΟΜΑΤΩΝ ΤΩΝ ΟΜΑΔΩΝ ΣΤΟ ΚΑΤΩ ΜΕΡΟΣ
 class TeamFormWidget extends StatelessWidget {
   final Team team;
-  final List<String> results; // "W" for Win, "D" for Draw, "L" for Loss
 
-  const TeamFormWidget({super.key, required this.team, required this.results});
+  const TeamFormWidget({super.key, required this.team});
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(left: 1,top: 10),
-      child: Row(
-        children: [
-          // Team Name (Left)
-          SizedBox(
-            width: 155, // Ensures team names align
-            child: TextButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => TeamDisplayPage(team)),
-                );
-              },
-              child: Text(
-                team.name,
-                style: TextStyle(
-                  fontSize: 17,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black,
-                  letterSpacing: 1.5,
-                ),
-              ),
-            ),
-          ),
-          SizedBox(width: 30), // Space between name and results
+    return FutureBuilder<List<String>>(
+      future: getFinalFive(team.name),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const CircularProgressIndicator(); // ή κάποιο placeholder
+        }
+        else if (snapshot.hasError)
+        {
+          return const Text("Error loading results");
+        } else {
+          final results = snapshot.data ?? [];
 
-          // Result Circles (Right, aligned)
-          Row(
-            children: results
-                .map((result) => Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 3),
-              child: _buildResultIcon(result),
-            ))
-                .toList(),
-          ),
-        ],
-      ),
+          return Padding(
+            padding: EdgeInsets.only(left: 1, top: 10),
+            child: Row(
+              children: [
+                // Team Name
+                SizedBox(
+                  width: 155,
+                  child: TextButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => TeamDisplayPage(team)),
+                      );
+                    },
+                    child: Text(
+                      team.name,
+                      style: TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black,
+                        letterSpacing: 1.5,
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(width: 30),
+                Row(
+                  children: results
+                      .map((result) => Padding(
+                    padding:
+                    const EdgeInsets.symmetric(horizontal: 3),
+                    child: _buildResultIcon(result),
+                  ))
+                      .toList(),
+                ),
+              ],
+            ),
+          );
+        }
+      },
     );
   }
 
@@ -214,4 +246,3 @@ class TeamFormWidget extends StatelessWidget {
     return Icon(icon, color: color, size: 30);
   }
 }
-

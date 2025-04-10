@@ -336,9 +336,137 @@ class TeamsHandle {
     return fTeams;
 
   }
+  
+  
+  Future<List<String>> getPreviousResults(String name) async
+  {
+    final querySnapshot = await FirebaseFirestore.instance
+        .collection("teams")
+        .where("Name", isEqualTo: name)
+        .get();
+    
+    if(querySnapshot.docs.isNotEmpty)
+      {
+        final teamDoc = querySnapshot.docs.first;
+        return List<String>.from(teamDoc.get("LastFive"));
+
+      }
+
+    return [];
+  }
+
+  /*
+  Future<void> addDraw(String home,String away) async{
+    final querySnapshot = await FirebaseFirestore.instance
+        .collection("matches")
+        .where("Hometeam", isEqualTo: home)
+        .where("Awayteam", isEqualTo: away)
+        .get();
+
+    if(querySnapshot.docs.isNotEmpty)
+      {
+        final matchDoc = querySnapshot.docs.first;
+        matchDoc.reference.update({"Draws": FieldValue.delete()});
+      }
+  }
+
+   */
 
 
-  List<MatchDetails> getMatchUps() {
+  Future<void> addAllValues(String home,String away,String selection) async{
+    final querySnapshot = await FirebaseFirestore.instance
+        .collection("matches")
+        .where("Hometeam", isEqualTo: home)
+        .where("Awayteam", isEqualTo: away)
+        .get();
+
+    if(querySnapshot.docs.isNotEmpty){
+      final matchDoc = querySnapshot.docs.first;
+
+      if(selection=="1"){
+        matchDoc.reference.update({"HomeVote": FieldValue.increment(1)});
+      }
+      else if(selection=="2"){
+        matchDoc.reference.update({"AwayVote": FieldValue.increment(1)});
+      }
+      else{
+        matchDoc.reference.update({"DrawVote": FieldValue.increment(1)});
+      }
+    }
+  }
+
+
+  Future<List<num>> getPercentages(String home, String away, String selection) async {
+    final querySnapshot = await FirebaseFirestore.instance
+        .collection("matches")
+        .where("Hometeam", isEqualTo: home)
+        .where("Awayteam", isEqualTo: away)
+        .get();
+
+    if (querySnapshot.docs.isNotEmpty) {
+      final matchDoc = querySnapshot.docs.first;
+
+      // ΠΕΡΙΜΕΝΕ να τελειώσει η ενημέρωση των votes
+      await addAllValues(home, away, selection);
+
+      // Ξαναφόρτωσε το έγγραφο μετά την ενημέρωση
+      final updatedDoc = await matchDoc.reference.get();
+
+      int homeVotes = updatedDoc.get("HomeVote");
+      int awayVotes = updatedDoc.get("AwayVote");
+      int drawVotes = updatedDoc.get("DrawVote");
+
+      int totalVotes = homeVotes + awayVotes + drawVotes;
+
+      if (totalVotes == 0) return [0, 0, 0]; // αποφυγή διαίρεσης με το μηδέν
+
+      List<num> percentages = [
+        homeVotes / totalVotes * 100,
+        awayVotes / totalVotes * 100,
+        drawVotes / totalVotes * 100,
+      ];
+
+      return percentages;
+    }
+
+    return [];
+  }
+
+
+
+
+
+/*
+  ΣΥΝΑΡΤΗΣΗ ΓΙΑ ΝΑ ΚΑΝΕΙ ΑΝΑΝΕΩΣΗ ΤΑ ΑΠΟΤΕΛΕΣΜΑΤΑ ΣΕ ΚΑΘΕ ΟΜΑΔΑ ΜΕΤΑ ΤΗΝ ΛΗΞΗ ΤΟΥ ΑΓΩΝΑ!!!!!
+  Future<void> addResult(String name, String result) async
+  {
+    final querySnapshot = await FirebaseFirestore.instance
+        .collection("teams")
+        .where("Name", isEqualTo: name)
+        .get();
+
+    if(querySnapshot.docs.isNotEmpty) {
+      final teamDoc = querySnapshot.docs.first;
+      final lastFive = List<String>.from(teamDoc.get("LastFive"));
+
+      for (var i = 0; i < 4; i++){
+        lastFive[i] = lastFive[i + 1];
+
+      }
+
+      lastFive[4] = result;
+
+      await teamDoc.reference.update({"LastFive": lastFive});
+
+    }
+
+
+
+  }
+
+   */
+
+  /*List<MatchDetails> getMatchUps() {
 
     List<Team> firstBracket = [];
     List<Team> secondBracket = [];
@@ -439,4 +567,9 @@ class TeamsHandle {
       return finalBracket;
 
   }
+
+   */
+
+
+
 }
