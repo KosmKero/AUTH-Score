@@ -52,8 +52,8 @@ class _FavoriteContainerState extends State<FavoritePage> {
             child: favouriteTeams.isNotEmpty
                 ? DropdownButton<Team>(
               value: selectedTeam,
-              dropdownColor: const Color.fromARGB(255, 48, 48, 48), // Optional: dark dropdown
-              style: const TextStyle(color: Colors.white), // Text color in dropdown
+              dropdownColor: darkModeNotifier.value? Colors.black: Colors.white, // Optional: dark dropdown
+              style:  TextStyle(color: darkModeNotifier.value? Colors.white:Colors.black87), // Text color in dropdown
               items: favouriteTeams.map<DropdownMenuItem<Team>>((Team team) {
                 return DropdownMenuItem<Team>(
                   value: team,

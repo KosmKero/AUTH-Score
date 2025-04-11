@@ -86,6 +86,18 @@ class UserHandleBase
         .docs.isEmpty; // Επιστρέφει true αν το username είναι διαθέσιμο
   }
 
+  Future<void> loadLanguage(String username) async {
+    final querySnapshot = await FirebaseFirestore.instance
+        .collection("users")
+        .where("username", isEqualTo: username)
+        .get();
+
+    if(querySnapshot.docs.isNotEmpty) {
+      final userDoc = querySnapshot.docs.first;
+      greek = userDoc.get("Language");
+    }
+  }
+
 
 
   Future<bool> login(String username, String password) async {
@@ -104,7 +116,8 @@ class UserHandleBase
       user = userCredential.user;
 
       DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection("users").doc(FirebaseAuth.instance.currentUser!.uid).get();
-      if (userDoc.exists && userDoc.data() != null) {
+      if (userDoc.exists && userDoc.data() != null)
+      {
         globalUser = AppUser(
           userDoc.get("username").toString(),
           userDoc.get("University").toString(),
@@ -119,13 +132,11 @@ class UserHandleBase
         else{isToggled =false;}
 
 
-        greek = userDoc.get("Language");
+        await loadLanguage(username);
 
-
-        print("HEEEEEYY");
-        print(greek);
-
-      } else {
+      }
+      else
+      {
         print("Error: User document does not exist or is empty.");
       }
 
@@ -183,7 +194,7 @@ class UserHandleBase
             .doc(userDoc.id)
             .update({"darkMode": newDarkMode});
 
-        darkModeNotifier.value = !darkModeNotifier.value;
+        //darkModeNotifier.value = !darkModeNotifier.value;
       } else {
         // Αν δεν υπάρχει, ορίζουμε την πρώτη τιμή (π.χ. true)
         await FirebaseFirestore.instance

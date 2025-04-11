@@ -78,6 +78,14 @@ class _LoadingScreenState extends State<LoadingScreen> {
   void initState() {
     super.initState();
     _loadData();
+    if(isLoggedIn)
+      _loadLanguage();
+  }
+
+
+  Future<void> _loadLanguage() async {
+    UserHandleBase userHandle = UserHandleBase();
+    userHandle.loadLanguage(globalUser.username);
   }
 
   Future<void> _loadData() async {

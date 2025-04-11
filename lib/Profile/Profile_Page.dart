@@ -143,7 +143,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           style: TextStyle(
                             fontSize: greek ? 16 : 18,
                             fontWeight: FontWeight.w600,
-                            color: darkModeOn ? Colors.white : Colors.black87,
+                            color: darkModeOn ? Colors.white : Color.fromARGB(255, 70, 107, 255),
                           ),
                         ),
                       ),
@@ -165,7 +165,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           style: TextStyle(
                             fontSize: greek ? 16 : 18,
                             fontWeight: FontWeight.w600,
-                            color: darkModeOn ? Colors.white : Colors.black87,
+                            color: darkModeOn ? Colors.white : Color.fromARGB(255, 70, 107, 255),
                           ),
                         ),
                       ),

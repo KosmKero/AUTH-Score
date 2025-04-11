@@ -571,7 +571,7 @@ class CreateButton extends StatelessWidget {
             elevation: 3,
           ),
           child: Text(
-            signIn ? greek?"Σύνδεση":"SIGN IN" : greek?"Εγγραγή":"SIGN UP",
+            signIn ? greek?"Σύνδεση":"SIGN IN" : greek?"Εγγραφή":"SIGN UP",
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
