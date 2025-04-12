@@ -29,11 +29,22 @@ List<List<MatchDetails>> matches = [];
 List<Team> favouriteTeams = [];
 List<Player> players = [];
 
+
+Future<void> loadUser(User user) async{
+  UserHandleBase userHandle = UserHandleBase();
+   userHandle.getUser(user);
+}
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+
   try {
     await Firebase.initializeApp();
+    User? user = FirebaseAuth.instance.currentUser;
+    if(user!=null) {
+      loadUser(user);
+    }
     print("✅ Firebase initialized successfully!");
   } catch (e) {
     print("❌ Firebase initialization failed: $e");

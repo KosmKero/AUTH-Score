@@ -261,5 +261,40 @@ class UserHandleBase
     return "English";
   }
 
+
+  Future<void> getUser(User user)async
+  {
+    DocumentSnapshot userDoc = await FirebaseFirestore.instance
+        .collection("users")
+        .doc(user.uid)
+        .get();
+
+    if(userDoc.exists && userDoc.data() != null){
+      globalUser = AppUser(
+        userDoc.get("username").toString(),
+        userDoc.get("University").toString(),
+        (userDoc['Favourite Teams'] as List<dynamic>).map((e) => e.toString()).toList(),
+        (userDoc['Controlled Teams'] as List<dynamic>).map((e) => e.toString()).toList(),
+      );
+
+      print("HEREEEEEEE");
+      print(userDoc.get("username"));
+
+      isLoggedIn = true;
+
+      darkModeNotifier.value = userDoc.get("darkMode");
+      if(darkModeNotifier.value) {
+        isToggled = true;
+      }
+      else{isToggled =false;}
+
+      await loadLanguage(globalUser.username);
+
+    }
+    else{
+      print("Error: User document does not exist or is empty.");
+    }
+
+  }
 }
 
