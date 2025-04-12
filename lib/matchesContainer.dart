@@ -125,18 +125,6 @@ class eachMatchContainerView extends StatelessWidget {
                             fontWeight: FontWeight.w600,
                             color: darkModeNotifier.value? Colors.white: Colors.black87
                         ),
-                      ),
-                      SizedBox(width: 10),
-                      Padding(
-                        padding: EdgeInsets.only(left: 0),
-                        child:Text(
-                          match.scoreHome!=-1?match.scoreHome.toString():"",
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                              color: darkModeNotifier.value? Colors.white: Colors.black87
-                          ),
-                        )
                       )
                     ],
                   ),
@@ -154,18 +142,6 @@ class eachMatchContainerView extends StatelessWidget {
                             color: darkModeNotifier.value? Colors.white: Colors.black87
                         ),
                       ),
-                      SizedBox(width: 10),
-                      Padding(
-                          padding: EdgeInsets.only(left: 0),
-                          child:Text(
-                            match.scoreAway!=-1?match.scoreAway.toString():"",
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                                color: darkModeNotifier.value? Colors.white: Colors.black87
-                            ),
-                          )
-                      )
                     ],
                   ),
                 ],

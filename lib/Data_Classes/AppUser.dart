@@ -1,4 +1,6 @@
 
+import 'package:untitled1/globals.dart';
+
 import 'Team.dart';
 
 class AppUser

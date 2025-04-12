@@ -37,16 +37,26 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
   int selectedIndex = 0;
   late int _secondsElapsed;
   Timer? _timer;
+  late int _startTimeInSeconds;
 
   @override
   void initState() {
     super.initState();
-    _secondsElapsed = (DateTime.now().millisecondsSinceEpoch ~/ 1000) -
-        widget.match.startTimeInSeconds;
-    _secondsElapsed = (DateTime.now().millisecondsSinceEpoch ~/ 1000) -
-        widget.match.startTimeInSeconds;
-
+    _startTimeInSeconds = widget.match.startTimeInSeconds;
+    _syncTime();
     _startTimer();
+  }
+
+  @override
+  void didUpdateWidget(covariant _MatchStartedView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.match.startTimeInSeconds != widget.match.startTimeInSeconds) {
+      _startTimeInSeconds = widget.match.startTimeInSeconds;
+      _syncTime(); // reset με νέα βάση
+    }
+  }
+  void _syncTime() {
+    _secondsElapsed = DateTime.now().millisecondsSinceEpoch ~/ 1000 - _startTimeInSeconds;
   }
 
   @override
@@ -195,32 +205,40 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
   }
 
   Widget _buildMatchTimer() {
-    int minutes = _secondsElapsed ~/ 60;
-    int seconds = _secondsElapsed % 60;
-    return Column(
-      children: [
-        SizedBox(
-          height: 15,
-        ),
-        Text("${widget.match.scoreHome}-${widget.match.scoreAway}",
-            style: const TextStyle(
-                fontWeight: FontWeight.bold, fontSize: 25, color: Colors.red)),
-        (!widget.match.isHalfTime())
-            ? Text(
-                '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}',
-                style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                    color: Colors.red),
-              )
-            : Text('Ημίχρονο',
-                style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 13,
-                    color: Colors.red))
-      ],
+    return Consumer<MatchDetails>(
+      builder: (context, matchDetails, child) {
+        // Λαμβάνουμε το χρόνο σε δευτερόλεπτα από το matchDetails
+        int secondsElapsed = DateTime.now().millisecondsSinceEpoch ~/ 1000-matchDetails.startTimeInSeconds;
+
+        int minutes = secondsElapsed ~/ 60;
+        int seconds = secondsElapsed % 60;
+
+        return Column(
+          children: [
+            SizedBox(height: 15),
+            Text(
+              "${matchDetails.scoreHome}-${matchDetails.scoreAway}",
+              style: const TextStyle(
+                  fontWeight: FontWeight.bold, fontSize: 25, color: Colors.red),
+            ),
+            // Ελέγχουμε αν είναι το ημίχρονο ή όχι
+            !matchDetails.isHalfTime()
+                ? Text(
+              '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}',
+              style: const TextStyle(
+                  fontWeight: FontWeight.bold, fontSize: 16, color: Colors.red),
+            )
+                : Text(
+              'Ημίχρονο',
+              style: const TextStyle(
+                  fontWeight: FontWeight.bold, fontSize: 13, color: Colors.red),
+            )
+          ],
+        );
+      },
     );
   }
+
 
   Widget _buildMatchdetails() {
     return Column(
@@ -420,8 +438,7 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
     // Check if the user is logged in
 
     if (globalUser.controlTheseTeams(
-            widget.match.homeTeam.name, widget.match.awayTeam.name) ??
-        false) {
+            widget.match.homeTeam.name, widget.match.awayTeam.name) && !widget.match.hasMatchFinished) {
       return GestureDetector(
         onTap: () {
           homeTeamScored
@@ -457,6 +474,12 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
   }
 
   Widget _matchProgressAdmin() {
+    //3 ωρες μετα το ματς δεν μπορεις να το κανεις κανσελ
+    if (DateTime.now().millisecondsSinceEpoch ~/ 1000>widget.match.startTimeInSeconds + 3*3600){
+      return SizedBox(
+        height: 10,
+      );
+    }
     // Check if the user is logged in
     if (widget.match.hasMatchFinished &&
         (globalUser.controlTheseTeams(
@@ -650,8 +673,7 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
 
   Widget _cardAdmin(bool homeTeamCard) {
     if (globalUser.controlTheseTeams(
-            widget.match.homeTeam.name, widget.match.awayTeam.name) ??
-        false) {
+            widget.match.homeTeam.name, widget.match.awayTeam.name) && !widget.match.hasMatchFinished) {
       return TextButton(
           onPressed: () {
             homeTeamCard

@@ -117,7 +117,10 @@ class TeamsHandle {
         'Time': time,
         'Type': type,
         'GoalHome': goalHome,
-        'GoalAway': goalAway
+        'GoalAway': goalAway,
+        "hasMatchFinished": false ,
+        "hasSecondHalfStarted": false,
+        "hasFirstHalfFinished":false,
       });
       print("✅ Match added successfully: ${name1} vs ${name2}");
     } catch (e) {
@@ -211,6 +214,10 @@ class TeamsHandle {
           game: data["Game"] ?? 0,
           scoreHome: data["GoalHome"] ?? -1,
           scoreAway: data["GoalAway"] ?? -1,
+          hasMatchFinished: data["hasMatchFinished"] ?? false,
+          hasSecondHalfStarted: data["hasSecondHalfStarted"] ?? false,
+          hasFirstHalfFinished: data["hasFirstHalfFinished"] ?? false,
+          timeStarted: data["TimeStarted"] ?? DateTime.now().millisecondsSinceEpoch,
         );
       }).toList();
 

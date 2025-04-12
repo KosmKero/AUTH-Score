@@ -163,6 +163,7 @@ class _isFavouriteState extends State<isFavourite> {
         isFavourite = result;
       });
     }
+
   }
 
   @override
@@ -179,6 +180,15 @@ class _isFavouriteState extends State<isFavourite> {
           setState(() {
             isFavourite = !isFavourite;
           });
+        }
+        else{
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: greek? Text('Πρέπει να συνδεθείς για να έχεις αγαπημένες ομάδες!') : Text('You have to log in to have favourite teams!'),
+              backgroundColor: Colors.red,
+              duration: Duration(seconds: 3),
+            ),
+          );
         }
       },
       icon: Icon(

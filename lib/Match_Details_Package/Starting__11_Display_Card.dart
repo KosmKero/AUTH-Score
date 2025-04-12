@@ -151,7 +151,7 @@ class _Starting11DisplayState extends State<Starting11Display> {
                   players: (isHomeTeam) ? widget.match.playersSelected[0] : widget.match.playersSelected[1],
                   playersList: (isHomeTeam) ? widget.match.players11[0] : widget.match.players11[1],
                   ind: (isHomeTeam) ? index-1: index, // Χρησιμοποιούμε το σωστό index
-                  profColor: (isHomeTeam)? Colors.black : Colors.blueGrey,
+                  profColor: (isHomeTeam)? Colors.black : Colors.blueGrey, match: widget.match,
                 );
               }),
             ),
@@ -174,7 +174,8 @@ class PlayerWidget extends StatefulWidget {
   final List<Player?> playersList;
   final  int ind;
   final Color profColor;
-  const PlayerWidget({super.key, required this.players,required this.playersList,required this.ind,required this.profColor});
+  final MatchDetails match;
+  const PlayerWidget({super.key, required this.players,required this.playersList,required this.ind,required this.profColor, required this.match});
 
   @override
   State<PlayerWidget> createState() => _PlayerWidgetState();
@@ -184,7 +185,12 @@ class _PlayerWidgetState extends State<PlayerWidget> {
 
   void tapped() {
     // Εμφάνιση διαλόγου ή bottom sheet με διαθέσιμους παίκτες
-    showAvailablePlayers();
+    if (globalUser.controlTheseTeams(widget.match.homeTeam.name, widget.match.awayTeam.name) &&
+        (DateTime.now().millisecondsSinceEpoch ~/ 1000) > widget.match.startTimeInSeconds + 3600)
+    // Έχει περάσει μία ώρα από την έναρξη
+     {
+      showAvailablePlayers();
+    }
   }
 
   void showAvailablePlayers() {
