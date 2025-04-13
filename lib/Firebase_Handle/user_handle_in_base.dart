@@ -41,11 +41,12 @@ class UserHandleBase
             "Favourite Teams":[],
             "Controlled Teams":[],
             "darkMode":false,
-            "Language":true
+            "Language":true,
+            'role': 'user'
           });
 
 
-          globalUser = AppUser(username, uni, [], []);
+          globalUser = AppUser(username, uni, [], [],"user");
           return true;
         }
       }
@@ -123,6 +124,7 @@ class UserHandleBase
           userDoc.get("University").toString(),
           (userDoc['Favourite Teams'] as List<dynamic>).map((e) => e.toString()).toList(),
           (userDoc['Controlled Teams'] as List<dynamic>).map((e) => e.toString()).toList(),
+          userDoc['role']
         );
 
         darkModeNotifier.value = userDoc.get("darkMode");
@@ -166,10 +168,10 @@ class UserHandleBase
       await FirebaseFirestore.instance
           .collection('users')
           .doc(FirebaseAuth.instance.currentUser!.uid)
-          .set(
-              {'Controlled Teams': FieldValue.arrayUnion(list)},
-              SetOptions(
-                  merge: true)); // Use merge to avoid overwriting other fields
+          .set({
+        'Controlled Teams': FieldValue.arrayUnion(list),
+        'role': 'admin',
+      }, SetOptions(merge: true));
 
       globalUser.addControlledTeams(list);
     }
@@ -275,6 +277,7 @@ class UserHandleBase
         userDoc.get("University").toString(),
         (userDoc['Favourite Teams'] as List<dynamic>).map((e) => e.toString()).toList(),
         (userDoc['Controlled Teams'] as List<dynamic>).map((e) => e.toString()).toList(),
+        userDoc['role']
       );
 
       isLoggedIn = true;

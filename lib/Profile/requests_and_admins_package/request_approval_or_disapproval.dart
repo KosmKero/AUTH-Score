@@ -57,7 +57,8 @@ class _RequestHandlePageState extends State<RequestHandlePage> {
           .collection('users')
           .doc(FirebaseAuth.instance.currentUser!.uid)
           .set(
-          {'Controlled Teams': FieldValue.arrayUnion([teamName])}, // Προσθέτουμε την ομάδα στο array
+          {'Controlled Teams': FieldValue.arrayUnion([teamName]),
+            'role':"admin"}, // Προσθέτουμε την ομάδα στο array
           SetOptions(merge: true) // Χρησιμοποιούμε merge για να κρατήσουμε τα υπάρχοντα δεδομένα
       );
 
@@ -111,10 +112,10 @@ class _RequestHandlePageState extends State<RequestHandlePage> {
                       ),
                       IconButton(
                         icon: Icon(Icons.close, color: Colors.red),
-                        onPressed: () {
-                          setState(() async {
-                            await _firestore.collection('requests').doc(request.id).update({'status': "rejected"});
-                            await _fetchRequests();
+                        onPressed: () async {
+                          await _firestore.collection('requests').doc(request.id).update({'status': "rejected"});
+                          await _fetchRequests();
+                          setState(()  {
                           });
 
                         },

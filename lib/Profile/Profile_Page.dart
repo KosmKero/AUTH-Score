@@ -360,7 +360,7 @@ class _LogInButtonState extends State<LogInButton> {
                           }
                           else{
                             isLoggedIn=false;
-                            globalUser=AppUser(" "," ",[ ], []);
+                            globalUser=AppUser(" "," ",[ ], [],"user");
                             signOutUser();
                           }
                           //widget.user.changeLogIn(); // Toggle login state

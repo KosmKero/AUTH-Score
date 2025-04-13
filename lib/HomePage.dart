@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:untitled1/TopScorersContainer.dart';
 import 'package:untitled1/matchesContainer.dart';
 import 'API/Match_Handle.dart';
+import 'Match_Details_Package/add_match_page.dart';
 import 'Scorer.dart';
 import 'globals.dart';
-
 
 class HomePage extends StatefulWidget {
   @override
@@ -23,22 +23,45 @@ class _HomePageState extends State<HomePage> {
     Scorer("lama", 15, "csd"),
   ];
 
-  void changeMatches(){
-
+  void changeMatches() {
     setState(() {
       upcomingMatches = !upcomingMatches;
     });
   }
 
+  Future<void> addi() async {}
+
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
+        if (globalUser.isAdmin)
         Container(
-            color: darkModeNotifier.value?darkModeBackGround: Color.fromARGB(150, 60, 80, 150),
+            color: darkModeNotifier.value
+                ? darkModeBackGround
+                : Color.fromARGB(150, 60, 80, 150),
             width: double.infinity,
             height: 60,
-            child: TextButton( //ΚΑΤΩ ΑΠΟ ΤΟ APPBAR
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(backgroundColor:  darkModeNotifier.value
+                  ? darkModeBackGround
+                  : Color.fromARGB(00, 60, 80, 150)),
+            onPressed: () async {
+                  await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => AddMatchScreen(),
+                      ));
+                },
+                child: Text("Προσθήκη Αγώνα",style: TextStyle(color: Colors.white),))),
+        Container(
+            color: darkModeNotifier.value
+                ? darkModeBackGround
+                : Color.fromARGB(150, 60, 80, 150),
+            width: double.infinity,
+            height: 60,
+            child: TextButton(
+                //ΚΑΤΩ ΑΠΟ ΤΟ APPBAR
                 onPressed: () {
                   changeMatches();
                 },
@@ -61,9 +84,7 @@ class _HomePageState extends State<HomePage> {
                           ),
                           Icon(CupertinoIcons.right_chevron),
                         ],
-                        )
-            )
-        ),
+                      ))),
         /* Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
@@ -79,15 +100,20 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
          */
-        Expanded( //βαζει ολα τα match που ακολουθουν
+        Expanded(
+          //βαζει ολα τα match που ακολουθουν
           // flex: 5, // Το κάτω μέρος είναι μικρότερο
           child: Container(
-            color: darkModeNotifier.value?darkModeBackGround:Color.fromARGB(150, 60, 80, 150),
-            child: upcomingMatches? matchesContainer(matches: MatchHandle().getUpcomingMatches(),type:1) :
-            matchesContainer(
-              matches: MatchHandle().getPreviousMatches(),
-              type: 1,
-            ),
+            color: darkModeNotifier.value
+                ? darkModeBackGround
+                : Color.fromARGB(150, 60, 80, 150),
+            child: upcomingMatches
+                ? matchesContainer(
+                    matches: MatchHandle().getUpcomingMatches(), type: 1)
+                : matchesContainer(
+                    matches: MatchHandle().getPreviousMatches(),
+                    type: 1,
+                  ),
           ),
         ),
       ],

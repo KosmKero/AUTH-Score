@@ -298,7 +298,8 @@ Future<void> updatePassword(BuildContext context, String username, String oldPas
               username,
               globalUser.university,
               [],
-              []
+              [],
+              "user"
           );
 
           // Update the globalUser variable

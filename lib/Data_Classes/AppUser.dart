@@ -6,14 +6,14 @@ import 'Team.dart';
 class AppUser
 {
   String _username,_university;
-  bool _isLoggedIn=true;
+  bool _isLoggedIn=false;
   late bool _isAdmin;
 
   List<String> favoriteList=[];
   List<String> _controlledTeams=[];
 
-  AppUser(this._username,this._university,this.favoriteList,this._controlledTeams){
-    _isAdmin=true; //θελει αλλαγη
+  AppUser(this._username,this._university,this.favoriteList,this._controlledTeams,String role){
+    (role=="admin") ? (_isAdmin=true) : (_isAdmin=false);
   }
 
   String get username => _username;
