@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'admins_handle.dart';
 import 'request_approval_or_disapproval.dart';
 
 class RequestApprovalScreen extends StatefulWidget {
@@ -21,7 +22,7 @@ class _RequestApprovalScreenState extends State<RequestApprovalScreen> {
       body: Column(
         children: [
           _NavigationButtons(onSectionChange: _changeSection),
-           selectedIndex==0 ? Expanded(child: RequestHandlePage()): SizedBox.shrink()
+           selectedIndex==0 ? Expanded(child: RequestHandlePage()): AdminListWidget()
         ],
       ),
     );
