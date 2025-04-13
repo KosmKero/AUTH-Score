@@ -12,6 +12,9 @@ import '../Data_Classes/AppUser.dart';
 import 'LogInScreen.dart';
 
 
+Future<void> signOutUser() async{
+  await FirebaseAuth.instance.signOut();
+}
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key, required this.user});
@@ -358,6 +361,7 @@ class _LogInButtonState extends State<LogInButton> {
                           else{
                             isLoggedIn=false;
                             globalUser=AppUser(" "," ",[ ], []);
+                            signOutUser();
                           }
                           //widget.user.changeLogIn(); // Toggle login state
                         });

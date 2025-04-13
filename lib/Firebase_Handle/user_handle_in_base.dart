@@ -277,9 +277,6 @@ class UserHandleBase
         (userDoc['Controlled Teams'] as List<dynamic>).map((e) => e.toString()).toList(),
       );
 
-      print("HEREEEEEEE");
-      print(userDoc.get("username"));
-
       isLoggedIn = true;
 
       darkModeNotifier.value = userDoc.get("darkMode");

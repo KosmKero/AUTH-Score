@@ -61,7 +61,9 @@ class _HomePageState extends State<HomePage> {
                           ),
                           Icon(CupertinoIcons.right_chevron),
                         ],
-                      ))),
+                        )
+            )
+        ),
         /* Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
@@ -81,10 +83,10 @@ class _HomePageState extends State<HomePage> {
           // flex: 5, // Το κάτω μέρος είναι μικρότερο
           child: Container(
             color: darkModeNotifier.value?darkModeBackGround:Color.fromARGB(150, 60, 80, 150),
-            child: upcomingMatches? matchesContainer(
-              matches: MatchHandle().getUpcomingMatches(),
-            ) : matchesContainer(
+            child: upcomingMatches? matchesContainer(matches: MatchHandle().getUpcomingMatches(),type:1) :
+            matchesContainer(
               matches: MatchHandle().getPreviousMatches(),
+              type: 1,
             ),
           ),
         ),

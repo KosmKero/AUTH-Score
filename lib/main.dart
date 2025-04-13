@@ -231,6 +231,21 @@ class _LoadingScreenState extends State<LoadingScreen> {
 Future<void> loadTeams() async {
   TeamsHandle teamsHandle = TeamsHandle();
   teams = await teamsHandle.getAllTeams();
+
+  /*
+  teamsHandle.addMatch("ΠΑΙΔΑΓΩΓΙΚΗ","ΠΟΛΙΤΙΚΩΝ ΜΗΧΑΝ.",17,2, 2025, 2, true, true, 1510, "previous",0,11);
+  teamsHandle.addMatch("ΤΕΦΑΑ","ΦΥΣΙΚΟ",18, 2, 2025, 2, true, true, 1510, "previous",10,0);
+  teamsHandle.addMatch("ΗΜΜΥ 1","ΧΩΡΟΤΑΞΙΑ",19, 2, 2025, 2, true, true, 1510, "previous",5,0);
+  teamsHandle.addMatch("ΗΜΜΥ 2","ΓΕΩΠΟΝΙΑ",20, 2, 2025, 2, true, true, 1510, "previous",1,2);
+
+  teamsHandle.addMatch("ΠΟΛΙΤΙΚΩΝ ΕΠΙΣΤΗΜ.","ΧΗΜ.ΜΗΧΑΝΙΚΩΝ",21,2, 2025, 2, true, true, 1510, "previous",0,6);
+  teamsHandle.addMatch("ΠΑΙΔΑΓΩΓΙΚΗ","ΟΔΟΝΤΙΑΤΡΙΚΗ",24, 2, 2025, 2, true, true, 1510, "previous",1,2);
+  teamsHandle.addMatch("ΚΤΗΝΙΑΤΡΙΚΗ","ΝΟΜΙΚΗ",25, 2, 2025, 2, true, true, 1510, "previous",3,4);
+  teamsHandle.addMatch("ΒΙΟΛΟΓΙΑ","ΣΣΑΣ",26, 2, 2025, 2, true, true, 1510, "previous",0,12);
+  
+   */
+
+
 }
 
 // Original matches loading function

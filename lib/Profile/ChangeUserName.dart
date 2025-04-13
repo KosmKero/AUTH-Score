@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:untitled1/globals.dart';
 import '../Data_Classes/AppUser.dart';
+import '../Firebase_Handle/user_handle_in_base.dart';
 import '../main.dart';
 
 
@@ -232,45 +233,57 @@ Future<void> updateUsername(BuildContext context, String oldUsername, String new
     // Find the user document
     QuerySnapshot querySnapshot = await FirebaseFirestore.instance
         .collection('users')
-        .where('Username', isEqualTo: oldUsername)
-        .limit(1)
+        .where('username', isEqualTo: oldUsername)
         .get();
 
-    if (querySnapshot.docs.isNotEmpty) {
+    if (querySnapshot.docs.isNotEmpty)
+    {
       bool userConfirmed = await _showMyDialog(context);
+      bool isAvailable = await UserHandleBase().isUsernameAvailable(newUsername);
 
-      if (userConfirmed) {
-        // Get the user document reference
-        DocumentReference userDocRef = querySnapshot.docs.first.reference;
+      if(isAvailable)
+      {
+        if (userConfirmed) {
+          // Get the user document reference
+          DocumentReference userDocRef = querySnapshot.docs.first.reference;
 
-        // Update the username in Firestore
-        await userDocRef.update({'Username': newUsername});
+          // Update the username in Firestore
+          await userDocRef.update({'username': newUsername});
+          await userDocRef.update({"email": newUsername+"@myapp.com"});
 
-        AppUser user = AppUser(
-            newUsername,
-            globalUser.university,
-            [],
-            []
-        );
+          AppUser user = AppUser(
+              newUsername,
+              globalUser.university,
+              [],
+              []
+          );
 
-        // Update the globalUser variable
-        globalUser = user;
+          // Update the globalUser variable
+          globalUser = user;
 
-        // Show success message
-        /*ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Username updated successfully!'),
+          // Show success message
+          /*ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Username updated successfully!'),
+              backgroundColor: Colors.red,
+              duration: Duration(seconds: 2),
+            ),
+          );*/
+          _textController1.clear();
+          _textController2.clear();
+
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => MyApp()),
+          );
+        }
+      }
+      else
+        {
+        SnackBar( //ΕΜΦΑΝΙΖΩ ΜΗΝΥΜΑ ΛΑΘΟΥΣ ΑΝ ΕΧΕΙ ΚΑΠΟΙΟ ΠΕΔΙΟ ΚΕΝΟ
+            content: Text('This is already used!'),
             backgroundColor: Colors.red,
-            duration: Duration(seconds: 2),
-          ),
-        );*/
-        _textController1.clear();
-        _textController2.clear();
-
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => MyApp()),
-        );
+            duration: Duration(seconds: 2),);
       }
     }
     else

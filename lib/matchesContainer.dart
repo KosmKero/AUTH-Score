@@ -9,10 +9,19 @@ import 'API/NotificationService.dart';
 
 //ΑΥΤΗ Η ΚΛΑΣΗ ΑΦΟΡΑ ΤΑ CONTAINER ΤΩΝ ΜΑΤΣ ΣΤΗΝ ΑΡΧΙΚΗ ΟΘΟΝΗ
 class matchesContainer extends StatelessWidget {
-  matchesContainer({super.key, required this.matches}){
-    sortMatches();
+  matchesContainer({super.key, required this.matches,required this.type})
+  {
+    if(type==1) {
+      sortMatches();
+    }
+    else
+      {
+        sortMatchesDifferent();
+      }
   }
   final List<MatchDetails> matches;
+
+  int type;
 
   @override
   Widget build(BuildContext context) {
@@ -54,6 +63,21 @@ class matchesContainer extends StatelessWidget {
         return a.day.compareTo(b.day);
       }else{
         return a.time.compareTo(b.time);
+      }
+    });
+  }
+
+  void sortMatchesDifferent() 
+  {
+    matches.sort((a, b) {
+      if (a.year != b.year) {
+        return b.year.compareTo(a.year);
+      } else if (a.month != b.month) {
+        return b.month.compareTo(a.month);
+      } else if (a.day!=b.day){
+        return b.day.compareTo(a.day);
+      }else{
+        return b.time.compareTo(a.time);
       }
     });
   }
@@ -121,7 +145,7 @@ class eachMatchContainerView extends StatelessWidget {
                       ),
                       Text(" ${match.homeTeam.name}",
                         style: TextStyle(
-                            fontSize: 16,
+                            fontSize: match.homeTeam.name.length<15?16:15,
                             fontWeight: FontWeight.w600,
                             color: darkModeNotifier.value? Colors.white: Colors.black87
                         ),
@@ -137,7 +161,8 @@ class eachMatchContainerView extends StatelessWidget {
                         child:  match.awayTeam.image
                       ),
                       Text(" ${match.awayTeam.name}",
-                        style: TextStyle(fontSize: 16,
+                        style: TextStyle(
+                            fontSize:  match.awayTeam.name.length<15?16:15,
                             fontWeight: FontWeight.w600,
                             color: darkModeNotifier.value? Colors.white: Colors.black87
                         ),
