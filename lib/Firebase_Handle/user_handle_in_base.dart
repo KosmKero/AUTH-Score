@@ -38,8 +38,8 @@ class UserHandleBase
             'username': username,
             'email': email,
             "University": uni,
-            "Favourite Teams":[" "],
-            "Controlled Teams":[" "],
+            "Favourite Teams":[],
+            "Controlled Teams":[],
             "darkMode":false,
             "Language":true
           });
