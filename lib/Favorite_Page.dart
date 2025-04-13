@@ -44,7 +44,7 @@ class _FavoriteContainerState extends State<FavoritePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: darkModeNotifier.value? darkModeBackGround:Colors.white, // Dark mode background
+      backgroundColor: darkModeNotifier.value? darkModeBackGround:  Color.fromARGB(150, 60, 80, 150), // Dark mode background
       body: Column(
         children: [
           Expanded(
@@ -71,9 +71,7 @@ class _FavoriteContainerState extends State<FavoritePage> {
           ),
           Expanded(
             flex: 10,
-            child: isLoggedIn
-                ? (favouriteTeams.isNotEmpty
-                ? matchesContainer(matches: teamMatches)
+            child: isLoggedIn ? (favouriteTeams.isNotEmpty ? matchesContainer(matches: teamMatches,type:2)
                 : Center(
               child: Text(
                 greek
@@ -110,15 +108,16 @@ class _FavoriteContainerState extends State<FavoritePage> {
   List<MatchDetails> refreshList() {
     teamMatches.clear();
     if (favouriteTeams.isNotEmpty) {
-        for (MatchDetails match in MatchHandle().getAllMatches())
-        {
-          if (match.homeTeam.name == selectedTeam?.name ||
-              match.awayTeam.name == selectedTeam?.name) {
-            teamMatches.add(match);
-          }
+      for (MatchDetails match in MatchHandle().getAllMatches())
+      {
+        if (match.homeTeam.name == selectedTeam?.name ||
+            match.awayTeam.name == selectedTeam?.name) {
+          teamMatches.add(match);
         }
+      }
 
     }
     return teamMatches;
   }
+  
 }
