@@ -121,8 +121,8 @@ class eachMatchContainerView extends StatelessWidget {
                       ),
                       Text(" ${match.homeTeam.name}",
                         style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
                             color: darkModeNotifier.value? Colors.white: Colors.black87
                         ),
                       )
@@ -137,8 +137,8 @@ class eachMatchContainerView extends StatelessWidget {
                         child:  match.awayTeam.image
                       ),
                       Text(" ${match.awayTeam.name}",
-                        style: TextStyle(fontSize: 16,
-                            fontWeight: FontWeight.w600,
+                        style: TextStyle(fontSize: 13,
+                            fontWeight: FontWeight.w500,
                             color: darkModeNotifier.value? Colors.white: Colors.black87
                         ),
                       ),

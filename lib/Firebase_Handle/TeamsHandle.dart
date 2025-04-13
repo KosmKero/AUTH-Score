@@ -58,19 +58,21 @@ class TeamsHandle {
             List<Player> players = [];
 
             if (team.get("Players") != null) {
-              List<dynamic> playersData = team.get("Players") as List<dynamic>;
+              Map<String, dynamic> playersData = team.get("Players") as Map<String, dynamic>;
 
-              for (var playerData in playersData) {
+              playersData.forEach((name, playerData) {
                 players.add(Player(
-                  playerData['Name'] ?? "",
+                  playersData["Name"] ?? "",
                   playerData['Surname'] ?? "",
+                  playerData['Position'] ?? 0,
                   playerData['Goals'] ?? 0,
-                  playerData['Position'] ?? "",
                   playerData['Number'] ?? 0,
                   playerData['Age'] ?? 0,
                   playerData['TeamName'] ?? "",
+                  playerData['numOfYellowCards'] ?? 0,
+                  playerData['numOfRedCards'] ?? 0,
                 ));
-              }
+              });
             }
 
             // Now create the Team with the properly converted Player list
@@ -144,15 +146,20 @@ class TeamsHandle {
       var doc = querySnapshot.docs.first;
       Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
 
-      List<Player> players = (data['Players'] as List<dynamic>? ?? []).map((playerData) {
+      List<Player> players = (data['Players'] as Map<String, dynamic>? ?? {}).entries.map((entry) {
+
+        final playerData = entry.value as Map<String, dynamic>;
+
         return Player(
-          playerData['Name'] ?? "Unknown",
+          playerData["Name"] ?? "Unknown",
           playerData['Surname'] ?? "Unknown",
+          playerData['Position'] ?? 0,
           playerData['Goals'] ?? 0,
-          playerData['Position'] ?? "Unknown",
           playerData['Number'] ?? 0,
           playerData['Age'] ?? 0,
           playerData['TeamName'] ?? "Unknown",
+          playerData['numOfYellowCards'] ?? 0,
+          playerData['numOfRedCards'] ?? 0,
         );
       }).toList();
 

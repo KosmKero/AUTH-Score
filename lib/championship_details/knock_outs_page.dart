@@ -30,9 +30,7 @@ class KnockOutsPage extends StatelessWidget {
                     8,
                         (index) => Padding(
                       padding: EdgeInsets.symmetric(vertical: 5),
-                      child: knockOutMatchUp(match: MatchHandle()
-                          .getAllMatches()
-                          .first), // Παράδειγμα δεδομένων
+                      child: knockOutMatchUp(match: null), // Παράδειγμα δεδομένων
                     ),
                   ),
                 ),
@@ -95,8 +93,7 @@ class KnockOutsPage extends StatelessWidget {
                         (index) => Padding(
                       padding: EdgeInsets.symmetric(vertical: 50),
                       child: knockOutMatchUp(match:
-                      MatchHandle().getAllMatches()[
-                      index]), // Παράδειγμα δεδομένων
+                      null), // Παράδειγμα δεδομένων
                     ),
                   ),
                 ),
@@ -143,8 +140,7 @@ class KnockOutsPage extends StatelessWidget {
                         (index) => Padding(
                       padding: EdgeInsets.symmetric(vertical: 138),
                       child: knockOutMatchUp(match:
-                      MatchHandle().getAllMatches()[
-                      index]), // Παράδειγμα δεδομένων
+                      null), // Παράδειγμα δεδομένων
                     ),
                   ),
                 ),
@@ -182,7 +178,7 @@ class KnockOutsPage extends StatelessWidget {
                     SizedBox(
                       height: 317,
                     ),
-                    knockOutMatchUp(match:MatchHandle().getAllMatches().first)
+                    knockOutMatchUp(match:null)
                   ],
                 ),
               ],
@@ -199,7 +195,7 @@ class KnockOutsPage extends StatelessWidget {
 
 class knockOutMatchUp extends StatefulWidget {
   const knockOutMatchUp({super.key,required this.match});
-  final MatchDetails match;
+  final MatchDetails? match;
 
   @override
   State<knockOutMatchUp> createState() => _knockOutMatchUpState();
@@ -210,13 +206,14 @@ class _knockOutMatchUpState extends State<knockOutMatchUp> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
+
       onTap: () {
-        Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => matchDetailsPage(widget.match)
-            )
-        );
+        if (widget.match!=null) {
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => matchDetailsPage(widget.match!)));
+        }
       },
       child: Card(
         child: Row(
@@ -227,10 +224,10 @@ class _knockOutMatchUpState extends State<knockOutMatchUp> {
                 SizedBox(
                     height: 25 ,
                     width:  25 ,
-                    child: widget.match.homeTeam.image),
-                Text(widget.match.homeInitials, style: TextStyle(fontSize: 15 )),
+                    child: (widget.match!=null) ? widget.match!.homeTeam.image : Image.asset('fotos/default_team_logo.png')),
+                Text((widget.match!=null) ? widget.match!.homeInitials : "N/A", style: TextStyle(fontSize: 15 )),
                 //if (match.hasMatchStarted)
-                Text(widget.match.scoreHome.toString(), style: TextStyle(fontSize:  17 ))
+                (widget.match!=null) ?Text(widget.match!.scoreHome.toString(), style: TextStyle(fontSize:  17 )) : SizedBox(height: 20,child: Text("-"),)
               ],
             ),
             SizedBox(
@@ -240,13 +237,13 @@ class _knockOutMatchUpState extends State<knockOutMatchUp> {
               SizedBox(
                   height: 25 ,
                   width:  25 ,
-                  child: widget.match.homeTeam.image),
+                  child: (widget.match!=null) ? widget.match!.homeTeam.image: Image.asset('fotos/default_team_logo.png')),
               Text(
-                widget.match.awayInitials,
+                (widget.match!=null) ? widget.match!.awayInitials : "N/A",
                 style: TextStyle(fontSize: 15 ),
               ),
               //if (match.hasMatchStarted) Text(match.scoreAway.toString())
-              Text(widget.match.scoreAway.toString(), style: TextStyle(fontSize:  17 ))
+              (widget.match!=null) ?Text(widget.match!.scoreAway.toString(), style: TextStyle(fontSize:  17 )) : SizedBox(height: 23.4, child: Text("-"),)
             ])
           ],
         ),

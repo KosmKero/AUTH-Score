@@ -142,22 +142,22 @@ class MatchDetails extends ChangeNotifier {
     return false;
   }
 
-   //Συναρτησεις για αποθηκευση δεδομενων στη βαση
+  //Συναρτησεις για αποθηκευση δεδομενων στη βαση
   //progress αν ειναι τρου προχωραει το ματς αλλιως κανει κανσελ
   Future<void> matchStartedBase(bool progress) async {
     await FirebaseFirestore.instance
         .collection('matches')
         .doc(homeTeam.name +
-        day.toString() +
-        month.toString() +
-        year.toString() +
-        _game.toString() +
-        awayTeam.name)
+            day.toString() +
+            month.toString() +
+            year.toString() +
+            _game.toString() +
+            awayTeam.name)
         .set({
       'HasMatchStarted': progress,
       'TimeStarted': DateTime.now().millisecondsSinceEpoch ~/ 1000,
-      'GoalAway':0,
-      'GoalHome':0
+      'GoalAway': 0,
+      'GoalHome': 0
     }, SetOptions(merge: true));
   }
 
@@ -186,11 +186,13 @@ class MatchDetails extends ChangeNotifier {
             awayTeam.name)
         .set({
       'hasSecondHalfStarted': progress,
-      'TimeStarted': DateTime.now().millisecondsSinceEpoch~/1000 - 45*60
+      'TimeStarted': DateTime.now().millisecondsSinceEpoch ~/ 1000 - 45 * 60
     }, SetOptions(merge: true)); // ώστε να μη διαγράψει άλλα πεδία
   }
 
   Future<void> matchFinishedBase(bool progress) async {
+    String type = progress ? "previous" : "upcoming";
+
     await FirebaseFirestore.instance
         .collection('matches')
         .doc(homeTeam.name +
@@ -199,9 +201,8 @@ class MatchDetails extends ChangeNotifier {
             year.toString() +
             _game.toString() +
             awayTeam.name)
-        .set({
-      'hasMatchFinished': progress,
-    }, SetOptions(merge: true)); // ώστε να μη διαγράψει άλλα πεδία
+        .set({'hasMatchFinished': progress, 'Type': type},
+            SetOptions(merge: true)); // ώστε να μη διαγράψει άλλα πεδία
   }
 
   Future<void> homeScoredBase() async {
@@ -245,13 +246,9 @@ class MatchDetails extends ChangeNotifier {
 
     final data = docSnapshot.data();
     if (data != null && data.containsKey('facts')) {
-      _matchFacts = await MatchFactsStorageHelper
-          .decodeMatchFacts(Map<String, dynamic>.from(data['facts']));
-
-      print("paei na ta fortosei");
+      _matchFacts = await MatchFactsStorageHelper.decodeMatchFacts(
+          Map<String, dynamic>.from(data['facts']));
     }
-
-    print("paei na ta fortoseieee");
   }
 
   //Map<int,List<Goal>> get goalsList => _goalsList;
@@ -339,6 +336,13 @@ class MatchDetails extends ChangeNotifier {
 
     _matchFacts[half]?.add(goal);
 
+    for (Player player in homeTeam.players) {
+      if ("${player.name.substring(0, 1)}. ${player.surname}" == name) {
+        TopPlayersHandle().playerScored(player);
+        break;
+      }
+    }
+
     MatchFactsStorageHelper().addMatchFact(
         matchDoc: FirebaseFirestore.instance.collection('matches').doc(
             homeTeam.name +
@@ -349,6 +353,7 @@ class MatchDetails extends ChangeNotifier {
                 awayTeam.name),
         half: half,
         factMap: goal.toMap());
+
     notifyListeners();
   }
 
@@ -360,17 +365,24 @@ class MatchDetails extends ChangeNotifier {
     _scoreAway++;
     awayScoredBase();
 
-    Goal goal= Goal(
+    Goal goal = Goal(
         scorerName: name,
         homeScore: _scoreHome,
         awayScore: _scoreAway,
         minute:
-        DateTime.now().millisecondsSinceEpoch ~/ 1000 - startTimeInSeconds,
+            DateTime.now().millisecondsSinceEpoch ~/ 1000 - startTimeInSeconds,
         isHomeTeam: false,
         team: awayTeam,
         half: half);
 
     _matchFacts[half]?.add(goal);
+
+    for (Player player in awayTeam.players) {
+      if ("${player.name.substring(0, 1)}. ${player.surname}" == name) {
+        TopPlayersHandle().playerScored(player);
+        break;
+      }
+    }
 
     MatchFactsStorageHelper().addMatchFact(
         matchDoc: FirebaseFirestore.instance.collection('matches').doc(
@@ -394,14 +406,43 @@ class MatchDetails extends ChangeNotifier {
       }
       _hasMatchFinished = true;
       matchFinishedBase(true);
+      updateStandings(true);
+
       notifyListeners();
     } else if (_hasFirstHalfFinished) {
       _hasSecondHalfStarted = true;
-      _startTimeInSeconds= DateTime.now().millisecondsSinceEpoch~/1000 - 45 *60;
+      _startTimeInSeconds =
+          DateTime.now().millisecondsSinceEpoch ~/ 1000 - 45 * 60;
       secondHalfStartedBase(true);
     } else if (_hasMatchStarted) {
       _hasFirstHalfFinished = true;
       firstHalfFinishedBase(true);
+    }
+  }
+
+  void updateStandings(bool progress) {
+    if (progress) {
+      if (scoreHome == scoreAway) {
+        homeTeam.increaseDraws();
+        awayTeam.increaseDraws();
+      } else if (scoreHome > scoreAway) {
+        homeTeam.increaseWins();
+        awayTeam.increaseLoses();
+      } else {
+        homeTeam.increaseLoses();
+        awayTeam.increaseWins();
+      }
+    } else {
+      if (scoreHome == scoreAway) {
+        homeTeam.reduceDraws();
+        awayTeam.reduceDraws();
+      } else if (scoreHome > scoreAway) {
+        homeTeam.reduceWins();
+        awayTeam.reduceLoses();
+      } else {
+        homeTeam.reduceLoses();
+        awayTeam.reduceWins();
+      }
     }
   }
 
@@ -412,6 +453,7 @@ class MatchDetails extends ChangeNotifier {
             3600) {
       if (_hasMatchFinished) {
         MatchHandle().matchNotFinished(this);
+        updateStandings(false);
       }
       _hasMatchFinished = false;
       matchFinishedBase(false);
@@ -438,17 +480,18 @@ class MatchDetails extends ChangeNotifier {
   }
 
   //ετοιμο
-  void playerGotCard(String name, Team team, bool isYellow, int? minute, bool isHomeTeam) {
+  Future<void> playerGotCard(
+      String name, Team team, bool isYellow, int? minute, bool isHomeTeam) async {
     for (Player player in team.players) {
       if ("${player.name.substring(0, 1)}. ${player.surname}" == name) {
-        isYellow ? player.gotYellowCard() : player.gotRedCard();
+        isYellow ? await player.gotYellowCard() : await player.gotRedCard();
         break;
       }
     }
     int half;
     (!_hasSecondHalfStarted) ? half = 0 : half = 1;
 
-    CardP card= CardP(
+    CardP card = CardP(
         playerName: name,
         team: team,
         isYellow: isYellow,
@@ -459,32 +502,36 @@ class MatchDetails extends ChangeNotifier {
         half: half);
 
     _matchFacts[half]?.add(card);
-    MatchFactsStorageHelper().addMatchFact(matchDoc: FirebaseFirestore.instance.collection('matches').doc(
-        homeTeam.name +
-            day.toString() +
-            month.toString() +
-            year.toString() +
-            _game.toString() +
-            awayTeam.name), half: half, factMap: card.toMap());
+    await MatchFactsStorageHelper().addMatchFact(
+        matchDoc: FirebaseFirestore.instance.collection('matches').doc(
+            homeTeam.name +
+                day.toString() +
+                month.toString() +
+                year.toString() +
+                _game.toString() +
+                awayTeam.name),
+        half: half,
+        factMap: card.toMap());
     notifyListeners();
   }
 
   //ετοιμο
-  void cancelGoal(Goal goal1) {
+  Future<void> cancelGoal(Goal goal1) async {
     if (_matchFacts.containsKey(goal1.half)) {
+
       _matchFacts[goal1.half]!
           .removeWhere((goal) => goal is Goal && goal == goal1);
+
       goal1.isHomeTeam ? _scoreHome-- : _scoreAway--;
       for (Player player in goal1.team.players) {
-        if ("${player.name.substring(0, 1)}. ${player.surname}" ==
+        if ("${player.name[0]}. ${player.surname}" ==
             goal1.scorerName) {
-          player.goalCancelled();
-          TopPlayersHandle().goalCancelled(goal1.scorerName);
+          TopPlayersHandle().goalCancelled(player);
           break;
         }
       }
 
-      MatchFactsStorageHelper().deleteMatchFact(
+      await MatchFactsStorageHelper().deleteMatchFact(
           matchDoc: FirebaseFirestore.instance.collection('matches').doc(
               homeTeam.name +
                   day.toString() +
@@ -495,9 +542,25 @@ class MatchDetails extends ChangeNotifier {
           half: goal1.half,
           factMap: goal1.toMap());
 
+      String type;
+      (goal1.isHomeTeam) ? (type = 'GoalHome') : (type = 'GoalAway');
+        await FirebaseFirestore.instance
+            .collection('matches')
+            .doc(homeTeam.name +
+                day.toString() +
+                month.toString() +
+                year.toString() +
+                _game.toString() +
+                awayTeam.name)
+            .set({
+          type : FieldValue.increment(-1),
+        }, SetOptions(merge: true));
+
+
       notifyListeners(); // Ενημέρωση των listeners για την αλλαγή
     }
   }
+
   //ετοιμο
   void cancelCard(CardP card1) {
     if (_matchFacts.containsKey(card1.half)) {
@@ -532,8 +595,6 @@ class MatchDetails extends ChangeNotifier {
     }
   }
 
-
-
   void _startListeningForUpdates() {
     final matchDocId = _generateMatchDocId();
 
@@ -554,7 +615,7 @@ class MatchDetails extends ChangeNotifier {
       }
 
       if (_hasFirstHalfFinished != (data['hasFirstHalfFinished'] ?? false)) {
-        _hasFirstHalfFinished = data['hasFirstHalfFinished']?? false;
+        _hasFirstHalfFinished = data['hasFirstHalfFinished'] ?? false;
         changed = true;
       }
 
@@ -578,16 +639,17 @@ class MatchDetails extends ChangeNotifier {
         changed = true;
       }
 
-      if(_startTimeInSeconds!=(data['TimeStarted'] ?? 0)){
+      if (_startTimeInSeconds != (data['TimeStarted'] ?? 0)) {
         _startTimeInSeconds = data['TimeStarted'] ?? 0;
-        changed= true;
-        print ("$_startTimeInSeconds $changed");
+        changed = true;
+        print("$_startTimeInSeconds $changed");
       }
 
       // Update match facts only if present
       if (data.containsKey('facts')) {
         final factsMap = Map<String, dynamic>.from(data['facts']);
-        final decodedFacts = await MatchFactsStorageHelper.decodeMatchFacts(factsMap);
+        final decodedFacts =
+            await MatchFactsStorageHelper.decodeMatchFacts(factsMap);
         _matchFacts = decodedFacts;
         changed = true;
       }
@@ -610,7 +672,6 @@ class MatchDetails extends ChangeNotifier {
     _matchSubscription?.cancel();
     super.dispose();
   }
-
 }
 
 class Goal extends MatchFact {
@@ -626,16 +687,7 @@ class Goal extends MatchFact {
       : _homeScore = homeScore,
         _awayScore = awayScore,
         _assistName = assistName,
-        super(scorerName, team, minute, isHomeTeam, half) {
-    // Ενημέρωση του παίκτη που σκόραρε
-    for (Player player in team.players) {
-      if ("${player.name.substring(0, 1)}. ${player.surname}" == scorerName) {
-        player.scoredGoal();
-        break;
-      }
-    }
-    TopPlayersHandle().playerScored(scorerName);
-  }
+        super(scorerName, team, minute, isHomeTeam, half);
 
   final int _homeScore, _awayScore;
   final String? _assistName;
@@ -749,13 +801,12 @@ class MatchFactsStorageHelper {
     });
   }
 
-
-    //Δουλευει
+  //Δουλευει
   // Μετατρέπει τα δεδομένα από Firestore πίσω σε Map<int, List<MatchFact>>
   // Κάνουμε την decodeMatchFacts async
   static Future<Map<int, List<MatchFact>>> decodeMatchFacts(
-      Map<String, dynamic> firestoreMap,
-      ) async {
+    Map<String, dynamic> firestoreMap,
+  ) async {
     final Map<int, List<MatchFact>> result = {};
 
     // Για κάθε μισό του παιχνιδιού
@@ -764,7 +815,8 @@ class MatchFactsStorageHelper {
       List<dynamic> factList = firestoreMap[halfKey] as List<dynamic>;
 
       // Χρησιμοποιούμε await για να πάρουμε την ομάδα
-      List<MatchFact> matchFacts = await Future.wait(factList.map<Future<MatchFact>>((item) async {
+      List<MatchFact> matchFacts =
+          await Future.wait(factList.map<Future<MatchFact>>((item) async {
         final Map<String, dynamic> map = Map<String, dynamic>.from(item);
         final String type = map['type'];
 
@@ -811,7 +863,8 @@ class MatchFactsStorageHelper {
   Future<void> deleteMatchFact({
     required DocumentReference matchDoc,
     required int half,
-    required Map<String, dynamic> factMap, // Το γεγονός που θέλεις να διαγράψεις
+    required Map<String, dynamic>
+        factMap, // Το γεγονός που θέλεις να διαγράψεις
   }) async {
     try {
       // Χρησιμοποιούμε την arrayRemove για να διαγράψουμε το γεγονός από την λίστα
@@ -824,6 +877,4 @@ class MatchFactsStorageHelper {
       print('🔥 Σφάλμα κατά τη διαγραφή του γεγονότος: $e');
     }
   }
-
-
 }

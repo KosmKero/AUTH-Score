@@ -20,29 +20,14 @@ class TopPlayersHandle extends ChangeNotifier {
     sortTopPlayers();
   }
 
-  void playerScored(String scorerName){
-    for (Team team in _teamsList){
-      for (Player player in team.players){
-        if ("${player.name.substring(0,1)}. ${player.surname}"==scorerName){
-          player.scoredGoal();
-          sortTopPlayers();
-          return;
-        }
-      }
-    }
+  void playerScored(Player player){
+
+    player.scoredGoal();
     sortTopPlayers();
   }
 
-  void goalCancelled(String scorerName){
-    for (Team team in _teamsList){
-      for (Player player in team.players){
-        if ("${player.name.substring(0,1)}. ${player.surname}"==scorerName){
-          player.goalCancelled();
-          sortTopPlayers();
-          return;
-        }
-      }
-    }
+  void goalCancelled(Player player){
+    player.goalCancelled();
     sortTopPlayers();
   }
 

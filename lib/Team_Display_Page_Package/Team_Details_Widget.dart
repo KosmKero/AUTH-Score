@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../Data_Classes/Team.dart';
+import '../Match_Details_Package/Match_Not_Started/DetailsMatchNotStarted.dart';
 import '/Match_Details_Package/Standings_Card_1Group.dart';
 
 //ΟΛΗ Η ΚΛΑΣΗ ΑΦΟΡΑ ΤΗΝ ΚΑΤΑΣΚΕΥΗ ΤΟΥ ΠΩΣ ΘΑ ΕΜΦΑΝΙΖΕΤΑΙ ΤΑ ΚΥΚΛΑΚΙΑ ΜΕ ΤΗΝ ΝΙΚΗ , ΙΣΟΠΑΛΙΑ, ΗΤΤΑ.
@@ -25,7 +26,7 @@ class TeamDetailsWidget extends StatelessWidget {
                         fontWeight: FontWeight.bold
                     ),
                   ),
-              TeamFormWidget(results: team.last5Results),
+              TeamFormWidget(team: team,),
               SizedBox(
                 height: 17,
               )
@@ -135,29 +136,64 @@ class TeamDetailsWidget extends StatelessWidget {
   }
 }
 
-//ΑΦΟΡΑ ΤΟ ΠΩς ΘΑ ΦΑΙΝΟΝΕΤΙΑ Ο ΠΙΝΑΚΑΣ
-class TeamFormWidget extends StatelessWidget {
-  final List<String> results; // "W" for Win, "D" for Draw, "L" for Loss
 
-  const TeamFormWidget({super.key, required this.results});
+//ΑΦΟΡΑ ΤΗΝ ΚΑΤΑΣΚΕΥΗ ΤΩΝ ΟΝΟΜΑΤΩΝ ΤΩΝ ΟΜΑΔΩΝ ΣΤΟ ΚΑΤΩ ΜΕΡΟΣ
+class TeamFormWidget extends StatelessWidget {
+  final Team team;
+
+  const TeamFormWidget({super.key, required this.team});
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        SizedBox(height: 10),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            SizedBox(width: 10),
-            ...results.map((result) => _buildResultIcon(result))
-          ],
-        ),
-      ],
+    return FutureBuilder<List<String>>(
+      future: getFinalFive(team.name),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const CircularProgressIndicator(); // ή κάποιο placeholder
+        }
+        else if (snapshot.hasError) {
+          return const Text("Error loading results");
+        } else {
+          final results = snapshot.data ?? [];
+          final displayResults = results.length == 6
+              ? results.sublist(1)
+              : results;
+
+          return Padding(
+            padding: EdgeInsets.only(left: 1, top: 10),
+            child: Row(
+              children: [
+                // Team Name
+                SizedBox(
+                  width: 155,
+                  child: Text(
+                    team.name,
+                    style: TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black,
+                      letterSpacing: 1.5,
+                    ),
+                  ),
+                ),
+                SizedBox(width: 30),
+                Row(
+                  children: displayResults.map((result) =>
+                      Padding(
+                        padding:
+                        const EdgeInsets.symmetric(horizontal: 3),
+                        child: _buildResultIcon(result),
+                      ))
+                      .toList(),
+                ),
+              ],
+            ),
+          );
+        }
+      },
     );
   }
 
-  //δημιορυγει τα κυκλακια
   Widget _buildResultIcon(String result) {
     IconData icon;
     Color color;
@@ -180,9 +216,6 @@ class TeamFormWidget extends StatelessWidget {
         color = Colors.grey;
     }
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4.0),
-      child: Icon(icon, color: color, size: 30),
-    );
+    return Icon(icon, color: color, size: 30);
   }
 }

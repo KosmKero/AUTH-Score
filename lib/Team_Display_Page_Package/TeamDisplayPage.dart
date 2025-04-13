@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:untitled1/Firebase_Handle/TeamsHandle.dart';
 import 'package:untitled1/Team_Display_Page_Package/Team_Details_Widget.dart';
 import 'package:untitled1/Team_Display_Page_Package/Team_Matches_Widget.dart';
@@ -7,6 +8,7 @@ import 'package:untitled1/championship_details/top_players_page.dart';
 import 'package:untitled1/globals.dart';
 import 'package:untitled1/main.dart';
 
+import '../Data_Classes/Player.dart';
 import '../Data_Classes/Team.dart';
 
 class TeamDisplayPage extends StatefulWidget{
@@ -41,7 +43,9 @@ class _TeamDisplayPageState extends State<TeamDisplayPage> {
             fontStyle: FontStyle.italic,
           ),
         ),
-            actions: [isFavourite(team: widget.team,)]
+            actions: [
+              isFavourite(team: widget.team,),
+            ]
         ),
         body:Column(
       children: [
@@ -201,6 +205,7 @@ class _isFavouriteState extends State<isFavourite> {
 
 
 
+
 Widget _sectionChooser(int selectedIndex, Team team) {
   switch (selectedIndex) {
     case 0:
@@ -215,3 +220,5 @@ Widget _sectionChooser(int selectedIndex, Team team) {
       return TeamDetailsWidget(team: team);
   }
 }
+
+

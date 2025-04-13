@@ -176,6 +176,7 @@ class TeamFormWidget extends StatelessWidget {
           return const Text("Error loading results");
         } else {
           final results = snapshot.data ?? [];
+          final displayResults = results.length == 6 ? results.sublist(1) : results;
 
           return Padding(
             padding: EdgeInsets.only(left: 1, top: 10),
@@ -205,8 +206,7 @@ class TeamFormWidget extends StatelessWidget {
                 ),
                 SizedBox(width: 30),
                 Row(
-                  children: results
-                      .map((result) => Padding(
+                  children: displayResults.map((result) => Padding(
                     padding:
                     const EdgeInsets.symmetric(horizontal: 3),
                     child: _buildResultIcon(result),

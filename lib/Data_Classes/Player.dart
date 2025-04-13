@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 
 import 'Team.dart';
@@ -9,11 +10,10 @@ class Player extends ChangeNotifier{
   //Team _team;
 
   // Constructor
-  Player(this._name, this._surname,this._position, this._goals,this._number,this._age,this._teamName,
-      {int numOfYellowCards = 0, int numOfRedCards = 0}) {
-    _numOfYellowCards = numOfYellowCards;
-    _numOfRedCards = numOfRedCards;
-  }
+  Player(this._name, this._surname,this._position, this._goals,this._number,
+      this._age,this._teamName,
+      this._numOfYellowCards, this._numOfRedCards);
+
 
   // Getters
   String get name => _name;
@@ -27,23 +27,88 @@ class Player extends ChangeNotifier{
   String get teamName=> _teamName;
 
 
-  void scoredGoal(){
+  Future<void> scoredGoal() async {
     _goals++;
-  }
-  void goalCancelled(){
-    _goals--;
+
+    await FirebaseFirestore.instance
+        .collection('teams')
+        .doc(teamName)
+        .set({
+      'Players': toMap(),
+    }, SetOptions(merge: true));
   }
 
-  void gotYellowCard(){
+  Future<void> goalCancelled() async {
+    if (_goals > 0) _goals--;
+
+    await FirebaseFirestore.instance
+        .collection('teams')
+        .doc(teamName)
+        .set({
+      'Players': toMap(),
+    }, SetOptions(merge: true));
+  }
+
+  Future<void> gotYellowCard() async {
     _numOfYellowCards++;
+
+    await FirebaseFirestore.instance
+        .collection('teams')
+        .doc(teamName)
+        .set({
+      'Players': toMap(),
+    }, SetOptions(merge: true));
   }
-  void gotRedCard(){
+  Future<void> gotRedCard() async {
     _numOfRedCards++;
+
+    await FirebaseFirestore.instance
+        .collection('teams')
+        .doc(teamName)
+        .set({
+      'Players': toMap(),
+    }, SetOptions(merge: true));
   }
-  void cancelYellowCard(){
+
+  Future<void> cancelYellowCard() async {
     _numOfYellowCards--;
+
+    await FirebaseFirestore.instance
+        .collection('teams')
+        .doc(teamName)
+        .set({
+      'Players': toMap(),
+    }, SetOptions(merge: true));
   }
-  void cancelRedCard(){
+
+
+  Future<void> cancelRedCard() async {
     _numOfRedCards--;
+
+    await FirebaseFirestore.instance
+        .collection('teams')
+        .doc(teamName)
+        .set({
+      'Players': toMap(),
+    }, SetOptions(merge: true));
   }
+
+  Map<String,Map<String, dynamic>> toMap() {
+    return {
+      name+number.toString(): {
+        'Name': _name,
+        'Surname': _surname,
+        'Goals': _goals,
+        'numOfYellowCards': _numOfYellowCards,
+        'numOfRedCards': _numOfRedCards,
+        'Position': _position,
+        'Age': _age,
+        'Number': _number,
+        'TeamName': _teamName,
+      }
+    };
+  }
+
+
+
 }

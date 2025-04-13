@@ -57,12 +57,18 @@ class AppUser
   }
 
 
-  bool controlTheseTeams(String team1,String team2) {
+  bool controlTheseTeams(String team1,String? team2) {
     if (!_isAdmin) return false;
     for (String name in controlledTeams){
-      if (name==team1 || name==team2){
+      if (name==team1 ){
         return true;
       }
+      else if (team2!=null){
+       if (team2==name){
+         return true;
+       }
+      }
+
     }
     return false;
   }
