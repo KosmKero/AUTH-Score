@@ -3,13 +3,13 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:untitled1/Data_Classes/Player.dart';
 import 'package:untitled1/Firebase_Handle/user_handle_in_base.dart';
+import 'package:untitled1/championship_details/StandingsPage.dart';
 import 'package:untitled1/globals.dart';
 import '../../Data_Classes/MatchDetails.dart';
 import 'package:provider/provider.dart';
 import '../API/user_handle.dart';
 import '../Data_Classes/Team.dart';
 import 'Match_Not_Started/Match_Not_Started_Details_Page.dart';
-import 'Standings_Card_1Group.dart';
 import 'Starting__11_Display_Card.dart';
 
 class matchStartedPage extends StatelessWidget {
@@ -243,7 +243,7 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
   Widget _buildMatchdetails() {
     return Column(
       children: [
-        widget.match.hasSecondHalfStarted ? _halfBuilder(2) : SizedBox.shrink(),
+        (widget.match.hasSecondHalfStarted || widget.match.hasMatchFinished)  ? _halfBuilder(2) : SizedBox.shrink(),
         _halfBuilder(1), // Always display the first half
       ],
     );
@@ -421,14 +421,12 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
     switch (selectedIndex) {
       case 0:
         return _buildMatchdetails();
+     // case 1:
+     //   return Starting11Display(
+     //     match: match,
+     //   );
       case 1:
-        return Starting11Display(
-          match: match,
-        );
-      case 2:
-        return StandingPageOneGroup(
-          team: match.homeTeam,
-        );
+        return StandingsPage1().buildGroupStandings(match.homeTeam.group);
       default:
         return _buildMatchdetails();
     }

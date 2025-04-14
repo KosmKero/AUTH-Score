@@ -12,6 +12,7 @@ import '../../Data_Classes/MatchDetails.dart';
 import '../Data_Classes/Player.dart';
 import '../globals.dart';
 
+/*
 class Starting11Display extends StatefulWidget {
   final MatchDetails match;
 
@@ -148,8 +149,8 @@ class _Starting11DisplayState extends State<Starting11Display> {
                 // Αποθηκεύουμε την τρέχουσα τιμή πριν την αυξήσουμε
                 (isHomeTeam) ? index++ : index--; // Αυξάνουμε το index κατά 1 ή τομειωνουμε
                 return PlayerWidget(
-                  players: (isHomeTeam) ? widget.match.playersSelected[0] : widget.match.playersSelected[1],
-                  playersList: (isHomeTeam) ? widget.match.players11[0] : widget.match.players11[1],
+                  players: (isHomeTeam) ? widget.match.playersSelectedHome : widget.match.playersSelectedAway,
+                  playersList: (isHomeTeam) ? widget.match.players11Home : widget.match.players11Away,
                   ind: (isHomeTeam) ? index-1: index, // Χρησιμοποιούμε το σωστό index
                   profColor: (isHomeTeam)? Colors.black : Colors.blueGrey, match: widget.match,
                 );
@@ -324,3 +325,5 @@ class _PlayerWidgetState extends State<PlayerWidget> {
     });
   }
 }
+
+ */

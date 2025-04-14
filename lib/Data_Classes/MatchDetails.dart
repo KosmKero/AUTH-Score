@@ -37,9 +37,12 @@ class MatchDetails extends ChangeNotifier {
 
   //Μαπ που θα δειχνει ποιοι παιχτες επιλέχθηκαν απο τον αντμιν για την αρχικη ενδεκαδα,
   // για να μη του εμφανιζονται σαν επιλογη στο gui
-  List<Map<Player, bool>> playersSelected = [{}, {}];
+  Map<Player, bool> playersSelectedHome = {};
+  Map<Player, bool> playersSelectedAway = {};
 
-  List<List<Player?>> players11 = [[], []];
+  Map<Player?,int> players11Home = {};
+  Map<Player?,int> players11Away = {};
+
 
   MatchDetails(
       {required Team homeTeam,
@@ -56,7 +59,14 @@ class MatchDetails extends ChangeNotifier {
       required game,
       required int scoreHome,
       required int scoreAway,
-      required int timeStarted}) {
+      required int timeStarted,
+     // required this.selectedFormationHome,
+     // required this.selectedFormationAway,
+     // required Map<String,int> playersI11Home,
+     // required Map<String,int> playersI11Away,
+     // required Map<String,bool> selectedHome,
+     // required Map<String,bool> selectedAway
+       }) {
     _homeTeam = homeTeam;
     _awayTeam = awayTeam;
     _hasMatchStarted = hasMatchStarted;
@@ -66,10 +76,9 @@ class MatchDetails extends ChangeNotifier {
     if (hasMatchFinished) {
       _hasSecondHalfStarted = true;
       _hasFirstHalfFinished = true;
+      _hasMatchStarted=true;
     }
 
-    _scoreAway = 0;
-    _scoreHome = 0;
     _time = time;
     _day = day;
     _month = month;
@@ -81,23 +90,64 @@ class MatchDetails extends ChangeNotifier {
     _isGroupPhase = isGroupPhase;
     _game = game;
 
-    for (Player player in homeTeam.players) {
-      playersSelected[0][player] = false;
+    /*for (final entry in selectedHome.entries) {
+      final name = entry.key;
+      final isSelected = entry.value;
+
+      final player = homeTeam.players.firstWhere(
+            (p) => p.name == name,
+      );
+
+      playersSelectedHome[player] = isSelected;
     }
-    for (Player player in awayTeam.players) {
-      playersSelected[1][player] = false;
+
+    for (final entry in selectedAway.entries) {
+      final name = entry.key;
+      final isSelected = entry.value;
+
+      final player = awayTeam.players.firstWhere(
+            (p) => p.name == name,
+      );
+
+      playersSelectedAway[player] = isSelected;
     }
-    for (int i = 0; i < 2; i++) {
-      for (int j = 0; j < 11; j++) {
-        players11[i].add(null);
-      }
+
+// Θέσεις στην ενδεκάδα
+    for (final entry in playersI11Home.entries) {
+      final name = entry.key;
+      final position = entry.value;
+
+      final player = homeTeam.players.firstWhere(
+            (p) => p.name == name,
+      );
+
+      players11Home[player] = position;
     }
+
+    for (final entry in playersI11Away.entries) {
+      final name = entry.key;
+      final position = entry.value;
+
+      final player = awayTeam.players.firstWhere(
+            (p) => p.name == name,
+      );
+
+      players11Away[player] = position;
+    }
+
+     */
+
+
     loadMatchFactsFromBase();
 
     _startListeningForUpdates();
   }
 
   factory MatchDetails.fromFirestore(DocumentSnapshot data) {
+
+
+    List<List<Player?>> players11 = [[], []];
+
     return MatchDetails(
       homeTeam: data["Hometeam"] ?? "",
       awayTeam: data["Awayteam"] ?? "",
@@ -114,6 +164,13 @@ class MatchDetails extends ChangeNotifier {
       hasSecondHalfStarted: data["hasSecondHalfStarted"],
       hasFirstHalfFinished: data["hasFirstHalfFinished"],
       timeStarted: data["TimeStarted"] ?? DateTime.now().millisecondsSinceEpoch,
+      //selectedFormationHome: data["selectedFormationHome"] ?? "4-3-3",
+      //selectedFormationAway: data["selectedFormationAway"] ?? "4-3-3",
+      //playersI11Home: Map<String, int>.from(data["playersI11Home"] ?? {}), //φορτωνουμε μαπ με αρχικη ενδεκαδα (ονομα παιχτη, θεση)
+      //playersI11Away: Map<String, int>.from(data["playersI11Away"] ?? {}), //φορτωνουμε μαπ με αρχικη ενδεκαδα (ονομα παιχτη, θεση)
+      //selectedHome: Map<String, bool>.from(data["selectedHome"] ?? {}), //φορτωνουμε μαπ με επιλεγμενους παιχτες (ονομα παιχτη, αν ειναι επιλεγμενους)
+      //selectedAway: Map<String, bool>.from(data["selectedAway"] ?? {}), //φορτωνουμε μαπ με επιλεγμενους παιχτες (ονομα παιχτη, αν ειναι επιλεγμενους)
+
     );
   }
 
@@ -591,7 +648,8 @@ class MatchDetails extends ChangeNotifier {
 
   void makeAllFalse(int i) {
     for (Player player in (i == 0) ? homeTeam.players : awayTeam.players) {
-      playersSelected[i][player] = false;
+      playersSelectedHome[player] = false;
+      playersSelectedAway[player] = false;
     }
   }
 

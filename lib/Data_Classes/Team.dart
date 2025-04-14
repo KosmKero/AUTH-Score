@@ -17,7 +17,7 @@ class Team {
   Team(this.name,this._matches, this._wins, this._losses, this._draws,this._group,this._foundationYear,this._titles,this._coach,[List<Player>? players] ) {
     _players = players ?? []; // Initialize players list if null
   }
-  final int? _foundationYear;
+  int? _foundationYear;
   String name;
   String _coach;
   int _matches, _wins, _losses, _draws, _titles;
@@ -208,6 +208,16 @@ class Team {
 
     await userRef.update({'LastFive': history});
   }
+
+
+  void setCoachName(String name){
+    _coach=name;
+  }
+  void setFoundationYear(int year){
+    _foundationYear=year;
+  }
+
+
 
 
 }

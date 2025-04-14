@@ -5,9 +5,9 @@ import 'package:untitled1/Match_Details_Package/Match_Not_Started/DetailsMatchNo
 import '../../Data_Classes/MatchDetails.dart';
 import '../../Data_Classes/Team.dart';
 import '../../Team_Display_Page_Package/TeamDisplayPage.dart';
+import '../../championship_details/StandingsPage.dart';
 import '../../globals.dart';
 import '../../main.dart';
-import '../Standings_Card_1Group.dart';
 import '../Starting__11_Display_Card.dart';
 
 //ΟΛΟ ΕΔΩ ΑΦΟΡΑ ΤΟ ΕΠΑΝΩ ΚΟΜΜΑΤΙ ΤΗΣ ΣΕΛΙΔΑΣ. ΓΙΑ ΤΗΝ ΩΡΑ =,ΜΕΡΑ ΚΙΑ ΤΙς ΟΜΑΔΕΣ. ΤΟ ΜΠΛΕ ΠΛΑΙΣΙΟ ΣΤΗΝ ΑΡΧΗ ΑΡΧΗ ΠΑΝΩ
@@ -139,8 +139,8 @@ class _NavigationButtonsState extends State<NavigationButtons> {
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           _buildTextButton(greek?"Λεπτομέρειες":"Details", 0),
-          _buildTextButton(greek?"Συνθέσεις":"Teams", 1),
-          _buildTextButton(greek?"Βαθμολογία":"Standing", 2),
+         // _buildTextButton(greek?"Συνθέσεις":"Teams", 1),
+          _buildTextButton(greek?"Βαθμολογία":"Standing", 1),
         ],
       ),
     );
@@ -293,12 +293,10 @@ Widget _sectionChooser(int selectedIndex, MatchDetails match) {
   switch (selectedIndex) {
     case 0:
       return DetailsMatchNotStarted(match: match);
+    //case 1:
+    //  return Starting11Display(match: match,);
     case 1:
-      return Starting11Display(match: match,);
-    case 2:
-      return StandingPageOneGroup(
-        team: match.homeTeam,
-      );
+      return StandingsPage1().buildGroupStandings(match.homeTeam.group);
     default:
       return DetailsMatchNotStarted(match: match);
   }

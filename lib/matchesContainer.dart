@@ -9,15 +9,12 @@ import 'API/NotificationService.dart';
 
 //ΑΥΤΗ Η ΚΛΑΣΗ ΑΦΟΡΑ ΤΑ CONTAINER ΤΩΝ ΜΑΤΣ ΣΤΗΝ ΑΡΧΙΚΗ ΟΘΟΝΗ
 class matchesContainer extends StatelessWidget {
-  matchesContainer({super.key, required this.matches,required this.type})
-  {
-    if(type==1) {
+  matchesContainer({super.key, required this.matches, required this.type}) {
+    if (type == 1) {
       sortMatches();
+    } else {
+      sortMatchesDifferent();
     }
-    else
-      {
-        sortMatchesDifferent();
-      }
   }
   final List<MatchDetails> matches;
 
@@ -31,9 +28,9 @@ class matchesContainer extends StatelessWidget {
     );
   }
 
-  Column _buildMatches() { //ΒΑΖΕΙ ΤΑ ΣΤΟΙΧΕΙΑ ΤΗΣ ΚΑΘΕ ΟΜΑΔΑΣ ΣΤΟ ΚΟΥΤΑΚΙ
+  Column _buildMatches() {
+    //ΒΑΖΕΙ ΤΑ ΣΤΟΙΧΕΙΑ ΤΗΣ ΚΑΘΕ ΟΜΑΔΑΣ ΣΤΟ ΚΟΥΤΑΚΙ
     return Column(
-
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         for (int i = 0; i < matches.length; i++) ...[
@@ -43,51 +40,53 @@ class matchesContainer extends StatelessWidget {
               matches[i].year != matches[i - 1].year)
             Text(
               " ${matches[i].day}/${matches[i].month}/${matches[i].year}",
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold,color: Colors.white),
+              style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white),
             ),
           // Create Container for the match
           eachMatchContainer(matches[i]),
         ],
-
       ],
     );
   }
 
-  void sortMatches(){
+  void sortMatches() {
     matches.sort((a, b) {
       if (a.year != b.year) {
         return a.year.compareTo(b.year);
       } else if (a.month != b.month) {
         return a.month.compareTo(b.month);
-      } else if (a.day!=b.day){
+      } else if (a.day != b.day) {
         return a.day.compareTo(b.day);
-      }else{
+      } else {
         return a.time.compareTo(b.time);
       }
     });
   }
 
-  void sortMatchesDifferent()
-  {
+  void sortMatchesDifferent() {
     matches.sort((a, b) {
       if (a.year != b.year) {
         return b.year.compareTo(a.year);
       } else if (a.month != b.month) {
         return b.month.compareTo(a.month);
-      } else if (a.day!=b.day){
+      } else if (a.day != b.day) {
         return b.day.compareTo(a.day);
-      }else{
+      } else {
         return b.time.compareTo(a.time);
       }
     });
   }
 }
 
-class eachMatchContainer extends StatelessWidget
-{
+class eachMatchContainer extends StatelessWidget {
   final MatchDetails match;
-  const eachMatchContainer(this.match, {Key? key,}): super(key: key);
-
+  const eachMatchContainer(
+    this.match, {
+    Key? key,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -106,111 +105,120 @@ class eachMatchContainerView extends StatelessWidget {
 
     return InkWell(
         onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => matchDetailsPage(match)
-            )
-          );
+          Navigator.push(context,
+              MaterialPageRoute(builder: (context) => matchDetailsPage(match)));
         },
         borderRadius: BorderRadius.circular(10),
         child: Card(
-          color: darkModeNotifier.value?darkModeMatches:Colors.white,
+          color: darkModeNotifier.value ? darkModeMatches : Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
-      elevation: 8,
-      margin: EdgeInsets.symmetric(vertical: 2, horizontal: 6),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 16.0),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            MatchContainerTime(match: match),
-            SizedBox(width: 15),
-            Container(height: 50, width: 1.5, color: Colors.black26),
-            SizedBox(width: 15),
-            Expanded(
-              flex: 3,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row( //ΦΤΙΑΧΝΕΙ ΤΗΝ HOME TEAM
-                    children: [
-                      SizedBox(
-                          height: 25,
-                          width: 25,
-                          child: match.homeTeam.image
-                      ),
-                      Text(" ${match.homeTeam.name}",
-                        style: TextStyle(
-                            fontSize: match.homeTeam.name.length<15?16:15,
-                            fontWeight: FontWeight.w600,
-                            color: darkModeNotifier.value? Colors.white: Colors.black87
-                        ),
-                      )
-                    ],
-                  ),
-                  SizedBox(height: 2),
-                  Row( //ΦΤΙΑΧΝΕΙ ΤΗΝ AWAY TEAM
-                    children: [
-                      SizedBox(
-                        height: 25,
-                        width: 25,
-                        child:  match.awayTeam.image
-                      ),
-                      Text(" ${match.awayTeam.name}",
-                        style: TextStyle(
-                            fontSize:  match.awayTeam.name.length<15?16:15,
-                            fontWeight: FontWeight.w600,
-                            color: darkModeNotifier.value? Colors.white: Colors.black87
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 20),
-            match.hasMatchStarted ? Column(
+          elevation: 8,
+          margin: EdgeInsets.symmetric(vertical: 2, horizontal: 6),
+          child: Padding(
+            padding:
+                const EdgeInsets.symmetric(vertical: 5.0, horizontal: 16.0),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Text(
-                  match.scoreHome.toString(),
-                  style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: match.hasMatchFinished ? Colors.black : Colors.red),
+                MatchContainerTime(match: match),
+                SizedBox(width: 15),
+                Container(height: 50, width: 1.5, color: Colors.black26),
+                SizedBox(width: 15),
+                Expanded(
+                  flex: 3,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        //ΦΤΙΑΧΝΕΙ ΤΗΝ HOME TEAM
+                        children: [
+                          SizedBox(
+                              height: 25,
+                              width: 25,
+                              child: match.homeTeam.image),
+                          Text(
+                            " ${match.homeTeam.name}",
+                            style: TextStyle(
+                                fontSize:
+                                    match.homeTeam.name.length < 15 ? 16 : 15,
+                                fontWeight: FontWeight.w600,
+                                color: darkModeNotifier.value
+                                    ? Colors.white
+                                    : Colors.black87),
+                          )
+                        ],
+                      ),
+                      SizedBox(height: 2),
+                      Row(
+                        //ΦΤΙΑΧΝΕΙ ΤΗΝ AWAY TEAM
+                        children: [
+                          SizedBox(
+                              height: 25,
+                              width: 25,
+                              child: match.awayTeam.image),
+                          Text(
+                            " ${match.awayTeam.name}",
+                            style: TextStyle(
+                                fontSize:
+                                    match.awayTeam.name.length < 15 ? 16 : 15,
+                                fontWeight: FontWeight.w600,
+                                color: darkModeNotifier.value
+                                    ? Colors.white
+                                    : Colors.black87),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
-                Text(
-                  match.scoreAway.toString(),
-                  style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: match.hasMatchFinished ? Colors.black : Colors.red),
-                ),
+                const SizedBox(width: 20),
+                match.hasMatchStarted
+                    ? Column(
+                        children: [
+                          Text(
+                            match.scoreHome.toString(),
+                            style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: match.hasMatchFinished
+                                    ? Colors.black
+                                    : Colors.red),
+                          ),
+                          Text(
+                            match.scoreAway.toString(),
+                            style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: match.hasMatchFinished
+                                    ? Colors.black
+                                    : Colors.red),
+                          ),
+                        ],
+                      )
+                    : SizedBox.shrink(),
+                Padding(
+                  padding: EdgeInsetsDirectional.only(start: 5, end: 0),
+                  child: notificationIcon(
+                    match: match,
+                    matchTime: match.startTimeInSeconds,
+                    matchDate: match.day,
+                  ),
+                )
               ],
-            ):SizedBox.shrink() ,
-            Padding(
-                padding: EdgeInsetsDirectional.only(start: 5,end:0),
-                child: notificationIcon(match: match,matchTime:match.startTimeInSeconds,matchDate: match.day,),
-            )
-          ],
-        ),
-      ),
-    )
-    );
+            ),
+          ),
+        ));
   }
 }
 
 //ΦΤΙΑΧΝΕΙ ΤΗΝ ΩΡΑ ΤΟΥ MATCH
-class MatchContainerTime extends StatefulWidget
-{
-
-
+class MatchContainerTime extends StatefulWidget {
   late final Color color;
-  MatchContainerTime({super.key,required this.match}){
-    match.hasMatchFinished ? color =Colors.black : color=Colors.red;
+  MatchContainerTime({super.key, required this.match}) {
+    match.hasMatchFinished ? color = Colors.black : color = Colors.red;
   }
 
   final MatchDetails match;
@@ -219,38 +227,74 @@ class MatchContainerTime extends StatefulWidget
   State<MatchContainerTime> createState() => _MatchContainerTimeState();
 }
 
-class _MatchContainerTimeState extends State<MatchContainerTime> {
-
-  int _secondsElapsed=7;
+class _MatchContainerTimeState extends State<MatchContainerTime>
+    with WidgetsBindingObserver {
+  int _secondsElapsed = 0;
   Timer? _timer;
 
   @override
   void initState() {
     super.initState();
-
-
-    // Listener για να ξεκινησει το χρονομετρο του αγώνα
-    widget.match.addListener(() {
-      if (widget.match.hasMatchStarted) {
-        _startTimer(); // Ξεκινά το χρονόμετρο αν το ματς ξεκινήσει
-      }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      widget.match.addListener(_onMatchUpdated);
     });
+
+    if (widget.match.hasMatchStarted) {
+      _startTimer();
+    }
+  }
+
+  void _onMatchUpdated() {
+    if (widget.match.hasMatchStarted && _timer == null) {
+      _startTimer();
+    }
   }
 
   @override
   void dispose() {
+    widget.match.removeListener(_onMatchUpdated);
     _timer?.cancel();
-    _timer = null;
     super.dispose();
   }
 
+  @override
+  void didUpdateWidget(MatchContainerTime oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    // Ελέγχουμε αν το ματς έχει ξεκινήσει και αν έχει αλλάξει κατάσταση
+    if (widget.match.hasMatchStarted &&
+        oldWidget.match.hasMatchStarted != widget.match.hasMatchStarted) {
+      setState(() {
+        _startTimer(); // Ξεκινάμε το χρονόμετρο αν το ματς ξεκινήσει
+      });
+    }
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+
+    // Όταν η εφαρμογή επιστρέψει από background, ξαναρχίζει το χρονόμετρο
+    if (state == AppLifecycleState.resumed) {
+      if (widget.match.hasMatchStarted) {
+        setState(() {
+          // Ενημερώνουμε την κατάσταση του widget
+          _startTimer();
+        });
+      }
+    }
+  }
+
   void _startTimer() {
-    _timer?.cancel();
-    _secondsElapsed = (DateTime.now().millisecondsSinceEpoch ~/ 1000) - widget.match.startTimeInSeconds;
+    _timer?.cancel(); // Ακύρωση του προηγούμενου timer
+    _secondsElapsed = (DateTime.now().millisecondsSinceEpoch ~/ 1000) -
+        widget.match.startTimeInSeconds;
+    print(DateTime.now().millisecondsSinceEpoch ~/ 1000 -
+        widget.match.startTimeInSeconds);
 
     _timer = Timer.periodic(Duration(seconds: 1), (timer) {
       if (!mounted) {
-        _timer?.cancel(); // Cancel the timer if the widget is no longer mounted
+        _timer?.cancel();
         return;
       }
       setState(() {
@@ -267,19 +311,22 @@ class _MatchContainerTimeState extends State<MatchContainerTime> {
           widget.match.timeString,
           style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
-
-        if(widget.match.isHalfTime()) Text("Ημίχρονο",style:TextStyle(color: Colors.red,fontSize: 9,fontWeight: FontWeight.bold))
-        else if (widget.match.hasMatchFinished) SizedBox.shrink()
-        else if(widget.match.hasMatchStarted) Text(
+        if (widget.match.isHalfTime())
+          Text("Ημίχρονο",
+              style: TextStyle(
+                  color: Colors.red, fontSize: 9, fontWeight: FontWeight.bold))
+        else if (widget.match.hasMatchFinished)
+          SizedBox.shrink()
+        else if (widget.match.hasMatchStarted)
+          Text(
             '${(_secondsElapsed ~/ 60).toString().padLeft(2, '0')}:${(_secondsElapsed % 60).toString().padLeft(2, '0')}',
             style: const TextStyle(
-                fontWeight: FontWeight.bold, fontSize: 12, color: Colors.red),)
-
+                fontWeight: FontWeight.bold, fontSize: 12, color: Colors.red),
+          ),
       ],
     );
   }
 }
-
 
 //ΦΤΙΑΧΝΕΙ ΤΗΝ NOTIFICATION ICON ΤΟΥ MATCH
 class notificationIcon extends StatefulWidget {
@@ -287,13 +334,15 @@ class notificationIcon extends StatefulWidget {
   final int matchTime;
   final int matchDate;
 
-
-  const notificationIcon({super.key, required this.match,required this.matchDate,required this.matchTime});
+  const notificationIcon(
+      {super.key,
+      required this.match,
+      required this.matchDate,
+      required this.matchTime});
 
   @override
   State<notificationIcon> createState() => _NotificationIconState();
 }
-
 
 class _NotificationIconState extends State<notificationIcon> {
   bool isNotified = false;
@@ -301,26 +350,28 @@ class _NotificationIconState extends State<notificationIcon> {
   @override
   Widget build(BuildContext context) {
     return IconButton(
-      color: darkModeNotifier.value? Colors.white: Colors.black87,
+      color: darkModeNotifier.value ? Colors.white : Colors.black87,
       onPressed: () {
-        setState(()
-        {
+        setState(() {
           isNotified = !isNotified;
-          if(isNotified)
-            {
-             // NotificationService().scheduleNotification(widget.matchDate as DateTime, widget.match as String);
-            }
+          if (isNotified) {
+            // NotificationService().scheduleNotification(widget.matchDate as DateTime, widget.match as String);
+          }
         });
-        ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Reminder set for ${widget.match}'),
-              duration: Duration(seconds: 2),
-            ));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Reminder set for ${widget.match}'),
+          duration: Duration(seconds: 2),
+        ));
       },
       icon: Icon(
-
-        isNotified ? Icons.notifications_active : Icons.notification_add_outlined,
-        color: isNotified ? Colors.blue :darkModeNotifier.value? Colors.white: Colors.black87,
+        isNotified
+            ? Icons.notifications_active
+            : Icons.notification_add_outlined,
+        color: isNotified
+            ? Colors.blue
+            : darkModeNotifier.value
+                ? Colors.white
+                : Colors.black87,
       ),
     );
   }

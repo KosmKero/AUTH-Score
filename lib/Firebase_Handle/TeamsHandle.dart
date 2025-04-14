@@ -225,6 +225,7 @@ class TeamsHandle {
           hasSecondHalfStarted: data["hasSecondHalfStarted"] ?? false,
           hasFirstHalfFinished: data["hasFirstHalfFinished"] ?? false,
           timeStarted: data["TimeStarted"] ?? DateTime.now().millisecondsSinceEpoch,
+
         );
       }).toList();
 
