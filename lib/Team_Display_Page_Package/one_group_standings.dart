@@ -1,49 +1,25 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:untitled1/Team_Display_Page_Package/TeamDisplayPage.dart';
-import 'package:untitled1/main.dart';
 
 import '../Data_Classes/Team.dart';
 import '../globals.dart';
+import 'TeamDisplayPage.dart';
 
-class StandingsPage extends StatefulWidget {
+class OneGroupStandings extends StatefulWidget {
+  OneGroupStandings({super.key,required this.group});
+  int group;
+
   @override
-  State<StandingsPage> createState() => StandingsPage1();
+  State<OneGroupStandings> createState() => _OneGroupStandingsState();
 }
 
-class StandingsPage1 extends State<StandingsPage> {
+class _OneGroupStandingsState extends State<OneGroupStandings> {
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: Container(
-        color:darkModeNotifier.value?darkModeBackGround: Color.fromARGB(70, 60, 80, 150),
-        child: Column(children: [
-          SizedBox(height: 5,),
-          Text(greek?"Βαθμολογικός Πίνακας":"Standings Table",
-              style: TextStyle(
-                  fontSize: 23,
-                  fontWeight: FontWeight.bold,
-                  color: Color.fromARGB(255, 245, 245, 245),
-                  fontFamily: 'Montserrat',
-                  fontStyle: FontStyle.italic
-              )),
-          SizedBox(height: 8,),
-          Expanded(
-              child: SingleChildScrollView(
-                  child: Column(
-            children: [
-              buildGroupStandings(1),
-              buildGroupStandings(2),
-              buildGroupStandings(3),
-              buildGroupStandings(4)
-            ],
-          )))
-        ]),
-      ),
-    );
+    return _buildGroupStandings(widget.group);
   }
 
-  Widget buildGroupStandings(int group) {
+  Widget _buildGroupStandings(int group) {
     // Φιλτράρισμα και ταξινόμηση ομάδων του ομίλου
     List<Team> groupTeams = teams.where((team) => team.group == group).toList()
       ..sort((a, b) => b.totalPoints.compareTo(a.totalPoints));
@@ -187,6 +163,4 @@ class StandingsPage1 extends State<StandingsPage> {
       numeric: numeric,
     );
   }
-
-
 }

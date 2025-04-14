@@ -5,6 +5,7 @@ import 'package:untitled1/Match_Details_Package/Match_Not_Started/DetailsMatchNo
 import '../../Data_Classes/MatchDetails.dart';
 import '../../Data_Classes/Team.dart';
 import '../../Team_Display_Page_Package/TeamDisplayPage.dart';
+import '../../Team_Display_Page_Package/one_group_standings.dart';
 import '../../championship_details/StandingsPage.dart';
 import '../../globals.dart';
 import '../../main.dart';
@@ -296,7 +297,7 @@ Widget _sectionChooser(int selectedIndex, MatchDetails match) {
     //case 1:
     //  return Starting11Display(match: match,);
     case 1:
-      return StandingsPage1().buildGroupStandings(match.homeTeam.group);
+      return OneGroupStandings(group: match.homeTeam.group);
     default:
       return DetailsMatchNotStarted(match: match);
   }
