@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:untitled1/API/Match_Handle.dart';
+import 'package:untitled1/globals.dart';
 import '../Data_Classes/MatchDetails.dart';
 import '../Match_Details_Package/Match_Details_Page.dart';
 
@@ -30,7 +31,7 @@ class KnockOutsPage extends StatelessWidget {
                     8,
                         (index) => Padding(
                       padding: EdgeInsets.symmetric(vertical: 5),
-                      child: knockOutMatchUp(match: null), // Παράδειγμα δεδομένων
+                      child: knockOutMatchUp(match: playOffMatches[index]), // Παράδειγμα δεδομένων
                     ),
                   ),
                 ),
@@ -93,7 +94,7 @@ class KnockOutsPage extends StatelessWidget {
                         (index) => Padding(
                       padding: EdgeInsets.symmetric(vertical: 50),
                       child: knockOutMatchUp(match:
-                      null), // Παράδειγμα δεδομένων
+                      playOffMatches[index+8]), // Παράδειγμα δεδομένων
                     ),
                   ),
                 ),
@@ -140,7 +141,7 @@ class KnockOutsPage extends StatelessWidget {
                         (index) => Padding(
                       padding: EdgeInsets.symmetric(vertical: 138),
                       child: knockOutMatchUp(match:
-                      null), // Παράδειγμα δεδομένων
+                      playOffMatches[index+12]), // Παράδειγμα δεδομένων
                     ),
                   ),
                 ),
@@ -178,7 +179,7 @@ class KnockOutsPage extends StatelessWidget {
                     SizedBox(
                       height: 317,
                     ),
-                    knockOutMatchUp(match:null)
+                    knockOutMatchUp(match: playOffMatches[14])
                   ],
                 ),
               ],

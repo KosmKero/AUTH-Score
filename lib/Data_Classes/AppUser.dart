@@ -1,6 +1,8 @@
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:untitled1/globals.dart';
 
+import 'MatchDetails.dart';
 import 'Team.dart';
 
 class AppUser
@@ -72,6 +74,56 @@ class AppUser
     }
     return false;
   }
+
+
+
+
+  Future<void> updateUserStatsForMatch(MatchDetails match, String correctChoice) async {
+    final matchKey = '${match.homeTeam.name}${match.awayTeam.name}${match.dateString}';
+    final votesDoc = await FirebaseFirestore.instance.collection('votes').doc(matchKey).get();
+
+    if (!votesDoc.exists || votesDoc.data()?['userVotes'] == null) {
+      print("No votes found for this match.");
+      return;
+    }
+
+    final Map<String, dynamic> userVotes = Map<String, dynamic>.from(votesDoc.data()!['userVotes']);
+
+    for (final entry in userVotes.entries) {
+      final String uid = entry.key;
+      final String choice = entry.value;
+
+      final userDocRef = FirebaseFirestore.instance.collection('users').doc(uid);
+      final userDoc = await userDocRef.get();
+
+      int correct = 0;
+      int total = 0;
+
+      if (userDoc.exists && userDoc.data()?['predictions'] != null) {
+        final predData = userDoc.data()!['predictions'];
+        correct = predData['correctVotes'] ?? 0;
+        total = predData['totalVotes'] ?? 0;
+      }
+
+      if (choice == correctChoice) {
+        correct++;
+      }
+      total++;
+
+      final accuracy = total > 0 ? (correct / total) * 100 : 0;
+
+      await userDocRef.set({
+        'predictions': {
+          'correctVotes': correct,
+          'totalVotes': total,
+          'accuracy': accuracy,
+        }
+      }, SetOptions(merge: true));
+    }
+
+    print("Stats updated for all users who voted in $matchKey.");
+  }
+
 
 
 
