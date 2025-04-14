@@ -6,6 +6,7 @@ import 'package:untitled1/Match_Details_Package/Match_Details_Page.dart';
 import 'package:untitled1/globals.dart';
 import 'Data_Classes/MatchDetails.dart';
 import 'API/NotificationService.dart';
+import 'globals.dart';
 
 //ΑΥΤΗ Η ΚΛΑΣΗ ΑΦΟΡΑ ΤΑ CONTAINER ΤΩΝ ΜΑΤΣ ΣΤΗΝ ΑΡΧΙΚΗ ΟΘΟΝΗ
 class matchesContainer extends StatelessWidget {
@@ -29,23 +30,30 @@ class matchesContainer extends StatelessWidget {
   }
 
   Column _buildMatches() {
-    //ΒΑΖΕΙ ΤΑ ΣΤΟΙΧΕΙΑ ΤΗΣ ΚΑΘΕ ΟΜΑΔΑΣ ΣΤΟ ΚΟΥΤΑΚΙ
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        SizedBox(height: 10),
         for (int i = 0; i < matches.length; i++) ...[
           if (i == 0 ||
               matches[i].day != matches[i - 1].day ||
               matches[i].month != matches[i - 1].month ||
-              matches[i].year != matches[i - 1].year)
+              matches[i].year != matches[i - 1].year) ...[
+            // Add extra spacing ONLY if it's a new date (not the first item)
+            if (i != 0) SizedBox(height: 20), // ← Larger gap for new dates
             Text(
               " ${matches[i].day}/${matches[i].month}/${matches[i].year}",
               style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white),
+                fontSize: 14.5,
+                fontWeight: FontWeight.bold,
+                fontFamily: 'Arial',
+                color: darkModeNotifier.value ? Colors.white : Colors.white,
+                letterSpacing: 0.5,
+              ),
             ),
-          // Create Container for the match
+            SizedBox(height: 8),
+          ],
+          // Match container
           eachMatchContainer(matches[i]),
         ],
       ],
@@ -110,11 +118,11 @@ class eachMatchContainerView extends StatelessWidget {
         },
         borderRadius: BorderRadius.circular(10),
         child: Card(
-          color: darkModeNotifier.value ? darkModeMatches : Colors.white,
+          color: darkModeNotifier.value ? darkModeMatches : lightModeContainer,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(20),
           ),
-          elevation: 8,
+          elevation: 5,
           margin: EdgeInsets.symmetric(vertical: 2, horizontal: 6),
           child: Padding(
             padding:
@@ -124,7 +132,7 @@ class eachMatchContainerView extends StatelessWidget {
               children: [
                 MatchContainerTime(match: match),
                 SizedBox(width: 15),
-                Container(height: 50, width: 1.5, color: Colors.black26),
+                Container(height: 50, width: 1.5, color:darkModeNotifier.value==true? Colors.black26 : Colors.black),
                 SizedBox(width: 15),
                 Expanded(
                   flex: 3,
@@ -142,12 +150,12 @@ class eachMatchContainerView extends StatelessWidget {
                           Text(
                             " ${match.homeTeam.name}",
                             style: TextStyle(
-                                fontSize:
-                                    match.homeTeam.name.length < 15 ? 16 : 15,
-                                fontWeight: FontWeight.w600,
-                                color: darkModeNotifier.value
-                                    ? Colors.white
-                                    : Colors.black87),
+                                fontSize: match.homeTeam.name.length < 15 ? 15 : 15,
+                              fontWeight: FontWeight.w600,
+                                color: darkModeNotifier.value==true ? Colors.white : lightModeText,
+                                fontFamily: 'Arial',
+                                letterSpacing: 0.3
+                            ),
                           )
                         ],
                       ),
@@ -162,12 +170,12 @@ class eachMatchContainerView extends StatelessWidget {
                           Text(
                             " ${match.awayTeam.name}",
                             style: TextStyle(
-                                fontSize:
-                                    match.awayTeam.name.length < 15 ? 16 : 15,
+                                fontSize: match.awayTeam.name.length < 15 ? 15 : 15,
                                 fontWeight: FontWeight.w600,
-                                color: darkModeNotifier.value
-                                    ? Colors.white
-                                    : Colors.black87),
+                                color: darkModeNotifier.value ? Colors.white : lightModeText,
+                                fontFamily: 'Arial',
+                                letterSpacing: 0.3
+                            ),
                           ),
                         ],
                       ),
@@ -183,18 +191,15 @@ class eachMatchContainerView extends StatelessWidget {
                             style: TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
-                                color: match.hasMatchFinished
-                                    ? Colors.black
-                                    : Colors.red),
+                                fontFamily: 'Arial',
+                                color: match.hasMatchFinished ? match.scoreHome > match.scoreAway ? Colors.black:Colors.grey : Colors.red),
                           ),
                           Text(
                             match.scoreAway.toString(),
                             style: TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
-                                color: match.hasMatchFinished
-                                    ? Colors.black
-                                    : Colors.red),
+                                color: match.hasMatchFinished ?match.scoreAway>match.scoreHome? Colors.black:Colors.grey : Colors.red),
                           ),
                         ],
                       )

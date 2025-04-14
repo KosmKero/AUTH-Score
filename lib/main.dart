@@ -308,10 +308,11 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   const CustomAppBar({super.key, required this.onOptionSelected, required this.selectedOption});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context)
+  {
     return AppBar(
       title: Text("AUTH Score", style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: Colors.white)),
-      backgroundColor: Color.fromARGB(250, 50, 120, 90),
+      backgroundColor: Color.fromARGB(250, 46, 90, 136),
       actions: [
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 5),

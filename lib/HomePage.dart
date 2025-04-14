@@ -37,15 +37,14 @@ class _HomePageState extends State<HomePage> {
       children: [
         if (globalUser.isAdmin)
         Container(
-            color: darkModeNotifier.value
-                ? darkModeBackGround
-                : Color.fromARGB(150, 60, 80, 150),
+            color: darkModeNotifier.value ? darkModeBackGround : lightModeBackGround,
             width: double.infinity,
             height: 60,
             child: ElevatedButton(
-              style: ElevatedButton.styleFrom(backgroundColor:  darkModeNotifier.value
+              style: ElevatedButton.styleFrom(
+                  backgroundColor:  darkModeNotifier.value
                   ? darkModeBackGround
-                  : Color.fromARGB(00, 60, 80, 150)),
+                  : Color.fromARGB(250, 74, 111, 150)),
             onPressed: () async {
                   await Navigator.push(
                       context,
@@ -53,11 +52,25 @@ class _HomePageState extends State<HomePage> {
                         builder: (context) => AddMatchScreen(),
                       ));
                 },
-                child: Text("Προσθήκη Αγώνα",style: TextStyle(color: Colors.white),))),
+                child: Text(
+                  "Προσθήκη Αγώνα",
+                  style: TextStyle(
+
+                      color:darkModeNotifier.value==true? Colors.white: Colors.white,
+                      fontFamily: 'Arial',
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16.5,
+                      wordSpacing: 1,
+                    letterSpacing: 0.5,
+
+                  ),
+                )
+            )
+        ),
         Container(
             color: darkModeNotifier.value
                 ? darkModeBackGround
-                : Color.fromARGB(150, 60, 80, 150),
+                : lightModeBackGround,
             width: double.infinity,
             height: 60,
             child: TextButton(
@@ -68,10 +81,16 @@ class _HomePageState extends State<HomePage> {
                 child: upcomingMatches
                     ? Row(
                         children: [
-                          Icon(CupertinoIcons.back),
+                          Icon(CupertinoIcons.back, color: Colors.white,size: 19,),
                           Text(
                             "Προηγούμενοι αγώνες",
-                            style: TextStyle(color: Colors.white),
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 17,
+                                fontWeight: FontWeight.w600,
+                                fontFamily: "Arial",
+                                letterSpacing: 0.5
+                            ),
                           ),
                         ],
                       )
@@ -80,9 +99,15 @@ class _HomePageState extends State<HomePage> {
                         children: [
                           Text(
                             "Επερχόμενοι αγώνες",
-                            style: TextStyle(color: Colors.white),
+                            style: TextStyle
+                              (color: Colors.white,
+                                fontSize: 17,
+                                fontWeight: FontWeight.w600,
+                                fontFamily: "Arial",
+                                letterSpacing: 0.5
+                            ),
                           ),
-                          Icon(CupertinoIcons.right_chevron),
+                          Icon(CupertinoIcons.right_chevron,color: Colors.white,size: 19,),
                         ],
                       ))),
         /* Container(
@@ -106,7 +131,7 @@ class _HomePageState extends State<HomePage> {
           child: Container(
             color: darkModeNotifier.value
                 ? darkModeBackGround
-                : Color.fromARGB(150, 60, 80, 150),
+                : lightModeBackGround,
             child: upcomingMatches
                 ? matchesContainer(
                     matches: MatchHandle().getUpcomingMatches(), type: 1)
