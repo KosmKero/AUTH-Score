@@ -36,7 +36,7 @@ class _TopPlayersView extends State<TopPlayersPage> {
   Widget build(BuildContext context) {
     return Expanded(
         child: Container(
-          color: darkModeNotifier.value?darkModeBackGround: lightModeBackGround,
+          color: darkModeNotifier.value?Color(0xFF121212): lightModeBackGround,
           child: Padding(
           padding: EdgeInsets.symmetric(vertical: 10,horizontal: 16),
               child: Column(
@@ -45,7 +45,11 @@ class _TopPlayersView extends State<TopPlayersPage> {
               // Προσθήκη του τίτλου
               Text(
               "Γκολ",
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                color: Colors.white
+              ),
               ),
               SizedBox(height: 10), // Απόσταση πριν από τη λίστα
 
@@ -83,15 +87,27 @@ class _TopPlayersView extends State<TopPlayersPage> {
 
         Column(
           children: [
-            Text("${player.name} ${player.surname}"),
-            Text(player.position == 3
-                ? "Επιθετικός"
-                : player.position == 2
-                    ? "Μέσος"
-                    : player.position == 1?"Αμυντικός":"Τερματοφύλακας")
+            Text("${player.name} ${player.surname}",
+              style: TextStyle(color:Colors.white,
+                  fontFamily: "Arial",
+                fontSize: 15.5
+              )
+              ,),
+            Text(player.position == 3 ? "Επιθετικός" : player.position == 2 ? "Μέσος" : player.position == 1?"Αμυντικός":"Τερματοφύλακας",
+               style: TextStyle(
+                   color:Colors.white,
+                   fontFamily: "Arial",
+                   fontSize: 15.5
+               ),
+            )
           ],
         ),
-        Text(player.goals.toString())
+        Text(player.goals.toString(),
+        style: TextStyle(
+            color:Colors.white,
+            fontFamily: "Arial",
+            fontSize: 15.5
+        ),)
       ],
     );
   }

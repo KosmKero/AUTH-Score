@@ -17,7 +17,7 @@ class KnockOutsPage extends StatelessWidget {
         child: SingleChildScrollView(
           //scrollDirection: Axis.vertical,
           child: Container(
-            color: darkModeNotifier.value?darkModeBackGround: lightModeBackGround,
+            color: darkModeNotifier.value?Color(0xFF121212): lightModeBackGround,
             // Χρώμα φόντου
             child: Row(
               mainAxisAlignment:
@@ -41,14 +41,14 @@ class KnockOutsPage extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment
                       .start, // Στοιχίστε τα στοιχεία στην αρχή
                   children: [
-                    SizedBox(height: 45), Container(width: 20, height: 2, color: Colors.black),
-                    SizedBox(height: 86), Container(width: 20, height: 2, color: Colors.black),
-                    SizedBox(height: 86), Container(width: 20, height: 2, color: Colors.black),
-                    SizedBox(height: 86), Container(width: 20, height: 2, color: Colors.black),
-                    SizedBox(height: 86), Container(width: 20, height: 2, color: Colors.black),
-                    SizedBox(height: 86), Container(width: 20, height: 2, color: Colors.black),
-                    SizedBox(height: 86), Container(width: 20, height: 2, color: Colors.black),
-                    SizedBox(height: 86), Container(width: 20, height: 2, color: Colors.black),
+                    SizedBox(height: 45), Container(width: 20, height: 2, color: !darkModeNotifier.value?Colors.black: Colors.grey[400]),
+                    SizedBox(height: 86), Container(width: 20, height: 2, color: !darkModeNotifier.value?Colors.black:Colors.grey[400]),
+                    SizedBox(height: 86), Container(width: 20, height: 2, color: !darkModeNotifier.value?Colors.black:Colors.grey[400]),
+                    SizedBox(height: 86), Container(width: 20, height: 2, color: !darkModeNotifier.value?Colors.black:Colors.grey[400]),
+                    SizedBox(height: 86), Container(width: 20, height: 2, color: !darkModeNotifier.value?Colors.black:Colors.grey[400]),
+                    SizedBox(height: 86), Container(width: 20, height: 2, color: !darkModeNotifier.value?Colors.black:Colors.grey[400]),
+                    SizedBox(height: 86), Container(width: 20, height: 2, color: !darkModeNotifier.value?Colors.black:Colors.grey[400]),
+                    SizedBox(height: 86), Container(width: 20, height: 2, color: !darkModeNotifier.value?Colors.black:Colors.grey[400]),
                   ],
                 ),
                 Column(
@@ -56,13 +56,13 @@ class KnockOutsPage extends StatelessWidget {
                     SizedBox(
                       height: 45,
                     ),
-                    Container(width: 2, height: 90, color: Colors.black),
+                    Container(width: 2, height: 90, color: !darkModeNotifier.value?Colors.black:Colors.grey[400]),
                     SizedBox(height: 86),
-                    Container(width: 2, height: 90, color: Colors.black),
+                    Container(width: 2, height: 90, color: !darkModeNotifier.value?Colors.black:Colors.grey[400]),
                     SizedBox(height: 86),
-                    Container(width: 2, height: 90, color: Colors.black),
+                    Container(width: 2, height: 90, color:!darkModeNotifier.value?Colors.black: Colors.grey[400]),
                     SizedBox(height: 86),
-                    Container(width: 2, height: 90, color: Colors.black),
+                    Container(width: 2, height: 90, color:!darkModeNotifier.value?Colors.black: Colors.grey[400]),
                     //SizedBox(height: 86),
                   ],
                 ),
@@ -71,13 +71,13 @@ class KnockOutsPage extends StatelessWidget {
                     SizedBox(
                       height: 86,
                     ),
-                    Container(width: 20, height: 2, color: Colors.black),
+                    Container(width: 20, height: 2, color: !darkModeNotifier.value?Colors.black:Colors.grey[400]),
                     SizedBox(height: 176),
-                    Container(width: 20, height: 2, color: Colors.black),
+                    Container(width: 20, height: 2, color:!darkModeNotifier.value?Colors.black: Colors.grey[400]),
                     SizedBox(height: 176),
-                    Container(width: 20, height: 2, color: Colors.black),
+                    Container(width: 20, height: 2, color: !darkModeNotifier.value?Colors.black:Colors.grey[400]),
                     SizedBox(height: 176),
-                    Container(width: 20, height: 2, color: Colors.black),
+                    Container(width: 20, height: 2, color:!darkModeNotifier.value?Colors.black: Colors.grey[400]),
                     //SizedBox(height: 176),
                   ],
                 ),
@@ -96,13 +96,13 @@ class KnockOutsPage extends StatelessWidget {
                     SizedBox(
                       height: 86,
                     ),
-                    Container(width: 10, height: 2, color: Colors.black),
+                    Container(width: 10, height: 2, color: !darkModeNotifier.value?Colors.black:Colors.grey[400]),
                     SizedBox(height: 176),
-                    Container(width: 10, height: 2, color: Colors.black),
+                    Container(width: 10, height: 2, color: !darkModeNotifier.value?Colors.black:Colors.grey[400]),
                     SizedBox(height: 176),
-                    Container(width: 10, height: 2, color: Colors.black),
+                    Container(width: 10, height: 2, color: !darkModeNotifier.value?Colors.black:Colors.grey[400]),
                     SizedBox(height: 176),
-                    Container(width: 10, height: 2, color: Colors.black),
+                    Container(width: 10, height: 2, color: !darkModeNotifier.value?Colors.black:Colors.grey[400]),
                     //SizedBox(height: 176),
                   ],
                 ),
@@ -111,9 +111,9 @@ class KnockOutsPage extends StatelessWidget {
                     SizedBox(
                       height: 86,
                     ),
-                    Container(width: 2, height: 180, color: Colors.black),
+                    Container(width: 2, height: 180, color:!darkModeNotifier.value?Colors.black: Colors.grey[400]),
                     SizedBox(height: 176),
-                    Container(width: 2, height: 180, color: Colors.black),
+                    Container(width: 2, height: 180, color:!darkModeNotifier.value?Colors.black: Colors.grey[400]),
                     //SizedBox(height: 86),
                   ],
                 ),
@@ -122,9 +122,9 @@ class KnockOutsPage extends StatelessWidget {
                     SizedBox(
                       height: 176,
                     ),
-                    Container(width: 30, height: 2, color: Colors.black),
+                    Container(width: 30, height: 2, color:!darkModeNotifier.value?Colors.black: Colors.grey[400]),
                     SizedBox(height: 264 + 89),
-                    Container(width: 30, height: 2, color: Colors.black),
+                    Container(width: 30, height: 2, color: !darkModeNotifier.value?Colors.black:Colors.grey[400]),
                     //SizedBox(height: 86),
                   ],
                 ),
@@ -143,9 +143,9 @@ class KnockOutsPage extends StatelessWidget {
                     SizedBox(
                       height: 176,
                     ),
-                    Container(width: 10, height: 2, color: Colors.black),
+                    Container(width: 10, height: 2, color:!darkModeNotifier.value?Colors.black: Colors.grey[400]),
                     SizedBox(height: 264 + 89),
-                    Container(width: 10, height: 2, color: Colors.black),
+                    Container(width: 10, height: 2, color: !darkModeNotifier.value?Colors.black:Colors.grey[400]),
                     // SizedBox(height: 86),
                   ],
                 ),
@@ -154,7 +154,7 @@ class KnockOutsPage extends StatelessWidget {
                     SizedBox(
                       height: 176,
                     ),
-                    Container(width: 2, height: 357, color: Colors.black),
+                    Container(width: 2, height: 357, color:!darkModeNotifier.value?Colors.black: Colors.grey[400]),
                     //SizedBox(height: 264 + 89),
                   ],
                 ),
@@ -163,7 +163,7 @@ class KnockOutsPage extends StatelessWidget {
                     SizedBox(
                       height: 176 + 356 / 2,
                     ),
-                    Container(width: 45, height: 2, color: Colors.black),
+                    Container(width: 45, height: 2, color: !darkModeNotifier.value?Colors.black:Colors.grey[400]),
                     SizedBox(height: 264 + 89),
                   ],
                 ),
@@ -230,6 +230,7 @@ class _knockOutMatchUpState extends State<knockOutMatchUpView> {
         }
       },
       child: Card(
+        color:darkModeNotifier.value?Colors.grey[800]:Colors.white,
         child: Column(
           children: [
             Row(
@@ -241,9 +242,14 @@ class _knockOutMatchUpState extends State<knockOutMatchUpView> {
                         height: 25 ,
                         width:  45 ,
                         child: (match!=null) ? match!.homeTeam.image : Image.asset('fotos/default_team_logo.png')),
-                    Text((match!=null) ? match!.homeTeam.initials : "N/A", style: TextStyle(fontSize: 13 )),
+                    Text((match!=null) ? match!.homeTeam.initials : "N/A",
+                        style: TextStyle(fontSize: 13,
+                          color: darkModeNotifier.value? Colors.white:Colors.black
+                        )
+                    ),
                     //if (match.hasMatchStarted)
-                    (match!=null && match!.hasMatchStarted)? Text(match!.scoreHome.toString(), style: TextStyle(fontSize:  17,color: (match!.hasMatchFinished)? Colors.black : Colors.red )) : SizedBox.shrink()
+                    (match!=null && match!.hasMatchStarted)? Text(match!.scoreHome.toString(),
+                        style: TextStyle(fontSize:  17,color: (match!.hasMatchFinished)? Colors.black : Colors.red )) : SizedBox.shrink()
                   ],
                 ),
                 SizedBox(
@@ -256,14 +262,14 @@ class _knockOutMatchUpState extends State<knockOutMatchUpView> {
                       child: (match!=null) ? match!.awayTeam.image: Image.asset('fotos/default_team_logo.png')),
                   Text(
                     (match!=null) ? match!.awayTeam.initials : "N/A",
-                    style: TextStyle(fontSize: 13 ),
+                    style: TextStyle(fontSize: 13, color: darkModeNotifier.value? Colors.white:Colors.black),
                   ),
                   //if (match.hasMatchStarted) Text(match.scoreAway.toString())
                 (match!=null && match!.hasMatchStarted)? Text(match!.scoreAway.toString(), style: TextStyle(fontSize:  17, color: (match!.hasMatchFinished)? Colors.black : Colors.red )) : SizedBox.shrink()
                 ])
               ],
             ),
-              (match==null) ? SizedBox(height:30,child: Center(child: Text("-"),)) : ( !match!.hasMatchStarted) ? SizedBox(height:27,child: Center(child: Text(match!.dateString))) : SizedBox.shrink()
+              (match==null) ? SizedBox(height:30,child: Center(child: Text("-"),)) : ( !match!.hasMatchStarted) ? SizedBox(height:27,child: Center(child: Text(match!.dateString,style:TextStyle( color: darkModeNotifier.value? Colors.white:Colors.black) ))) : SizedBox.shrink()
           ],
         ),
       ),

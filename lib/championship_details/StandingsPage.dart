@@ -14,50 +14,51 @@ class StandingsPage extends StatefulWidget {
 class StandingsPage1 extends State<StandingsPage> {
   @override
   Widget build(BuildContext context) {
+    final isDark = darkModeNotifier.value;
     return Expanded(
       child: Container(
-        color:darkModeNotifier.value?darkModeBackGround: lightModeBackGround,
+        color: isDark ? Color(0xFF121212) : lightModeBackGround,
         child: Column(children: [
           SizedBox(height: 5,),
           Text(greek?"Βαθμολογικός Πίνακας":"Standings Table",
               style: TextStyle(
                   fontSize: 23,
                   fontWeight: FontWeight.bold,
-                  color: Color.fromARGB(255, 235, 245, 245),
+                  color: isDark ? Colors.white : Colors.white,
                   fontFamily: 'Arial',
-                  fontStyle: FontStyle.italic
               )),
           SizedBox(height: 8,),
           Expanded(
               child: SingleChildScrollView(
                   child: Column(
-            children: [
-              buildGroupStandings(1),
-              buildGroupStandings(2),
-              buildGroupStandings(3),
-              buildGroupStandings(4)
-            ],
-          )))
+                    children: [
+                      buildGroupStandings(1),
+                      buildGroupStandings(2),
+                      buildGroupStandings(3),
+                      buildGroupStandings(4)
+                    ],
+                  )))
         ]),
       ),
     );
   }
 
   Widget buildGroupStandings(int group) {
-    // Φιλτράρισμα και ταξινόμηση ομάδων του ομίλου
+    final isDark = darkModeNotifier.value;
     List<Team> groupTeams = teams.where((team) => team.group == group).toList()
       ..sort((a, b) => b.totalPoints.compareTo(a.totalPoints));
 
-    // Προσθήκη των πρώτων 4 στην λίστα με τις topTeams
     topTeams.addAll(groupTeams.take(4));
 
-    // Εναλλασσόμενα χρώματα γραμμών
-    final Color rowColor1 = Color.fromARGB(255, 235, 244, 255);
-    final Color rowColor2 = Colors.white;
+    final Color rowColor1 = isDark ? Color.fromARGB(255, 55, 55, 55) : Color.fromARGB(255, 235, 244, 255);
+    final Color rowColor2 = isDark ? Color.fromARGB(255, 45, 45, 45) : Colors.white;
+    final Color textColor = isDark ? Colors.white : Colors.black87;
+    final Color headerTextColor = isDark ? Colors.white70 : Colors.black54;
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 5.0, vertical: 2.0),
-      elevation: 4,
+      elevation: isDark ? 2 : 4,
+      color: isDark ? Color.fromARGB(255, 50, 50, 50) : Colors.white,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 10),
         child: Column(
@@ -65,25 +66,37 @@ class StandingsPage1 extends State<StandingsPage> {
           children: [
             Text(
               greek ? "Όμιλος $group" : "Group $group",
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: textColor,
+              ),
             ),
             const SizedBox(height: 4),
             DataTable(
               columnSpacing: 20.0,
               headingRowHeight: 40.0,
               dataRowHeight: 60.0,
+              headingTextStyle: TextStyle(
+                color: headerTextColor,
+                fontWeight: FontWeight.bold,
+              ),
+              dataTextStyle: TextStyle(color: textColor),
               columns: [
-                _buildColumn("  #", numeric: false),
-                _buildColumn(greek ? "Ομάδα" : "Team"),
-                _buildColumn(greek ? "Π" : "G", numeric: true),
-                _buildColumn(greek ? "Ν" : "W", numeric: true),
-                _buildColumn(greek ? "Ι" : "D", numeric: true),
-                _buildColumn(greek ? "Η" : "L", numeric: true),
+                _buildColumn("  #", numeric: false, textColor: headerTextColor),
+                _buildColumn(greek ? "Ομάδα" : "Team", textColor: headerTextColor),
+                _buildColumn(greek ? "Π" : "G", numeric: true, textColor: headerTextColor),
+                _buildColumn(greek ? "Ν" : "W", numeric: true, textColor: headerTextColor),
+                _buildColumn(greek ? "Ι" : "D", numeric: true, textColor: headerTextColor),
+                _buildColumn(greek ? "Η" : "L", numeric: true, textColor: headerTextColor),
                 DataColumn(
-                  label: Center(  // Κεντραρισμένο κείμενο στην κεφαλίδα
+                  label: Center(
                     child: Text(
                       greek ? "Πόντοι" : "Points",
-                      style: const TextStyle(fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: headerTextColor,
+                      ),
                     ),
                   ),
                   numeric: true,
@@ -95,22 +108,22 @@ class StandingsPage1 extends State<StandingsPage> {
                 final isPromotionSpot = index < 4;
 
                 return DataRow(
-                  color: MaterialStateProperty.all(rowColor),
+                  color: WidgetStateProperty.all(rowColor),
                   cells: [
                     DataCell(
                       isPromotionSpot
                           ? Container(
                         width: 26,
                         height: 26,
-                        decoration: const BoxDecoration(
-                          color: Colors.green,
+                        decoration: BoxDecoration(
+                          color: isDark ? Colors.green.shade700 : Colors.green,
                           shape: BoxShape.circle,
                         ),
                         child: Center(
                           child: Text(
                             (index + 1).toString(),
-                            style: const TextStyle(
-                              color: Colors.black,
+                            style: TextStyle(
+                              color: isDark ? Colors.white : Colors.black,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -119,15 +132,15 @@ class StandingsPage1 extends State<StandingsPage> {
                           : Container(
                         width: 26,
                         height: 26,
-                        decoration: const BoxDecoration(
-                          color: Colors.grey,
+                        decoration: BoxDecoration(
+                          color: isDark ? Colors.grey.shade700 : Colors.grey,
                           shape: BoxShape.circle,
                         ),
                         child: Center(
                           child: Text(
                             (index + 1).toString(),
-                            style: const TextStyle(
-                              color: Colors.black,
+                            style: TextStyle(
+                              color: isDark ? Colors.white : Colors.black,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -136,39 +149,33 @@ class StandingsPage1 extends State<StandingsPage> {
                     ),
                     DataCell(TextButton(
                       onPressed: () async {
-                        // Πρώτα ελέγχεις αν το widget είναι ακόμη ενεργό (mounted)
                         if (!mounted) return;
-
-                        // Εκτέλεση του Navigator
                         await Navigator.push(
                           context,
                           MaterialPageRoute(builder: (context) => TeamDisplayPage(team)),
                         );
-
-                        // Αν το widget είναι ακόμη ενεργό, κάνεις το setState()
                         if (mounted) {
                           setState(() {});
                         }
                       },
-
-
                       child: Text(team.name,
-                        style: TextStyle(fontSize: 12,
+                        style: TextStyle(
+                          fontSize: 12,
                           fontWeight: FontWeight.w500,
-                          color: Colors.black,
-
+                          color: textColor,
                         ),
                       ),
                     )),
-                    DataCell(Text(team.totalGames.toString())),
-                    DataCell(Text(team.wins.toString())),
-                    DataCell(Text(team.draws.toString())),
-                    DataCell(Text(team.losses.toString())),
+                    DataCell(Text(team.totalGames.toString(), style: TextStyle(color: textColor))),
+                    DataCell(Text(team.wins.toString(), style: TextStyle(color: textColor))),
+                    DataCell(Text(team.draws.toString(), style: TextStyle(color: textColor))),
+                    DataCell(Text(team.losses.toString(), style: TextStyle(color: textColor))),
                     DataCell(
-                      Center(  // Κεντραρισμένο κείμενο για τους πόντους
+                      Center(
                         child: Text(
                           team.totalPoints.toString(),
-                          textAlign: TextAlign.center,  // Κεντραρισμένο
+                          style: TextStyle(color: textColor),
+                          textAlign: TextAlign.center,
                         ),
                       ),
                     ),
@@ -179,7 +186,11 @@ class StandingsPage1 extends State<StandingsPage> {
             const SizedBox(height: 8),
             Text(
               greek ? "Οι 4 πρώτοι περνούν στην επόμενη φάση." : "Top 4 teams advance to the next round.",
-              style: const TextStyle(fontSize: 13, fontStyle: FontStyle.italic, color: Colors.black54),
+              style: TextStyle(
+                  fontSize: 13,
+                  fontStyle: FontStyle.italic,
+                  color: isDark ? Colors.white70 : Colors.black54
+              ),
             ),
           ],
         ),
@@ -187,17 +198,18 @@ class StandingsPage1 extends State<StandingsPage> {
     );
   }
 
-  DataColumn _buildColumn(String label, {bool numeric = false}) {
+  DataColumn _buildColumn(String label, {bool numeric = false, required Color textColor}) {
     return DataColumn(
-      label: Center(  // Κεντραρισμένο κείμενο στις επικεφαλίδες
+      label: Center(
         child: Text(
           label,
-          style: const TextStyle(fontWeight: FontWeight.bold),
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: textColor,
+          ),
         ),
       ),
       numeric: numeric,
     );
   }
-
-
 }

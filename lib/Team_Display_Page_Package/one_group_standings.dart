@@ -28,11 +28,11 @@ class _OneGroupStandingsState extends State<OneGroupStandings> {
     topTeams.addAll(groupTeams.take(4));
 
     // Εναλλασσόμενα χρώματα γραμμών
-    final Color rowColor1 = Color.fromARGB(255, 214, 230, 255);
-    final Color rowColor2 = Colors.white;
+    final Color rowColor1 = darkModeNotifier.value ? Color(0xFF2D2D2D) : Color.fromARGB(255, 214, 230, 255);
+    final Color rowColor2 = darkModeNotifier.value ? Color(0xFF1E1E1E) : Colors.white;
 
     return Card(
-      color: Colors.white,
+      color: darkModeNotifier.value ? Color(0xFF1E1E1E) : Colors.white,
       margin: const EdgeInsets.symmetric(horizontal: 5.0, vertical: 2.0),
       elevation: 4,
       child: Padding(
@@ -42,9 +42,10 @@ class _OneGroupStandingsState extends State<OneGroupStandings> {
           children: [
             Text(
               greek ? "Όμιλος $group" : "Group $group",
-              style: const TextStyle(
+              style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
+                  color: darkModeNotifier.value ? Colors.white : Colors.black
               ),
             ),
             const SizedBox(height: 4),
@@ -52,6 +53,13 @@ class _OneGroupStandingsState extends State<OneGroupStandings> {
               columnSpacing: 20.0,
               headingRowHeight: 40.0,
               dataRowHeight: 60.0,
+              headingTextStyle: TextStyle(
+                  color: darkModeNotifier.value ? Colors.white : Colors.black,
+                  fontWeight: FontWeight.bold
+              ),
+              dataTextStyle: TextStyle(
+                  color: darkModeNotifier.value ? Colors.white : Colors.black
+              ),
               columns: [
                 _buildColumn("  #", numeric: false),
                 _buildColumn(greek ? "Ομάδα" : "Team"),
@@ -60,10 +68,13 @@ class _OneGroupStandingsState extends State<OneGroupStandings> {
                 _buildColumn(greek ? "Ι" : "D", numeric: true),
                 _buildColumn(greek ? "Η" : "L", numeric: true),
                 DataColumn(
-                  label: Center(  // Κεντραρισμένο κείμενο στην κεφαλίδα
+                  label: Center(
                     child: Text(
                       greek ? "Πόντοι" : "Points",
-                      style: const TextStyle(fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: darkModeNotifier.value ? Colors.white : Colors.black
+                      ),
                     ),
                   ),
                   numeric: true,
@@ -99,15 +110,15 @@ class _OneGroupStandingsState extends State<OneGroupStandings> {
                           : Container(
                         width: 26,
                         height: 26,
-                        decoration: const BoxDecoration(
-                          color: Colors.grey,
+                        decoration: BoxDecoration(
+                          color: darkModeNotifier.value ? Colors.grey[700] : Colors.grey,
                           shape: BoxShape.circle,
                         ),
                         child: Center(
                           child: Text(
                             (index + 1).toString(),
-                            style: const TextStyle(
-                              color: Colors.black,
+                            style: TextStyle(
+                              color: darkModeNotifier.value ? Colors.white : Colors.black,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -116,35 +127,56 @@ class _OneGroupStandingsState extends State<OneGroupStandings> {
                     ),
                     DataCell(TextButton(
                       onPressed: () async {
-                        // Πρώτα ελέγχεις αν το widget είναι ακόμη ενεργό (mounted)
                         if (!mounted) return;
-
-                        // Εκτέλεση του Navigator
                         await Navigator.push(
                           context,
                           MaterialPageRoute(builder: (context) => TeamDisplayPage(team)),
                         );
-
-                        // Αν το widget είναι ακόμη ενεργό, κάνεις το setState()
                         if (mounted) {
                           setState(() {});
                         }
                       },
-
-
-                      child: Text(team.name,style: TextStyle(fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.black),),
+                      child: Text(
+                        team.name,
+                        style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                            color: darkModeNotifier.value ? Colors.white : Colors.black
+                        ),
+                      ),
                     )),
-                    DataCell(Text(team.totalGames.toString())),
-                    DataCell(Text(team.wins.toString())),
-                    DataCell(Text(team.draws.toString())),
-                    DataCell(Text(team.losses.toString())),
+                    DataCell(Text(
+                      team.totalGames.toString(),
+                      style: TextStyle(
+                          color: darkModeNotifier.value ? Colors.white : Colors.black
+                      ),
+                    )),
+                    DataCell(Text(
+                      team.wins.toString(),
+                      style: TextStyle(
+                          color: darkModeNotifier.value ? Colors.white : Colors.black
+                      ),
+                    )),
+                    DataCell(Text(
+                      team.draws.toString(),
+                      style: TextStyle(
+                          color: darkModeNotifier.value ? Colors.white : Colors.black
+                      ),
+                    )),
+                    DataCell(Text(
+                      team.losses.toString(),
+                      style: TextStyle(
+                          color: darkModeNotifier.value ? Colors.white : Colors.black
+                      ),
+                    )),
                     DataCell(
-                      Center(  // Κεντραρισμένο κείμενο για τους πόντους
+                      Center(
                         child: Text(
                           team.totalPoints.toString(),
-                          textAlign: TextAlign.center,  // Κεντραρισμένο
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                              color: darkModeNotifier.value ? Colors.white : Colors.black
+                          ),
                         ),
                       ),
                     ),
@@ -155,7 +187,11 @@ class _OneGroupStandingsState extends State<OneGroupStandings> {
             const SizedBox(height: 8),
             Text(
               greek ? "Οι 4 πρώτοι περνούν στην επόμενη φάση." : "Top 4 teams advance to the next round.",
-              style: const TextStyle(fontSize: 13, fontStyle: FontStyle.italic, color: Colors.black54),
+              style: TextStyle(
+                  fontSize: 13,
+                  fontStyle: FontStyle.italic,
+                  color: darkModeNotifier.value ? Colors.white70 : Colors.black54
+              ),
             ),
           ],
         ),
@@ -165,11 +201,13 @@ class _OneGroupStandingsState extends State<OneGroupStandings> {
 
   DataColumn _buildColumn(String label, {bool numeric = false}) {
     return DataColumn(
-      label: Center(  // Κεντραρισμένο κείμενο στις επικεφαλίδες
+      label: Center(
         child: Text(
           label,
-          style: const TextStyle(fontWeight: FontWeight.bold),
-
+          style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: darkModeNotifier.value ? Colors.white : Colors.black
+          ),
         ),
       ),
       numeric: numeric,

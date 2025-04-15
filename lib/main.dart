@@ -314,7 +314,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   {
     return AppBar(
       title: Text("AUTH Score", style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: Colors.white)),
-      backgroundColor: Color.fromARGB(250, 46, 90, 136),
+      backgroundColor:darkModeNotifier.value? Color(0xFF121212): Color.fromARGB(250, 46, 90, 136),
       actions: [
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 5),
@@ -343,7 +343,7 @@ class CustomBottomNavigationBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BottomNavigationBar(
-      backgroundColor:  darkModeNotifier.value?darkModeWidgets: Colors.black87,
+      backgroundColor:  darkModeNotifier.value?Colors.grey[850]: Colors.black87,
       selectedFontSize: 14,
       unselectedFontSize: 12,
       type: BottomNavigationBarType.fixed,

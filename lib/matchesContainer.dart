@@ -118,7 +118,7 @@ class eachMatchContainerView extends StatelessWidget {
         },
         borderRadius: BorderRadius.circular(10),
         child: Card(
-          color: darkModeNotifier.value ? darkModeMatches : lightModeContainer,
+          color: darkModeNotifier.value ? Colors.grey[800] : lightModeContainer,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
           ),
@@ -132,7 +132,7 @@ class eachMatchContainerView extends StatelessWidget {
               children: [
                 MatchContainerTime(match: match),
                 SizedBox(width: 15),
-                Container(height: 50, width: 1.5, color:darkModeNotifier.value==true? Colors.black26 : Colors.black),
+                Container(height: 50, width: 1.5, color:darkModeNotifier.value==true? Colors.white : Colors.black),
                 SizedBox(width: 15),
                 Expanded(
                   flex: 3,
@@ -192,14 +192,14 @@ class eachMatchContainerView extends StatelessWidget {
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
                                 fontFamily: 'Arial',
-                                color: match.hasMatchFinished ? match.scoreHome > match.scoreAway ? Colors.black:Colors.grey : Colors.red),
+                                color: match.hasMatchFinished ? match.scoreHome > match.scoreAway ?darkModeNotifier.value?Colors.white: Colors.black:Colors.grey : Colors.red),
                           ),
                           Text(
                             match.scoreAway.toString(),
                             style: TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
-                                color: match.hasMatchFinished ?match.scoreAway>match.scoreHome? Colors.black:Colors.grey : Colors.red),
+                                color: match.hasMatchFinished ?match.scoreAway>match.scoreHome?darkModeNotifier.value?Colors.white: Colors.black:Colors.grey : Colors.red),
                           ),
                         ],
                       )
@@ -314,7 +314,10 @@ class _MatchContainerTimeState extends State<MatchContainerTime>
       children: [
         Text(
           widget.match.timeString,
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          style: TextStyle(fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: darkModeNotifier.value ? Colors.white : Colors.black87,
+          ),
         ),
         if (widget.match.isHalfTime())
           Text("Ημίχρονο",

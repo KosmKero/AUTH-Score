@@ -59,7 +59,7 @@ class _NavigationButtonsState extends State<_NavigationButtons> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color:darkModeNotifier.value?darkModeBackGround: lightModeBackGround,
+      color:darkModeNotifier.value?Color(0xFF121212): lightModeBackGround,
       height: 65,
       width: double.infinity,
       child: Row(
@@ -90,7 +90,7 @@ class _NavigationButtonsState extends State<_NavigationButtons> {
             text,
             style: TextStyle(
               fontSize: 17,
-              color: isSelected ? Color.fromARGB(255, 0, 35, 150) :darkModeNotifier.value?Colors.white: Colors.black87,
+              color: isSelected ?darkModeNotifier.value?Colors.blue: Color.fromARGB(255, 0, 35, 150) :darkModeNotifier.value?Colors.white: Colors.black87,
               fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
               fontFamily: "Arial"
             ),
@@ -100,7 +100,7 @@ class _NavigationButtonsState extends State<_NavigationButtons> {
             Container(
               width: 70, // Μήκος γραμμής
               height: 3, // Πάχος γραμμής
-              color: Color.fromARGB(255, 0, 35, 150), // Χρώμα γραμμής
+              color:darkModeNotifier.value?Colors.blue: Color.fromARGB(255, 0, 35, 150), // Χρώμα γραμμής
             ),
         ],
       ),

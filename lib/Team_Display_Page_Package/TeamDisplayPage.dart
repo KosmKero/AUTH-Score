@@ -34,7 +34,7 @@ class _TeamDisplayPageState extends State<TeamDisplayPage> {
     return
       Scaffold( //ΑΦΟΡΑ ΤΟ ΟΝΟΜΑ ΠΑΝΩ ΣΤΗΝ ΣΕΛΙΔΑ
         appBar: AppBar(
-            backgroundColor: Color.fromARGB(250, 46, 90, 136),
+            backgroundColor:darkModeNotifier.value? Color(0xFF121212): Color.fromARGB(250, 46, 90, 136),
             iconTheme: IconThemeData(color: Colors.white),
             title: Text(
             widget.team.name,
@@ -51,7 +51,7 @@ class _TeamDisplayPageState extends State<TeamDisplayPage> {
             ]
         ),
         body:Scaffold(
-          backgroundColor: Colors.white,
+          backgroundColor:darkModeNotifier.value?Color(0xFF121212): Colors.white,
           body: Column(
       children: [
         //Text(team.name,style: TextStyle(color: Color.fromARGB(100, 255, 10, 40),)),
@@ -128,7 +128,7 @@ class _NavigationButtonsState extends State<_NavigationButtons> {
             text,
             style: TextStyle(
               fontSize: 17,
-              color: isSelected ? Colors.blue : Colors.black,
+              color: isSelected ? Colors.blue :darkModeNotifier.value?Colors.white: Colors.black,
               fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
               //backgroundColor: darkModeNotifier.value==true?Colors.black87: lightModeBackGround
             ),

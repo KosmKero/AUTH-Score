@@ -24,7 +24,7 @@ class _TeamDetailsWidgetState extends State<TeamDetailsWidget> {
           child: Column(
     children: [
       Card(
-        color: Colors.white,
+        color:darkModeNotifier.value?Color(0xFF1E1E1E) : Colors.white,
           child: Column(
         children: [
           Text(
@@ -32,6 +32,7 @@ class _TeamDetailsWidgetState extends State<TeamDetailsWidget> {
             style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
+              color: darkModeNotifier.value?Colors.white:Colors.black
             ),
           ),
           TeamFormWidget(
@@ -45,7 +46,7 @@ class _TeamDetailsWidgetState extends State<TeamDetailsWidget> {
       ),
       Card(
 
-        color: Colors.white,
+        color:darkModeNotifier.value?Color(0xFF121212) : Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         shadowColor: Colors.black.withOpacity(0.4),
         elevation: 8,
@@ -54,7 +55,11 @@ class _TeamDetailsWidgetState extends State<TeamDetailsWidget> {
             padding: EdgeInsets.only(bottom: 10, top: 25),
             child: Text("Βαθμολογία",
                 style:
-                    TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                    TextStyle(fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                      color: darkModeNotifier.value?Colors.white:Colors.black
+                    )
+            ),
           ),
           GroupStandingsWidget(group: widget.team.group),
 
@@ -64,7 +69,7 @@ class _TeamDetailsWidgetState extends State<TeamDetailsWidget> {
         height: 25,
       ),
       Card(
-        color: Colors.white,
+        color:darkModeNotifier.value?Color(0xFF1E1E1E): Colors.white,
         //ΑΦΟΡΑ ΤΙΣ ΠΛΗΡΟΦΟΡΙΕΣ ΣΤΟ ΚΑΤΩ ΜΕΡΟΣ ΤΗΝ ΟΘΟΝΗΣ
         elevation: 4,
         shape:
@@ -101,7 +106,8 @@ class _TeamDetailsWidgetState extends State<TeamDetailsWidget> {
                         fontSize: 20,
                         fontWeight: FontWeight.w600,
                         fontFamily: "Arial",
-                        letterSpacing: 0.3
+                        letterSpacing: 0.3,
+                      color: darkModeNotifier.value?Colors.white:Colors.black
                     ),
                   ),
                 ),
@@ -110,7 +116,7 @@ class _TeamDetailsWidgetState extends State<TeamDetailsWidget> {
                     child: Text(
                       '${widget.team.foundationYear}',
                       style: TextStyle(
-                          fontSize: 20, fontWeight: FontWeight.bold),
+                          fontSize: 20, fontWeight: FontWeight.bold,color: darkModeNotifier.value?Colors.white:Colors.black),
                     )),
               ],
             ),
@@ -133,7 +139,8 @@ class _TeamDetailsWidgetState extends State<TeamDetailsWidget> {
                     style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w600,
-                        fontFamily: "Arial"
+                        fontFamily: "Arial",
+                        color:darkModeNotifier.value?Colors.white:Colors.black
                     ),
                   ),
                 ),
@@ -142,7 +149,7 @@ class _TeamDetailsWidgetState extends State<TeamDetailsWidget> {
                     child: Text(
                       '${widget.team.titles}',
                       style: TextStyle(
-                          fontSize: 20, fontWeight: FontWeight.bold),
+                          fontSize: 20, fontWeight: FontWeight.bold,color: darkModeNotifier.value?Colors.white:Colors.black),
                     )),
               ],
             ),
@@ -162,7 +169,8 @@ class _TeamDetailsWidgetState extends State<TeamDetailsWidget> {
                     style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w600,
-                        fontFamily: "Arial"
+                        fontFamily: "Arial",
+                      color: darkModeNotifier.value?Colors.white:Colors.black
                     ),
                   ),
                 ),
@@ -171,7 +179,7 @@ class _TeamDetailsWidgetState extends State<TeamDetailsWidget> {
                     child: Text(
                       '${widget.team.coach}',
                       style: TextStyle(
-                          fontSize: 17, fontWeight: FontWeight.bold),
+                          fontSize: 17, fontWeight: FontWeight.bold,color: darkModeNotifier.value?Colors.white:Colors.black),
                     )),
               ],
             ),
@@ -216,7 +224,7 @@ class TeamFormWidget extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 17,
                       fontWeight: FontWeight.w600,
-                      color: Colors.black,
+                      color:darkModeNotifier.value?Colors.white: Colors.black,
                       letterSpacing: 1.5,
                     ),
                   ),

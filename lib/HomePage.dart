@@ -36,80 +36,81 @@ class _HomePageState extends State<HomePage> {
     return Column(
       children: [
         if (globalUser.isAdmin)
-        Container(
-            color: darkModeNotifier.value ? darkModeBackGround : lightModeBackGround,
-            width: double.infinity,
-            height: 60,
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                  backgroundColor:  darkModeNotifier.value
-                  ? darkModeBackGround
-                  : Color.fromARGB(250, 74, 111, 150)),
-            onPressed: () async {
-                  await Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => AddMatchScreen(),
-                      ));
-                },
-                child: Text(
-                  "Προσθήκη Αγώνα",
-                  style: TextStyle(
-
-                      color:darkModeNotifier.value==true? Colors.white: Colors.white,
+          Container(
+              color: darkModeNotifier.value ?Color(0xFF121212) : lightModeBackGround,
+              width: double.infinity,
+              height: 60,
+              child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                      backgroundColor: darkModeNotifier.value
+                          ? darkModeBackGround
+                          : Color.fromARGB(250, 74, 111, 150)),
+                  onPressed: () async {
+                    await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => AddMatchScreen(),
+                        ));
+                  },
+                  child: Text(
+                    "Προσθήκη Αγώνα",
+                    style: TextStyle(
+                      color: darkModeNotifier.value ? Colors.white : Colors.white,
                       fontFamily: 'Arial',
                       fontWeight: FontWeight.bold,
                       fontSize: 16.5,
                       wordSpacing: 1,
-                    letterSpacing: 0.5,
-
-                  ),
-                )
-            )
-        ),
+                      letterSpacing: 0.5,
+                    ),
+                  )
+              )
+          ),
         Container(
             color: darkModeNotifier.value
-                ? darkModeBackGround
+                ?Color(0xFF121212)
                 : lightModeBackGround,
             width: double.infinity,
             height: 60,
             child: TextButton(
-                //ΚΑΤΩ ΑΠΟ ΤΟ APPBAR
                 onPressed: () {
                   changeMatches();
                 },
                 child: upcomingMatches
                     ? Row(
-                        children: [
-                          Icon(CupertinoIcons.back, color: Colors.white,size: 19,),
-                          Text(
-                            "Προηγούμενοι αγώνες",
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 17,
-                                fontWeight: FontWeight.w600,
-                                fontFamily: "Arial",
-                                letterSpacing: 0.5
-                            ),
-                          ),
-                        ],
-                      )
+                  children: [
+                    Icon(CupertinoIcons.back,
+                      color: darkModeNotifier.value ? Colors.white : Colors.white,
+                      size: 19,),
+                    Text(
+                      "Προηγούμενοι αγώνες",
+                      style: TextStyle(
+                          color: darkModeNotifier.value ? Colors.white : Colors.white,
+                          fontSize: 17,
+                          fontWeight: FontWeight.w600,
+                          fontFamily: "Arial",
+                          letterSpacing: 0.5
+                      ),
+                    ),
+                  ],
+                )
                     : Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          Text(
-                            "Επερχόμενοι αγώνες",
-                            style: TextStyle
-                              (color: Colors.white,
-                                fontSize: 17,
-                                fontWeight: FontWeight.w600,
-                                fontFamily: "Arial",
-                                letterSpacing: 0.5
-                            ),
-                          ),
-                          Icon(CupertinoIcons.right_chevron,color: Colors.white,size: 19,),
-                        ],
-                      ))),
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Text(
+                      "Επερχόμενοι αγώνες",
+                      style: TextStyle(
+                          color: darkModeNotifier.value ? Colors.white : Colors.white,
+                          fontSize: 17,
+                          fontWeight: FontWeight.w600,
+                          fontFamily: "Arial",
+                          letterSpacing: 0.5
+                      ),
+                    ),
+                    Icon(CupertinoIcons.right_chevron,
+                      color: darkModeNotifier.value ? Colors.white : Colors.white,
+                      size: 19,),
+                  ],
+                ))),
         /* Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
@@ -130,15 +131,15 @@ class _HomePageState extends State<HomePage> {
           // flex: 5, // Το κάτω μέρος είναι μικρότερο
           child: Container(
             color: darkModeNotifier.value
-                ? darkModeBackGround
+                ? Color(0xFF121212)
                 : lightModeBackGround,
             child: upcomingMatches
                 ? matchesContainer(
-                    matches: MatchHandle().getUpcomingMatches(), type: 1)
+                matches: MatchHandle().getUpcomingMatches(), type: 1)
                 : matchesContainer(
-                    matches: MatchHandle().getPreviousMatches(),
-                    type: 1,
-                  ),
+              matches: MatchHandle().getPreviousMatches(),
+              type: 1,
+            ),
           ),
         ),
       ],

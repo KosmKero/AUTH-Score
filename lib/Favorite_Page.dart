@@ -44,7 +44,7 @@ class _FavoriteContainerState extends State<FavoritePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: darkModeNotifier.value? darkModeBackGround:  lightModeBackGround, // Dark mode background
+      backgroundColor: darkModeNotifier.value? Color(0xFF121212):  lightModeBackGround, // Dark mode background
       body: Column(
         children: [
           Expanded(
@@ -52,12 +52,14 @@ class _FavoriteContainerState extends State<FavoritePage> {
             child: favouriteTeams.isNotEmpty
                 ? DropdownButton<Team>(
               value: selectedTeam,
-              dropdownColor: darkModeNotifier.value? Colors.black: Colors.white, // Optional: dark dropdown
+              dropdownColor: darkModeNotifier.value? Color(0xFF1E1E1E): Colors.white, // Optional: dark dropdown
               style:  TextStyle(color: darkModeNotifier.value? Colors.white:Colors.black87), // Text color in dropdown
               items: favouriteTeams.map<DropdownMenuItem<Team>>((Team team) {
                 return DropdownMenuItem<Team>(
                   value: team,
-                  child: Text(team.name),
+                  child: Text(
+                      team.name,
+                  ),
                 );
               }).toList(),
               onChanged: (Team? newValue) {
@@ -120,5 +122,5 @@ class _FavoriteContainerState extends State<FavoritePage> {
     }
     return teamMatches;
   }
-  
+
 }
