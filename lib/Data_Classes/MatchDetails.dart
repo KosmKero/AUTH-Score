@@ -190,9 +190,7 @@ class MatchDetails extends ChangeNotifier {
   bool get isGroupPhase=> _isGroupPhase;
   int get game => _game;
 
-  //debug
-  String get homeInitials => "CSD";
-  String get awayInitials => "NMK";
+
 
   bool isHalfTime() {
     if (hasFirstHalfFinished && !hasSecondHalfStarted) {
@@ -333,7 +331,7 @@ class MatchDetails extends ChangeNotifier {
   }
 
   String get dateString {
-    return "${_day.toString().padLeft(2, '0')}.${_month.toString().padLeft(2, '0')}.${_year.toString().padLeft(4, '0')}";
+    return "${_day.toString().padLeft(2, '0')}.${_month.toString().padLeft(2, '0')}.${_year.toString().substring(2,3).padLeft(2, '0')}";
   }
 
   Future<void> setScoreHome(int score) async {

@@ -475,7 +475,7 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
     //3 ωρες μετα το ματς δεν μπορεις να το κανεις κανσελ
     if (DateTime.now().millisecondsSinceEpoch ~/ 1000>widget.match.startTimeInSeconds + 3*3600){
       return SizedBox(
-        height: 10,
+        height: 5,
       );
     }
     // Check if the user is logged in
@@ -571,7 +571,7 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
       );
     } else {
       return SizedBox(
-        height: 10,
+        height: 5,
       );
     }
   }
@@ -692,7 +692,7 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
               )));
     } else {
       return SizedBox(
-        height: 10,
+        height: 5,
       );
     }
   }

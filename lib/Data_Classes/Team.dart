@@ -15,11 +15,13 @@ class Team {
 
   late final Image _image;
   // Constructor with optional values
-  Team(this.name,this._matches, this._wins, this._losses, this._draws,this._group,this._foundationYear,this._titles,this._coach,this._position ,[List<Player>? players]) {
+  Team(this.name,this._matches, this._wins, this._losses, this._draws,this._group,this._foundationYear,this._titles,this._coach,this._position,this._initials ,[List<Player>? players]) {
     _players = players ?? []; // Initialize players list if null
 
     loadTeamImage();
   }
+
+  String _initials;
   int? _foundationYear;
   String name;
   String _coach;
@@ -42,6 +44,7 @@ class Team {
   int? get foundationYear=> _foundationYear;
   int get titles=>_titles;
   int get position => _position;
+  String get initials=> _initials;
 
   List<Player> get getPlayers => _players;
 

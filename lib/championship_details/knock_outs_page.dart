@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:untitled1/API/Match_Handle.dart';
 import 'package:untitled1/globals.dart';
 import '../Data_Classes/MatchDetails.dart';
@@ -40,22 +41,14 @@ class KnockOutsPage extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment
                       .start, // Στοιχίστε τα στοιχεία στην αρχή
                   children: [
-                    SizedBox(height: 45),
-                    Container(width: 20, height: 2, color: Colors.black),
-                    SizedBox(height: 86),
-                    Container(width: 20, height: 2, color: Colors.black),
-                    SizedBox(height: 86),
-                    Container(width: 20, height: 2, color: Colors.black),
-                    SizedBox(height: 86),
-                    Container(width: 20, height: 2, color: Colors.black),
-                    SizedBox(height: 86),
-                    Container(width: 20, height: 2, color: Colors.black),
-                    SizedBox(height: 86),
-                    Container(width: 20, height: 2, color: Colors.black),
-                    SizedBox(height: 86),
-                    Container(width: 20, height: 2, color: Colors.black),
-                    SizedBox(height: 86),
-                    Container(width: 20, height: 2, color: Colors.black),
+                    SizedBox(height: 45), Container(width: 20, height: 2, color: Colors.black),
+                    SizedBox(height: 86), Container(width: 20, height: 2, color: Colors.black),
+                    SizedBox(height: 86), Container(width: 20, height: 2, color: Colors.black),
+                    SizedBox(height: 86), Container(width: 20, height: 2, color: Colors.black),
+                    SizedBox(height: 86), Container(width: 20, height: 2, color: Colors.black),
+                    SizedBox(height: 86), Container(width: 20, height: 2, color: Colors.black),
+                    SizedBox(height: 86), Container(width: 20, height: 2, color: Colors.black),
+                    SizedBox(height: 86), Container(width: 20, height: 2, color: Colors.black),
                   ],
                 ),
                 Column(
@@ -194,58 +187,83 @@ class KnockOutsPage extends StatelessWidget {
 
 }
 
-class knockOutMatchUp extends StatefulWidget {
-  const knockOutMatchUp({super.key,required this.match});
+class knockOutMatchUp extends StatelessWidget {
   final MatchDetails? match;
 
-  @override
-  State<knockOutMatchUp> createState() => _knockOutMatchUpState();
-}
-
-class _knockOutMatchUpState extends State<knockOutMatchUp> {
+  const knockOutMatchUp({Key? key, required this.match}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+
+    if (match == null) {
+      return const knockOutMatchUpView(); // χωρίς δεδομένα
+    }
+
+    return ChangeNotifierProvider<MatchDetails>.value(
+      value: match!, // σίγουρα non-null εδώ
+      child: const knockOutMatchUpView(),
+    );
+  }
+}
+
+class knockOutMatchUpView extends StatefulWidget {
+  const knockOutMatchUpView({super.key});
+
+
+  @override
+  State<knockOutMatchUpView> createState() => _knockOutMatchUpState();
+}
+
+class _knockOutMatchUpState extends State<knockOutMatchUpView> {
+
+  @override
+  Widget build(BuildContext context) {
+    final match = Provider.of<MatchDetails?>(context);
     return GestureDetector(
 
       onTap: () {
-        if (widget.match!=null) {
+        if (match!=null) {
           Navigator.push(
               context,
               MaterialPageRoute(
-                  builder: (context) => matchDetailsPage(widget.match!)));
+                  builder: (context) => matchDetailsPage(match!)));
         }
       },
       child: Card(
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Column(
           children: [
-            Column(
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                Column(
+                  children: [
+                    SizedBox(
+                        height: 25 ,
+                        width:  45 ,
+                        child: (match!=null) ? match!.homeTeam.image : Image.asset('fotos/default_team_logo.png')),
+                    Text((match!=null) ? match!.homeTeam.initials : "N/A", style: TextStyle(fontSize: 13 )),
+                    //if (match.hasMatchStarted)
+                    (match!=null && match!.hasMatchStarted)? Text(match!.scoreHome.toString(), style: TextStyle(fontSize:  17,color: (match!.hasMatchFinished)? Colors.black : Colors.red )) : SizedBox.shrink()
+                  ],
+                ),
                 SizedBox(
-                    height: 25 ,
-                    width:  25 ,
-                    child: (widget.match!=null) ? widget.match!.homeTeam.image : Image.asset('fotos/default_team_logo.png')),
-                Text((widget.match!=null) ? widget.match!.homeInitials : "N/A", style: TextStyle(fontSize: 15 )),
-                //if (match.hasMatchStarted)
-                (widget.match!=null) ?Text(widget.match!.scoreHome.toString(), style: TextStyle(fontSize:  17 )) : SizedBox(height: 20,child: Text("-"),)
+                  width: 5,
+                ),
+                Column(children: [
+                  SizedBox(
+                      height: 25 ,
+                      width:  45 ,
+                      child: (match!=null) ? match!.awayTeam.image: Image.asset('fotos/default_team_logo.png')),
+                  Text(
+                    (match!=null) ? match!.awayTeam.initials : "N/A",
+                    style: TextStyle(fontSize: 13 ),
+                  ),
+                  //if (match.hasMatchStarted) Text(match.scoreAway.toString())
+                (match!=null && match!.hasMatchStarted)? Text(match!.scoreAway.toString(), style: TextStyle(fontSize:  17, color: (match!.hasMatchFinished)? Colors.black : Colors.red )) : SizedBox.shrink()
+                ])
               ],
             ),
-            SizedBox(
-              width: 4,
-            ),
-            Column(children: [
-              SizedBox(
-                  height: 25 ,
-                  width:  25 ,
-                  child: (widget.match!=null) ? widget.match!.homeTeam.image: Image.asset('fotos/default_team_logo.png')),
-              Text(
-                (widget.match!=null) ? widget.match!.awayInitials : "N/A",
-                style: TextStyle(fontSize: 15 ),
-              ),
-              //if (match.hasMatchStarted) Text(match.scoreAway.toString())
-              (widget.match!=null) ?Text(widget.match!.scoreAway.toString(), style: TextStyle(fontSize:  17 )) : SizedBox(height: 23.4, child: Text("-"),)
-            ])
+              (match==null) ? SizedBox(height:30,child: Center(child: Text("-"),)) : ( !match!.hasMatchStarted) ? SizedBox(height:27,child: Center(child: Text(match!.dateString))) : SizedBox.shrink()
           ],
         ),
       ),

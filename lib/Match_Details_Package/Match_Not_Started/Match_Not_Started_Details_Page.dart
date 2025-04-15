@@ -214,15 +214,15 @@ class _buildTeamName extends State<buildTeamName> {
                 children: [
                   SizedBox(
                     child: SizedBox(
-                        height: 50, width: 50, child: widget.team.image),
+                        height: 60, width: 100, child: widget.team.image),
                   ),
                   SizedBox(
-                    height: 3,
+                    height: 7,
                   ),
                   Text(
                     widget.team.name,
                     style: TextStyle(
-                        fontSize: 12,
+                        fontSize: 10,
                         fontWeight: FontWeight.w500,
                         color: Colors.black),
                   ),

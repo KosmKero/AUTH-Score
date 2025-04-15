@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:untitled1/Data_Classes/MatchDetails.dart';
 
 import '../Data_Classes/Player.dart';
@@ -22,6 +23,7 @@ class TeamsHandle {
       'Group': team.group,
       'Foundation Year': team.foundationYear,
       'Titles': team.titles,
+      'initials':team.initials,
       'Players': team.players.map((player) => {
         'Name': player.name,
         'Age': player.age,
@@ -54,6 +56,7 @@ class TeamsHandle {
             int titles = team.get("Titles") ?? 0;
             String coach = team.get("Coach") ?? "";
             int position = team.get("position") ?? 0;
+            String initianls = team.get("initials");
 
             // Convert the raw player data from Firestore into Player objects
             List<Player> players = [];
@@ -88,6 +91,7 @@ class TeamsHandle {
                 titles,
                 coach,
                 position,
+                initianls,
                 players
             ));
           } catch (e) {
@@ -176,6 +180,7 @@ class TeamsHandle {
         data['Titles'] ?? 0,
         data['Coach'] ?? "Unknown",
         data['position'] ?? 0,
+        data['initials'] ?? " ",
         players,
       );
     } catch (e) {
@@ -231,7 +236,77 @@ class TeamsHandle {
 
         );
         if (!match.isGroupPhase){
-          playOffMatches[match.game] = match;
+
+          int group1,group2,pos1,pos2;
+         if (match.homeTeam.group>match.awayTeam.group){
+           group1=match.awayTeam.group;
+           group2=match.homeTeam.group;
+
+           pos1=match.awayTeam.position;
+           pos2=match.homeTeam.position;
+         }
+         else{
+           group2=match.awayTeam.group;
+           group1=match.homeTeam.group;
+
+           pos2=match.awayTeam.position;
+           pos1=match.homeTeam.position;
+         }
+
+         //φαση των 16
+          if (group1==1 && pos1==1 && group2==2 && match.game==16) {
+            playOffMatches[0] = match;
+          }
+          else if (group1==1 && pos1==4 && group2==2 && match.game==16) {
+            playOffMatches[2] = match;
+          }
+          else if (group1==1 && pos1==2 && group2==2 && match.game==16) {
+            playOffMatches[4] = match;
+          }
+          else if (group1==1 && pos1==3 && group2==2 && match.game==16) {
+            playOffMatches[6] = match;
+          }
+          else if (group1==3 && pos1==1 && group2==4 && match.game==16) {
+            playOffMatches[7] = match;
+          }
+          else if (group1==3 && pos1==4 && group2==4 && match.game==16) {
+            playOffMatches[5] = match;
+          }
+          else if (group1==3 && pos1==2 && group2==4 && match.game==16) {
+            playOffMatches[3] = match;
+          }
+          else if (group1==3 && pos1==3 && group2==4 && match.game==16) {
+            playOffMatches[1] = match;
+          }
+
+          //φαση των 8
+          else if (((group1==1 && pos1==1) || (group1==2 && pos1==4)) &&  (group2==3 || group2==4) && match.game==8) {
+            playOffMatches[8] = match;
+          }
+          else if ((group1 == 1 && pos1 == 4 || group1 == 2 && pos1 == 1) && (group2 == 3 || group2 == 4) && match.game == 8) {
+            playOffMatches[9] = match;
+          }
+
+          else if ((group1 == 1 && pos1 == 2 || group1 == 2 && pos1 == 3) && (group2 == 3 || group2 == 4) && match.game == 8) {
+            playOffMatches[10] = match;
+          }
+          else if ((group1 == 1 && pos1 == 3 || group1 == 2 && pos1 == 2) && (group2 == 3 || group2 == 4) && match.game == 8) {
+            playOffMatches[11] = match;
+          }
+
+          //ημιτελικοι
+          else if (((group1 == 1 && pos1 == 1) || (group1 == 2 && pos1 == 4) || (group1 == 3 && pos1 == 3) || (group1 == 4 && pos1 == 2)) && match.game == 4) {
+            playOffMatches[12] = match;
+          }
+          else if (match.game == 4) {
+            playOffMatches[13] = match;
+          }
+
+          //Τελικός
+          else if (match.game==2) {
+            playOffMatches[14] = match;
+          }
+
         }
 
         return match;
