@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/services.dart';
 import 'package:untitled1/Team_Display_Page_Package/TeamDisplayPage.dart';
 import 'package:flutter/material.dart';
 import 'package:untitled1/globals.dart';
@@ -12,21 +13,22 @@ class Team {
   late List<Player> _players;
   List<String>  last5Results=["W","D","L","W","D"];
 
-
+  late final Image _image;
   // Constructor with optional values
-  Team(this.name,this._matches, this._wins, this._losses, this._draws,this._group,this._foundationYear,this._titles,this._coach,[List<Player>? players] ) {
+  Team(this.name,this._matches, this._wins, this._losses, this._draws,this._group,this._foundationYear,this._titles,this._coach,this._position ,[List<Player>? players]) {
     _players = players ?? []; // Initialize players list if null
+
+    loadTeamImage();
   }
   int? _foundationYear;
   String name;
   String _coach;
-  int _matches, _wins, _losses, _draws, _titles;
+  int _matches, _wins, _losses, _draws, _titles,_position;
   final int _group;
   bool _isFavourite=false;
   static int n=0;
 
-  final Image _image1=Image.asset('fotos/csdfootball.png');
-  final Image _image2=Image.asset('fotos/teamlogo.png');
+
   // Getters
   int get matches => _matches;
   int get wins => _wins;
@@ -39,20 +41,14 @@ class Team {
   bool get isFavourite => _isFavourite;
   int? get foundationYear=> _foundationYear;
   int get titles=>_titles;
+  int get position => _position;
 
   List<Player> get getPlayers => _players;
 
   String get coach => _coach;
 
   Image get image {
-    if (n%2==0) {
-      n++;
-      return _image1;
-    } else {
-      n++;
-      return _image2;
-    }
-
+      return _image;
   }
 
   // Method to add a player
@@ -215,6 +211,20 @@ class Team {
   }
   void setFoundationYear(int year){
     _foundationYear=year;
+  }
+  void setPosition(int pos){
+    _position=pos;
+  }
+
+  Future<void> loadTeamImage() async {
+    try {
+      // Προσπάθεια να φορτωθεί το αρχείο
+      await rootBundle.load('logos/$name.png');
+      _image= Image.asset('logos/$name.png');
+    } catch (e) {
+      // Αν δεν υπάρχει, χρησιμοποίησε fallback
+      _image= Image.asset('fotos/default_team_logo.png');
+    }
   }
 
 

@@ -47,6 +47,7 @@ class UserHandleBase
 
 
           globalUser = AppUser(username, uni, [], [],"user");
+          globalUser.loggedIn();
           return true;
         }
       }

@@ -16,7 +16,7 @@ class KnockOutsPage extends StatelessWidget {
         child: SingleChildScrollView(
           //scrollDirection: Axis.vertical,
           child: Container(
-            color: Colors.grey[300],
+            color: darkModeNotifier.value?darkModeBackGround: lightModeBackGround,
             // Χρώμα φόντου
             child: Row(
               mainAxisAlignment:

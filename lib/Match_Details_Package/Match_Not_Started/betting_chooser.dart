@@ -41,9 +41,7 @@ class _BettingChooserState extends State<BettingChooser> {
     if (vote != null && mounted) {
       // Φόρτωσε τα ποσοστά και όχι μόνο την επιλογή
       final loadedPercentages = await loadPercentages(
-        widget.match.homeTeam.name,
-        widget.match.awayTeam.name,
-        vote,
+       widget.match
       );
       setState(() {
         hasChosen = true;
@@ -71,9 +69,7 @@ class _BettingChooserState extends State<BettingChooser> {
     await saveUserVoteToMatch(match: widget.match, choice: value);
 
     final loadedPercentages = await loadPercentages(
-      widget.match.homeTeam.name,
-      widget.match.awayTeam.name,
-      value,
+        widget.match
     );
 
     if (mounted) {

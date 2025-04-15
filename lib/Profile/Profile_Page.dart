@@ -7,7 +7,6 @@ import 'package:untitled1/Profile/ChangePassword.dart';
 import 'package:untitled1/Profile/ChangeUserName.dart';
 import 'package:untitled1/Profile/admin/update_betting_results_button.dart';
 import 'package:untitled1/Profile/admin_request_screen.dart';
-import 'package:untitled1/Profile/requests_and_admins_package/requests_and_admins_page.dart';
 import 'package:untitled1/globals.dart';
 import '../Data_Classes/AppUser.dart';
 import 'LogInScreen.dart';

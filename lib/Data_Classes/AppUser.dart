@@ -28,6 +28,10 @@ class AppUser
   void addFavoriteTeam(Team team){
     favoriteList.add(team.name);
   }
+  void loggedIn(){
+    _isLoggedIn=true;
+  }
+
 
   void changeLogIn(){
     _isLoggedIn=!_isLoggedIn;

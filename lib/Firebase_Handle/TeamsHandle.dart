@@ -53,6 +53,7 @@ class TeamsHandle {
             int foundationYear = team.get("Foundation Year") ?? 0;
             int titles = team.get("Titles") ?? 0;
             String coach = team.get("Coach") ?? "";
+            int position = team.get("position") ?? 0;
 
             // Convert the raw player data from Firestore into Player objects
             List<Player> players = [];
@@ -86,6 +87,7 @@ class TeamsHandle {
                 foundationYear,
                 titles,
                 coach,
+                position,
                 players
             ));
           } catch (e) {
@@ -173,6 +175,7 @@ class TeamsHandle {
         data['Foundation Year'] ?? 0,
         data['Titles'] ?? 0,
         data['Coach'] ?? "Unknown",
+        data['position'] ?? 0,
         players,
       );
     } catch (e) {
@@ -246,6 +249,23 @@ class TeamsHandle {
     }
 
     return matches;
+  }
+
+  Future<void> sortTeams(int group) async {
+    List<Team> groupTeams = teams.where((team) => team.group == group).toList()
+      ..sort((a, b) => b.totalPoints.compareTo(a.totalPoints));
+
+    for (int i = 0; i < groupTeams.length; i++) {
+      Team team = groupTeams[i];
+      int position = i + 1; // Η θέση ξεκινά από 1
+      team.setPosition(position); // Αν υπάρχει μεταβλητή θέσης στο μοντέλο
+      await FirebaseFirestore.instance
+          .collection('teams')
+          .doc(team.name)
+          .update({'position': position});
+    }
+
+
   }
 
 
@@ -478,41 +498,47 @@ class TeamsHandle {
   }
 
 
-  Future<List<num>> getPercentages(String home, String away, String selection) async {
-    final querySnapshot = await FirebaseFirestore.instance
-        .collection("matches")
-        .where("Hometeam", isEqualTo: home)
-        .where("Awayteam", isEqualTo: away)
+  Future<List<num>> getPercentages(String key) async {
+    final doc = await FirebaseFirestore.instance
+        .collection('votes')
+        .doc(key)
         .get();
 
-    if (querySnapshot.docs.isNotEmpty) {
-      final matchDoc = querySnapshot.docs.first;
+    if (doc.exists) {
+      Map<String, dynamic> userVotes = doc.get("userVotes") ?? {};
 
-      // ΠΕΡΙΜΕΝΕ να τελειώσει η ενημέρωση των votes
-      await addAllValues(home, away, selection);
+      int homeVotes = 0;
+      int awayVotes = 0;
+      int drawVotes = 0;
 
-      // Ξαναφόρτωσε το έγγραφο μετά την ενημέρωση
-      final updatedDoc = await matchDoc.reference.get();
-
-      int homeVotes = updatedDoc.get("HomeVote");
-      int awayVotes = updatedDoc.get("AwayVote");
-      int drawVotes = updatedDoc.get("DrawVote");
+      for (var vote in userVotes.values) {
+        switch (vote) {
+          case "1":
+            homeVotes++;
+            break;
+          case "2":
+            awayVotes++;
+            break;
+          case "X":
+            drawVotes++;
+            break;
+        }
+      }
 
       int totalVotes = homeVotes + awayVotes + drawVotes;
+      if (totalVotes == 0) return [0, 0, 0];
 
-      if (totalVotes == 0) return [0, 0, 0]; // αποφυγή διαίρεσης με το μηδέν
-
-      List<num> percentages = [
+      return [
         homeVotes / totalVotes * 100,
         awayVotes / totalVotes * 100,
         drawVotes / totalVotes * 100,
       ];
-
-      return percentages;
     }
 
     return [];
   }
+
+
 
 
 

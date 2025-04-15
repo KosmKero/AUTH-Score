@@ -5,6 +5,7 @@ import 'package:untitled1/API/top_players_handle.dart';
 import 'package:untitled1/main.dart';
 
 import '../Data_Classes/Player.dart';
+import '../globals.dart';
 
 class TopPlayersProvider extends StatelessWidget {
 
@@ -34,31 +35,34 @@ class _TopPlayersView extends State<TopPlayersPage> {
   @override
   Widget build(BuildContext context) {
     return Expanded(
-        child: Padding(
-        padding: EdgeInsets.symmetric(vertical: 10,horizontal: 16),
-    child: Column(
-    crossAxisAlignment: CrossAxisAlignment.start, // Ευθυγραμμίζει το κείμενο αριστερά
-    children: [
-    // Προσθήκη του τίτλου
-    Text(
-    "Γκολ",
-    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-    ),
-    SizedBox(height: 10), // Απόσταση πριν από τη λίστα
+        child: Container(
+          color: darkModeNotifier.value?darkModeBackGround: lightModeBackGround,
+          child: Padding(
+          padding: EdgeInsets.symmetric(vertical: 10,horizontal: 16),
+              child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start, // Ευθυγραμμίζει το κείμενο αριστερά
+              children: [
+              // Προσθήκη του τίτλου
+              Text(
+              "Γκολ",
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 10), // Απόσταση πριν από τη λίστα
 
-    // Λίστα παικτών
-    Expanded(
-    child: ListView.builder(
-    itemCount: widget.playersList.length,
-    itemBuilder: (context, index) {
-    return Column(
-    children: [
-    playerCard(widget.playersList[index], index),
-    Divider(thickness: 1, color: Colors.black),
-    ],
-    );
-    }))]),
-    ));
+              // Λίστα παικτών
+              Expanded(
+              child: ListView.builder(
+              itemCount: widget.playersList.length,
+              itemBuilder: (context, index) {
+              return Column(
+              children: [
+              playerCard(widget.playersList[index], index),
+              Divider(thickness: 1, color: Colors.black),
+              ],
+              );
+              }))]),
+              ),
+        ));
   }
 
   Widget playerCard(Player player, int i) {

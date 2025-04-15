@@ -60,12 +60,14 @@ class DetailsMatchNotStarted extends StatelessWidget {
           ],
         ));
   }
+
+
+
 }
 
-
-Future<List<num>> loadPercentages(String homeTeam, String awayTeam, String selection) async {
+Future<List<num>> loadPercentages(MatchDetails match) async {
   TeamsHandle teamsHandle = TeamsHandle();
-  return teamsHandle.getPercentages(homeTeam, awayTeam, selection);
+  return teamsHandle.getPercentages('${match.homeTeam.name}${match.awayTeam.name}${match.dateString}');
 }
 
 

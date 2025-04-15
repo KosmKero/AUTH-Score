@@ -516,6 +516,9 @@ class MatchDetails extends ChangeNotifier {
         awayTeam.reduceWins();
       }
     }
+    if (isGroupPhase) {
+      TeamsHandle().sortTeams(homeTeam.group);
+    }
   }
 
   //ετοιμο
