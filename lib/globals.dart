@@ -3,6 +3,7 @@ import 'dart:ui';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:untitled1/Data_Classes/MatchDetails.dart';
 import 'Data_Classes/AppUser.dart';
 import 'Data_Classes/Team.dart';
 
@@ -18,6 +19,8 @@ List<Team> topTeams = [];
 
 
 List<Team> teams = [];
+
+Map<int, MatchDetails> playOffMatches = {};
 
 
 Color lightModeBackGround =Color.fromARGB(255, 151, 180, 195);    //Color.fromARGB(255, 125, 163, 181);

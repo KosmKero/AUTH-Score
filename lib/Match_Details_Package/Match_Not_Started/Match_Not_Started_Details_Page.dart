@@ -31,55 +31,50 @@ class _MatchNotStartedDetailsState extends State<MatchNotStartedDetails> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold( //Button to begin the match countdown
+    return Scaffold(
+        //Button to begin the match countdown
         body: SingleChildScrollView(
-          scrollDirection: Axis.vertical,
-          child:
-            Column(children: [
-                  TextButton(
-              onPressed: () {
-                widget.match.matchStarted();
-                setState(() {});
-              },
-              child: Text(
-                  greek?"Έναρξη αγώνα":"Begin Match")),
-                  Container(
-            color: Color.fromARGB(50, 5, 150, 200),
-            child: Padding(
-              padding: const EdgeInsets.all(0.5),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Center(child: Text(
-                    widget.match.matchweekInfo(),
-                    style: TextStyle(fontSize: 13,color: Colors.grey[800]),)),
-                  SizedBox(height: 5),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Expanded(child: buildTeamName(team: widget.match.homeTeam)),
-                      Flexible(fit: FlexFit.tight, child:_buildMatchDateTime()),
-                      Expanded(child:buildTeamName(team: widget.match.awayTeam)),
-                    ],
-                  ),
-                  Center(child: _isAdminWidget()),
-                  const Divider(),
-                  NavigationButtons(onSectionChange: _changeSection),
-                ],
-              ),
+      scrollDirection: Axis.vertical,
+      child: Column(children: [
+        Container(
+          color: Color.fromARGB(50, 5, 150, 200),
+          child: Padding(
+            padding: const EdgeInsets.all(0.5),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Center(
+                    child: Text(
+                  widget.match.matchweekInfo(),
+                  style: TextStyle(fontSize: 13, color: Colors.grey[800]),
+                )),
+                SizedBox(height: 5),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Expanded(child: buildTeamName(team: widget.match.homeTeam)),
+                    Flexible(fit: FlexFit.tight, child: _buildMatchDateTime()),
+                    Expanded(child: buildTeamName(team: widget.match.awayTeam)),
+                  ],
+                ),
+                Center(child: _isAdminWidget()),
+                const Divider(),
+                NavigationButtons(onSectionChange: _changeSection),
+              ],
             ),
-                  ),
-                  _sectionChooser(selectedIndex, widget.match)
-                ]),
-
-        ));
+          ),
+        ),
+        _sectionChooser(selectedIndex, widget.match)
+      ]),
+    ));
   }
 
   Widget _isAdminWidget() {
     // Check if the user is logged in
-    if (globalUser.controlTheseTeams(widget.match.homeTeam.name, widget.match.awayTeam.name)){
+    if (globalUser.controlTheseTeams(
+        widget.match.homeTeam.name, widget.match.awayTeam.name)) {
       return TextButton(
         child: Text("Εκκινηση Αγώνα"),
         onPressed: () {
@@ -87,8 +82,7 @@ class _MatchNotStartedDetailsState extends State<MatchNotStartedDetails> {
           setState(() {});
         },
       );
-    }
-    else{
+    } else {
       return SizedBox(
         height: 50,
       );
@@ -139,9 +133,9 @@ class _NavigationButtonsState extends State<NavigationButtons> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          _buildTextButton(greek?"Λεπτομέρειες":"Details", 0),
-         // _buildTextButton(greek?"Συνθέσεις":"Teams", 1),
-          _buildTextButton(greek?"Βαθμολογία":"Standing", 1),
+          _buildTextButton(greek ? "Λεπτομέρειες" : "Details", 0),
+          // _buildTextButton(greek?"Συνθέσεις":"Teams", 1),
+          _buildTextButton(greek ? "Βαθμολογία" : "Standing", 1),
         ],
       ),
     );
@@ -222,14 +216,16 @@ class _buildTeamName extends State<buildTeamName> {
                     child: SizedBox(
                         height: 50, width: 50, child: widget.team.image),
                   ),
-                     SizedBox(height: 3,),
-                     Text(
-                        widget.team.name,
-                        style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w500,
-                            color: Colors.black),
-                      ),
+                  SizedBox(
+                    height: 3,
+                  ),
+                  Text(
+                    widget.team.name,
+                    style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.black),
+                  ),
                 ],
               ),
             ))

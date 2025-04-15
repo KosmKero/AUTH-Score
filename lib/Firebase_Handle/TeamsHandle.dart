@@ -209,6 +209,73 @@ class TeamsHandle {
           return null;
         }
 
+        MatchDetails match = MatchDetails(
+          homeTeam: homeTeam,
+          awayTeam: awayTeam,
+          hasMatchStarted: data['HasMatchStarted'] ?? false,
+          time: data["Time"] ?? 0,
+          day: data["Day"] ?? 0,
+          month: data["Month"] ?? 0,
+          year: data["Year"] ?? 0,
+          isGroupPhase: data["IsGroupPhase"] ?? false,
+          game: data["Game"] ?? 0,
+          scoreHome: data["GoalHome"] ?? -1,
+          scoreAway: data["GoalAway"] ?? -1,
+          hasMatchFinished: data["hasMatchFinished"] ?? false,
+          hasSecondHalfStarted: data["hasSecondHalfStarted"] ?? false,
+          hasFirstHalfFinished: data["hasFirstHalfFinished"] ?? false,
+          timeStarted: data["TimeStarted"] ?? DateTime.now().millisecondsSinceEpoch,
+
+        );
+        if (!match.isGroupPhase){
+          playOffMatches[match.game] = match;
+        }
+
+        return match;
+      }).toList();
+
+      // Εκτελούνται όλες παράλληλα
+      var completedMatches = await Future.wait(matchFutures);
+
+      // Φιλτράρουμε τα null (όσα απορρίψαμε λόγω ελλιπών δεδομένων)
+      matches = completedMatches.whereType<MatchDetails>().toList();
+
+      print("✅ Loaded ${matches.length} matches for type '$type'.");
+    } catch (e) {
+      print("❌ Error fetching matches of type '$type': $e");
+    }
+
+    return matches;
+  }
+
+
+  Future<List<MatchDetails>> getPlatOffMatches() async {
+    List<MatchDetails> matches = [];
+
+    try {
+      var matchDocs = await FirebaseFirestore.instance
+          .collection('matches')
+          .where("IsGroupPhase", isEqualTo: false)
+          .get();
+
+      if (matchDocs.docs.isEmpty) {
+        print("⚠️ No matches found for type playoffs.");
+        return matches;
+      }
+
+      // Χρησιμοποιούμε Future.wait για να κάνουμε τις κλήσεις παράλληλα
+      List<Future<MatchDetails?>> matchFutures = matchDocs.docs.map((matchDoc) async {
+        var data = matchDoc.data() as Map<String, dynamic>;
+        String homeTeamName = data["Hometeam"] ?? "";
+        String awayTeamName = data["Awayteam"] ?? "";
+        Team? homeTeam = await getTeam(homeTeamName);
+        Team? awayTeam = await getTeam(awayTeamName);
+
+        if (homeTeam == null || awayTeam == null) {
+          print("⚠️ Skipping match due to missing team data: $homeTeamName vs $awayTeamName");
+          return null;
+        }
+
         return MatchDetails(
           homeTeam: homeTeam,
           awayTeam: awayTeam,
@@ -235,9 +302,9 @@ class TeamsHandle {
       // Φιλτράρουμε τα null (όσα απορρίψαμε λόγω ελλιπών δεδομένων)
       matches = completedMatches.whereType<MatchDetails>().toList();
 
-      print("✅ Loaded ${matches.length} matches for type '$type'.");
+      print("✅ Loaded ${matches.length} matches for type playoffs.");
     } catch (e) {
-      print("❌ Error fetching matches of type '$type': $e");
+      print("❌ Error fetching matches of type playoffs: $e");
     }
 
     return matches;

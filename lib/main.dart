@@ -117,6 +117,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
       MatchHandle().initializeMatces(matches);
       TopPlayersHandle().initializeList(teams);
 
+
       // Add a small delay so users can see the loading completed message
       setState(() {
         _loadingMessage = "All set!";
@@ -231,6 +232,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
 Future<void> loadTeams() async {
   TeamsHandle teamsHandle = TeamsHandle();
   teams = await teamsHandle.getAllTeams();
+
 
   /*
   teamsHandle.addMatch("ΠΑΙΔΑΓΩΓΙΚΗ","ΠΟΛΙΤΙΚΩΝ ΜΗΧΑΝ.",17,2, 2025, 2, true, true, 1510, "previous",0,11);

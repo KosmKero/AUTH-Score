@@ -4,6 +4,7 @@ import '../../Data_Classes/MatchDetails.dart';
 import '../../Data_Classes/Team.dart';
 import '../../Team_Display_Page_Package/TeamDisplayPage.dart';
 import '../../globals.dart';
+import 'betting_chooser.dart';
 
 
 //ΤΟ ΚΟΜΜΑΤΙ ΑΥΤΟ ΑΦΟΡΑ ΟΛΟ ΤΟ ΥΠΟΛΟΙΠΟ ΜΕΡΟΣ ΤΗΣ ΣΕΛΙΔΑΣ
@@ -30,7 +31,7 @@ class DetailsMatchNotStarted extends StatelessWidget {
               ),
             ),
             SizedBox(height: 8),
-            BettingChooser(homeTeam:match.homeTeam.name,awayTeam:  match.awayTeam.name), //TO KOYMΠΙ ΜΕ ΤΙΣ 3 ΕΠΙΛΟΓΕΣ (1Χ2)
+            BettingChooser(match: match,), //TO KOYMΠΙ ΜΕ ΤΙΣ 3 ΕΠΙΛΟΓΕΣ (1Χ2)
             SizedBox(
               height: 70,
             ),
@@ -67,87 +68,7 @@ Future<List<num>> loadPercentages(String homeTeam, String awayTeam, String selec
   return teamsHandle.getPercentages(homeTeam, awayTeam, selection);
 }
 
-class BettingChooser extends StatefulWidget {
-  final String homeTeam;
-  final String awayTeam;
 
-  const BettingChooser({
-    super.key,
-    required this.homeTeam,
-    required this.awayTeam,
-  });
-
-  @override
-  State<BettingChooser> createState() => _BettingChooserState();
-}
-
-class _BettingChooserState extends State<BettingChooser> {
-  TeamsHandle teamsHandle = TeamsHandle();
-  String _selected = '';
-  bool hasChosen = false;
-  List<num> percentages = [];
-
-  void _updateCount(String value) async {
-    if (hasChosen) return;
-
-    // First perform the async work
-    final loadedPercentages = await loadPercentages(
-      widget.homeTeam,
-      widget.awayTeam,
-      value,
-    );
-
-    // Then update the state
-    if (mounted) {
-      setState(() {
-        hasChosen = true;
-        _selected = value;
-        percentages = loadedPercentages;
-      });
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(right: 10),
-      child: Column(
-      children: [
-        SizedBox(
-          width: 320,
-        child: SegmentedButton<String>(
-          segments: [
-            ButtonSegment(value: '1', label: Text(hasChosen ? percentages[0].toStringAsFixed(2)  : "1",
-              style:  TextStyle(fontSize: 15,),
-              textAlign: TextAlign.center,
-              overflow: TextOverflow.ellipsis,
-              ),
-            ),
-
-            ButtonSegment(value: 'X', label: Text(hasChosen ? percentages[2].toStringAsFixed(2) :'X',style: TextStyle(fontSize: 15),)),
-
-            ButtonSegment(value: '2', label: Text(hasChosen ? percentages[1].toStringAsFixed(2) :'2',style: TextStyle(fontSize: 15,))),
-          ],
-          style: ButtonStyle(
-              fixedSize: WidgetStateProperty.all(Size(540, 50)),
-              shape: WidgetStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(9),side: BorderSide(color: Colors.black,width: 1.5))),
-              backgroundColor: WidgetStateProperty.all(Color.fromARGB(255, 243, 246, 255)),
-          ),
-          showSelectedIcon: true,
-          selected: _selected != null ? {_selected!} : {},
-          onSelectionChanged: hasChosen
-              ? null
-              : (newSelection) {
-            _updateCount(newSelection.first);
-          },
-        ),
-        ),
-        SizedBox(height: 10),
-       ],
-      )
-    );
-  }
-}
 
 
 Future<List<String>> getFinalFive(String teamName) async{

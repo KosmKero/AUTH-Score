@@ -176,6 +176,11 @@ class StandingsPage1 extends State<StandingsPage> {
                 );
               }),
             ),
+            const SizedBox(height: 8),
+            Text(
+              greek ? "Οι 4 πρώτοι περνούν στην επόμενη φάση." : "Top 4 teams advance to the next round.",
+              style: const TextStyle(fontSize: 13, fontStyle: FontStyle.italic, color: Colors.black54),
+            ),
           ],
         ),
       ),

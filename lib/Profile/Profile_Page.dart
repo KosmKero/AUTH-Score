@@ -5,14 +5,16 @@ import 'package:untitled1/Firebase_Handle/TeamsHandle.dart';
 import 'package:untitled1/Firebase_Handle/user_handle_in_base.dart';
 import 'package:untitled1/Profile/ChangePassword.dart';
 import 'package:untitled1/Profile/ChangeUserName.dart';
+import 'package:untitled1/Profile/admin/update_betting_results_button.dart';
 import 'package:untitled1/Profile/admin_request_screen.dart';
 import 'package:untitled1/Profile/requests_and_admins_package/requests_and_admins_page.dart';
 import 'package:untitled1/globals.dart';
 import '../Data_Classes/AppUser.dart';
 import 'LogInScreen.dart';
+import 'admin/requests_and_admins_page.dart';
+import 'best_betters.dart';
 
-
-Future<void> signOutUser() async{
+Future<void> signOutUser() async {
   await FirebaseAuth.instance.signOut();
 }
 
@@ -38,8 +40,8 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Future<void> _loadLanguage() async {
     if (isLoggedIn) {
-      String lang = await UserHandleBase().getSelectedLanguage(
-          globalUser.username);
+      String lang =
+          await UserHandleBase().getSelectedLanguage(globalUser.username);
       setState(() {
         isGreek = (lang == "Ελληνικά");
         selectedLanguage = lang;
@@ -88,10 +90,11 @@ class _ProfilePageState extends State<ProfilePage> {
                                 builder: (context) => RequestApprovalScreen()),
                           );
                         },
-                        child: Text(
-                            "see Requests", style: TextStyle(color: darkModeOn
-                            ? Colors.white
-                            : Colors.black87)),
+                        child: Text("see Requests",
+                            style: TextStyle(
+                                color: darkModeOn
+                                    ? Colors.white
+                                    : Colors.black87)),
                       ),
                       TextButton(
                         onPressed: () {
@@ -101,12 +104,24 @@ class _ProfilePageState extends State<ProfilePage> {
                                 builder: (context) => AdminRequestScreen()),
                           );
                         },
-                        child: Text("req", style: TextStyle(color: darkModeOn
-                            ? Colors.white
-                            : Colors.black87)),
+                        child: Text("req",
+                            style: TextStyle(
+                                color: darkModeOn
+                                    ? Colors.white
+                                    : Colors.black87)),
                       ),
                     ],
                   ),
+                  AdminPanel(),
+                  ElevatedButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => TopUsersListPage()),
+                        );
+                      },
+                      child: Text("data")),
                   Padding(
                     padding: const EdgeInsets.only(bottom: 5, top: 15, left: 5),
                     child: Text(
@@ -116,7 +131,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         fontWeight: FontWeight.bold,
                         fontFamily: 'Trajan Pro',
                         fontStyle: FontStyle.italic,
-                        color: darkModeOn ? Colors.white : Colors.white,
+                        color: darkModeOn ? Colors.white : Colors.black87,
                       ),
                     ),
                   ),
@@ -137,8 +152,9 @@ class _ProfilePageState extends State<ProfilePage> {
                         onPressed: () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) =>
-                                ChangeUserName(user: widget.user)),
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    ChangeUserName(user: widget.user)),
                           );
                         },
                         child: Text(
@@ -146,7 +162,9 @@ class _ProfilePageState extends State<ProfilePage> {
                           style: TextStyle(
                             fontSize: greek ? 16 : 18,
                             fontWeight: FontWeight.w600,
-                            color: darkModeOn ? Colors.white : Color.fromARGB(255, 70, 107, 255),
+                            color: darkModeOn
+                                ? Colors.white
+                                : Color.fromARGB(255, 70, 107, 255),
                           ),
                         ),
                       ),
@@ -159,8 +177,9 @@ class _ProfilePageState extends State<ProfilePage> {
                         onPressed: () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) =>
-                                ChangePassword(user: widget.user)),
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    ChangePassword(user: widget.user)),
                           );
                         },
                         child: Text(
@@ -168,7 +187,9 @@ class _ProfilePageState extends State<ProfilePage> {
                           style: TextStyle(
                             fontSize: greek ? 16 : 18,
                             fontWeight: FontWeight.w600,
-                            color: darkModeOn ? Colors.white : Color.fromARGB(255, 70, 107, 255),
+                            color: darkModeOn
+                                ? Colors.white
+                                : Color.fromARGB(255, 70, 107, 255),
                           ),
                         ),
                       ),
@@ -181,8 +202,8 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
                   const SizedBox(height: 20),
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 20, vertical: 8),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                     child: Row(
                       children: [
                         Padding(
@@ -198,13 +219,12 @@ class _ProfilePageState extends State<ProfilePage> {
                         ),
                         DropdownButtonHideUnderline(
                           child: DropdownButton<String>(
-                            dropdownColor: darkModeOn
-                                ? Colors.grey[850]
-                                : Colors.white,
+                            dropdownColor:
+                                darkModeOn ? Colors.grey[850] : Colors.white,
                             value: greek ? "Ελληνικά" : "English",
                             icon: Icon(Icons.language,
-                                color: darkModeOn ? Colors.white : Colors
-                                    .black87),
+                                color:
+                                    darkModeOn ? Colors.white : Colors.black87),
                             style: TextStyle(
                               color: darkModeOn ? Colors.white : Colors.black87,
                               fontWeight: FontWeight.w500,
@@ -294,8 +314,8 @@ class _ProfilePageState extends State<ProfilePage> {
                           child: Text(
                             "Email: adamo@csd.auth.gr",
                             style: TextStyle(
-                                color: darkModeOn ? Colors.white : Colors
-                                    .black87),
+                                color:
+                                    darkModeOn ? Colors.white : Colors.black87),
                           ),
                         ),
                         const SizedBox(height: 30),
@@ -304,8 +324,8 @@ class _ProfilePageState extends State<ProfilePage> {
                           child: Text(
                             "Email: kosma pes email",
                             style: TextStyle(
-                                color: darkModeOn ? Colors.white : Colors
-                                    .black87),
+                                color:
+                                    darkModeOn ? Colors.white : Colors.black87),
                           ),
                         ),
                         const SizedBox(height: 30),
@@ -329,7 +349,8 @@ class LogInButton extends StatefulWidget {
   final AppUser user;
   final VoidCallback onLoginStateChanged; // Callback to refresh the page
 
-  const LogInButton({super.key, required this.user, required this.onLoginStateChanged});
+  const LogInButton(
+      {super.key, required this.user, required this.onLoginStateChanged});
 
   @override
   State<LogInButton> createState() => _LogInButtonState();
@@ -338,6 +359,50 @@ class LogInButton extends StatefulWidget {
 class _LogInButtonState extends State<LogInButton> {
   @override
   Widget build(BuildContext context) {
+    return Column(children: [
+      Padding(
+          padding: EdgeInsets.only(bottom: widget.user.isLoggedIn ? 70 : 70),
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 30),
+            child: TextButton(
+              style: ButtonStyle(
+                backgroundColor: MaterialStateProperty.all<Color>(
+                    isLoggedIn ? Colors.red : Colors.blue),
+              ),
+              onPressed: () {
+                setState(() {
+                  if (!isLoggedIn) {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) =>
+                                LogInScreen(user: widget.user)));
+                  } else {
+                    isLoggedIn = false;
+                    globalUser = AppUser(" ", " ", [], [], "user");
+                    signOutUser();
+                  }
+                  //widget.user.changeLogIn(); // Toggle login state
+                });
+                widget.onLoginStateChanged(); // Notify ProfilePage to refresh
+              },
+              child: Text(
+                isLoggedIn
+                    ? greek
+                        ? "Αποσύνδεση"
+                        : "Disconnect"
+                    : greek
+                        ? "Σύνδεση/Δημιουργία Λογαριασμού"
+                        : "Login/Create an account",
+                style: TextStyle(
+                  fontSize: 19,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          )),
+    ]);
 
     return Column(
         children:[
@@ -418,9 +483,8 @@ class _OvalToggleButtonState extends State<OvalToggleButton> {
             ),
             child: AnimatedAlign(
               duration: Duration(milliseconds: 300),
-              alignment: isToggled
-                  ? Alignment.centerRight
-                  : Alignment.centerLeft,
+              alignment:
+                  isToggled ? Alignment.centerRight : Alignment.centerLeft,
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 5),
                 child: Container(

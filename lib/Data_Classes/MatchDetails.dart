@@ -187,6 +187,8 @@ class MatchDetails extends ChangeNotifier {
   int get month => _month;
   int get year => _year;
   int get startTimeInSeconds => _startTimeInSeconds;
+  bool get isGroupPhase=> _isGroupPhase;
+  int get game => _game;
 
   //debug
   String get homeInitials => "CSD";
@@ -260,6 +262,19 @@ class MatchDetails extends ChangeNotifier {
             awayTeam.name)
         .set({'hasMatchFinished': progress, 'Type': type},
             SetOptions(merge: true)); // ώστε να μη διαγράψει άλλα πεδία
+
+    String matchKey = '${homeTeam.name}${awayTeam.name}${dateString}';
+
+    String correctChoice;
+    (scoreHome>scoreAway) ? correctChoice="1": (scoreHome==scoreAway)? correctChoice="X": correctChoice="2";
+
+    await FirebaseFirestore.instance
+        .collection('votes')
+        .doc(matchKey)
+        .set({'hasMatchFinished': progress,
+              'correctChoice': correctChoice,
+              'statsUpdated': false},
+        SetOptions(merge: true)); // ώστε να μη διαγράψει άλλα πεδία
   }
 
   Future<void> homeScoredBase() async {
