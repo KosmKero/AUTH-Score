@@ -59,7 +59,7 @@ class _NavigationButtonsState extends State<_NavigationButtons> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color:darkModeNotifier.value?darkModeBackGround: Color.fromARGB(70, 60, 80, 150),
+      color:darkModeNotifier.value?darkModeBackGround: lightModeBackGround,
       height: 65,
       width: double.infinity,
       child: Row(
@@ -90,8 +90,9 @@ class _NavigationButtonsState extends State<_NavigationButtons> {
             text,
             style: TextStyle(
               fontSize: 17,
-              color: isSelected ? Colors.blue :darkModeNotifier.value?Colors.white: Colors.black87,
-              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+              color: isSelected ? Color.fromARGB(255, 0, 35, 150) :darkModeNotifier.value?Colors.white: Colors.black87,
+              fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+              fontFamily: "Arial"
             ),
           ),
           SizedBox(height: 3), // Απόσταση μεταξύ κειμένου και γραμμής
@@ -99,7 +100,7 @@ class _NavigationButtonsState extends State<_NavigationButtons> {
             Container(
               width: 70, // Μήκος γραμμής
               height: 3, // Πάχος γραμμής
-              color: Colors.blue, // Χρώμα γραμμής
+              color: Color.fromARGB(255, 0, 35, 150), // Χρώμα γραμμής
             ),
         ],
       ),

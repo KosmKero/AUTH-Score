@@ -24,11 +24,15 @@ class _TeamDetailsWidgetState extends State<TeamDetailsWidget> {
           child: Column(
     children: [
       Card(
+        color: Colors.white,
           child: Column(
         children: [
           Text(
             "Αποτελέσματα τελευταίων 5 αγωνιστικών",
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+            ),
           ),
           TeamFormWidget(
             team: widget.team,
@@ -37,8 +41,14 @@ class _TeamDetailsWidgetState extends State<TeamDetailsWidget> {
             height: 17,
           )
         ],
-      )),
+      )
+      ),
       Card(
+
+        color: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        shadowColor: Colors.black.withOpacity(0.4),
+        elevation: 8,
         child: Column(children: [
           Padding(
             padding: EdgeInsets.only(bottom: 10, top: 25),
@@ -54,6 +64,7 @@ class _TeamDetailsWidgetState extends State<TeamDetailsWidget> {
         height: 25,
       ),
       Card(
+        color: Colors.white,
         //ΑΦΟΡΑ ΤΙΣ ΠΛΗΡΟΦΟΡΙΕΣ ΣΤΟ ΚΑΤΩ ΜΕΡΟΣ ΤΗΝ ΟΘΟΝΗΣ
         elevation: 4,
         shape:
@@ -87,7 +98,11 @@ class _TeamDetailsWidgetState extends State<TeamDetailsWidget> {
                   child: Text(
                     'Έτος ίδρυσης:',
                     style: TextStyle(
-                        fontSize: 20, fontWeight: FontWeight.bold),
+                        fontSize: 20,
+                        fontWeight: FontWeight.w600,
+                        fontFamily: "Arial",
+                        letterSpacing: 0.3
+                    ),
                   ),
                 ),
                 Padding(
@@ -116,7 +131,10 @@ class _TeamDetailsWidgetState extends State<TeamDetailsWidget> {
                   child: Text(
                     'Τίτλοι:',
                     style: TextStyle(
-                        fontSize: 20, fontWeight: FontWeight.bold),
+                        fontSize: 20,
+                        fontWeight: FontWeight.w600,
+                        fontFamily: "Arial"
+                    ),
                   ),
                 ),
                 Padding(
@@ -142,11 +160,14 @@ class _TeamDetailsWidgetState extends State<TeamDetailsWidget> {
                   child: Text(
                     'Προπονητής:',
                     style: TextStyle(
-                        fontSize: 20, fontWeight: FontWeight.bold),
+                        fontSize: 20,
+                        fontWeight: FontWeight.w600,
+                        fontFamily: "Arial"
+                    ),
                   ),
                 ),
                 Padding(
-                    padding: EdgeInsets.only(left: 90),
+                    padding: EdgeInsets.only(left: 70),
                     child: Text(
                       '${widget.team.coach}',
                       style: TextStyle(

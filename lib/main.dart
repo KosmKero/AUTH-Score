@@ -341,7 +341,7 @@ class CustomBottomNavigationBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BottomNavigationBar(
-      backgroundColor:  darkModeNotifier.value?darkModeWidgets: Color.fromARGB(255, 10, 28, 21),
+      backgroundColor:  darkModeNotifier.value?darkModeWidgets: Colors.black87,
       selectedFontSize: 14,
       unselectedFontSize: 12,
       type: BottomNavigationBarType.fixed,

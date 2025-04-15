@@ -28,10 +28,11 @@ class _OneGroupStandingsState extends State<OneGroupStandings> {
     topTeams.addAll(groupTeams.take(4));
 
     // Εναλλασσόμενα χρώματα γραμμών
-    final Color rowColor1 = Colors.grey.shade200;
+    final Color rowColor1 = Color.fromARGB(255, 214, 230, 255);
     final Color rowColor2 = Colors.white;
 
     return Card(
+      color: Colors.white,
       margin: const EdgeInsets.symmetric(horizontal: 5.0, vertical: 2.0),
       elevation: 4,
       child: Padding(
@@ -41,7 +42,10 @@ class _OneGroupStandingsState extends State<OneGroupStandings> {
           children: [
             Text(
               greek ? "Όμιλος $group" : "Group $group",
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+              ),
             ),
             const SizedBox(height: 4),
             DataTable(
@@ -128,7 +132,9 @@ class _OneGroupStandingsState extends State<OneGroupStandings> {
                       },
 
 
-                      child: Text(team.name,style: TextStyle(fontSize: 12),),
+                      child: Text(team.name,style: TextStyle(fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.black),),
                     )),
                     DataCell(Text(team.totalGames.toString())),
                     DataCell(Text(team.wins.toString())),
@@ -158,6 +164,7 @@ class _OneGroupStandingsState extends State<OneGroupStandings> {
         child: Text(
           label,
           style: const TextStyle(fontWeight: FontWeight.bold),
+
         ),
       ),
       numeric: numeric,

@@ -34,26 +34,32 @@ class _TeamDisplayPageState extends State<TeamDisplayPage> {
     return
       Scaffold( //ΑΦΟΡΑ ΤΟ ΟΝΟΜΑ ΠΑΝΩ ΣΤΗΝ ΣΕΛΙΔΑ
         appBar: AppBar(
+            backgroundColor: Color.fromARGB(250, 46, 90, 136),
+            iconTheme: IconThemeData(color: Colors.white),
             title: Text(
             widget.team.name,
-          style: TextStyle(
+            style: TextStyle(
             fontSize: 23,
             fontWeight: FontWeight.bold,
-            fontFamily: 'Montserrat',
+            fontFamily: 'Arial',
             fontStyle: FontStyle.italic,
+              color: Colors.white
           ),
         ),
             actions: [
               isFavourite(team: widget.team,),
             ]
         ),
-        body:Column(
+        body:Scaffold(
+          backgroundColor: Colors.white,
+          body: Column(
       children: [
         //Text(team.name,style: TextStyle(color: Color.fromARGB(100, 255, 10, 40),)),
         _NavigationButtons(onSectionChange: _changeSection),
         _sectionChooser(selectedIndex , widget.team,)
       ],
     )
+      )
       );
   }
 
@@ -124,6 +130,7 @@ class _NavigationButtonsState extends State<_NavigationButtons> {
               fontSize: 17,
               color: isSelected ? Colors.blue : Colors.black,
               fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+              //backgroundColor: darkModeNotifier.value==true?Colors.black87: lightModeBackGround
             ),
           ),
           SizedBox(height: 3), // Απόσταση μεταξύ κειμένου και γραμμής

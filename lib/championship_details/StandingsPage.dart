@@ -16,15 +16,15 @@ class StandingsPage1 extends State<StandingsPage> {
   Widget build(BuildContext context) {
     return Expanded(
       child: Container(
-        color:darkModeNotifier.value?darkModeBackGround: Color.fromARGB(70, 60, 80, 150),
+        color:darkModeNotifier.value?darkModeBackGround: lightModeBackGround,
         child: Column(children: [
           SizedBox(height: 5,),
           Text(greek?"Βαθμολογικός Πίνακας":"Standings Table",
               style: TextStyle(
                   fontSize: 23,
                   fontWeight: FontWeight.bold,
-                  color: Color.fromARGB(255, 245, 245, 245),
-                  fontFamily: 'Montserrat',
+                  color: Color.fromARGB(255, 235, 245, 245),
+                  fontFamily: 'Arial',
                   fontStyle: FontStyle.italic
               )),
           SizedBox(height: 8,),
@@ -52,7 +52,7 @@ class StandingsPage1 extends State<StandingsPage> {
     topTeams.addAll(groupTeams.take(4));
 
     // Εναλλασσόμενα χρώματα γραμμών
-    final Color rowColor1 = Colors.grey.shade200;
+    final Color rowColor1 = Color.fromARGB(255, 235, 244, 255);
     final Color rowColor2 = Colors.white;
 
     return Card(
@@ -152,7 +152,13 @@ class StandingsPage1 extends State<StandingsPage> {
                       },
 
 
-                      child: Text(team.name,style: TextStyle(fontSize: 12),),
+                      child: Text(team.name,
+                        style: TextStyle(fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.black,
+
+                        ),
+                      ),
                     )),
                     DataCell(Text(team.totalGames.toString())),
                     DataCell(Text(team.wins.toString())),

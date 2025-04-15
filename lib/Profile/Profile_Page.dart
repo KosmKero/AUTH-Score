@@ -62,7 +62,7 @@ class _ProfilePageState extends State<ProfilePage> {
       valueListenable: darkModeNotifier,
       builder: (context, darkModeOn, _) {
         return Scaffold(
-          backgroundColor: darkModeOn ? darkModeBackGround : Colors.white,
+          backgroundColor: darkModeOn ? darkModeBackGround : lightModeBackGround,
           body: ListView(
             scrollDirection: Axis.vertical,
             children: [
@@ -116,7 +116,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         fontWeight: FontWeight.bold,
                         fontFamily: 'Trajan Pro',
                         fontStyle: FontStyle.italic,
-                        color: darkModeOn ? Colors.white : Colors.black87,
+                        color: darkModeOn ? Colors.white : Colors.white,
                       ),
                     ),
                   ),
@@ -192,7 +192,7 @@ class _ProfilePageState extends State<ProfilePage> {
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.w600,
-                              color: darkModeOn ? Colors.white : Colors.black87,
+                              color: darkModeOn ? Colors.white : Colors.white,
                             ),
                           ),
                         ),
@@ -258,8 +258,8 @@ class _ProfilePageState extends State<ProfilePage> {
                           greek ? "Σκοτεινή λειτουργία" : "Dark mode",
                           style: TextStyle(
                             fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: darkModeOn ? Colors.white : Colors.black87,
+                            fontWeight: FontWeight.w600,
+                            color: darkModeOn ? Colors.white : Colors.white,
                           ),
                         ),
                         SizedBox(width: 25),
@@ -284,7 +284,7 @@ class _ProfilePageState extends State<ProfilePage> {
                               : "Communication for problems",
                           style: TextStyle(
                             fontSize: 18,
-                            fontWeight: FontWeight.bold,
+                            fontWeight: FontWeight.w600,
                             color: Colors.white,
                           ),
                         ),
@@ -350,7 +350,7 @@ class _LogInButtonState extends State<LogInButton> {
                     TextButton(
                       style: ButtonStyle(
                         backgroundColor: MaterialStateProperty.all<Color>(
-                           isLoggedIn ? Colors.red : Colors.blue),
+                           isLoggedIn ? Colors.red : Color.fromARGB(250, 46, 90, 136)),
                       ),
                       onPressed: () {
                         setState(() {
