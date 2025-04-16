@@ -1,4 +1,8 @@
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
+
+import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:untitled1/API/Match_Handle.dart';
@@ -12,6 +16,7 @@ import 'package:untitled1/Firebase_Handle/TeamsHandle.dart';
 import 'package:untitled1/Firebase_Handle/user_handle_in_base.dart';
 import 'package:untitled1/championship_details/knock_outs_page.dart';
 import 'package:untitled1/championship_details/sector_chooser.dart';
+import 'API/NotificationService.dart';
 import 'Data_Classes/AppUser.dart';
 import 'Favorite_Page.dart';
 import 'HomePage.dart';
@@ -66,6 +71,11 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      navigatorKey: navigatorKey,
+      routes: {
+        '/home': (context) => LoadingScreen(),
+      },
+
       home: LoadingScreen(),
     );
   }
@@ -91,6 +101,9 @@ class _LoadingScreenState extends State<LoadingScreen> {
     _loadData();
     if(isLoggedIn)
       _loadLanguage();
+
+    initia();
+
   }
 
 

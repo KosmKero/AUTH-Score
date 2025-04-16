@@ -1,3 +1,4 @@
+import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 
 import '../Data_Classes/Team.dart';
@@ -33,37 +34,44 @@ class _AddMatchScreenState extends State<AddMatchScreen> {
           key: _formKey,
           child: ListView(
             children: [
-              DropdownButtonFormField<Team>(
-                decoration: InputDecoration(labelText: 'Γηπεδούχος Ομάδα'),
-                value: homeTeam,
-                items: teams.map((team) {
-                  return DropdownMenuItem<Team>(
-                    value: team,
-                    child: Text(team.name),
-                  );
-                }).toList(),
+              DropdownSearch<Team>(
+                items: teams,
+                itemAsString: (Team t) => t.name,
+                popupProps: const PopupProps.menu(
+                  showSearchBox: true,
+                ),
+                dropdownDecoratorProps: const DropDownDecoratorProps(
+                  dropdownSearchDecoration: InputDecoration(
+                    labelText: "Γηπεδούχος Ομάδα",
+                  ),
+                ),
                 onChanged: (Team? value) {
-                  setState(() {
-                    homeTeam = value!;
-                  });
+                  if (value != null) {
+                    setState(() {
+                      homeTeam = value;
+                    });
+                  }
                 },
               ),
 
               SizedBox(height: 12),
-
-              DropdownButtonFormField<Team>(
-                decoration: InputDecoration(labelText: 'Φιλοξενούμενη Ομάδα'),
-                value: awayTeam,
-                items: teams.map((team) {
-                  return DropdownMenuItem<Team>(
-                    value: team,
-                    child: Text(team.name),
-                  );
-                }).toList(),
+              DropdownSearch<Team>(
+                items: teams,
+                itemAsString: (Team t) => t.name,
+                popupProps: const PopupProps.menu(
+                  showSearchBox: true,
+                ),
+                dropdownDecoratorProps: const DropDownDecoratorProps(
+                  dropdownSearchDecoration: InputDecoration(
+                    labelText: "Φιλοξενούμενη Ομάδα",
+                  ),
+                ),
                 onChanged: (Team? value) {
-                  setState(() {
-                    awayTeam = value!;
-                  });
+                  if (value != null) {
+                    setState(() {
+                      awayTeam = value;
+                    });
+                  }
                 },
               ),
               ListTile(
@@ -128,10 +136,11 @@ class _AddMatchScreenState extends State<AddMatchScreen> {
                   _formKey.currentState?.save();
 
                   if (globalUser.controlTheseTeams(homeTeam!.name, awayTeam!.name)) {
-                    TeamsHandle().addMatch(homeTeam!.name, awayTeam!.name, day, month, year, game, false, isGroupPhase,  matchTime!.hour*100+matchTime!.minute, "upcoming", 0, 0);
+                    TeamsHandle().addMatch(homeTeam!, awayTeam!, day, month, year, game, false, isGroupPhase,  matchTime!.hour*100+matchTime!.minute, "upcoming", 0, 0);
                     ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text("Το ματς προστέθηκε!")));
                     Navigator.pop(context);
+                    navigatorKey.currentState?.pushReplacementNamed('/home');
                   }
                   else{
                     ScaffoldMessenger.of(context).showSnackBar(

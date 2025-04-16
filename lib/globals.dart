@@ -7,6 +7,7 @@ import 'package:untitled1/Data_Classes/MatchDetails.dart';
 import 'Data_Classes/AppUser.dart';
 import 'Data_Classes/Team.dart';
 
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 bool isLoggedIn=false;
 ValueNotifier<bool> darkModeNotifier = ValueNotifier<bool>(false);

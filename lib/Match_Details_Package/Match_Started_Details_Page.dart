@@ -81,8 +81,7 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        body: Container(
+    return Container(
       //color: Colors.blueGrey,
       child: SingleChildScrollView(
         scrollDirection: Axis.vertical,
@@ -160,7 +159,7 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
           ],
         ),
       ),
-    ));
+    );
   }
 
   Widget _buildMatchFinishedScore() {

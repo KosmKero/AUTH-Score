@@ -1,5 +1,6 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:untitled1/globals.dart';
 
 import 'MatchDetails.dart';
@@ -128,6 +129,21 @@ class AppUser
     print("Stats updated for all users who voted in $matchKey.");
   }
 
+
+  Future<bool> isSuperUser() async {
+    final userDoc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(FirebaseAuth.instance.currentUser?.uid)
+        .get();
+
+    // Ελέγχει αν ο χρήστης είναι superuser
+    if (userDoc.exists && userDoc.data()?['superuser'] ==
+    "super123user"){
+      return true;
+    }
+    return false;
+
+  }
 
 
 

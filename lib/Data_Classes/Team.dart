@@ -15,7 +15,7 @@ class Team {
 
   late final Image _image;
   // Constructor with optional values
-  Team(this.name,this._matches, this._wins, this._losses, this._draws,this._group,this._foundationYear,this._titles,this._coach,this._position,this._initials ,[List<Player>? players]) {
+  Team(this.name,this._nameEnglish,this._matches, this._wins, this._losses, this._draws,this._group,this._foundationYear,this._titles,this._coach,this._position,this._initials ,[List<Player>? players]) {
     _players = players ?? []; // Initialize players list if null
 
     loadTeamImage();
@@ -23,7 +23,7 @@ class Team {
 
   String _initials;
   int? _foundationYear;
-  String name;
+  String name,_nameEnglish;
   String _coach;
   int _matches, _wins, _losses, _draws, _titles,_position;
   final int _group;
@@ -45,7 +45,7 @@ class Team {
   int get titles=>_titles;
   int get position => _position;
   String get initials=> _initials;
-
+  String get nameEnglish=> _nameEnglish;
   List<Player> get getPlayers => _players;
 
   String get coach => _coach;

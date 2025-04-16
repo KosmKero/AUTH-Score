@@ -190,6 +190,8 @@ class MatchDetails extends ChangeNotifier {
   bool get isGroupPhase=> _isGroupPhase;
   int get game => _game;
 
+  String get matchKey => '${homeTeam.nameEnglish}$day$month$year$game${awayTeam.nameEnglish}';
+
 
 
   bool isHalfTime() {
@@ -204,12 +206,7 @@ class MatchDetails extends ChangeNotifier {
   Future<void> matchStartedBase(bool progress) async {
     await FirebaseFirestore.instance
         .collection('matches')
-        .doc(homeTeam.name +
-            day.toString() +
-            month.toString() +
-            year.toString() +
-            _game.toString() +
-            awayTeam.name)
+        .doc(matchDocId)
         .set({
       'HasMatchStarted': progress,
       'TimeStarted': DateTime.now().millisecondsSinceEpoch ~/ 1000,
@@ -221,12 +218,7 @@ class MatchDetails extends ChangeNotifier {
   Future<void> firstHalfFinishedBase(bool progress) async {
     await FirebaseFirestore.instance
         .collection('matches')
-        .doc(homeTeam.name +
-            day.toString() +
-            month.toString() +
-            year.toString() +
-            _game.toString() +
-            awayTeam.name)
+        .doc(matchDocId)
         .set({
       'hasFirstHalfFinished': progress,
     }, SetOptions(merge: true)); // ώστε να μη διαγράψει άλλα πεδία
@@ -235,12 +227,7 @@ class MatchDetails extends ChangeNotifier {
   Future<void> secondHalfStartedBase(bool progress) async {
     await FirebaseFirestore.instance
         .collection('matches')
-        .doc(homeTeam.name +
-            day.toString() +
-            month.toString() +
-            year.toString() +
-            _game.toString() +
-            awayTeam.name)
+        .doc(matchDocId)
         .set({
       'hasSecondHalfStarted': progress,
       'TimeStarted': DateTime.now().millisecondsSinceEpoch ~/ 1000 - 45 * 60
@@ -252,12 +239,7 @@ class MatchDetails extends ChangeNotifier {
 
     await FirebaseFirestore.instance
         .collection('matches')
-        .doc(homeTeam.name +
-            day.toString() +
-            month.toString() +
-            year.toString() +
-            _game.toString() +
-            awayTeam.name)
+        .doc(matchDocId)
         .set({'hasMatchFinished': progress, 'Type': type},
             SetOptions(merge: true)); // ώστε να μη διαγράψει άλλα πεδία
 
@@ -278,12 +260,7 @@ class MatchDetails extends ChangeNotifier {
   Future<void> homeScoredBase() async {
     await FirebaseFirestore.instance
         .collection('matches')
-        .doc(homeTeam.name +
-            day.toString() +
-            month.toString() +
-            year.toString() +
-            _game.toString() +
-            awayTeam.name)
+        .doc(matchDocId)
         .set({
       'GoalHome': FieldValue.increment(1),
     }, SetOptions(merge: true)); // ώστε να μη διαγράψει άλλα πεδία
@@ -292,12 +269,7 @@ class MatchDetails extends ChangeNotifier {
   Future<void> awayScoredBase() async {
     await FirebaseFirestore.instance
         .collection('matches')
-        .doc(homeTeam.name +
-            day.toString() +
-            month.toString() +
-            year.toString() +
-            _game.toString() +
-            awayTeam.name)
+        .doc(matchDocId)
         .set({
       'GoalAway': FieldValue.increment(1),
     }, SetOptions(merge: true)); // ώστε να μη διαγράψει άλλα πεδία
@@ -306,12 +278,7 @@ class MatchDetails extends ChangeNotifier {
   Future<void> loadMatchFactsFromBase() async {
     final docSnapshot = await FirebaseFirestore.instance
         .collection('matches')
-        .doc(homeTeam.name +
-            day.toString() +
-            month.toString() +
-            year.toString() +
-            _game.toString() +
-            awayTeam.name)
+        .doc(matchDocId)
         .get();
 
     final data = docSnapshot.data();
@@ -339,12 +306,7 @@ class MatchDetails extends ChangeNotifier {
 
     await FirebaseFirestore.instance
         .collection('matches')
-        .doc(homeTeam.name +
-            day.toString() +
-            month.toString() +
-            year.toString() +
-            _game.toString() +
-            awayTeam.name)
+        .doc(matchDocId)
         .set({
       'GoalHome': score,
     }, SetOptions(merge: true));
@@ -355,12 +317,7 @@ class MatchDetails extends ChangeNotifier {
 
     await FirebaseFirestore.instance
         .collection('matches')
-        .doc(homeTeam.name +
-            day.toString() +
-            month.toString() +
-            year.toString() +
-            _game.toString() +
-            awayTeam.name)
+        .doc(matchDocId)
         .set({
       'GoalAway': score,
     }, SetOptions(merge: true));
@@ -414,13 +371,7 @@ class MatchDetails extends ChangeNotifier {
     }
 
     MatchFactsStorageHelper().addMatchFact(
-        matchDoc: FirebaseFirestore.instance.collection('matches').doc(
-            homeTeam.name +
-                day.toString() +
-                month.toString() +
-                year.toString() +
-                _game.toString() +
-                awayTeam.name),
+        matchDoc: FirebaseFirestore.instance.collection('matches').doc(matchDocId),
         half: half,
         factMap: goal.toMap());
 
@@ -455,13 +406,7 @@ class MatchDetails extends ChangeNotifier {
     }
 
     MatchFactsStorageHelper().addMatchFact(
-        matchDoc: FirebaseFirestore.instance.collection('matches').doc(
-            homeTeam.name +
-                day.toString() +
-                month.toString() +
-                year.toString() +
-                _game.toString() +
-                awayTeam.name),
+        matchDoc: FirebaseFirestore.instance.collection('matches').doc(matchDocId),
         half: half,
         factMap: goal.toMap());
 
@@ -576,13 +521,7 @@ class MatchDetails extends ChangeNotifier {
 
     _matchFacts[half]?.add(card);
     await MatchFactsStorageHelper().addMatchFact(
-        matchDoc: FirebaseFirestore.instance.collection('matches').doc(
-            homeTeam.name +
-                day.toString() +
-                month.toString() +
-                year.toString() +
-                _game.toString() +
-                awayTeam.name),
+        matchDoc: FirebaseFirestore.instance.collection('matches').doc(matchDocId),
         half: half,
         factMap: card.toMap());
     notifyListeners();
@@ -605,13 +544,7 @@ class MatchDetails extends ChangeNotifier {
       }
 
       await MatchFactsStorageHelper().deleteMatchFact(
-          matchDoc: FirebaseFirestore.instance.collection('matches').doc(
-              homeTeam.name +
-                  day.toString() +
-                  month.toString() +
-                  year.toString() +
-                  _game.toString() +
-                  awayTeam.name),
+          matchDoc: FirebaseFirestore.instance.collection('matches').doc(matchDocId),
           half: goal1.half,
           factMap: goal1.toMap());
 
@@ -619,12 +552,7 @@ class MatchDetails extends ChangeNotifier {
       (goal1.isHomeTeam) ? (type = 'GoalHome') : (type = 'GoalAway');
         await FirebaseFirestore.instance
             .collection('matches')
-            .doc(homeTeam.name +
-                day.toString() +
-                month.toString() +
-                year.toString() +
-                _game.toString() +
-                awayTeam.name)
+            .doc(matchDocId)
             .set({
           type : FieldValue.increment(-1),
         }, SetOptions(merge: true));
@@ -648,13 +576,7 @@ class MatchDetails extends ChangeNotifier {
       }
 
       MatchFactsStorageHelper().deleteMatchFact(
-          matchDoc: FirebaseFirestore.instance.collection('matches').doc(
-              homeTeam.name +
-                  day.toString() +
-                  month.toString() +
-                  year.toString() +
-                  _game.toString() +
-                  awayTeam.name),
+          matchDoc: FirebaseFirestore.instance.collection('matches').doc(matchDocId),
           half: card1.half,
           factMap: card1.toMap());
 
@@ -670,7 +592,6 @@ class MatchDetails extends ChangeNotifier {
   }
 
   void _startListeningForUpdates() {
-    final matchDocId = _generateMatchDocId();
 
     _matchSubscription = FirebaseFirestore.instance
         .collection('matches')
@@ -732,13 +653,13 @@ class MatchDetails extends ChangeNotifier {
     });
   }
 
-  String _generateMatchDocId() {
-    return homeTeam.name +
+  String get matchDocId {
+    return homeTeam.nameEnglish +
         day.toString() +
         month.toString() +
         year.toString() +
         _game.toString() +
-        awayTeam.name;
+        awayTeam.nameEnglish;
   }
 
   @override

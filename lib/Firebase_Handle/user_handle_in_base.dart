@@ -42,7 +42,8 @@ class UserHandleBase
             "Controlled Teams":[],
             "darkMode":false,
             "Language":true,
-            'role': 'user'
+            'role': 'user',
+            "fcmToken": " "
           });
 
 
@@ -117,7 +118,9 @@ class UserHandleBase
 
       user = userCredential.user;
 
+
       DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection("users").doc(FirebaseAuth.instance.currentUser!.uid).get();
+
       if (userDoc.exists && userDoc.data() != null)
       {
         globalUser = AppUser(
@@ -143,9 +146,7 @@ class UserHandleBase
         print("Error: User document does not exist or is empty.");
       }
 
-
-      print("${userDoc.get("username")} ${userDoc.get("University")} ${(userDoc['Favourite Teams'] as List<dynamic>).map((e) => e.toString()).toList().first} ${(userDoc['Controlled Teams'] as List<dynamic>).map((e) => e.toString()).toList().first}");
-      globalUser = globalUser;
+     globalUser = globalUser;
 
 
       print("object");

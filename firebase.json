@@ -1,8 +1,8 @@
 {
   "functions": [
     {
-      "source": "functions",
-      "codebase": "default",
+      "source": "notif",
+      "codebase": "notif",
       "ignore": [
         "node_modules",
         ".git",
@@ -13,3 +13,4 @@
     }
   ]
 }
+

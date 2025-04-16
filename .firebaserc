@@ -1,5 +1,8 @@
 {
   "projects": {
-    "default": "auth-score-742c5"
-  }
+    "default": "auth-score-742c5",
+    "notif": "auth-score-742c5"
+  },
+  "targets": {},
+  "etags": {}
 }
