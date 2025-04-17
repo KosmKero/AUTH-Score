@@ -112,6 +112,12 @@ class TeamsHandle {
 
   Future<void> addMatch(Team home, Team away, int day, int month, int year, int game, bool hasStarted, bool isGroupPhase, int time, String type,int goalHome,int goalAway) async {
     try {
+      final hour = time ~/ 100;
+      final minute = time % 100;
+
+      final dateTime = DateTime(year, month, day, hour, minute);
+      final timestamp = Timestamp.fromDate(dateTime);
+
       await FirebaseFirestore.instance
           .collection('matches')
           .doc(home.nameEnglish+day.toString()+month.toString()+year.toString()+game.toString()+away.nameEnglish) // Improved unique ID
@@ -131,6 +137,7 @@ class TeamsHandle {
         "hasMatchFinished": false ,
         "hasSecondHalfStarted": false,
         "hasFirstHalfFinished":false,
+        'startTime': timestamp
       });
       print("✅ Match added successfully: ${home.nameEnglish} vs ${away.nameEnglish}");
     } catch (e) {

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:untitled1/Firebase_Handle/user_handle_in_base.dart';
 import 'package:untitled1/Match_Details_Package/Match_Details_Page.dart';
 import 'package:untitled1/globals.dart';
 import 'Data_Classes/MatchDetails.dart';
@@ -363,7 +364,7 @@ class _NotificationIconState extends State<notificationIcon> {
         setState(() {
           isNotified = !isNotified;
           if (isNotified) {
-            // NotificationService().scheduleNotification(widget.matchDate as DateTime, widget.match as String);
+           UserHandleBase().addNotifyMatch(widget.match);
           }
         });
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(

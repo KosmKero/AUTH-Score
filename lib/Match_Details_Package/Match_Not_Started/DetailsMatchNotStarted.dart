@@ -68,7 +68,7 @@ class DetailsMatchNotStarted extends StatelessWidget {
 
 Future<List<num>> loadPercentages(MatchDetails match) async {
   TeamsHandle teamsHandle = TeamsHandle();
-  return teamsHandle.getPercentages('${match.homeTeam.name}${match.awayTeam.name}${match.dateString}');
+  return teamsHandle.getPercentages('${match.homeTeam.nameEnglish}${match.awayTeam.nameEnglish}${match.dateString}');
 }
 
 

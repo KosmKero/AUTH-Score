@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:untitled1/Data_Classes/MatchDetails.dart';
 
 import '../Data_Classes/AppUser.dart';
 import '../globals.dart';
@@ -130,7 +131,7 @@ class UserHandleBase
           (userDoc['Controlled Teams'] as List<dynamic>).map((e) => e.toString()).toList(),
           userDoc['role']
         );
-
+        globalUser.loggedIn();
         darkModeNotifier.value = userDoc.get("darkMode");
         if(darkModeNotifier.value) {
           isToggled = true;
@@ -296,6 +297,19 @@ class UserHandleBase
     else{
       print("Error: User document does not exist or is empty.");
     }
+
+  }
+
+
+  Future<void> addNotifyMatch(MatchDetails match) async {
+
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(FirebaseAuth.instance.currentUser!.uid)
+        .set({
+      'matchKeys': FieldValue.arrayUnion([match.matchKey]),
+    }, SetOptions(merge: true));
+
 
   }
 }
