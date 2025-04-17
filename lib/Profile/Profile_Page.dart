@@ -225,11 +225,12 @@ class _ProfilePageState extends State<ProfilePage> {
                                       ? "Αποσύνδεση"
                                       : "Disconnect"
                                   : greek
-                                      ? "Σύνδεση/Δημιουργία Λογαριασμού"
+                                      ? "Σύνδεση/\nΔημιουργία Λογαριασμού"
                                       : "Login/Create an account",
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
+                                color: isLoggedIn?Colors.red: darkModeOn ? Colors.white : Colors.black,
                                 color: isLoggedIn?Colors.red:darkModeOn?Colors.white:Colors.black,
                               ),
                             ),

@@ -47,6 +47,7 @@ class TeamsHandle {
           try {
             // Safely get values with null checking
             String name = team.get("Name") ?? "";
+            String nameE = team.get('NameEnglish') ?? "";
             int matches = team.get("Matches") ?? 0;
             int wins = team.get("Wins") ?? 0;
             int losses = team.get("Loses") ?? 0;  // Note: "Loses" vs "Losses"
@@ -82,6 +83,7 @@ class TeamsHandle {
             // Now create the Team with the properly converted Player list
             allTeams.add(Team(
                 name,
+                nameE,
                 matches,
                 wins,
                 losses,
@@ -108,14 +110,14 @@ class TeamsHandle {
   }
 
 
-  Future<void> addMatch(String name1, String name2, int day, int month, int year, int game, bool hasStarted, bool isGroupPhase, int time, String type,int goalHome,int goalAway) async {
+  Future<void> addMatch(Team home, Team away, int day, int month, int year, int game, bool hasStarted, bool isGroupPhase, int time, String type,int goalHome,int goalAway) async {
     try {
       await FirebaseFirestore.instance
           .collection('matches')
-          .doc(name1+day.toString()+month.toString()+year.toString()+game.toString()+name2) // Improved unique ID
+          .doc(home.nameEnglish+day.toString()+month.toString()+year.toString()+game.toString()+away.nameEnglish) // Improved unique ID
           .set({
-        'Awayteam': name2,
-        'Hometeam': name1,
+        'Awayteam': away.name,
+        'Hometeam': home.name,
         'Day': day,
         'Month': month,
         'Year': year,
@@ -130,9 +132,22 @@ class TeamsHandle {
         "hasSecondHalfStarted": false,
         "hasFirstHalfFinished":false,
       });
-      print("✅ Match added successfully: ${name1} vs ${name2}");
+      print("✅ Match added successfully: ${home.nameEnglish} vs ${away.nameEnglish}");
     } catch (e) {
       print("❌ Error adding match: $e");
+    }
+  }
+
+  Future<void> deleteMatch(MatchDetails match) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection("matches")
+          .doc(match.matchKey)
+          .delete();
+
+      print('Το έγγραφο διαγράφηκε επιτυχώς!');
+    } catch (e) {
+      print('Σφάλμα κατά τη διαγραφή του εγγράφου: $e');
     }
   }
 
@@ -171,6 +186,7 @@ class TeamsHandle {
 
       return Team(
         data['Name'] ?? "Unknown",
+        data['NameEnglish'] ?? "Unknown",
         data['Matches'] ?? 0,
         data['Wins'] ?? 0,
         data['Loses'] ?? 0,

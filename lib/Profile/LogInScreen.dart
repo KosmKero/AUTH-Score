@@ -612,12 +612,8 @@ void checkBase(BuildContext context,controller1,controller2,controller3) async
         try
         {
           greek = await getValue(globalUser.username,"Language");
-          Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(
-              builder: (context) => MyApp(),
-            ),
-                (Route<dynamic> route) => false,
-          );
+          navigatorKey.currentState?.pushReplacementNamed('/home');
+
         } catch (navError) {
           print('🚨 Navigation Error: $navError');
         }
@@ -683,12 +679,8 @@ void addInBase(BuildContext context, controller1, controller2, controller3) asyn
 
       username = text1;
       print("Data successfully added!");
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(
-          builder: (context) => MyApp(),
-        ),
-            (Route<dynamic> route) => false,
-      );
+      navigatorKey.currentState?.pushReplacementNamed('/home');
+
   }
 }
 

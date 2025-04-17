@@ -14,7 +14,7 @@ class BettingChooser extends StatefulWidget {
     super.key,
     required this.match,
   }){
-   matchKey = '${match.homeTeam.name}${match.awayTeam.name}${match.dateString}';
+   matchKey = '${match.homeTeam.nameEnglish}${match.awayTeam.nameEnglish}${match.dateString}';
   }
 
   @override
