@@ -137,9 +137,10 @@ class TeamsHandle {
         "hasMatchFinished": false ,
         "hasSecondHalfStarted": false,
         "hasFirstHalfFinished":false,
-        'startTime': timestamp
+        'startTime': timestamp,
+          "notified":false
       });
-      print("✅ Match added successfully: ${home.nameEnglish} vs ${away.nameEnglish}");
+      navigatorKey.currentState?.pushReplacementNamed('/home');
     } catch (e) {
       print("❌ Error adding match: $e");
     }
@@ -151,7 +152,7 @@ class TeamsHandle {
           .collection("matches")
           .doc(match.matchKey)
           .delete();
-
+      navigatorKey.currentState?.pushReplacementNamed('/home');
       print('Το έγγραφο διαγράφηκε επιτυχώς!');
     } catch (e) {
       print('Σφάλμα κατά τη διαγραφή του εγγράφου: $e');

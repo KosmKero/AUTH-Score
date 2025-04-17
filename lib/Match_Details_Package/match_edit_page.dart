@@ -63,7 +63,7 @@ class _MatchEditPageState extends State<MatchEditPage> {
 
       TeamsHandle().deleteMatch(widget.match);
 
-        navigatorKey.currentState?.pushReplacementNamed('/home');
+
 
       }
     }
