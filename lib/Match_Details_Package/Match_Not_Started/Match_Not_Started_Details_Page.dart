@@ -35,7 +35,6 @@ class _MatchNotStartedDetailsState extends State<MatchNotStartedDetails> {
       backgroundColor: darkModeNotifier.value?Colors.grey[900]:Colors.white,
         //Button to begin the match countdown
         body: SingleChildScrollView(
-    return SingleChildScrollView(
       scrollDirection: Axis.vertical,
       child: Column(children: [
         Container(
@@ -71,7 +70,8 @@ class _MatchNotStartedDetailsState extends State<MatchNotStartedDetails> {
           ),
         ),
         _sectionChooser(selectedIndex, widget.match)
-      ]),
+      ])
+    )
     );
   }
 

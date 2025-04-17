@@ -192,7 +192,7 @@ class _AddMatchScreenState extends State<AddMatchScreen> {
                   _formKey.currentState?.save();
 
                   if (globalUser.controlTheseTeams(homeTeam!.name, awayTeam!.name)) {
-                    TeamsHandle().addMatch(homeTeam!.name, awayTeam!.name, day, month, year, game, false, isGroupPhase,  matchTime!.hour*100+matchTime!.minute, "upcoming", 0, 0);
+                    TeamsHandle().addMatch(homeTeam!, awayTeam!, day, month, year, game, false, isGroupPhase,  matchTime!.hour*100+matchTime!.minute, "upcoming", 0, 0);
                     ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text("Το ματς προστέθηκε!")));
                     Navigator.pop(context);

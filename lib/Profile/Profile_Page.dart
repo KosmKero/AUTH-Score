@@ -231,7 +231,6 @@ class _ProfilePageState extends State<ProfilePage> {
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
                                 color: isLoggedIn?Colors.red: darkModeOn ? Colors.white : Colors.black,
-                                color: isLoggedIn?Colors.red:darkModeOn?Colors.white:Colors.black,
                               ),
                             ),
                           ),
