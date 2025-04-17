@@ -32,12 +32,13 @@ class _MatchNotStartedDetailsState extends State<MatchNotStartedDetails> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: darkModeNotifier.value?Colors.grey[900]:Colors.white,
         //Button to begin the match countdown
         body: SingleChildScrollView(
       scrollDirection: Axis.vertical,
       child: Column(children: [
         Container(
-          color: Color.fromARGB(50, 5, 150, 200),
+          color:darkModeNotifier.value?Colors.grey[900]: Color.fromARGB(50, 5, 150, 200),
           child: Padding(
             padding: const EdgeInsets.all(0.5),
             child: Column(
@@ -47,7 +48,9 @@ class _MatchNotStartedDetailsState extends State<MatchNotStartedDetails> {
                 Center(
                     child: Text(
                   widget.match.matchweekInfo(),
-                  style: TextStyle(fontSize: 13, color: Colors.grey[800]),
+                  style: TextStyle(
+                      fontSize: 13,
+                      color:darkModeNotifier.value?Colors.white: Colors.grey[800]),
                 )),
                 SizedBox(height: 5),
                 Row(
@@ -76,7 +79,14 @@ class _MatchNotStartedDetailsState extends State<MatchNotStartedDetails> {
     if (globalUser.controlTheseTeams(
         widget.match.homeTeam.name, widget.match.awayTeam.name)) {
       return TextButton(
-        child: Text("Εκκινηση Αγώνα"),
+        child: Text(
+            "Εκκινηση Αγώνα",
+            style: TextStyle(
+              fontFamily: "Arial",
+              fontSize: 15,
+
+            ),
+        ),
         onPressed: () {
           widget.match.matchStarted();
           setState(() {});
@@ -94,10 +104,19 @@ class _MatchNotStartedDetailsState extends State<MatchNotStartedDetails> {
       children: [
         //Sets the text for the date of the match
         Text('${widget.match.day}.${widget.match.month}.${widget.match.year}',
-            style: TextStyle(fontWeight: FontWeight.w400, fontSize: 14)),
+            style: TextStyle(
+                fontWeight: FontWeight.w400,
+                fontSize: 14,
+              color: darkModeNotifier.value?Colors.white:Colors.black
+            )
+        ),
         Text(
           widget.match.timeString,
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+          style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 20,
+              color: darkModeNotifier.value?Colors.white:Colors.black
+          ),
         ),
       ],
     );
@@ -155,8 +174,8 @@ class _NavigationButtonsState extends State<NavigationButtons> {
             text,
             style: TextStyle(
               fontSize: 16,
-              //fontFamily: 'Montserrat',
-              color: isSelected ? Colors.blue : Colors.black,
+              fontFamily: '"Arial"',
+              color: isSelected ? Colors.blue :darkModeNotifier.value?Colors.white: Colors.black,
               fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
             ),
           ),
@@ -224,7 +243,7 @@ class _buildTeamName extends State<buildTeamName> {
                     style: TextStyle(
                         fontSize: 10,
                         fontWeight: FontWeight.w500,
-                        color: Colors.black),
+                        color:darkModeNotifier.value?Colors.white: Colors.black),
                   ),
                 ],
               ),
@@ -273,7 +292,7 @@ class _buildAwayTeamName extends State<buildAwayTeamName> {
                   style: TextStyle(
                       fontSize: 17,
                       fontWeight: FontWeight.w600,
-                      color: Colors.black),
+                      color:darkModeNotifier.value?Colors.white: Colors.black),
                 )),
           ],
         ),

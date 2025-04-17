@@ -89,7 +89,7 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
         child: Column(
           children: [
             Container(
-              color: Color.fromARGB(50, 5, 150, 200),
+              color:darkModeNotifier.value? Colors.grey[900]: lightModeBackGround,
               child: Padding(
                 padding: const EdgeInsets.all(5.0),
                 child: Column(
@@ -113,7 +113,9 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
                     Center(
                         child: Text(
                       widget.match.matchweekInfo(),
-                      style: TextStyle(fontSize: 13, color: Colors.grey[800]),
+                      style: TextStyle(
+                          fontSize: 13,
+                          color: darkModeNotifier.value?Colors.white: Colors.grey[800]),
                     )),
                     SizedBox(
                       height: 10,
@@ -166,15 +168,19 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
   Widget _buildMatchFinishedScore() {
     Color homeColor, awayColor;
 
-    (widget.match.scoreHome > widget.match.scoreAway)
-        ? {homeColor = Colors.black, awayColor = Colors.grey}
+    (widget.match.scoreHome > widget.match.scoreAway) ? {homeColor = Colors.black, awayColor = Colors.grey}
         : (widget.match.scoreHome < widget.match.scoreAway)
             ? {homeColor = Colors.grey, awayColor = Colors.black}
             : {homeColor = Colors.blueGrey, awayColor = Colors.blueGrey};
 
     return Column(
       children: [
-        Text(widget.match.dateString),
+        Text(
+            widget.match.dateString,
+          style: TextStyle(
+              color: darkModeNotifier.value?Colors.white:Colors.black
+          ),
+        ),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -198,8 +204,9 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
           ],
         ),
         Text('Ολοκληρώθηκε',
-            style: const TextStyle(
-                fontWeight: FontWeight.w400, fontSize: 12, color: Colors.black))
+            style: TextStyle(
+                fontWeight: FontWeight.w400, fontSize: 12,
+                color: darkModeNotifier.value?Colors.white: Colors.black))
       ],
     );
   }
@@ -219,7 +226,9 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
             Text(
               "${matchDetails.scoreHome}-${matchDetails.scoreAway}",
               style: const TextStyle(
-                  fontWeight: FontWeight.bold, fontSize: 25, color: Colors.red),
+                  fontWeight: FontWeight.bold,
+                  fontSize: 25,
+                  color: Colors.red),
             ),
             // Ελέγχουμε αν είναι το ημίχρονο ή όχι
             !matchDetails.isHalfTime()
@@ -264,11 +273,10 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
           Text(
             " $halfο ημίχρονο ",
             style: TextStyle(
-                color: widget.match.hasMatchFinished
-                    ? Colors.black
-                    : Colors.redAccent),
+                color: widget.match.hasMatchFinished ?darkModeNotifier.value?Colors.white: Colors.black : Colors.redAccent),
           ),
           Container(
+
             height: 1,
             width: 100,
             color: widget.match.hasMatchFinished
@@ -456,7 +464,9 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
                 ),
                 Text(
                   "Γκολ",
-                  style: TextStyle(color: Colors.black, fontSize: 18),
+                  style: TextStyle(
+                      color:darkModeNotifier.value?Colors.grey[300]: Colors.black,
+                      fontSize: 18),
                 ),
                 SizedBox(
                   height: 10,
@@ -682,13 +692,17 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
             setState(() {});
           },
           child: Card(
+              color: Colors.grey[200],
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
-              elevation: 8,
+              elevation: 10,
               child: Text(
                 "Κάρτα",
-                style: TextStyle(color: Colors.black),
+                style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 15
+                ),
               )));
     } else {
       return SizedBox(

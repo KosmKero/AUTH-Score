@@ -118,7 +118,7 @@ class eachMatchContainerView extends StatelessWidget {
         },
         borderRadius: BorderRadius.circular(10),
         child: Card(
-          color: darkModeNotifier.value ? Colors.grey[800] : lightModeContainer,
+          color: darkModeNotifier.value ? Colors.grey[850] : lightModeContainer,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
           ),

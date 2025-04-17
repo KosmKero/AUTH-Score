@@ -35,6 +35,20 @@ class _TeamPlayersDisplayWidgetState extends State<TeamPlayersDisplayWidget> {
             playersCard(1, positionList(1)),
             playersCard(2, positionList(2)),
             playersCard(3, positionList(3)),
+            if((globalUser.controlTheseTeams(widget.team.name,null)))
+              Padding(
+                padding: EdgeInsets.only(top: 300,left: 10),
+                child: Text(
+                  greek? "*Για να διαγράψεις ένα παίκτη πάτα παρατεταμένα πάνω του.": "*To remove a player, long-press on their name.",
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: 'Arial',
+                    color: darkModeNotifier.value ? Colors.white : Colors.black
+                  ),
+                ),
+              ),
+            SizedBox(height: 20),
           ],
         ),
       ),
@@ -60,7 +74,7 @@ class _TeamPlayersDisplayWidgetState extends State<TeamPlayersDisplayWidget> {
         margin: EdgeInsets.symmetric(vertical: 5, horizontal: 8),
         decoration: ShapeDecoration(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          color: Color.fromARGB(20, 10, 20, 15),
+          color:darkModeNotifier.value? Color(0xFF121212):Colors.white,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -72,8 +86,8 @@ class _TeamPlayersDisplayWidgetState extends State<TeamPlayersDisplayWidget> {
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
-                  fontFamily: 'Montserrat',
-                  fontStyle: FontStyle.italic,
+                  fontFamily: 'Arial',
+                  color: darkModeNotifier.value?Colors.white:Colors.black
                 ),
               ),
             ),
@@ -84,12 +98,11 @@ class _TeamPlayersDisplayWidgetState extends State<TeamPlayersDisplayWidget> {
                     .map((player) => Column(
                   children: [
                     playerName(player),
-                    Divider(height: 10, thickness: 1, color: Colors.black45)
+                    Divider(height: 10, thickness: 1, color: darkModeNotifier.value?Colors.white:Colors.black)
                   ],
-                ))
-                    .toList(),
+                )).toList(),
               ),
-            ),
+            )
           ],
         ),
       ),
@@ -133,12 +146,25 @@ class _TeamPlayersDisplayWidgetState extends State<TeamPlayersDisplayWidget> {
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text("${player.name} ${player.surname}"),
+                Text(" ${player.name} ${player.surname}",
+                style: TextStyle(
+                  color:darkModeNotifier.value?Colors.white:Colors.black,
+                  fontFamily: "Arial",
+                  fontSize: 16.5
+                ),),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    Text("${player.number}", style: TextStyle(color: Colors.black45)),
-                    Text("   ${player.age} έτη", style: TextStyle(color: Colors.black45)),
+                    Text(" ${player.number}", style: TextStyle(color: darkModeNotifier.value?Colors.white:Colors.black,
+                      fontFamily: "Arial",
+                      fontSize: 15
+                      )
+                    ),
+                    Text("  ${player.age} έτη", style: TextStyle(color:darkModeNotifier.value?Colors.white:Colors.black,
+                      fontFamily: "Arial",
+                      fontSize: 15
+                      )
+                    ),
                   ],
                 ),
               ],
@@ -171,7 +197,7 @@ class _TeamPlayersDisplayWidgetState extends State<TeamPlayersDisplayWidget> {
       },
       icon: Icon(
         Icons.add,
-        color: Colors.black87,
+        color: darkModeNotifier.value?Colors.white:Colors.black,
       ),
     );
   }
@@ -236,27 +262,95 @@ class _AddPlayerScreenState extends State<AddPlayerScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Προσθήκη νέου παίκτη')),
+      backgroundColor: darkModeNotifier.value?Color(0xFF121212):Colors.white,
+      appBar: AppBar(
+        backgroundColor: darkModeNotifier.value?Color(0xFF121212):Colors.white,
+          iconTheme:IconThemeData(
+            color: darkModeNotifier.value ? Colors.white : Colors.black, // Set icon color
+          ),
+          title: Text(
+          'Προσθήκη νέου παίκτη',
+          style:
+            TextStyle(fontSize: 24,
+              fontWeight: FontWeight.w600,
+              fontFamily: 'Arial',
+              color:darkModeNotifier.value? Colors.white: Colors.black
+            ),
+        )
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
             TextField(
+              style: TextStyle(
+                color: darkModeNotifier.value?Colors.white:Colors.black,
+                fontSize: 14.5,
+                fontFamily: "Arial"
+              ),
               controller: _nameController,
-              decoration: InputDecoration(labelText: 'Όνομα'),
+              decoration: InputDecoration(
+                  labelText: 'Όνομα',
+                labelStyle: TextStyle(
+                  color: darkModeNotifier.value?Colors.white:Colors.black,
+                  fontSize: 16,
+                  fontFamily: "Arial"
+                )
+              ),
             ),
+            SizedBox(height: 20,),
             TextField(
+              style: TextStyle(
+                  color: darkModeNotifier.value?Colors.white:Colors.black,
+                  fontSize: 16,
+                  fontFamily: "Arial"
+              ),
               controller: _surnameController,
-              decoration: InputDecoration(labelText: 'Επώνυμο'),
+              decoration: InputDecoration(
+                  labelText: 'Επώνυμο',
+                  labelStyle: TextStyle(
+                      color: darkModeNotifier.value?Colors.white:Colors.black
+                  )
+              ),
             ),
-            SizedBox(height: 15),
+            SizedBox(height: 20),
             DropdownButtonFormField<String>(
               value: _selectedPosition,
-              decoration: InputDecoration(labelText: 'Θέση'),
+              dropdownColor: darkModeNotifier.value ? Colors.grey[850] : Colors.white,
+              style: TextStyle(
+                color: darkModeNotifier.value ? Colors.white : Colors.black,
+                fontSize: 16,
+                fontFamily: "Arial"
+              ),
+              decoration: InputDecoration(
+                  labelText: 'Θέση',
+                  labelStyle: TextStyle(
+                      color: darkModeNotifier.value?Colors.white:Colors.black,
+                    fontFamily: "Arial",
+                    fontSize: 20
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(
+                      color: darkModeNotifier.value ? Colors.white : Colors.black,
+                    ),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(
+                      color: darkModeNotifier.value ? Colors.white : Colors.black,
+                    ),
+                  ),
+              ),
               items: positions.map((position) {
                 return DropdownMenuItem<String>(
                   value: position,
-                  child: Text(position),
+                  child: Text(
+                      position,
+                    style: TextStyle(
+                        color: darkModeNotifier.value ? Colors.white : Colors.black,
+                        fontSize: 16,
+                        fontFamily: "Arial"
+                    ),
+                  ),
                 );
               }).toList(),
               onChanged: (value) {
@@ -265,22 +359,43 @@ class _AddPlayerScreenState extends State<AddPlayerScreen> {
                 });
               },
             ),
+            SizedBox(height: 20,),
             TextField(
               controller: _numberController,
               keyboardType: TextInputType.number,
               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-              decoration: InputDecoration(labelText: 'Αριθμός Φανέλας'),
+              decoration: InputDecoration(
+                  labelText: 'Αριθμός Φανέλας',
+                  labelStyle: TextStyle(
+                      color: darkModeNotifier.value?Colors.white:Colors.black,
+                    fontSize: 16
+                  )
+              ),
             ),
+            SizedBox(height: 20,),
             TextField(
               controller: _ageController,
               keyboardType: TextInputType.number,
               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-              decoration: InputDecoration(labelText: 'Ηλικία'),
+              decoration: InputDecoration(
+                  labelText: 'Ηλικία',
+                  labelStyle: TextStyle(
+                      color: darkModeNotifier.value?Colors.white:Colors.black,
+                    fontSize: 16,
+                    fontFamily: "Arial"
+                  )
+              ),
             ),
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: _savePlayer,
-              child: Text('Αποθήκευση'),
+              child: Text(
+                  'Αποθήκευση',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontFamily: "Arial"
+                  ),
+              ),
             ),
           ],
         ),

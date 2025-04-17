@@ -230,7 +230,7 @@ class _ProfilePageState extends State<ProfilePage> {
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
-                                color: isLoggedIn?Colors.red:Colors.white,
+                                color: isLoggedIn?Colors.red:darkModeOn?Colors.white:Colors.black,
                               ),
                             ),
                           ),

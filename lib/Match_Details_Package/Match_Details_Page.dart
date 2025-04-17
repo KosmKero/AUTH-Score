@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:untitled1/Match_Details_Package/Match_Not_Started/Match_Not_Started_Details_Page.dart';
 import 'package:untitled1/Match_Details_Package/Match_Started_Details_Page.dart';
 import '../Data_Classes/MatchDetails.dart';
+import '../globals.dart';
 
 class matchDetailsPage extends StatelessWidget {
   final MatchDetails match;
@@ -28,7 +29,11 @@ class _matchDetailsPageView extends StatelessWidget {
   Widget build(BuildContext context) {
     final match = Provider.of<MatchDetails>(context);
     return Scaffold(
-      appBar: AppBar(backgroundColor: Color.fromARGB(50, 5, 150, 200),),
+
+      appBar: AppBar(
+        backgroundColor:darkModeNotifier.value?Colors.grey[900]: Color.fromARGB(50, 5, 150, 200),
+        iconTheme: IconThemeData(color: darkModeNotifier.value?Colors.white:Colors.black),
+      ),
       body: matchProgress(match),
 
 

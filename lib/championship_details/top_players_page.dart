@@ -61,7 +61,8 @@ class _TopPlayersView extends State<TopPlayersPage> {
               return Column(
               children: [
               playerCard(widget.playersList[index], index),
-              Divider(thickness: 1, color: Colors.black),
+              Divider(thickness: 1,
+                  color: darkModeNotifier.value?Colors.white:Colors.black),
               ],
               );
               }))]),

@@ -26,7 +26,19 @@ class _AddMatchScreenState extends State<AddMatchScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Προσθήκη Ματς")),
+      backgroundColor: darkModeNotifier.value? Color(0xFF1E1E1E):Colors.white,
+      appBar: AppBar(
+        title: Text(
+            "Προσθήκη Ματς",
+            style: TextStyle(
+                color: darkModeNotifier.value?Colors.white:Colors.black,
+                fontSize: 22,
+                fontFamily: "Arial"
+            )
+        ),
+        backgroundColor: darkModeNotifier.value? Color(0xFF1E1E1E):Colors.white,
+        iconTheme: IconThemeData(color: darkModeNotifier.value?Colors.white:Colors.black),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(
@@ -34,7 +46,17 @@ class _AddMatchScreenState extends State<AddMatchScreen> {
           child: ListView(
             children: [
               DropdownButtonFormField<Team>(
-                decoration: InputDecoration(labelText: 'Γηπεδούχος Ομάδα'),
+                dropdownColor: darkModeNotifier.value?Colors.grey[900]:Colors.white,
+                style: TextStyle(
+                  color: darkModeNotifier.value?Colors.white:Colors.grey[900],
+                  fontFamily: "Arial"
+                ),
+                decoration: InputDecoration(
+                    labelText: 'Γηπεδούχος Ομάδα',
+                    labelStyle: TextStyle(
+                        color: darkModeNotifier.value?Colors.white:Colors.grey[800]
+                    )
+                ),
                 value: homeTeam,
                 items: teams.map((team) {
                   return DropdownMenuItem<Team>(
@@ -52,7 +74,16 @@ class _AddMatchScreenState extends State<AddMatchScreen> {
               SizedBox(height: 12),
 
               DropdownButtonFormField<Team>(
-                decoration: InputDecoration(labelText: 'Φιλοξενούμενη Ομάδα'),
+                dropdownColor: darkModeNotifier.value?Colors.grey[900]:Colors.white,
+                style: TextStyle(
+                  color:darkModeNotifier.value?Colors.white:Colors.grey[900]
+                ),
+                decoration: InputDecoration(
+                    labelText: 'Φιλοξενούμενη Ομάδα',
+                    labelStyle: TextStyle(
+                        color: darkModeNotifier.value?Colors.white:Colors.grey[800]
+                    )
+                ),
                 value: awayTeam,
                 items: teams.map((team) {
                   return DropdownMenuItem<Team>(
@@ -66,9 +97,17 @@ class _AddMatchScreenState extends State<AddMatchScreen> {
                   });
                 },
               ),
+              SizedBox(height: 20,),
               ListTile(
-                title: Text('Ώρα: ${matchTime != null ? matchTime!.format(context) : 'Επιλέξτε Ώρα'}'),
-                trailing: Icon(Icons.access_time),
+                title: Text('Ώρα: ${matchTime != null ? matchTime!.format(context) : 'Επιλέξτε Ώρα'}',
+                  style: TextStyle(
+                      color: darkModeNotifier.value?Colors.white:Colors.grey[900]
+                  ),
+                ),
+                trailing: Icon(
+                  Icons.access_time,
+                  color: darkModeNotifier.value?Colors.white:Colors.grey[900],
+                ),
                 onTap: () async {
                   final TimeOfDay? picked = await showTimePicker(
                     context: context,
@@ -85,7 +124,12 @@ class _AddMatchScreenState extends State<AddMatchScreen> {
                 children: [
                   Expanded(
                     child: TextFormField(
-                      decoration: InputDecoration(labelText: 'Ημέρα'),
+                      decoration: InputDecoration(
+                          labelText: 'Ημέρα',
+                          labelStyle: TextStyle(
+                              color: darkModeNotifier.value?Colors.white:Colors.grey[900]
+                          )
+                      ),
                       keyboardType: TextInputType.number,
                       onSaved: (value) => day = int.parse(value!),
                     ),
@@ -93,7 +137,12 @@ class _AddMatchScreenState extends State<AddMatchScreen> {
                   SizedBox(width: 8),
                   Expanded(
                     child: TextFormField(
-                      decoration: InputDecoration(labelText: 'Μήνας'),
+                      decoration: InputDecoration(
+                          labelText: 'Μήνας',
+                          labelStyle: TextStyle(
+                              color:darkModeNotifier.value?Colors.white:Colors.grey[900]
+                          )
+                      ),
                       keyboardType: TextInputType.number,
                       onSaved: (value) => month = int.parse(value!),
                     ),
@@ -101,7 +150,12 @@ class _AddMatchScreenState extends State<AddMatchScreen> {
                   SizedBox(width: 8),
                   Expanded(
                     child: TextFormField(
-                      decoration: InputDecoration(labelText: 'Έτος'),
+                      decoration: InputDecoration(
+                          labelText: 'Έτος',
+                          labelStyle: TextStyle(
+                              color:darkModeNotifier.value?Colors.white:Colors.grey[900]
+                          )
+                      ),
                       keyboardType: TextInputType.number,
                       onSaved: (value) => year = int.parse(value!),
                     ),
@@ -109,7 +163,12 @@ class _AddMatchScreenState extends State<AddMatchScreen> {
                 ],
               ),
               SwitchListTile(
-                title: Text("Φάση Ομίλων;"),
+                title: Text(
+                    "Φάση Ομίλων;",
+                  style: TextStyle(
+                    color:darkModeNotifier.value?Colors.white:Colors.grey[900]
+                  ),
+                ),
                 value: isGroupPhase,
                 onChanged: (value) {
                   setState(() {
@@ -118,7 +177,12 @@ class _AddMatchScreenState extends State<AddMatchScreen> {
                 },
               ),
               TextFormField(
-                decoration: InputDecoration(labelText: 'Αριθμός Αγωνιστικής'),
+                decoration: InputDecoration(
+                    labelText: 'Αριθμός Αγωνιστικής',
+                  labelStyle: TextStyle(
+                    color:darkModeNotifier.value?Colors.white:Colors.grey[900]
+                  )
+                ),
                 keyboardType: TextInputType.number,
                 onSaved: (value) => game = int.parse(value!),
               ),
@@ -142,7 +206,14 @@ class _AddMatchScreenState extends State<AddMatchScreen> {
 
 
                 },
-                child: Text('Προσθήκη Ματς'),
+                child: Text(
+                    'Προσθήκη Ματς',
+                    style: TextStyle(
+                      fontFamily: "Arial",
+                      fontSize: 17,
+
+                    ),
+                ),
               ),
             ],
           ),

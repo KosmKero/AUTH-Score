@@ -25,8 +25,8 @@ class DetailsMatchNotStarted extends StatelessWidget {
                 style: TextStyle(
                     fontSize: 19,
                     fontWeight: FontWeight.bold,
-                    fontFamily: 'Montserrat',
-                    fontStyle: FontStyle.italic
+                    fontFamily: 'Arial',
+                    color: darkModeNotifier.value?Colors.white:Colors.black
                 ),
               ),
             ),
@@ -39,6 +39,7 @@ class DetailsMatchNotStarted extends StatelessWidget {
               greek?'Αποτελέσματα τελευταίων 5 αγωνιστικών:':"Result of the last 5 games:",
               style: TextStyle(
                 fontSize: 18,
+                fontFamily: "Arial", color: darkModeNotifier.value?Colors.white:Colors.black
               ),
             ),
             SizedBox(
@@ -121,7 +122,7 @@ class TeamFormWidget extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 17,
                         fontWeight: FontWeight.w600,
-                        color: Colors.black,
+                        color: darkModeNotifier.value?Colors.white:Colors.black,
                         letterSpacing: 1.5,
                       ),
                     ),
