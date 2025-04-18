@@ -42,6 +42,24 @@ class _MatchEditPageState extends State<MatchEditPage> {
   }
 
   Future<void> _saveMatch() async {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+
+    if (_gameController.text.trim().isEmpty) {
+      _showSnackBar("Συμπλήρωσε το πεδίο 'Παιχνίδι'");
+      return;
+    }
+
+    if (_selectedHomeTeam == _selectedAwayTeam) {
+      _showSnackBar("Οι ομάδες πρέπει να είναι διαφορετικές");
+      return;
+    }
+
+    if (_selectedDate.isBefore(today)) {
+      _showSnackBar("Η ημερομηνία δεν μπορεί να είναι παλαιότερη από σήμερα");
+      return;
+    }
+
     int formattedTime = _selectedTime.hour * 100 + _selectedTime.minute;
 
     if (!widget.match.hasMatchStarted) {
@@ -52,19 +70,19 @@ class _MatchEditPageState extends State<MatchEditPage> {
         await TeamsHandle().deleteMatch(widget.match);
 
         await TeamsHandle().addMatch(
-            _selectedHomeTeam,
-            _selectedAwayTeam,
-            _selectedDate.day,
-            _selectedDate.month,
-            _selectedDate.year,
-            int.parse(_gameController.text),
-            false,
-            _isGroupPhase,
-            formattedTime,
-            "upcoming",
-            0,
-            0);
-
+          _selectedHomeTeam,
+          _selectedAwayTeam,
+          _selectedDate.day,
+          _selectedDate.month,
+          _selectedDate.year,
+          int.tryParse(_gameController.text) ?? 0,
+          false,
+          _isGroupPhase,
+          formattedTime,
+          "upcoming",
+          0,
+          0,
+        );
 
         WidgetsBinding.instance.addPostFrameCallback((_) {
           navigatorKey.currentState?.pushReplacementNamed('/home');
@@ -72,14 +90,36 @@ class _MatchEditPageState extends State<MatchEditPage> {
       }
     }
 
-    // Εδώ βάζεις την αποθήκευση ή αποστολή στο backend
     Navigator.pop(context);
   }
+
+  void _showSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.redAccent,
+      ),
+    );
+  }
+
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Επεξεργασία Αγώνα')),
+      backgroundColor: darkModeNotifier.value? Color(0xFF121212) : Colors.white,
+      appBar: AppBar(
+          title:  Text(
+              'Επεξεργασία Αγώνα',
+              style: TextStyle(
+                color: darkModeNotifier.value? Colors.white: Colors.black,
+                fontFamily: "Arial"
+              ),
+          ),
+        iconTheme: IconThemeData(
+          color: darkModeNotifier.value? Colors.white : Colors.black
+        ),
+        backgroundColor: darkModeNotifier.value? Color(0xFF121212) : Colors.white,
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: ListView(
@@ -88,12 +128,40 @@ class _MatchEditPageState extends State<MatchEditPage> {
               selectedItem: _selectedHomeTeam,
               items: teams,
               itemAsString: (Team t) => t.name,
-              popupProps: const PopupProps.menu(
+              popupProps: PopupProps.menu(
                 showSearchBox: true,
+                searchFieldProps: TextFieldProps(
+                  style: TextStyle(
+                    color: darkModeNotifier.value ? Colors.white : Colors.black,
+                  ),
+                  decoration: InputDecoration(
+                    labelText: "Αναζήτηση",
+                    labelStyle: TextStyle(
+                    ),
+                  ),
+                ),
               ),
-              dropdownDecoratorProps: const DropDownDecoratorProps(
+              dropdownDecoratorProps: DropDownDecoratorProps(
                 dropdownSearchDecoration: InputDecoration(
                   labelText: "Ομάδα Εντός",
+                  labelStyle: TextStyle(
+                    color: darkModeNotifier.value ? Colors.white : Colors.black,
+                    fontSize: 20
+                  ),
+                  enabledBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(
+                      color: darkModeNotifier.value ? Colors.white : Colors.black,
+                    ),
+                  ),
+                  focusedBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(
+                      color: darkModeNotifier.value ? Colors.white : Colors.black,
+                    ),
+                  ),
+                ),
+                baseStyle: TextStyle(
+                  color: darkModeNotifier.value ? Colors.white : Colors.black,
+                  fontSize: 16,
                 ),
               ),
               onChanged: (Team? value) {
@@ -109,12 +177,41 @@ class _MatchEditPageState extends State<MatchEditPage> {
               selectedItem: _selectedAwayTeam,
               items: teams,
               itemAsString: (Team t) => t.name,
-              popupProps: const PopupProps.menu(
+              popupProps: PopupProps.menu(
                 showSearchBox: true,
+                searchFieldProps: TextFieldProps(
+                  style: TextStyle(
+                    color: darkModeNotifier.value ? Colors.white : Colors.black,
+                  ),
+                  decoration: InputDecoration(
+                    labelText: "Αναζήτηση",
+                    labelStyle: TextStyle(
+
+                    ),
+                  ),
+                ),
               ),
-              dropdownDecoratorProps: const DropDownDecoratorProps(
+              dropdownDecoratorProps: DropDownDecoratorProps(
                 dropdownSearchDecoration: InputDecoration(
                   labelText: "Ομάδα Εκτός",
+                  labelStyle: TextStyle(
+                    color: darkModeNotifier.value ? Colors.white : Colors.black,
+                    fontSize: 20
+                  ),
+                  enabledBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(
+                      color: darkModeNotifier.value ? Colors.white : Colors.black,
+                    ),
+                  ),
+                  focusedBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(
+                      color: darkModeNotifier.value ? Colors.white : Colors.black,
+                    ),
+                  ),
+                ),
+                baseStyle: TextStyle(
+                  color: darkModeNotifier.value ? Colors.white : Colors.black,
+                  fontSize: 16,
                 ),
               ),
               onChanged: (Team? value) {
@@ -128,17 +225,38 @@ class _MatchEditPageState extends State<MatchEditPage> {
             const SizedBox(height: 16),
             ListTile(
               title: Text(
-                  'Ημερομηνία: ${_selectedDate.toLocal().toString().split(' ')[0]}'),
-              trailing: const Icon(Icons.calendar_today),
+                  'Ημερομηνία: ${_selectedDate.toLocal().toString().split(' ')[0]}',
+                style: TextStyle(
+                  color: darkModeNotifier.value? Colors.white: Colors.black,
+                  fontSize: 18
+                ),
+              ),
+              trailing:  Icon(
+                  Icons.calendar_today,
+                  color: darkModeNotifier.value? Colors.white: Colors.black,
+              ),
               onTap: _pickDate,
             ),
             ListTile(
-              title: Text('Ώρα: ${_selectedTime.format(context)}'),
-              trailing: const Icon(Icons.access_time),
+              title: Text('Ώρα: ${_selectedTime.format(context)}',
+                style: TextStyle(
+                    color: darkModeNotifier.value? Colors.white: Colors.black,
+                    fontSize: 18
+                ),
+              ),
+              trailing:  Icon(
+                  Icons.access_time,
+                color: darkModeNotifier.value? Colors.white: Colors.black,
+              ),
               onTap: _pickTime,
             ),
             SwitchListTile(
-              title: const Text('Φάση Ομίλων'),
+              title:  Text('Φάση Ομίλων',
+                style: TextStyle(
+                    color: darkModeNotifier.value? Colors.white: Colors.black,
+                    fontSize: 18
+                ),
+              ),
               value: _isGroupPhase,
               onChanged: (value) {
                 setState(() => _isGroupPhase = value);
@@ -147,12 +265,27 @@ class _MatchEditPageState extends State<MatchEditPage> {
             const SizedBox(height: 16),
             TextField(
               controller: _gameController,
-              decoration: const InputDecoration(labelText: 'Παιχνίδι'),
+              decoration:  InputDecoration(labelText: 'Παιχνίδι',
+                  labelStyle: TextStyle(
+                      color: darkModeNotifier.value? Colors.white: Colors.black,
+                      fontSize: 20
+                  )
+              ),
+              style: TextStyle(
+                color: darkModeNotifier.value? Colors.white: Colors.black,
+                fontSize: 16,
+              ),
             ),
-            const SizedBox(height: 20),
+             SizedBox(height: 30),
             ElevatedButton(
               onPressed: _saveMatch,
-              child: const Text('Αποθήκευση'),
+              child:  Text('Αποθήκευση',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontFamily: "Arial"
+
+                )
+              ),
             ),
           ],
         ),

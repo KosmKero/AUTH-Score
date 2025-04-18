@@ -53,7 +53,7 @@ class _HomePageState extends State<HomePage> {
                         ));
                   },
                   child: Text(
-                    "Προσθήκη Αγώνα",
+                    greek?"Προσθήκη Αγώνα":"Add new match",
                     style: TextStyle(
                       color: darkModeNotifier.value ? Colors.white : Colors.white,
                       fontFamily: 'Arial',
@@ -82,7 +82,7 @@ class _HomePageState extends State<HomePage> {
                       color: darkModeNotifier.value ? Colors.white : Colors.white,
                       size: 19,),
                     Text(
-                      "Προηγούμενοι αγώνες",
+                      greek?"Προηγούμενοι αγώνες":"Previous matches",
                       style: TextStyle(
                           color: darkModeNotifier.value ? Colors.white : Colors.white,
                           fontSize: 17,
@@ -97,7 +97,7 @@ class _HomePageState extends State<HomePage> {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     Text(
-                      "Επερχόμενοι αγώνες",
+                      greek?"Επερχόμενοι αγώνες":"Upcoming matches",
                       style: TextStyle(
                           color: darkModeNotifier.value ? Colors.white : Colors.white,
                           fontSize: 17,
