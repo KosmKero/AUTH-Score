@@ -157,7 +157,7 @@ class TeamFormWidget extends StatelessWidget {
         break;
       case "D":
         icon = Icons.remove_circle;
-        color = Colors.grey;
+        color = Colors.orange;
         break;
       case "L":
         icon = Icons.cancel;

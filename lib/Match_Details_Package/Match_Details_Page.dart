@@ -31,7 +31,7 @@ class _matchDetailsPageView extends StatelessWidget {
   Widget build(BuildContext context) {
     final match = Provider.of<MatchDetails>(context);
     return Scaffold(
-      backgroundColor: darkModeNotifier.value ? Color.fromARGB(255,40, 40, 40) : Colors.white,
+      backgroundColor: darkModeNotifier.value ? Color.fromARGB(255, 30, 30, 30) : Colors.white,
       appBar: AppBar(
         backgroundColor:darkModeNotifier.value?Colors.grey[900]: Color.fromARGB(50, 5, 150, 200),
         iconTheme: IconThemeData(color: darkModeNotifier.value?Colors.white:Colors.black),

@@ -95,7 +95,9 @@ class _BettingChooserState extends State<BettingChooser> {
                   value: '1',
                   label: Text(
                     hasChosen && percentages.isNotEmpty ? percentages[0].toStringAsFixed(2) : "1",
-                    style: TextStyle(fontSize: 15),
+                    style: TextStyle(
+                        fontSize: 15,
+                    ),
                     textAlign: TextAlign.center,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -135,9 +137,6 @@ class _BettingChooserState extends State<BettingChooser> {
                 _updateCount(newSelection.first);
               },
             )
-
-
-
 
           ),
           SizedBox(height: 10),

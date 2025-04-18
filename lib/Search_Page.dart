@@ -29,15 +29,22 @@ class _SearchPageState extends State<SearchPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: darkModeNotifier.value? Color(0xFF121212):  lightModeBackGround,
       appBar: AppBar(
+        backgroundColor: darkModeNotifier.value? Color(0xFF121212):  lightModeBackGround,
+        iconTheme: IconThemeData(
+          color: darkModeNotifier.value? Colors.white: Colors.black,
+        ),
         title: TextField(
           controller: _searchController,
           decoration: InputDecoration(
             hintText: 'Search...',
             border: InputBorder.none,
-            hintStyle: TextStyle(color: Colors.black),
+            hintStyle: TextStyle(
+                color:darkModeNotifier.value?Colors.white: Colors.black,
+            ),
           ),
-          style: TextStyle(color: Colors.black),
+          style: TextStyle(color: darkModeNotifier.value? Colors.white: Colors.black),
           onChanged: (text) {
             setState(() {}); // Rerender to pass updated text
           },
@@ -88,8 +95,9 @@ class _SearchPageState extends State<SearchPage> {
             text,
             style: TextStyle(
               fontSize: 16,
-              color: isSelected ? Colors.blue : Colors.black,
+              color: isSelected ? Colors.blue :darkModeNotifier.value? Colors.white: Colors.black,
               fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+              fontFamily: "Arial"
             ),
           ),
           SizedBox(height: 4), // Απόσταση μεταξύ κειμένου και γραμμής
@@ -336,7 +344,14 @@ class _searchDetailsState extends State<searchDetails> {
         itemBuilder: (context, index) {
           if (widget.selectedIndex == 0) {
             return ListTile(
-              title: Text(teamSearchList[index].name),
+              title: Text(
+                  teamSearchList[index].name,
+                style: TextStyle(
+                  color:darkModeNotifier.value? Colors.white: Colors.black,
+                    fontFamily: "Arial",
+                  fontWeight: FontWeight.w600
+                ),
+              ),
               onTap: () {
                 Navigator.push(
                   context,
@@ -346,12 +361,18 @@ class _searchDetailsState extends State<searchDetails> {
             );
           } else if (widget.selectedIndex == 1) {
             return Card(
-              color: Colors.white10,
+              color: Color(0xFF121212),
               child: eachMatchContainer(matchSearchList[index]),
             );
           } else {
             return ListTile(
-              title: Text(playerSearchList[index].name),
+              title: Text(
+                  playerSearchList[index].name,
+                  style: TextStyle(
+                    color: darkModeNotifier.value? Colors.white: Colors.black,
+                    fontFamily: "Arial"
+                  ),
+              ),
             );
           }
         },

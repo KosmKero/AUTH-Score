@@ -59,6 +59,11 @@ class _FavoriteContainerState extends State<FavoritePage> {
                   value: team,
                   child: Text(
                       team.name,
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontFamily: "Arial",
+                        fontWeight: FontWeight.w600,
+                      ),
                   ),
                 );
               }).toList(),

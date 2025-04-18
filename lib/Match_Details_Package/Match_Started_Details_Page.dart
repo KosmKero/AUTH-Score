@@ -167,46 +167,49 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
   Widget _buildMatchFinishedScore() {
     Color homeColor, awayColor;
 
-    (widget.match.scoreHome > widget.match.scoreAway) ? {homeColor = Colors.black, awayColor = Colors.grey}
+    (widget.match.scoreHome > widget.match.scoreAway) ? {homeColor = darkModeNotifier.value ? Colors.white : Colors.black, awayColor = Colors.grey}
         : (widget.match.scoreHome < widget.match.scoreAway)
-            ? {homeColor = Colors.grey, awayColor = Colors.black}
+            ? {homeColor = Colors.grey, awayColor = darkModeNotifier.value ? Colors.white : Colors.black}
             : {homeColor = Colors.blueGrey, awayColor = Colors.blueGrey};
 
-    return Column(
-      children: [
-        Text(
-            widget.match.dateString,
-          style: TextStyle(
-              color: darkModeNotifier.value?Colors.white:Colors.black
-          ),
-        ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text("${widget.match.scoreHome}",
-                style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 25,
-                    color: homeColor)),
-            Text("-",
-                style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 25,
-                    color: (widget.match.scoreHome != widget.match.scoreAway)
-                        ? Colors.grey
-                        : Colors.blueGrey)),
-            Text("${widget.match.scoreAway}",
-                style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 25,
-                    color: awayColor)),
-          ],
-        ),
-        Text('Ολοκληρώθηκε',
+    return Container(
+      color: darkModeNotifier.value ? Color(0xFF121212) : Colors.white,
+      child: Column(
+        children: [
+          Text(
+              widget.match.dateString,
             style: TextStyle(
-                fontWeight: FontWeight.w400, fontSize: 12,
-                color: darkModeNotifier.value?Colors.white: Colors.black))
-      ],
+                color: darkModeNotifier.value?Colors.white:Colors.black
+            ),
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text("${widget.match.scoreHome}",
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 25,
+                      color: homeColor)),
+              Text("-",
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 25,
+                      color: (widget.match.scoreHome != widget.match.scoreAway)
+                          ? Colors.grey
+                          : Colors.blueGrey)),
+              Text("${widget.match.scoreAway}",
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 25,
+                      color: awayColor)),
+            ],
+          ),
+          Text('Ολοκληρώθηκε',
+              style: TextStyle(
+                  fontWeight: FontWeight.w400, fontSize: 12,
+                  color: darkModeNotifier.value?Colors.white: Colors.black))
+        ],
+      ),
     );
   }
 
@@ -334,12 +337,18 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
                     ? Text(
                         '${goal.timeString} \u0301 ⚽ ${goal.scorerName} (${goal.homeScore}-${goal.awayScore})',
                         style: TextStyle(
-                            fontSize: 15, fontWeight: FontWeight.w600),
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            color: darkModeNotifier.value?Colors.grey[300]: Colors.black
+                        ),
                       )
                     : Text(
                         '(${goal.homeScore}-${goal.awayScore}) ${goal.scorerName} ⚽ ${goal.timeString} \u0301 ',
                         style: TextStyle(
-                            fontSize: 15, fontWeight: FontWeight.w600),
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            color: darkModeNotifier.value?Colors.grey[300]: Colors.black
+                        ),
                       ),
               ),
             ),

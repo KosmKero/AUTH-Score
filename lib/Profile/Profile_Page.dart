@@ -432,7 +432,7 @@ class _ProfilePageState extends State<ProfilePage> {
                             ),
                             SizedBox(width: 10),
                             Text(
-                              "adamo@csd.auth.gr",
+                              "authscore@gmail.com",
                               style: TextStyle(
                                 color: darkModeOn ? Colors.white70 : Colors.black87,
                                 fontSize: 16,
@@ -441,7 +441,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           ],
                         ),
                         SizedBox(height: 15),
-                        Row(
+                        /*Row(
                           children: [
                             Icon(
                               Icons.email,
@@ -457,6 +457,8 @@ class _ProfilePageState extends State<ProfilePage> {
                             ),
                           ],
                         ),
+
+                         */
                       ],
                     ),
                   ),

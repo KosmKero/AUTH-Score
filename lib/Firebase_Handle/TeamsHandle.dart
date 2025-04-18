@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:untitled1/Data_Classes/MatchDetails.dart';
 
 import '../Data_Classes/Player.dart';
@@ -111,40 +112,47 @@ class TeamsHandle {
 
 
   Future<void> addMatch(Team home, Team away, int day, int month, int year, int game, bool hasStarted, bool isGroupPhase, int time, String type,int goalHome,int goalAway) async {
-    try {
+    try
+    {
       final hour = time ~/ 100;
       final minute = time % 100;
 
       final dateTime = DateTime(year, month, day, hour, minute);
       final timestamp = Timestamp.fromDate(dateTime);
 
-      await FirebaseFirestore.instance
-          .collection('matches')
-          .doc(home.nameEnglish+day.toString()+month.toString()+year.toString()+game.toString()+away.nameEnglish) // Improved unique ID
-          .set({
-        'Awayteam': away.name,
-        'Hometeam': home.name,
-        'Day': day,
-        'Month': month,
-        'Year': year,
-        'Game': game,
-        'HasMatchStarted': hasStarted,
-        'IsGroupPhase': isGroupPhase,
-        'Time': time,
-        'Type': type,
-        'GoalHome': goalHome,
-        'GoalAway': goalAway,
-        "hasMatchFinished": false ,
-        "hasSecondHalfStarted": false,
-        "hasFirstHalfFinished":false,
-        'startTime': timestamp,
+
+      if(day==0 || month==0 || year==0 || game==0 )
+
+        await FirebaseFirestore.instance
+            .collection('matches')
+            .doc(home.nameEnglish+day.toString()+month.toString()+year.toString()+game.toString()+away.nameEnglish) // Improved unique ID
+            .set({
+          'Awayteam': away.name,
+          'Hometeam': home.name,
+          'Day': day,
+          'Month': month,
+          'Year': year,
+          'Game': game,
+          'HasMatchStarted': hasStarted,
+          'IsGroupPhase': isGroupPhase,
+          'Time': time,
+          'Type': type,
+          'GoalHome': goalHome,
+          'GoalAway': goalAway,
+          "hasMatchFinished": false ,
+          "hasSecondHalfStarted": false,
+          "hasFirstHalfFinished":false,
+          'startTime': timestamp,
           "notified":false
-      });
+        });
       navigatorKey.currentState?.pushReplacementNamed('/home');
-    } catch (e) {
+    }
+    catch (e)
+    {
       print("❌ Error adding match: $e");
     }
   }
+
 
   Future<void> deleteMatch(MatchDetails match) async {
     try {

@@ -28,7 +28,7 @@ class _AddMatchScreenState extends State<AddMatchScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor:
-          darkModeNotifier.value ? Color(0xFF1E1E1E) : Colors.white,
+      darkModeNotifier.value ? Color(0xFF1E1E1E) : Colors.white,
       appBar: AppBar(
         title: Text("Προσθήκη Ματς",
             style: TextStyle(
@@ -36,7 +36,7 @@ class _AddMatchScreenState extends State<AddMatchScreen> {
                 fontSize: 22,
                 fontFamily: "Arial")),
         backgroundColor:
-            darkModeNotifier.value ? Color(0xFF1E1E1E) : Colors.white,
+        darkModeNotifier.value ? Color(0xFF1E1E1E) : Colors.white,
         iconTheme: IconThemeData(
             color: darkModeNotifier.value ? Colors.white : Colors.black),
       ),
@@ -96,58 +96,58 @@ class _AddMatchScreenState extends State<AddMatchScreen> {
               SizedBox(height: 12),
 
 
-        DropdownSearch<Team>(
-        popupProps: PopupProps.menu(
-          showSearchBox: true,  // Enable search box for filtering teams
-          menuProps: MenuProps(
-            backgroundColor: darkModeNotifier.value ? Colors.grey[900] : Colors.white,
-          ),
-          searchFieldProps: TextFieldProps(
-            style: TextStyle(
-              color: darkModeNotifier.value ? Colors.white : Colors.black,  // Ρύθμιση του χρώματος του κειμένου του search box
-            ),
-          ),
-          itemBuilder: (context, Team item, isSelected) {
-            return ListTile(
-              title: Text(
-                item.name,
-                style: TextStyle(
-                  color: darkModeNotifier.value ? Colors.white : Colors.grey[900],  // Set text color based on dark mode
+              DropdownSearch<Team>(
+                popupProps: PopupProps.menu(
+                  showSearchBox: true,  // Enable search box for filtering teams
+                  menuProps: MenuProps(
+                    backgroundColor: darkModeNotifier.value ? Colors.grey[900] : Colors.white,
+                  ),
+                  searchFieldProps: TextFieldProps(
+                    style: TextStyle(
+                      color: darkModeNotifier.value ? Colors.white : Colors.black,  // Ρύθμιση του χρώματος του κειμένου του search box
+                    ),
+                  ),
+                  itemBuilder: (context, Team item, isSelected) {
+                    return ListTile(
+                      title: Text(
+                        item.name,
+                        style: TextStyle(
+                          color: darkModeNotifier.value ? Colors.white : Colors.grey[900],  // Set text color based on dark mode
+                        ),
+                      ),
+                    );
+                  },
                 ),
+                itemAsString: (Team team) => team.name,  // Display the team name in the dropdown list
+                dropdownDecoratorProps: DropDownDecoratorProps(
+                  dropdownSearchDecoration: InputDecoration(
+                    labelText: 'Φιλοξενούμενη Ομάδα',
+                    labelStyle: TextStyle(
+                      color: darkModeNotifier.value ? Colors.white : Colors.grey[800],  // Set label color based on dark mode
+                    ),
+
+                  ),
+                ),
+                selectedItem: awayTeam,
+                items: teams,
+                onChanged: (Team? value) {
+                  setState(() {
+                    awayTeam = value!;
+                  });
+                },
+                dropdownBuilder: (context, selectedItem) {
+                  return Text(
+                    selectedItem != null ? selectedItem.name : 'Επιλέξτε Ομάδα',
+                    style: TextStyle(
+                      color: darkModeNotifier.value ? Colors.white : Colors.grey[900],  // Set text color based on dark mode
+                    ),
+                  );
+                },
+
+
               ),
-            );
-          },
-        ),
-        itemAsString: (Team team) => team.name,  // Display the team name in the dropdown list
-        dropdownDecoratorProps: DropDownDecoratorProps(
-          dropdownSearchDecoration: InputDecoration(
-            labelText: 'Φιλοξενούμενη Ομάδα',
-            labelStyle: TextStyle(
-              color: darkModeNotifier.value ? Colors.white : Colors.grey[800],  // Set label color based on dark mode
-            ),
 
-          ),
-        ),
-        selectedItem: awayTeam,
-        items: teams,
-        onChanged: (Team? value) {
-          setState(() {
-            awayTeam = value!;
-          });
-        },
-        dropdownBuilder: (context, selectedItem) {
-          return Text(
-            selectedItem != null ? selectedItem.name : 'Επιλέξτε Ομάδα',
-            style: TextStyle(
-              color: darkModeNotifier.value ? Colors.white : Colors.grey[900],  // Set text color based on dark mode
-            ),
-          );
-        },
-
-
-      ),
-
-      SizedBox(
+              SizedBox(
                 height: 20,
               ),
               ListTile(
@@ -161,7 +161,7 @@ class _AddMatchScreenState extends State<AddMatchScreen> {
                 trailing: Icon(
                   Icons.access_time,
                   color:
-                      darkModeNotifier.value ? Colors.white : Colors.grey[900],
+                  darkModeNotifier.value ? Colors.white : Colors.grey[900],
                 ),
                 onTap: () async {
                   final TimeOfDay? picked = await showTimePicker(
@@ -188,7 +188,7 @@ class _AddMatchScreenState extends State<AddMatchScreen> {
                       keyboardType: TextInputType.number,
                       onSaved: (value) => day = int.parse(value!),
                       style: TextStyle(color:  darkModeNotifier.value
-                      ? Colors.white
+                          ? Colors.white
                           : Colors.grey[900]),
                     ),
                   ),
@@ -251,11 +251,12 @@ class _AddMatchScreenState extends State<AddMatchScreen> {
                 keyboardType: TextInputType.number,
                 onSaved: (value) => game = int.parse(value!),
               ),
-              SizedBox(height: 20),
+              SizedBox(height: 30),
               ElevatedButton(
                 onPressed: () {
                   _formKey.currentState?.save();
 
+                  // Check for empty fields
                   if (globalUser.controlTheseTeams(
                       homeTeam!.name, awayTeam!.name)) {
                     TeamsHandle().addMatch(
@@ -274,7 +275,9 @@ class _AddMatchScreenState extends State<AddMatchScreen> {
                     ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text("Το ματς προστέθηκε!")));
                     Navigator.pop(context);
-                  } else {
+                  }
+                  else
+                  {
                     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                         content: Text(
                             "Πρέπει να είσαι διαχειριστής τουλάχιστον της μίας ομάδας")));
