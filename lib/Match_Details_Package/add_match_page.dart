@@ -276,7 +276,7 @@ class _AddMatchScreenState extends State<AddMatchScreen> {
                   });
                 },
               ),
-              TextFormField(
+              if (!isGroupPhase) TextFormField(
                 decoration: InputDecoration(
                     labelText: 'Αριθμός Αγωνιστικής',
                     labelStyle: TextStyle(
@@ -290,7 +290,8 @@ class _AddMatchScreenState extends State<AddMatchScreen> {
                   }
                   try {
                     int.parse(value);
-                  } catch (e) {
+                  }
+                  catch (e) {
                     return 'Παρακαλώ εισάγετε έγκυρο αριθμό';
                   }
                   return null;
@@ -303,59 +304,42 @@ class _AddMatchScreenState extends State<AddMatchScreen> {
                   if (_formKey.currentState!.validate()) {
                     _formKey.currentState?.save();
 
-                    // Validate date combination
-                    bool isValidDate = true;
-                    String errorMessage = '';
-
-                    // Check for valid days in each month
-                    if (month == 2) { // February
-                      bool isLeapYear = (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0);
-                      if (isLeapYear && day > 29) {
-                        isValidDate = false;
-                        errorMessage = 'Ο Φεβρουάριος έχει 29 ημέρες σε δίσεκτο έτος';
-                      } else if (!isLeapYear && day > 28) {
-                        isValidDate = false;
-                        errorMessage = 'Ο Φεβρουάριος έχει 28 ημέρες';
-                      }
-                    } else if ([4, 6, 9, 11].contains(month) && day > 30) { // April, June, September, November
-                      isValidDate = false;
-                      errorMessage = 'Αυτός ο μήνας έχει 30 ημέρες';
-                    }
-
-                    if (!isValidDate) {
+                    if (homeTeam == null || awayTeam == null) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(errorMessage)));
-                      return;
-                    }
-
-                    // Check for empty fields
-                    if (homeTeam == null || awayTeam == null || matchTime == null) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content:
-                          Text("Παρακαλώ συμπληρώστε όλα τα πεδία"),
-                            backgroundColor: Colors.red,
-                          )
+                        SnackBar(
+                          content: Text("Παρακαλώ επιλέξτε και τις δύο ομάδες!"),
+                          backgroundColor: Colors.red,
+                        )
                       );
                       return;
                     }
 
+                    if (matchTime == null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text("Παρακαλώ επιλέξτε ώρα!"),
+                          backgroundColor: Colors.red,
+                        )
+                      );
+                      return;
+                    }
 
+                    /*
                     DateTime currentDate = DateTime.now();
-                    DateTime matchDate = DateTime(year, month, day,);
-                    if(matchDate.isBefore(currentDate))
-                      {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content:
-                            Text("Δεν γίνεται να βάλεις παρελθοντική ημερομηνία!"),
-                              backgroundColor: Colors.red,
-                            )
-                        );
-                        return;
-                      }
+                    DateTime matchDate = DateTime(year, month, day);
+                    if (matchDate.isBefore(currentDate)) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text("Δεν γίνεται να βάλεις παρελθοντική ημερομηνία!"),
+                          backgroundColor: Colors.red,
+                        )
+                      );
+                      return;
+                    }
 
+                     */
 
-                    if (globalUser.controlTheseTeams(
-                        homeTeam!.name, awayTeam!.name)) {
+                    if (globalUser.controlTheseTeams(homeTeam!.name, awayTeam!.name)) {
                       TeamsHandle().addMatch(
                           homeTeam!,
                           awayTeam!,
@@ -376,12 +360,6 @@ class _AddMatchScreenState extends State<AddMatchScreen> {
                       });
 
                       Navigator.pop(context);
-                    }
-                    else
-                    {
-                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                          content: Text(
-                              "Πρέπει να είσαι διαχειριστής τουλάχιστον της μίας ομάδας")));
                     }
                   }
                 },

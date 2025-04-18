@@ -38,7 +38,7 @@ class _SearchPageState extends State<SearchPage> {
         title: TextField(
           controller: _searchController,
           decoration: InputDecoration(
-            hintText: 'Search...',
+            hintText: greek?"Αναζήτηση":'Search...',
             border: InputBorder.none,
             hintStyle: TextStyle(
                 color:darkModeNotifier.value?Colors.white: Colors.black,
@@ -59,9 +59,9 @@ class _SearchPageState extends State<SearchPage> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                _buildTextButton("Ομάδα", 0),
-                _buildTextButton("Αγώνας", 1),
-                _buildTextButton("Παίχτης", 2),
+                _buildTextButton(greek?"Ομάδα":"Team", 0),
+                _buildTextButton(greek?"Αγώνας":"Match", 1),
+                _buildTextButton(greek?"Παίχτης":"Player", 2),
               ],
             ),
           ),

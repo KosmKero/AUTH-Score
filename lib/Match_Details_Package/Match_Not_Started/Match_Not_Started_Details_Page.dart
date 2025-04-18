@@ -78,7 +78,7 @@ class _MatchNotStartedDetailsState extends State<MatchNotStartedDetails> {
         widget.match.homeTeam.name, widget.match.awayTeam.name)) {
       return TextButton(
         child: Text(
-            "Εκκινηση Αγώνα",
+            greek?"Εκκίνηση Αγώνα":"Start match",
             style: TextStyle(
               fontFamily: "Arial",
               fontSize: 15,

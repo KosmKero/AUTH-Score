@@ -504,9 +504,8 @@ class MatchDetails extends ChangeNotifier {
 
   String matchweekInfo() {
     String info;
-    _isGroupPhase
-        ? info = "Φάση ομίλων: Αγωνιστική $_game"
-        : info = "Φάση των $_game: Νοκ Άουτ";
+    _isGroupPhase ?greek?info = "Φάση ομίλων":info = "Group Stage"
+        :greek? info = "Φάση των $_game: Νοκ Άουτ":info = "Stage $_game: Round of 16";
     return info;
   }
 
