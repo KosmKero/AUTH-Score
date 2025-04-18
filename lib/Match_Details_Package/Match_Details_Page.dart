@@ -66,7 +66,10 @@ class _matchDetailsPageView extends StatelessWidget {
                             child: Text('Ακύρωση'),
                           ),
                           TextButton(
-                            onPressed: () => Navigator.pop(context, true),
+                            onPressed: () async {
+                              await TeamsHandle().deleteMatch(match);
+                              //Navigator.pop(context, true);
+                            },
                             child: Text('Ναι'),
                           ),
                         ],

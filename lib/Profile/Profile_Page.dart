@@ -214,7 +214,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                               LogInScreen(user: widget.user)));
                                 } else {
                                   isLoggedIn = false;
-                                  globalUser = AppUser(" ", " ", [], [], "user");
+                                  globalUser = AppUser(" ", " ", [], [], "user",{});
                                   signOutUser();
                                 }
                               });

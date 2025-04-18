@@ -256,7 +256,8 @@ Future<void> updateUsername(BuildContext context, String oldUsername, String new
               globalUser.university,
               [],
               [],
-              "user"
+              "user",
+            {}
           );
 
           // Update the globalUser variable

@@ -207,10 +207,8 @@ class eachMatchContainerView extends StatelessWidget {
                     : SizedBox.shrink(),
                 Padding(
                   padding: EdgeInsetsDirectional.only(start: 5, end: 0),
-                  child: notificationIcon(
+                  child: MatchNotificationIcon(
                     match: match,
-                    matchTime: match.startTimeInSeconds,
-                    matchDate: match.day,
                   ),
                 )
               ],
@@ -338,50 +336,75 @@ class _MatchContainerTimeState extends State<MatchContainerTime>
 }
 
 //ΦΤΙΑΧΝΕΙ ΤΗΝ NOTIFICATION ICON ΤΟΥ MATCH
-class notificationIcon extends StatefulWidget {
+class MatchNotificationIcon extends StatefulWidget {
   final MatchDetails match;
-  final int matchTime;
-  final int matchDate;
 
-  const notificationIcon(
-      {super.key,
-      required this.match,
-      required this.matchDate,
-      required this.matchTime});
+  MatchNotificationIcon({
+    super.key,
+    required this.match,
+  });
 
   @override
-  State<notificationIcon> createState() => _NotificationIconState();
+  State<MatchNotificationIcon> createState() => _MatchNotificationIconState();
 }
 
-class _NotificationIconState extends State<notificationIcon> {
-  bool isNotified = false;
+class _MatchNotificationIconState extends State<MatchNotificationIcon> {
+  late bool isEnabled;
+
+  @override
+  void initState() {
+    super.initState();
+    isEnabled = widget.match.notify;
+  }
+
+  Future<void> toggleNotification() async {
+    final newValue = !(isEnabled);
+
+    setState(() {
+      isEnabled = newValue;
+    });
+    widget.match.enableNotify(isEnabled );
+
+    if (isEnabled){
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Reminder set for ${widget.match}'),
+        duration: Duration(seconds: 2),
+      ));
+
+      if (globalUser.favoriteList.contains(widget.match.homeTeam.name) ||
+          globalUser.favoriteList.contains(widget.match.awayTeam.name) ){
+        await UserHandleBase().deleteNotifyMatch(widget.match);
+      }
+      else{
+        await UserHandleBase().addNotifyMatch(widget.match);
+      }
+
+    }
+    else{
+
+      if (globalUser.favoriteList.contains(widget.match.homeTeam.name) ||
+          globalUser.favoriteList.contains(widget.match.awayTeam.name) ){
+        await UserHandleBase().addNotifyMatch(widget.match);
+      }
+      else{
+        await UserHandleBase().deleteNotifyMatch(widget.match);
+      }
+
+    }
+
+  }
 
   @override
   Widget build(BuildContext context) {
     return IconButton(
-      color: darkModeNotifier.value ? Colors.white : Colors.black87,
-      onPressed: () {
-        setState(() {
-          isNotified = !isNotified;
-          if (isNotified) {
-           UserHandleBase().addNotifyMatch(widget.match);
-          }
-        });
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('Reminder set for ${widget.match}'),
-          duration: Duration(seconds: 2),
-        ));
-      },
       icon: Icon(
-        isNotified
-            ? Icons.notifications_active
-            : Icons.notification_add_outlined,
-        color: isNotified
-            ? Colors.blue
-            : darkModeNotifier.value
-                ? Colors.white
-                : Colors.black87,
+        widget.match.notify ? Icons.notifications_active : Icons.notifications_off,
+        color: isEnabled == true ? (darkModeNotifier.value ? Colors.amber : Colors.blue) : Colors.grey,
       ),
+      tooltip: isEnabled == true
+          ? "Απενεργοποίηση ειδοποίησης"
+          : "Ενεργοποίηση ειδοποίησης",
+      onPressed: toggleNotification,
     );
   }
 }

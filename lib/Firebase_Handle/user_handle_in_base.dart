@@ -44,11 +44,12 @@ class UserHandleBase
             "darkMode":false,
             "Language":true,
             'role': 'user',
-            "fcmToken": " "
+            "fcmToken": " ",
+            'matchKeys': {}
           });
 
 
-          globalUser = AppUser(username, uni, [], [],"user");
+          globalUser = AppUser(username, uni, [], [],"user",{});
           globalUser.loggedIn();
           return true;
         }
@@ -122,14 +123,27 @@ class UserHandleBase
 
       DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection("users").doc(FirebaseAuth.instance.currentUser!.uid).get();
 
+
+
       if (userDoc.exists && userDoc.data() != null)
       {
+        Map<String, bool> matchKeys = {};
+
+        try {
+          final raw = userDoc['matchKeys'];
+          if (raw is Map) {
+            matchKeys = Map<String, bool>.from(raw);
+          }
+        } catch (e) {}
+
         globalUser = AppUser(
           userDoc.get("username").toString(),
           userDoc.get("University").toString(),
           (userDoc['Favourite Teams'] as List<dynamic>).map((e) => e.toString()).toList(),
           (userDoc['Controlled Teams'] as List<dynamic>).map((e) => e.toString()).toList(),
-          userDoc['role']
+          userDoc['role'],
+          matchKeys
+
         );
         globalUser.loggedIn();
         darkModeNotifier.value = userDoc.get("darkMode");
@@ -275,14 +289,25 @@ class UserHandleBase
         .get();
 
     if(userDoc.exists && userDoc.data() != null){
+
+      Map<String, bool> matchKeys = {};
+
+      try {
+        final raw = userDoc['matchKeys'];
+        if (raw is Map) {
+          matchKeys = Map<String, bool>.from(raw);
+        }
+      } catch (e) {}
+
       globalUser = AppUser(
         userDoc.get("username").toString(),
         userDoc.get("University").toString(),
         (userDoc['Favourite Teams'] as List<dynamic>).map((e) => e.toString()).toList(),
         (userDoc['Controlled Teams'] as List<dynamic>).map((e) => e.toString()).toList(),
-        userDoc['role']
+        userDoc['role'],
+       matchKeys
       );
-
+      globalUser.loggedIn();
       isLoggedIn = true;
 
       darkModeNotifier.value = userDoc.get("darkMode");
@@ -302,15 +327,48 @@ class UserHandleBase
 
 
   Future<void> addNotifyMatch(MatchDetails match) async {
+    bool value;
+    if (globalUser.favoriteList.contains(match.homeTeam.name) ||
+        globalUser.favoriteList.contains(match.awayTeam.name) ){
+      value=false;
+    }
+    else{
+      value=true;
+    }
 
     await FirebaseFirestore.instance
         .collection('users')
         .doc(FirebaseAuth.instance.currentUser!.uid)
         .set({
-      'matchKeys': FieldValue.arrayUnion([match.matchKey]),
+      'matchKeys': {
+        match.matchKey: value
+      }
     }, SetOptions(merge: true));
 
-
   }
+
+  Future<void> deleteNotifyMatch(MatchDetails match) async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+
+    if (uid == null) {
+      print('User not logged in');
+      return;
+    }
+
+    final key = 'matchKeys.${match.matchKey}';
+
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .update({
+      key: FieldValue.delete()
+    });
+
+    print('Deleted $key successfully');
+  }
+
+
+
+
 }
 

@@ -14,8 +14,8 @@ class AppUser
 
   List<String> favoriteList=[];
   List<String> _controlledTeams=[];
-
-  AppUser(this._username,this._university,this.favoriteList,this._controlledTeams,String role){
+  Map<String,bool>  _matchKeys={};
+  AppUser(this._username,this._university,this.favoriteList,this._controlledTeams,String role,this._matchKeys){
     (role=="admin") ? (_isAdmin=true) : (_isAdmin=false);
   }
 
@@ -24,7 +24,7 @@ class AppUser
   bool get isLoggedIn => _isLoggedIn;
   bool get isAdmin=> _isAdmin;
   List<String> get controlledTeams=> _controlledTeams;
-
+  Map<String,bool> get matchKeys=> _matchKeys;
 
   void addFavoriteTeam(Team team){
     favoriteList.add(team.name);

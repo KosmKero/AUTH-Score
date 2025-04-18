@@ -8,11 +8,13 @@ import 'package:untitled1/API/top_players_handle.dart';
 import 'package:untitled1/Data_Classes/Player.dart';
 import 'package:untitled1/Firebase_Handle/TeamsHandle.dart';
 
+import '../globals.dart';
 import 'Team.dart';
 
 class MatchDetails extends ChangeNotifier {
   //με το _ γινεται private
 
+  late bool _notify;
   bool _hasMatchStarted = false;
   bool _hasMatchFinished = false,
       _hasSecondHalfStarted = false,
@@ -140,6 +142,11 @@ class MatchDetails extends ChangeNotifier {
 
     loadMatchFactsFromBase();
 
+    _notify = globalUser.matchKeys[matchKey] ??
+        (globalUser.favoriteList.contains(homeTeam.name) ||
+            globalUser.favoriteList.contains(awayTeam.name));
+
+
     _startListeningForUpdates();
   }
 
@@ -189,6 +196,7 @@ class MatchDetails extends ChangeNotifier {
   int get startTimeInSeconds => _startTimeInSeconds;
   bool get isGroupPhase=> _isGroupPhase;
   int get game => _game;
+  bool get notify => _notify;
 
   String get matchKey => '${homeTeam.nameEnglish}$day$month$year$game${awayTeam.nameEnglish}';
 
@@ -667,6 +675,11 @@ class MatchDetails extends ChangeNotifier {
     _matchSubscription?.cancel();
     super.dispose();
   }
+
+  void enableNotify(bool notify){
+    _notify=notify;
+  }
+
 }
 
 class Goal extends MatchFact {
