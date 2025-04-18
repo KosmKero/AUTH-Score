@@ -184,8 +184,11 @@ class _isFavouriteState extends State<isFavourite> {
         if (isLoggedIn) {
           if (isFavourite) {
             await teamsHandle.removeFavouriteTeam(widget.team.name);
+            globalUser.removeFavoriteTeam(widget.team);
+
           } else {
             await teamsHandle.addFavouriteTeam(widget.team.name);
+            globalUser.addFavoriteTeam(widget.team);
           }
 
           setState(() {

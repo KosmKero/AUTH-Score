@@ -49,9 +49,11 @@ class _matchDetailsPageView extends StatelessWidget {
           FutureBuilder<bool>(
             future: globalUser.isSuperUser(),
             builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting)
-              {
-                return SizedBox(); // ή CircularProgressIndicator()
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Center(child: CircularProgressIndicator());
+              }
+              if (snapshot.hasError) {
+                return Text('Σφάλμα: ${snapshot.error}');
               }
               if (snapshot.hasData && snapshot.data == true) {
                 return IconButton(
@@ -67,10 +69,7 @@ class _matchDetailsPageView extends StatelessWidget {
                             child: Text('Ακύρωση'),
                           ),
                           TextButton(
-                            onPressed: () async {
-                              await TeamsHandle().deleteMatch(match);
-                              //Navigator.pop(context, true);
-                            },
+                            onPressed: () => Navigator.pop(context, true),
                             child: Text('Ναι'),
                           ),
                         ],
@@ -78,13 +77,19 @@ class _matchDetailsPageView extends StatelessWidget {
                     );
 
                     if (confirmed == true) {
-                      TeamsHandle().deleteMatch(match);
+                      if (await globalUser.isSuperUser()) {
+                        await TeamsHandle().deleteMatch(match);
+
+
+                        Navigator.of(context).pushNamedAndRemoveUntil('/home', (route) => false);
+
+                      }
                     }
                   },
                   icon: Icon(Icons.delete),
                 );
               } else {
-                return SizedBox(); // δεν δείχνει τίποτα αν δεν είναι super user
+                return SizedBox(); // Αν δεν είναι super user
               }
             },
           ),

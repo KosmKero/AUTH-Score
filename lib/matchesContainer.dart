@@ -349,62 +349,60 @@ class MatchNotificationIcon extends StatefulWidget {
 }
 
 class _MatchNotificationIconState extends State<MatchNotificationIcon> {
-  late bool isEnabled;
 
   @override
   void initState() {
     super.initState();
-    isEnabled = widget.match.notify;
   }
 
   Future<void> toggleNotification() async {
-    final newValue = !(isEnabled);
+    final newValue = !widget.match.notify.value;
 
-    setState(() {
-      isEnabled = newValue;
-    });
-    widget.match.enableNotify(isEnabled );
+    widget.match.enableNotify(newValue);
 
-    if (isEnabled){
+    // Προαιρετικά ενημερωτικό μήνυμα
+    if (newValue) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text('Reminder set for ${widget.match}'),
         duration: Duration(seconds: 2),
       ));
-
-      if (globalUser.favoriteList.contains(widget.match.homeTeam.name) ||
-          globalUser.favoriteList.contains(widget.match.awayTeam.name) ){
-        await UserHandleBase().deleteNotifyMatch(widget.match);
-      }
-      else{
-        await UserHandleBase().addNotifyMatch(widget.match);
-      }
-
-    }
-    else{
-
-      if (globalUser.favoriteList.contains(widget.match.homeTeam.name) ||
-          globalUser.favoriteList.contains(widget.match.awayTeam.name) ){
-        await UserHandleBase().addNotifyMatch(widget.match);
-      }
-      else{
-        await UserHandleBase().deleteNotifyMatch(widget.match);
-      }
-
     }
 
+    final isFavorite = globalUser.favoriteList.contains(widget.match.homeTeam.name) ||
+        globalUser.favoriteList.contains(widget.match.awayTeam.name);
+
+    if (newValue) {
+      if (!isFavorite) {
+        await UserHandleBase().addNotifyMatch(widget.match);
+      } else {
+        await UserHandleBase().deleteNotifyMatch(widget.match);
+      }
+    } else {
+      if (!isFavorite) {
+        await UserHandleBase().deleteNotifyMatch(widget.match);
+      } else {
+        await UserHandleBase().addNotifyMatch(widget.match);
+      }
+    }
   }
+
+
 
   @override
   Widget build(BuildContext context) {
-    return IconButton(
-      icon: Icon(
-        widget.match.notify ? Icons.notifications_active : Icons.notifications_off,
-        color: isEnabled == true ? (darkModeNotifier.value ? Colors.amber : Colors.blue) : Colors.grey,
-      ),
-      tooltip: isEnabled == true
-          ? "Απενεργοποίηση ειδοποίησης"
-          : "Ενεργοποίηση ειδοποίησης",
-      onPressed: toggleNotification,
+    return ValueListenableBuilder<bool>(
+      valueListenable: widget.match.notify,
+      builder: (context, value, _) {
+        return IconButton(
+          icon: Icon(
+            value ? Icons.notifications_active : Icons.notifications_off,
+            color: value ? (darkModeNotifier.value ? Colors.amber : Colors.blue) : Colors.grey,
+          ),
+          tooltip: value ? "Απενεργοποίηση ειδοποίησης" : "Ενεργοποίηση ειδοποίησης",
+          onPressed: toggleNotification,
+        );
+      },
     );
   }
+
 }

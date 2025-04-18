@@ -1,8 +1,12 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:untitled1/globals.dart';
+import 'package:flutter/src/foundation/change_notifier.dart';
 
+
+import '../Firebase_Handle/TeamsHandle.dart';
+
+import '../main.dart';
 import 'MatchDetails.dart';
 import 'Team.dart';
 
@@ -26,9 +30,28 @@ class AppUser
   List<String> get controlledTeams=> _controlledTeams;
   Map<String,bool> get matchKeys=> _matchKeys;
 
-  void addFavoriteTeam(Team team){
+  Future<void> addFavoriteTeam(Team team) async {
     favoriteList.add(team.name);
+
+    for (MatchDetails match in upcomingMatches){
+      if (match.homeTeam.name==team.name || match.awayTeam.name ==team.name ){
+        match.enableNotify(true);
+        print (match.notify);
+      }
+    }
   }
+
+  Future<void> removeFavoriteTeam(Team team) async {
+    favoriteList.remove(team.name);
+
+    for (MatchDetails match in upcomingMatches){
+      if (match.homeTeam.name==team.name || match.awayTeam.name ==team.name ){
+        match.enableNotify(false);
+        print (match.notify);
+      }
+    }
+  }
+
   void loggedIn(){
     _isLoggedIn=true;
   }

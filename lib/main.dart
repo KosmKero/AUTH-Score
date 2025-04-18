@@ -320,31 +320,52 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final Function(String) onOptionSelected;
   final String selectedOption;
 
-  const CustomAppBar({super.key, required this.onOptionSelected, required this.selectedOption});
+  const CustomAppBar({
+    super.key,
+    required this.onOptionSelected,
+    required this.selectedOption,
+  });
 
   @override
-  Widget build(BuildContext context)
-  {
-    return AppBar(
-      title: Text("AUTH Score", style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: Colors.white)),
-      backgroundColor:darkModeNotifier.value? Color(0xFF121212): Color.fromARGB(250, 46, 90, 136),
-      actions: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 5),
-          child: IconButton(
-            icon: Icon(Icons.search, color: Colors.white),
-            onPressed: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => SearchPage()));
-            },
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<bool>(
+      valueListenable: darkModeNotifier,
+      builder: (context, isDarkMode, _) {
+        return AppBar(
+          title: Text(
+            "AUTH Score",
+            style: TextStyle(
+              fontSize: 26,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
           ),
-        )
-      ],
+          backgroundColor: isDarkMode
+              ? const Color(0xFF121212)
+              : const Color.fromARGB(250, 46, 90, 136),
+          actions: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 5),
+              child: IconButton(
+                icon: const Icon(Icons.search, color: Colors.white),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => SearchPage()),
+                  );
+                },
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 
   @override
-  Size get preferredSize => Size.fromHeight(kToolbarHeight);
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 }
+
 
 // ------------------------ BOTTOM NAVIGATION ------------------------
 class CustomBottomNavigationBar extends StatelessWidget {

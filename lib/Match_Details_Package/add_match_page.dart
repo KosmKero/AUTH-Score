@@ -371,6 +371,10 @@ class _AddMatchScreenState extends State<AddMatchScreen> {
                           0);
                       ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(content: Text("Το ματς προστέθηκε!")));
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        navigatorKey.currentState?.pushReplacementNamed('/home');
+                      });
+
                       Navigator.pop(context);
                     }
                     else

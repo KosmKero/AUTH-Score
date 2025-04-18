@@ -41,13 +41,17 @@ class _MatchEditPageState extends State<MatchEditPage> {
     _isGroupPhase = widget.match.isGroupPhase;
   }
 
-  void _saveMatch() {
+  Future<void> _saveMatch() async {
     int formattedTime = _selectedTime.hour * 100 + _selectedTime.minute;
 
     if (!widget.match.hasMatchStarted) {
       if (globalUser.controlTheseTeams(
           widget.match.homeTeam.name, widget.match.awayTeam.name)) {
-        TeamsHandle().addMatch(
+        final nav = navigatorKey.currentState;
+
+        await TeamsHandle().deleteMatch(widget.match);
+
+        await TeamsHandle().addMatch(
             _selectedHomeTeam,
             _selectedAwayTeam,
             _selectedDate.day,
@@ -61,10 +65,10 @@ class _MatchEditPageState extends State<MatchEditPage> {
             0,
             0);
 
-      TeamsHandle().deleteMatch(widget.match);
 
-
-
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          navigatorKey.currentState?.pushReplacementNamed('/home');
+        });
       }
     }
 

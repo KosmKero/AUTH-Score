@@ -14,7 +14,7 @@ import 'Team.dart';
 class MatchDetails extends ChangeNotifier {
   //με το _ γινεται private
 
-  late bool _notify;
+  ValueNotifier<bool> _notify = ValueNotifier<bool>(false);
   bool _hasMatchStarted = false;
   bool _hasMatchFinished = false,
       _hasSecondHalfStarted = false,
@@ -142,9 +142,9 @@ class MatchDetails extends ChangeNotifier {
 
     loadMatchFactsFromBase();
 
-    _notify = globalUser.matchKeys[matchKey] ??
+    _notify =  ValueNotifier<bool>((globalUser.matchKeys[matchKey] ??
         (globalUser.favoriteList.contains(homeTeam.name) ||
-            globalUser.favoriteList.contains(awayTeam.name));
+            globalUser.favoriteList.contains(awayTeam.name))));
 
 
     _startListeningForUpdates();
@@ -196,7 +196,7 @@ class MatchDetails extends ChangeNotifier {
   int get startTimeInSeconds => _startTimeInSeconds;
   bool get isGroupPhase=> _isGroupPhase;
   int get game => _game;
-  bool get notify => _notify;
+  ValueNotifier<bool> get notify => _notify;
 
   String get matchKey => '${homeTeam.nameEnglish}$day$month$year$game${awayTeam.nameEnglish}';
 
@@ -677,7 +677,7 @@ class MatchDetails extends ChangeNotifier {
   }
 
   void enableNotify(bool notify){
-    _notify=notify;
+    _notify.value=notify;
   }
 
 }

@@ -127,6 +127,8 @@ class TeamsHandle {
             .set({
           'Awayteam': away.name,
           'Hometeam': home.name,
+          "homeTeamEnglish": home.nameEnglish,
+          "awayTeamEnglish": away.nameEnglish,
           'Day': day,
           'Month': month,
           'Year': year,
@@ -143,7 +145,6 @@ class TeamsHandle {
           'startTime': timestamp,
           "notified":false
         });
-      navigatorKey.currentState?.pushReplacementNamed('/home');
     }
     catch (e)
     {
