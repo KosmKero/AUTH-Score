@@ -31,7 +31,7 @@ class _matchDetailsPageView extends StatelessWidget {
   Widget build(BuildContext context) {
     final match = Provider.of<MatchDetails>(context);
     return Scaffold(
-
+      backgroundColor: darkModeNotifier.value ? Color.fromARGB(255,40, 40, 40) : Colors.white,
       appBar: AppBar(
         backgroundColor:darkModeNotifier.value?Colors.grey[900]: Color.fromARGB(50, 5, 150, 200),
         iconTheme: IconThemeData(color: darkModeNotifier.value?Colors.white:Colors.black),
@@ -49,7 +49,8 @@ class _matchDetailsPageView extends StatelessWidget {
           FutureBuilder<bool>(
             future: globalUser.isSuperUser(),
             builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
+              if (snapshot.connectionState == ConnectionState.waiting)
+              {
                 return SizedBox(); // ή CircularProgressIndicator()
               }
               if (snapshot.hasData && snapshot.data == true) {

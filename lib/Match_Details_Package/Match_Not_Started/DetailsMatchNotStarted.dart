@@ -14,6 +14,7 @@ class DetailsMatchNotStarted extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      color: darkModeNotifier.value?Color.fromARGB(255,30, 30, 30):Colors.white,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
