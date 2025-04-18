@@ -121,8 +121,6 @@ class TeamsHandle {
       final timestamp = Timestamp.fromDate(dateTime);
 
 
-      if(day==0 || month==0 || year==0 || game==0 )
-
         await FirebaseFirestore.instance
             .collection('matches')
             .doc(home.nameEnglish+day.toString()+month.toString()+year.toString()+game.toString()+away.nameEnglish) // Improved unique ID
