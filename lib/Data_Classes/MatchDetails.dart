@@ -356,12 +356,11 @@ class MatchDetails extends ChangeNotifier {
     int half;
     (!_hasSecondHalfStarted) ? half = 0 : half = 1;
 
-    _scoreHome++;
-    homeScoredBase();
+
 
     Goal goal = Goal(
         scorerName: name,
-        homeScore: _scoreHome,
+        homeScore: _scoreHome+1,
         awayScore: _scoreAway,
         minute:
             DateTime.now().millisecondsSinceEpoch ~/ 1000 - startTimeInSeconds,
@@ -383,6 +382,9 @@ class MatchDetails extends ChangeNotifier {
         half: half,
         factMap: goal.toMap());
 
+    _scoreHome++;
+    homeScoredBase();
+
     notifyListeners();
   }
 
@@ -391,13 +393,12 @@ class MatchDetails extends ChangeNotifier {
     int half;
     (!_hasSecondHalfStarted) ? half = 0 : half = 1;
 
-    _scoreAway++;
-    awayScoredBase();
+
 
     Goal goal = Goal(
         scorerName: name,
         homeScore: _scoreHome,
-        awayScore: _scoreAway,
+        awayScore: _scoreAway+1,
         minute:
             DateTime.now().millisecondsSinceEpoch ~/ 1000 - startTimeInSeconds,
         isHomeTeam: false,
@@ -417,6 +418,10 @@ class MatchDetails extends ChangeNotifier {
         matchDoc: FirebaseFirestore.instance.collection('matches').doc(matchDocId),
         half: half,
         factMap: goal.toMap());
+
+
+    _scoreAway++;
+    awayScoredBase();
 
     notifyListeners();
   }
@@ -719,6 +724,7 @@ class Goal extends MatchFact {
   }
 
   Map<String, dynamic> toMap() {
+
     return {
       'type': "goal",
       'scorerName': scorerName,
