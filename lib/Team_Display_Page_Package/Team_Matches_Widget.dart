@@ -27,7 +27,7 @@ class _TeamMatchesWidgetState extends State<TeamMatchesWidget> {
   Widget build(BuildContext context) {
     return Expanded(child: matchesContainer(
       matches: matchList ,
-      type:1
+      type:2
     ));
   }
 

@@ -138,7 +138,7 @@ class _HomePageState extends State<HomePage> {
                 matches: MatchHandle().getUpcomingMatches(), type: 1)
                 : matchesContainer(
               matches: MatchHandle().getPreviousMatches(),
-              type: 1,
+              type: 2,
             ),
           ),
         ),
