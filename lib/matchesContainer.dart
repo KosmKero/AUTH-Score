@@ -24,13 +24,51 @@ class matchesContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.vertical,
-      child: _buildMatches(),
-    );
+    return _buildMatches();
   }
 
-  Column _buildMatches() {
+  List<Widget> _buildMatchList(List<MatchDetails> matches) {
+    List<Widget> widgets = [];
+    for (int i = 0; i < matches.length; i++) {
+      final match = matches[i];
+
+      final isNewDate = i == 0 ||
+          match.day != matches[i - 1].day ||
+          match.month != matches[i - 1].month ||
+          match.year != matches[i - 1].year;
+
+      if (isNewDate) {
+        if (i != 0) widgets.add(SizedBox(height: 20));
+        widgets.add(
+          Padding(
+            padding: const EdgeInsets.only(top: 10, bottom: 8),
+            child: Text(
+              " ${match.day}/${match.month}/${match.year}",
+              style: TextStyle(
+                fontSize: 14.5,
+                fontWeight: FontWeight.bold,
+                fontFamily: 'Arial',
+                color: darkModeNotifier.value ? Colors.white : Colors.white,
+                letterSpacing: 0.5,
+              ),
+            ),
+          ),
+        );
+      }
+
+      widgets.add(eachMatchContainer(match));
+    }
+    return widgets;
+  }
+
+
+  Widget _buildMatches() {
+
+    return ListView(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      children: _buildMatchList(matches),
+    );
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -220,12 +258,9 @@ class eachMatchContainerView extends StatelessWidget {
 
 //ΦΤΙΑΧΝΕΙ ΤΗΝ ΩΡΑ ΤΟΥ MATCH
 class MatchContainerTime extends StatefulWidget {
-  late final Color color;
-  MatchContainerTime({super.key, required this.match}) {
-    match.hasMatchFinished ? color = Colors.black : color = Colors.red;
-  }
-
   final MatchDetails match;
+
+  const MatchContainerTime({super.key, required this.match});
 
   @override
   State<MatchContainerTime> createState() => _MatchContainerTimeState();
@@ -239,14 +274,11 @@ class _MatchContainerTimeState extends State<MatchContainerTime>
   @override
   void initState() {
     super.initState();
-    if (!widget.match.hasMatchFinished) {
+    WidgetsBinding.instance.addObserver(this);
 
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-      widget.match.addListener(_onMatchUpdated);
-    });
-    }
+    widget.match.addListener(_onMatchUpdated);
 
-    if (widget.match.hasMatchStarted) {
+    if (widget.match.hasMatchStarted && !widget.match.hasMatchFinished) {
       _startTimer();
     }
   }
@@ -259,6 +291,7 @@ class _MatchContainerTimeState extends State<MatchContainerTime>
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     widget.match.removeListener(_onMatchUpdated);
     _timer?.cancel();
     super.dispose();
@@ -268,12 +301,13 @@ class _MatchContainerTimeState extends State<MatchContainerTime>
   void didUpdateWidget(MatchContainerTime oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    // Ελέγχουμε αν το ματς έχει ξεκινήσει και αν έχει αλλάξει κατάσταση
-    if (widget.match.hasMatchStarted  && !widget.match.hasMatchFinished &&
-        oldWidget.match.hasMatchStarted != widget.match.hasMatchStarted) {
-      setState(() {
-        _startTimer(); // Ξεκινάμε το χρονόμετρο αν το ματς ξεκινήσει
-      });
+    if (oldWidget.match != widget.match) {
+      oldWidget.match.removeListener(_onMatchUpdated);
+      widget.match.addListener(_onMatchUpdated);
+
+      if (widget.match.hasMatchStarted && !widget.match.hasMatchFinished) {
+        _startTimer();
+      }
     }
   }
 
@@ -281,25 +315,22 @@ class _MatchContainerTimeState extends State<MatchContainerTime>
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
 
-    // Όταν η εφαρμογή επιστρέψει από background, ξαναρχίζει το χρονόμετρο
-    if (state == AppLifecycleState.resumed) {
-      if (widget.match.hasMatchStarted && !widget.match.hasMatchFinished) {
-        setState(() {
-          // Ενημερώνουμε την κατάσταση του widget
-          _startTimer();
-        });
-      }
+    if (state == AppLifecycleState.resumed &&
+        widget.match.hasMatchStarted &&
+        !widget.match.hasMatchFinished) {
+      _startTimer();
     }
   }
 
   void _startTimer() {
-    _timer?.cancel(); // Ακύρωση του προηγούμενου timer
+    _timer?.cancel(); // cancel previous timer if any
+
     _secondsElapsed = (DateTime.now().millisecondsSinceEpoch ~/ 1000) -
         widget.match.startTimeInSeconds;
-    print(DateTime.now().millisecondsSinceEpoch ~/ 1000 -
-        widget.match.startTimeInSeconds);
 
-    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+    print("object");
+
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (!mounted) {
         _timer?.cancel();
         return;
@@ -310,33 +341,46 @@ class _MatchContainerTimeState extends State<MatchContainerTime>
     });
   }
 
+  Color get _timeColor =>
+      widget.match.hasMatchFinished ? Colors.black : Colors.red;
+
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
         Text(
           widget.match.timeString,
-          style: TextStyle(fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: darkModeNotifier.value ? Colors.white : Colors.black87,
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: darkModeNotifier.value ? Colors.white : Colors.black87,
           ),
         ),
         if (widget.match.isHalfTime())
-          Text("Ημίχρονο",
-              style: TextStyle(
-                  color: Colors.red, fontSize: 9, fontWeight: FontWeight.bold))
+          const Text(
+            "Ημίχρονο",
+            style: TextStyle(
+              color: Colors.red,
+              fontSize: 9,
+              fontWeight: FontWeight.bold,
+            ),
+          )
         else if (widget.match.hasMatchFinished)
-          SizedBox.shrink()
+          const SizedBox.shrink()
         else if (widget.match.hasMatchStarted)
-          Text(
-            '${(_secondsElapsed ~/ 60).toString().padLeft(2, '0')}:${(_secondsElapsed % 60).toString().padLeft(2, '0')}',
-            style: const TextStyle(
-                fontWeight: FontWeight.bold, fontSize: 12, color: Colors.red),
-          ),
+            Text(
+              '${(_secondsElapsed ~/ 60).toString().padLeft(2, '0')}:${(_secondsElapsed % 60).toString().padLeft(2, '0')}',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 12,
+                color: _timeColor,
+              ),
+            ),
       ],
     );
   }
 }
+
 
 //ΦΤΙΑΧΝΕΙ ΤΗΝ NOTIFICATION ICON ΤΟΥ MATCH
 class MatchNotificationIcon extends StatefulWidget {

@@ -361,7 +361,7 @@ class MatchDetails extends ChangeNotifier {
 
     Goal goal = Goal(
         scorerName: name,
-        homeScore: _scoreHome+1,
+        homeScore: _scoreHome,
         awayScore: _scoreAway,
         minute:
             DateTime.now().millisecondsSinceEpoch ~/ 1000 - startTimeInSeconds,
@@ -401,7 +401,7 @@ class MatchDetails extends ChangeNotifier {
     Goal goal = Goal(
         scorerName: name,
         homeScore: _scoreHome,
-        awayScore: _scoreAway+1,
+        awayScore: _scoreAway,
         minute:
             DateTime.now().millisecondsSinceEpoch ~/ 1000 - startTimeInSeconds,
         isHomeTeam: false,
