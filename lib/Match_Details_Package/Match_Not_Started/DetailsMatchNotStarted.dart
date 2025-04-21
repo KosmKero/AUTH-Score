@@ -104,12 +104,13 @@ class TeamFormWidget extends StatelessWidget {
           final displayResults = results.length == 6 ? results.sublist(1) : results;
 
           return Padding(
-            padding: EdgeInsets.only(left: 1, top: 10),
+            padding: EdgeInsets.only(left: 0, top: 10),
             child: Row(
               children: [
                 // Team Name
-                SizedBox(
-                  width: 155,
+                Container(
+                  width: 160,
+                  alignment: Alignment.centerLeft,
                   child: TextButton(
                     onPressed: () {
                       Navigator.push(
@@ -121,7 +122,7 @@ class TeamFormWidget extends StatelessWidget {
                     child: Text(
                       team.name,
                       style: TextStyle(
-                        fontSize: 17,
+                        fontSize: 16,
                         fontWeight: FontWeight.w600,
                         color: darkModeNotifier.value?Colors.white:Colors.black,
                         letterSpacing: 1.5,
@@ -131,6 +132,7 @@ class TeamFormWidget extends StatelessWidget {
                 ),
                 SizedBox(width: 30),
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
                   children: displayResults.map((result) => Padding(
                     padding:
                     const EdgeInsets.symmetric(horizontal: 3),

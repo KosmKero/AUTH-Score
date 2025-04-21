@@ -174,7 +174,7 @@ class _NavigationButtonsState extends State<NavigationButtons> {
               fontSize: 16,
               fontFamily: '"Arial"',
               color: isSelected ? Colors.blue :darkModeNotifier.value?Colors.white: Colors.black,
-              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+              fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
             ),
           ),
           SizedBox(height: 3), // Απόσταση μεταξύ κειμένου και γραμμής
