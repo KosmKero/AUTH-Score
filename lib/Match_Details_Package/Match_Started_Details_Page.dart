@@ -173,7 +173,7 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
             : {homeColor = Colors.blueGrey, awayColor = Colors.blueGrey};
 
     return Container(
-      color: darkModeNotifier.value ? Color(0xFF121212) : Colors.white,
+      //color:darkModeNotifier.value? Colors.grey[900]: Color.fromARGB(50, 5, 150, 200),
       child: Column(
         children: [
           Text(
