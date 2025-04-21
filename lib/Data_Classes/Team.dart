@@ -26,6 +26,7 @@ class Team {
   String name,_nameEnglish;
   String _coach;
   int _matches, _wins, _losses, _draws, _titles,_position;
+  int _goalsFor = 0, _goalsAgainst = 0;
   final int _group;
   bool _isFavourite=false;
   static int n=0;
@@ -37,6 +38,8 @@ class Team {
   int get losses => _losses;
   int get draws => _draws;
   int get group => _group;
+  int get goalsFor => _goalsFor;
+  int get goalsAgainst => _goalsAgainst;
   List<Player> get players => _players;
   int get totalPoints=> (3*_wins+_draws);
   int get totalGames=> ( _wins + _draws + _losses );
@@ -166,23 +169,21 @@ class Team {
 
     List<dynamic> history = snapshot.data()?['LastFive'] ?? [];
 
+    // Αφαίρεσε όλα τα κενά entries (αν υπάρχουν)
     history.removeWhere((item) => item == "");
-    // Βεβαιώνεσαι ότι ο πίνακας έχει 6 θέσεις
-    while (history.length < 6) {
-      history.insert(0, "");  // Βάζει το "" στην αρχή της λίστας
-    }
 
-    // Διαγραφή του πρώτου (παλιότερου) αν έχει 6 στοιχεία
-    if (history.length >= 6) {
+    // Αν έχει ήδη 5 αποτελέσματα, αφαίρεσε το πιο παλιό (πρώτο)
+    if (history.length >= 5) {
       history.removeAt(0);
     }
 
-    // Προσθήκη του νέου στο τέλος
+    // Πρόσθεσε το νέο στο τέλος
     history.add(newResult);
 
-    // Ενημέρωση Firestore
+    // Ενημέρωσε τη βάση
     await userRef.update({'LastFive': history});
   }
+
 
   Future<void> shiftRightAndClearLast() async {
     final userRef = FirebaseFirestore.instance.collection('teams').doc(name);
@@ -230,7 +231,58 @@ class Team {
     }
   }
 
+  Future<void> increaseGoalsFor() async {
+    _goalsFor++;
+    await FirebaseFirestore.instance
+        .collection('teams')
+        .doc(name)
+        .set({
+      'goalsFor': FieldValue.increment(1)
+    }, SetOptions(merge: true));
+  }
 
+  Future<void> decreaseGoalsFor() async {
+    if (_goalsFor > 0) {
+      _goalsFor--;
+      await FirebaseFirestore.instance
+          .collection('teams')
+          .doc(name)
+          .set({
+        'goalsFor': FieldValue.increment(-1)
+      }, SetOptions(merge: true));
+    }
+  }
 
+  Future<void> increaseGoalsAgainst() async {
+    _goalsAgainst++;
+    await FirebaseFirestore.instance
+        .collection('teams')
+        .doc(name)
+        .set({
+      'goalsAgainst': FieldValue.increment(1)
+    }, SetOptions(merge: true));
+  }
+
+  Future<void> decreaseGoalsAgainst() async {
+    if (_goalsAgainst > 0) {
+      _goalsAgainst--;
+      await FirebaseFirestore.instance
+          .collection('teams')
+          .doc(name)
+          .set({
+        'goalsAgainst': FieldValue.increment(-1)
+      }, SetOptions(merge: true));
+    }
+  }
+
+  Future<void> increaseMatches() async {
+    _matches++;
+    await FirebaseFirestore.instance
+        .collection('teams')
+        .doc(name)
+        .set({
+      'Matches': FieldValue.increment(1)
+    }, SetOptions(merge: true));
+  }
 
 }

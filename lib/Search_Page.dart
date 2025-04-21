@@ -38,7 +38,7 @@ class _SearchPageState extends State<SearchPage> {
         title: TextField(
           controller: _searchController,
           decoration: InputDecoration(
-            hintText: greek?"Αναζήτηση":'Search...',
+            hintText: greek?"Αναζήτηση...":'Search...',
             border: InputBorder.none,
             hintStyle: TextStyle(
                 color:darkModeNotifier.value?Colors.white: Colors.black,

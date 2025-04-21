@@ -356,8 +356,6 @@ class MatchDetails extends ChangeNotifier {
     int half;
     (!_hasSecondHalfStarted) ? half = 0 : half = 1;
 
-
-
     Goal goal = Goal(
         scorerName: name,
         homeScore: _scoreHome+1,
@@ -383,17 +381,28 @@ class MatchDetails extends ChangeNotifier {
         factMap: goal.toMap());
 
     _scoreHome++;
-    homeScoredBase();
+    homeTeam.increaseGoalsFor();
+    awayTeam.increaseGoalsAgainst();
+    
+    // Update goals in database
+    await FirebaseFirestore.instance
+        .collection('teams')
+        .doc(homeTeam.name)
+        .update({'goalsFor': homeTeam.goalsFor});
+    
+    await FirebaseFirestore.instance
+        .collection('teams')
+        .doc(awayTeam.name)
+        .update({'goalsAgainst': awayTeam.goalsAgainst});
 
+    homeScoredBase();
     notifyListeners();
   }
 
   //ετοιμο
-  void awayScored(String name) {
+  Future<void> awayScored(String name) async {
     int half;
     (!_hasSecondHalfStarted) ? half = 0 : half = 1;
-
-
 
     Goal goal = Goal(
         scorerName: name,
@@ -419,10 +428,22 @@ class MatchDetails extends ChangeNotifier {
         half: half,
         factMap: goal.toMap());
 
-
     _scoreAway++;
-    awayScoredBase();
+    awayTeam.increaseGoalsFor();
+    homeTeam.increaseGoalsAgainst();
+    
+    // Update goals in database
+    await FirebaseFirestore.instance
+        .collection('teams')
+        .doc(awayTeam.name)
+        .update({'goalsFor': awayTeam.goalsFor});
+    
+    await FirebaseFirestore.instance
+        .collection('teams')
+        .doc(homeTeam.name)
+        .update({'goalsAgainst': homeTeam.goalsAgainst});
 
+    awayScoredBase();
     notifyListeners();
   }
 
@@ -448,32 +469,97 @@ class MatchDetails extends ChangeNotifier {
     }
   }
 
-  void updateStandings(bool progress) {
+  void updateStandings(bool progress) async {
     if (progress) {
+      // Increase matches count for both teams when match finishes
+      homeTeam.increaseMatches();
+      awayTeam.increaseMatches();
+      
       if (scoreHome == scoreAway) {
         homeTeam.increaseDraws();
         awayTeam.increaseDraws();
+        await _updateTeamStats(homeTeam, "D");
+        await _updateTeamStats(awayTeam, "D");
       } else if (scoreHome > scoreAway) {
         homeTeam.increaseWins();
         awayTeam.increaseLoses();
+        await _updateTeamStats(homeTeam, "W");
+        await _updateTeamStats(awayTeam, "L");
       } else {
         homeTeam.increaseLoses();
         awayTeam.increaseWins();
+        await _updateTeamStats(homeTeam, "L");
+        await _updateTeamStats(awayTeam, "W");
       }
     } else {
       if (scoreHome == scoreAway) {
         homeTeam.reduceDraws();
         awayTeam.reduceDraws();
+        await _updateTeamStats(homeTeam, "D", true);
+        await _updateTeamStats(awayTeam, "D", true);
       } else if (scoreHome > scoreAway) {
         homeTeam.reduceWins();
         awayTeam.reduceLoses();
+        await _updateTeamStats(homeTeam, "W", true);
+        await _updateTeamStats(awayTeam, "L", true);
       } else {
         homeTeam.reduceLoses();
         awayTeam.reduceWins();
+        await _updateTeamStats(homeTeam, "L", true);
+        await _updateTeamStats(awayTeam, "W", true);
       }
     }
     if (isGroupPhase) {
       TeamsHandle().sortTeams(homeTeam.group);
+    }
+  }
+
+  Future<void> _updateTeamStats(Team team, String result, [bool isRemoval = false]) async {
+    try {
+      // Update team stats in Firestore
+      await FirebaseFirestore.instance
+          .collection('teams')
+          .doc(team.name)
+          .update({
+        'Wins': team.wins,
+        'Draws': team.draws,
+        'Loses': team.losses,
+        'goalsFor': team.goalsFor,
+        'goalsAgainst': team.goalsAgainst,
+        'Matches': team.matches,
+      });
+
+      // Get current last 5 results
+      final teamDoc = await FirebaseFirestore.instance
+          .collection('teams')
+          .doc(team.name)
+          .get();
+
+      if (teamDoc.exists) {
+        List<String> lastFive = List<String>.from(teamDoc.get("LastFive") ?? []);
+        
+        if (isRemoval) {
+          // Remove the result from the beginning of the list
+          if (lastFive.isNotEmpty) {
+            lastFive.removeAt(0);
+          }
+        } else {
+          // Add new result at the end
+          lastFive.add(result);
+          // Keep only last 5 results
+          if (lastFive.length > 5) {
+            lastFive.removeAt(0);
+          }
+        }
+
+        // Update LastFive in Firebase
+        await FirebaseFirestore.instance
+            .collection('teams')
+            .doc(team.name)
+            .update({'LastFive': lastFive});
+      }
+    } catch (e) {
+      print("❌ Error updating team stats: $e");
     }
   }
 
@@ -542,11 +628,43 @@ class MatchDetails extends ChangeNotifier {
   //ετοιμο
   Future<void> cancelGoal(Goal goal1) async {
     if (_matchFacts.containsKey(goal1.half)) {
-
       _matchFacts[goal1.half]!
           .removeWhere((goal) => goal is Goal && goal == goal1);
 
       goal1.isHomeTeam ? _scoreHome-- : _scoreAway--;
+      
+      // Update team goals
+      if (goal1.isHomeTeam) {
+        homeTeam.decreaseGoalsFor();
+        awayTeam.decreaseGoalsAgainst();
+      } else {
+        awayTeam.decreaseGoalsFor();
+        homeTeam.decreaseGoalsAgainst();
+      }
+      
+      // Update goals in database
+      if (goal1.isHomeTeam) {
+        await FirebaseFirestore.instance
+            .collection('teams')
+            .doc(homeTeam.name)
+            .update({'goalsFor': homeTeam.goalsFor});
+        
+        await FirebaseFirestore.instance
+            .collection('teams')
+            .doc(awayTeam.name)
+            .update({'goalsAgainst': awayTeam.goalsAgainst});
+      } else {
+        await FirebaseFirestore.instance
+            .collection('teams')
+            .doc(awayTeam.name)
+            .update({'goalsFor': awayTeam.goalsFor});
+        
+        await FirebaseFirestore.instance
+            .collection('teams')
+            .doc(homeTeam.name)
+            .update({'goalsAgainst': homeTeam.goalsAgainst});
+      }
+
       for (Player player in goal1.team.players) {
         if ("${player.name[0]}. ${player.surname}" ==
             goal1.scorerName) {
@@ -569,8 +687,7 @@ class MatchDetails extends ChangeNotifier {
           type : FieldValue.increment(-1),
         }, SetOptions(merge: true));
 
-
-      notifyListeners(); // Ενημέρωση των listeners για την αλλαγή
+      notifyListeners();
     }
   }
 
