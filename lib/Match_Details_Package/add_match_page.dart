@@ -284,6 +284,9 @@ class _AddMatchScreenState extends State<AddMatchScreen> {
                             ? Colors.white
                             : Colors.grey[900])),
                 keyboardType: TextInputType.number,
+                style: TextStyle(color:  darkModeNotifier.value
+                    ? Colors.white
+                    : Colors.grey[900]),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Παρακαλώ εισάγετε αριθμό αγωνιστικής';

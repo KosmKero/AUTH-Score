@@ -239,9 +239,12 @@ class _MatchContainerTimeState extends State<MatchContainerTime>
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    if (!widget.match.hasMatchFinished) {
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
       widget.match.addListener(_onMatchUpdated);
     });
+    }
 
     if (widget.match.hasMatchStarted) {
       _startTimer();
@@ -249,7 +252,7 @@ class _MatchContainerTimeState extends State<MatchContainerTime>
   }
 
   void _onMatchUpdated() {
-    if (widget.match.hasMatchStarted && _timer == null) {
+    if (widget.match.hasMatchStarted && _timer == null && !widget.match.hasMatchFinished) {
       _startTimer();
     }
   }
@@ -266,7 +269,7 @@ class _MatchContainerTimeState extends State<MatchContainerTime>
     super.didUpdateWidget(oldWidget);
 
     // Ελέγχουμε αν το ματς έχει ξεκινήσει και αν έχει αλλάξει κατάσταση
-    if (widget.match.hasMatchStarted &&
+    if (widget.match.hasMatchStarted  && !widget.match.hasMatchFinished &&
         oldWidget.match.hasMatchStarted != widget.match.hasMatchStarted) {
       setState(() {
         _startTimer(); // Ξεκινάμε το χρονόμετρο αν το ματς ξεκινήσει
@@ -280,7 +283,7 @@ class _MatchContainerTimeState extends State<MatchContainerTime>
 
     // Όταν η εφαρμογή επιστρέψει από background, ξαναρχίζει το χρονόμετρο
     if (state == AppLifecycleState.resumed) {
-      if (widget.match.hasMatchStarted) {
+      if (widget.match.hasMatchStarted && !widget.match.hasMatchFinished) {
         setState(() {
           // Ενημερώνουμε την κατάσταση του widget
           _startTimer();

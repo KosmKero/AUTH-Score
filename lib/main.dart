@@ -145,11 +145,11 @@ class _LoadingScreenState extends State<LoadingScreen> {
       }
     } catch (e) {
       print("Error loading data: $e");
-      setState(() {
-        _hasError = true;
-        _errorMessage = "Failed to load data: $e";
-        _isLoading = false;
-      });
+      //setState(() {
+      //  _hasError = true;
+      //  _errorMessage = "Failed to load data: $e";
+      //  _isLoading = false;
+      //});
     }
   }
 

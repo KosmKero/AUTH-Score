@@ -364,6 +364,11 @@ class _AddPlayerScreenState extends State<AddPlayerScreen> {
               controller: _numberController,
               keyboardType: TextInputType.number,
               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              style: TextStyle(
+                  color: darkModeNotifier.value?Colors.white:Colors.black,
+                  fontSize: 16,
+                  fontFamily: "Arial"
+              ),
               decoration: InputDecoration(
                   labelText: 'Αριθμός Φανέλας',
                   labelStyle: TextStyle(
@@ -377,6 +382,11 @@ class _AddPlayerScreenState extends State<AddPlayerScreen> {
               controller: _ageController,
               keyboardType: TextInputType.number,
               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              style: TextStyle(
+                  color: darkModeNotifier.value?Colors.white:Colors.black,
+                  fontSize: 16,
+                  fontFamily: "Arial"
+              ),
               decoration: InputDecoration(
                   labelText: 'Ηλικία',
                   labelStyle: TextStyle(

@@ -36,16 +36,25 @@ class _TeamDisplayPageState extends State<TeamDisplayPage> {
         appBar: AppBar(
             backgroundColor:darkModeNotifier.value? Color(0xFF121212): const Color.fromARGB(250, 46, 90, 136),
             iconTheme: IconThemeData(color: Colors.white),
-            title: Text(
-            widget.team.name,
-            style: TextStyle(
-            fontSize: 23,
-            fontWeight: FontWeight.bold,
-            fontFamily: 'Arial',
-            fontStyle: FontStyle.italic,
-              color: Colors.white
-          ),
-        ),
+            title: Row(
+              children: [
+                SizedBox(
+                    height: 33,
+                    width:  33,
+                    child: widget.team.image),
+                SizedBox(width: 10,),
+                Text(
+                widget.team.name,
+                style: TextStyle(
+                fontSize: 23,
+                fontWeight: FontWeight.bold,
+                fontFamily: 'Arial',
+                fontStyle: FontStyle.italic,
+                  color: Colors.white
+                          ),
+                        ),
+              ],
+            ),
             actions: [
               isFavourite(team: widget.team,),
             ]

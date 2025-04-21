@@ -263,7 +263,7 @@ class _MatchEditPageState extends State<MatchEditPage> {
               },
             ),
             const SizedBox(height: 16),
-            TextField(
+            (!_isGroupPhase)?TextField(
               controller: _gameController,
               decoration:  InputDecoration(labelText: 'Παιχνίδι',
                   labelStyle: TextStyle(
@@ -275,7 +275,7 @@ class _MatchEditPageState extends State<MatchEditPage> {
                 color: darkModeNotifier.value? Colors.white: Colors.black,
                 fontSize: 16,
               ),
-            ),
+            ) : SizedBox.shrink(),
              SizedBox(height: 30),
             ElevatedButton(
               onPressed: _saveMatch,
