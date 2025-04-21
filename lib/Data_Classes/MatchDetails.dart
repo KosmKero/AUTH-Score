@@ -306,7 +306,7 @@ class MatchDetails extends ChangeNotifier {
   }
 
   String get dateString {
-    return "${_day.toString().padLeft(2, '0')}.${_month.toString().padLeft(2, '0')}.${_year.toString().substring(2,3).padLeft(2, '0')}";
+    return "${_day.toString().padLeft(2, '0')}.${_month.toString().padLeft(2, '0')}.${_year.toString().substring(2,4)}";
   }
 
   Future<void> setScoreHome(int score) async {
@@ -356,7 +356,8 @@ class MatchDetails extends ChangeNotifier {
     int half;
     (!_hasSecondHalfStarted) ? half = 0 : half = 1;
 
-
+    _scoreHome++;
+    homeScoredBase();
 
     Goal goal = Goal(
         scorerName: name,
@@ -382,8 +383,7 @@ class MatchDetails extends ChangeNotifier {
         half: half,
         factMap: goal.toMap());
 
-    _scoreHome++;
-    homeScoredBase();
+
 
     notifyListeners();
   }
@@ -392,6 +392,9 @@ class MatchDetails extends ChangeNotifier {
   void awayScored(String name) {
     int half;
     (!_hasSecondHalfStarted) ? half = 0 : half = 1;
+
+    _scoreAway++;
+    awayScoredBase();
 
 
 
@@ -420,8 +423,7 @@ class MatchDetails extends ChangeNotifier {
         factMap: goal.toMap());
 
 
-    _scoreAway++;
-    awayScoredBase();
+
 
     notifyListeners();
   }
