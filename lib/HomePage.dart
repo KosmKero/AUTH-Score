@@ -62,7 +62,8 @@ class _HomePageState extends State<HomePage> {
         // === Banner Ad ===
         if (_isBannerAdReady && _bannerAd != null)
           Container(
-            width: _bannerAd!.size.width.toDouble(),
+            color: darkModeNotifier.value ? Color(0xFF121212) : lightModeBackGround,
+            width: double.infinity.toDouble(),
             height: _bannerAd!.size.height.toDouble(),
             child: AdWidget(ad: _bannerAd!),
           ),
