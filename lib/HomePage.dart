@@ -69,6 +69,7 @@ class _HomePageState extends State<HomePage> {
           ),
 
         // === Admin Button ===
+        if (globalUser.isAdmin) Container(height: 5,color: darkModeNotifier.value ? Color(0xFF121212) : lightModeBackGround,) ,
         if (globalUser.isAdmin)
           Container(
             color: darkModeNotifier.value ? Color(0xFF121212) : lightModeBackGround,
