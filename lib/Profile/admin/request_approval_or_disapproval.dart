@@ -55,7 +55,7 @@ class _RequestHandlePageState extends State<RequestHandlePage> {
       // Προσθήκη της ομάδας στο έγγραφο του χρήστη
       await FirebaseFirestore.instance
           .collection('users')
-          .doc(requestId)
+          .doc(requestSnapshot['uid'])
           .set(
           {'Controlled Teams': FieldValue.arrayUnion([teamName]),
             'role':"admin"}, // Προσθέτουμε την ομάδα στο array
