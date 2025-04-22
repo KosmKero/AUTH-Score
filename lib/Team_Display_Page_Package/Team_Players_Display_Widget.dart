@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import '../Data_Classes/Player.dart';
 import '../Data_Classes/Team.dart';
 import '../globals.dart';
+import 'edit_player_page.dart';
 
 class TeamPlayersDisplayWidget extends StatefulWidget {
   const TeamPlayersDisplayWidget({super.key, required this.team});
@@ -39,7 +40,7 @@ class _TeamPlayersDisplayWidgetState extends State<TeamPlayersDisplayWidget> {
               Padding(
                 padding: EdgeInsets.only(top: 20,left: 10),
                 child: Text(
-                  greek? "*Για να διαγράψεις ένα παίκτη πάτα παρατεταμένα πάνω του.": "*To remove a player, long-press on their name.",
+                  greek? "*Για να επεξεργαστείς ένα παίκτη κάνε double-tap πάνω του.": "*To edit a player, double-tap on their name.",
                   style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.bold,
@@ -111,22 +112,14 @@ class _TeamPlayersDisplayWidgetState extends State<TeamPlayersDisplayWidget> {
 
   Widget playerName(Player player) {
     return GestureDetector(
-      onLongPress: (globalUser.controlTheseTeams(widget.team.name,null)) ?  ()  async {
-        final confirm = await showDialog<bool>(
-          context: context, // ή χρησιμοποίησε context αν έχεις
-          builder: (context) => AlertDialog(
-            title: Text('Διαγραφή Παίκτη'),
-            content: Text('Είσαι σίγουρος ότι θέλεις να διαγράψεις τον ${player.name};'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context, false),
-                child: Text('Ακύρωση'),
-              ),
-              TextButton(
-                onPressed: () => Navigator.pop(context, true),
-                child: Text('Διαγραφή', style: TextStyle(color: Colors.red)),
-              ),
-            ],
+      onDoubleTap: (globalUser.controlTheseTeams(widget.team.name,null)) ?  ()  async {
+        final confirm = await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => PlayerEditPage(
+              player: player,
+              team: widget.team,
+            ),
           ),
         );
 

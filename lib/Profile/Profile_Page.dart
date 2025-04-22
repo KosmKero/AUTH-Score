@@ -6,6 +6,7 @@ import 'package:untitled1/Profile/ChangePassword.dart';
 import 'package:untitled1/Profile/ChangeUserName.dart';
 import 'package:untitled1/Profile/admin/update_betting_results_button.dart';
 import 'package:untitled1/Profile/admin_request_screen.dart';
+import 'package:untitled1/Profile/feedback_page.dart';
 import 'package:untitled1/globals.dart';
 import '../Data_Classes/AppUser.dart';
 import '../Firebase_Handle/betting_result_update.dart';
@@ -104,10 +105,10 @@ class _ProfilePageState extends State<ProfilePage> {
                     ),
                   ),
                   Container(
-                    margin: EdgeInsets.symmetric(vertical: 10,horizontal: 20),
+                    margin: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
                     padding: EdgeInsets.symmetric(horizontal: 5, vertical: 2),
                     decoration: BoxDecoration(
-                      color: darkModeOn ? Color(0xFF1E1E1E ) : Colors.white,
+                      color: darkModeOn ? Color(0xFF1E1E1E) : Colors.white,
                       borderRadius: BorderRadius.circular(15),
                       boxShadow: [
                         BoxShadow(
@@ -134,14 +135,11 @@ class _ProfilePageState extends State<ProfilePage> {
                             );
                           },
                           child: Text(
-
-                                 "Top 20 Tipsters",
+                            "Top 20 Tipsters",
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.w500,
-                              color: darkModeOn
-                                  ? Colors.white
-                                  : Colors.black,
+                              color: darkModeOn ? Colors.white : Colors.black,
                             ),
                           )),
                     ),
@@ -499,9 +497,42 @@ class _ProfilePageState extends State<ProfilePage> {
                                 fontSize: 16,
                               ),
                             ),
+
                           ],
                         ),
-                        SizedBox(height: 15),
+                        SizedBox(height: 5,),
+                        Divider(),
+                        Row(
+                          children: [
+                            Icon(Icons.messenger,color: Colors.blue,),
+                            TextButton(
+                              onPressed: () {
+                                if (isLoggedIn) {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(builder: (context) => FeedbackPage()),
+                                  );
+                                }
+                              },
+                              style: TextButton.styleFrom(
+                                //backgroundColor: darkModeOn ? Colors.white10 : Colors.grey.shade200,
+                                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+
+                              ),
+                              child: Text(
+                                "Send feedback",
+                                style: TextStyle(
+                                  color: darkModeOn ? Colors.white : Colors.black87,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w400,
+                                ),
+                              ),
+                            )
+
+                          ],
+                        ),
+                        //SizedBox(height: 15),
+
                         /*Row(
                           children: [
                             Icon(

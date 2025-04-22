@@ -97,51 +97,66 @@ class _TopPlayersView extends State<TopPlayersPage> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Row(
-          children: [
-            Text((i + 1).toString(),style: TextStyle(color: darkModeNotifier.value ? Colors.white : Colors.black,),),
-            SizedBox(width: 10),
-            Container(
-              height: 40,
-              width: 40,
-              padding: EdgeInsets.all(6),
-
-              decoration: ( darkModeNotifier.value)? BoxDecoration(
-                color: Colors.white, // ή light grey
-                borderRadius: BorderRadius.circular(8),
-              ): null,
-              child: image, // το logo
-            )
-
-
-          ],
+        SizedBox(
+          width: 80, // ή όσο χρειάζεται
+          child: Row(
+            children: [
+              Text(
+                (i + 1).toString(),
+                style: TextStyle(
+                  color: darkModeNotifier.value ? Colors.white : Colors.black,
+                ),
+              ),
+              SizedBox(width: 10),
+              Container(
+                height: 40,
+                width: 40,
+                padding: EdgeInsets.all(6),
+                decoration: darkModeNotifier.value
+                    ? BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(8),
+                )
+                    : null,
+                child: image,
+              ),
+            ],
+          ),
         ),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              "${player.name} ${player.surname}",
-              style: TextStyle(color: Colors.white, fontSize: 15.5),
-            ),
-            Text(
-              player.position == 3
-                  ? "Επιθετικός"
-                  : player.position == 2
-                  ? "Μέσος"
-                  : player.position == 1
-                  ? "Αμυντικός"
-                  : "Τερματοφύλακας",
-              style: TextStyle(color: Colors.white, fontSize: 15.5),
-            ),
-          ],
+        SizedBox(
+          width: 160, // ίδιο πλάτος για να ευθυγραμμιστούν
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "${player.name} ${player.surname}",
+                style: TextStyle(color: Colors.white, fontSize: 15.5),
+              ),
+              Text(
+                player.position == 3
+                    ? "Επιθετικός"
+                    : player.position == 2
+                    ? "Μέσος"
+                    : player.position == 1
+                    ? "Αμυντικός"
+                    : "Τερματοφύλακας",
+                style: TextStyle(color: Colors.white, fontSize: 15.5),
+              ),
+            ],
+          ),
         ),
-        Text(
-          player.goals.toString(),
-          style: TextStyle(color: Colors.white, fontSize: 15.5),
+        SizedBox(
+          width: 40, // για γκολ
+          child: Text(
+            player.goals.toString(),
+            style: TextStyle(color: Colors.white, fontSize: 15.5),
+            textAlign: TextAlign.end,
+          ),
         ),
       ],
     );
   }
+
 
   Future<bool> assetExists(String path) async {
     try {
