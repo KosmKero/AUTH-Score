@@ -16,6 +16,7 @@
 	<string>untitled1</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
+	<string>ca-app-pub-1918416043234880/5443049271</string>
 	<key>CFBundleShortVersionString</key>
 	<string>$(FLUTTER_BUILD_NAME)</string>
 	<key>CFBundleSignature</key>

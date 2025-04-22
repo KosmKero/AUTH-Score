@@ -1,10 +1,12 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:untitled1/TopScorersContainer.dart';
 import 'package:untitled1/matchesContainer.dart';
-import 'API/Match_Handle.dart';
-import 'Match_Details_Package/add_match_page.dart';
-import 'Scorer.dart';
+import 'package:untitled1/API/Match_Handle.dart';
+import 'package:untitled1/Match_Details_Package/add_match_page.dart';
+import 'package:untitled1/Scorer.dart';
+import 'package:untitled1/ad_manager.dart';
 import 'globals.dart';
 
 class HomePage extends StatefulWidget {
@@ -14,6 +16,10 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   bool upcomingMatches = true;
+
+  BannerAd? _bannerAd;
+  bool _isBannerAdReady = false;
+
   List<Scorer> topScorers = [
     Scorer("paulos", 30, "c"),
     Scorer("lito", 15, "c"),
@@ -29,113 +35,122 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  Future<void> addi() async {}
+  @override
+  void initState() {
+    super.initState();
+
+    // Create banner ad with listener
+    _bannerAd = AdManager.createBannerAd(
+        onStatusChanged: (status) {
+          setState(() {
+            _isBannerAdReady = status;
+          });
+        }
+    )..load();
+  }
+
+  @override
+  void dispose() {
+    _bannerAd?.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
+        // === Banner Ad ===
+        if (_isBannerAdReady && _bannerAd != null)
+          Container(
+            width: _bannerAd!.size.width.toDouble(),
+            height: _bannerAd!.size.height.toDouble(),
+            child: AdWidget(ad: _bannerAd!),
+          ),
+
+        // === Admin Button ===
         if (globalUser.isAdmin)
           Container(
-              color: darkModeNotifier.value ?Color(0xFF121212) : lightModeBackGround,
-              width: double.infinity,
-              height: 60,
-              child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                      backgroundColor: darkModeNotifier.value
-                          ? darkModeBackGround
-                          : Color.fromARGB(250, 74, 111, 150)),
-                  onPressed: () async {
-                    await Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => AddMatchScreen(),
-                        ));
-                  },
-                  child: Text(
-                    greek?"Προσθήκη Αγώνα":"Add new match",
-                    style: TextStyle(
-                      color: darkModeNotifier.value ? Colors.white : Colors.white,
-                      fontFamily: 'Arial',
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16.5,
-                      wordSpacing: 1,
-                      letterSpacing: 0.5,
-                    ),
-                  )
-              )
-          ),
-        Container(
-            color: darkModeNotifier.value
-                ?Color(0xFF121212)
-                : lightModeBackGround,
+            color: darkModeNotifier.value ? Color(0xFF121212) : lightModeBackGround,
             width: double.infinity,
             height: 60,
-            child: TextButton(
-                onPressed: () {
-                  changeMatches();
-                },
-                child: upcomingMatches
-                    ? Row(
-                  children: [
-                    Icon(CupertinoIcons.back,
-                      color: darkModeNotifier.value ? Colors.white : Colors.white,
-                      size: 19,),
-                    Text(
-                      greek?"Προηγούμενοι αγώνες":"Previous matches",
-                      style: TextStyle(
-                          color: darkModeNotifier.value ? Colors.white : Colors.white,
-                          fontSize: 17,
-                          fontWeight: FontWeight.w600,
-                          fontFamily: "Arial",
-                          letterSpacing: 0.5
-                      ),
-                    ),
-                  ],
-                )
-                    : Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    Text(
-                      greek?"Επερχόμενοι αγώνες":"Upcoming matches",
-                      style: TextStyle(
-                          color: darkModeNotifier.value ? Colors.white : Colors.white,
-                          fontSize: 17,
-                          fontWeight: FontWeight.w600,
-                          fontFamily: "Arial",
-                          letterSpacing: 0.5
-                      ),
-                    ),
-                    Icon(CupertinoIcons.right_chevron,
-                      color: darkModeNotifier.value ? Colors.white : Colors.white,
-                      size: 19,),
-                  ],
-                ))),
-        /* Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [ Color.fromARGB(150, 105, 165, 227), Color.fromARGB(150, 105, 165, 227)], // Δύο χρώματα
-              begin: Alignment.topCenter, // Ξεκινάει από πάνω
-              end: Alignment.bottomCenter, // Καταλήγει κάτω
-              stops: [0.5, 0.5], // Χωρίζει το container 50-50
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: darkModeNotifier.value
+                    ? darkModeBackGround
+                    : Color.fromARGB(250, 74, 111, 150),
+              ),
+              onPressed: () async {
+                await Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => AddMatchScreen()),
+                );
+              },
+              child: Text(
+                greek ? "Προσθήκη Αγώνα" : "Add new match",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontFamily: 'Arial',
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16.5,
+                  wordSpacing: 1,
+                  letterSpacing: 0.5,
+                ),
+              ),
             ),
           ),
-          height: 90, // Ύψος για το scorers container
-          child: topScorersContainer(
-            topScorers: topScorers,
+
+        // === Toggle Button for Matches ===
+        Container(
+          color: darkModeNotifier.value ? Color(0xFF121212) : lightModeBackGround,
+          width: double.infinity,
+          height: 60,
+          child: TextButton(
+            onPressed: changeMatches,
+            child: upcomingMatches
+                ? Row(
+              children: [
+                Icon(CupertinoIcons.back, color: Colors.white, size: 19),
+                Text(
+                  greek ? "Προηγούμενοι αγώνες" : "Previous matches",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 17,
+                    fontWeight: FontWeight.w600,
+                    fontFamily: "Arial",
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ],
+            )
+                : Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Text(
+                  greek ? "Επερχόμενοι αγώνες" : "Upcoming matches",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 17,
+                    fontWeight: FontWeight.w600,
+                    fontFamily: "Arial",
+                    letterSpacing: 0.5,
+                  ),
+                ),
+                Icon(CupertinoIcons.right_chevron,
+                    color: Colors.white, size: 19),
+              ],
+            ),
           ),
         ),
-         */
+
+        // === Main Match Container ===
         Expanded(
-          //βαζει ολα τα match που ακολουθουν
-          // flex: 5, // Το κάτω μέρος είναι μικρότερο
           child: Container(
-            color: darkModeNotifier.value
-                ? Color(0xFF121212)
-                : lightModeBackGround,
+            color: darkModeNotifier.value ? Color(0xFF121212) : lightModeBackGround,
             child: upcomingMatches
                 ? matchesContainer(
-                matches: MatchHandle().getUpcomingMatches(), type: 1)
+              matches: MatchHandle().getUpcomingMatches(),
+              type: 1,
+            )
                 : matchesContainer(
               matches: MatchHandle().getPreviousMatches(),
               type: 2,

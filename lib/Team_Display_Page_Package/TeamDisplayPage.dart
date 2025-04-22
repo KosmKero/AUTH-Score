@@ -46,7 +46,7 @@ class _TeamDisplayPageState extends State<TeamDisplayPage> {
                 Text(
                 widget.team.name,
                 style: TextStyle(
-                fontSize: 23,
+                fontSize: 21,
                 fontWeight: FontWeight.bold,
                 fontFamily: 'Arial',
                 fontStyle: FontStyle.italic,
