@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:untitled1/Data_Classes/Player.dart';
 import 'package:untitled1/Firebase_Handle/user_handle_in_base.dart';
@@ -311,6 +312,9 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
   }
 
   Widget buildGoalIndicator(Goal goal) {
+    String goalScorer;
+    goal.scorerName == "Άλλος" ?  goalScorer='Γκολ' : goalScorer = goal.scorerName;
+
     return InkWell(
         onLongPress: (widget.match.hasMatchStarted && !widget.match.hasMatchFinished && globalUser.controlTheseTeams(
                     widget.match.homeTeam.name, widget.match.awayTeam.name) )
@@ -337,7 +341,7 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
                 //border: Border.all(color: Colors.grey)),
                 child: goal.isHomeTeam
                     ? Text(
-                        '${goal.timeString} \u0301 ⚽ ${goal.scorerName} (${goal.homeScore}-${goal.awayScore})',
+                        '${goal.timeString} \u0301 ⚽ $goalScorer (${goal.homeScore}-${goal.awayScore})',
                         style: TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.w600,
@@ -345,7 +349,7 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
                         ),
                       )
                     : Text(
-                        '(${goal.homeScore}-${goal.awayScore}) ${goal.scorerName} ⚽ ${goal.timeString} \u0301 ',
+                        '(${goal.homeScore}-${goal.awayScore}) $goalScorer ⚽ ${goal.timeString} \u0301 ',
                         style: TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.w600,
@@ -605,46 +609,37 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
         builder: (context) {
           return StatefulBuilder(builder: (context, setDialogState) {
             return AlertDialog(
-              title: Text("Γκολ ${team.name}"),
+              title: Text("ΓΚΟΛ ${team.name}"),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  TextField(
-                    controller: _controller,
-                    decoration:
-                        InputDecoration(hintText: "Γράψτε για αναζήτηση"),
-                    onChanged: (value) {
-                      setDialogState(() {
-                        goalScorer = null;
-                        // Ενημέρωση της κατάστασης με βάση την είσοδο
-                      });
-                    },
+              DropdownSearch<String>(
+              popupProps: PopupProps.menu(
+                showSearchBox: true,
+                searchFieldProps: TextFieldProps(
+                  decoration: InputDecoration(
+                    hintText: "Αναζήτηση σκόρερ",
                   ),
-                  SizedBox(height: 10),
-                  DropdownButton<String>(
-                    hint: Text(
-                      "Σκόρερ",
-                      style: TextStyle(
-                          color: _getFilteredOptions(team).isNotEmpty
-                              ? Colors.black
-                              : Colors.grey),
-                    ),
-                    value: goalScorer,
-                    isExpanded: true,
-                    items: _getFilteredOptions(team).map((Player player) {
-                      return DropdownMenuItem<String>(
-                        value:
-                            "${player.name.substring(0, 1)}. ${player.surname}",
-                        child: Text("${player.name} ${player.surname}"),
-                      );
-                    }).toList(),
-                    onChanged: (String? newValue) {
-                      setDialogState(() {
-                        goalScorer = newValue;
-                      });
-                    },
-                  ),
+                ),
+                emptyBuilder: (_, __) => Center(child: Text("Δεν βρέθηκαν παίκτες")),
+              ),
+                items: [
+                  ...team.players.map((player) => "${player.name.substring(0, 1)}. ${player.surname}"),
+                  "Άλλος",
                 ],
+              dropdownDecoratorProps: DropDownDecoratorProps(
+                dropdownSearchDecoration: InputDecoration(
+                  hintText: "Σκόρερ",
+                ),
+              ),
+              selectedItem: goalScorer,
+              onChanged: (String? newValue) {
+                setDialogState(() {
+                  goalScorer = newValue;
+                });
+              },
+            )
+            ],
               ),
               actions: [
                 TextButton(
@@ -659,9 +654,16 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
                   onPressed: () {
                     //εδω πρεπει να μπει λεπτο
                     if (goalScorer != null) {
-                      homeTeamScored
-                          ? widget.match.homeScored(goalScorer ?? " ")
-                          : widget.match.awayScored(goalScorer ?? " ");
+                      if (goalScorer !='Άλλος') {
+                        homeTeamScored
+                          ? widget.match.homeScored(goalScorer ?? " ", true)
+                          : widget.match.awayScored(goalScorer ?? " ", true);
+                      }
+                      else{
+                        homeTeamScored
+                            ? widget.match.homeScored(goalScorer ?? " ",false)
+                            : widget.match.awayScored(goalScorer ?? " ",false);
+                      }
                     }
                     _controller.clear();
                     Navigator.of(context).pop(); // Κλείνει το διάλογο

@@ -353,7 +353,7 @@ class MatchDetails extends ChangeNotifier {
   }
 
   //ετοιμο
-  Future<void> homeScored(String name) async {
+  Future<void> homeScored(String name, bool hasName) async {
     if (hasMatchStarted && globalUser.controlTheseTeams(homeTeam.name, awayTeam.name)) {
       int half;
       (!_hasSecondHalfStarted) ? half = 0 : half = 1;
@@ -373,10 +373,12 @@ class MatchDetails extends ChangeNotifier {
 
       _matchFacts[half]?.add(goal);
 
-      for (Player player in homeTeam.players) {
-        if ("${player.name.substring(0, 1)}. ${player.surname}" == name) {
-          TopPlayersHandle().playerScored(player);
-          break;
+      if (hasName) {
+        for (Player player in homeTeam.players) {
+          if ("${player.name.substring(0, 1)}. ${player.surname}" == name) {
+            TopPlayersHandle().playerScored(player);
+            break;
+          }
         }
       }
 
@@ -391,7 +393,7 @@ class MatchDetails extends ChangeNotifier {
   }
 
   //ετοιμο
-  void awayScored(String name) {
+  void awayScored(String name, bool hasName) {
     if (!hasMatchFinished && globalUser.controlTheseTeams(homeTeam.name, awayTeam.name)) {
       int half;
       (!_hasSecondHalfStarted) ? half = 0 : half = 1;
@@ -411,10 +413,12 @@ class MatchDetails extends ChangeNotifier {
 
       _matchFacts[half]?.add(goal);
 
-      for (Player player in awayTeam.players) {
-        if ("${player.name.substring(0, 1)}. ${player.surname}" == name) {
-          TopPlayersHandle().playerScored(player);
-          break;
+      if (hasName) {
+        for (Player player in awayTeam.players) {
+          if ("${player.name.substring(0, 1)}. ${player.surname}" == name) {
+            TopPlayersHandle().playerScored(player);
+            break;
+          }
         }
       }
 

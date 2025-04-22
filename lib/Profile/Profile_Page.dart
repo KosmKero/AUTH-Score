@@ -130,7 +130,7 @@ class _ProfilePageState extends State<ProfilePage> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => TopUsersListPage()),
+                                  builder: (context) => TopUsersList()),
                             );
                           },
                           child: Text(
