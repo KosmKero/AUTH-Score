@@ -95,6 +95,8 @@ class _RequestHandlePageState extends State<RequestHandlePage> {
                   subtitle: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      Text('Username: ${request['username']}'),
+                      Text('Ομάδα: ${request['team']}'),
                       Text('Status: ${request['status']}'),
                     ],
                   ),

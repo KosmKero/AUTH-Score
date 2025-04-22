@@ -43,16 +43,20 @@ class _TeamDisplayPageState extends State<TeamDisplayPage> {
                     width:  33,
                     child: widget.team.image),
                 SizedBox(width: 10,),
-                Text(
+            Flexible(
+              child: Text(
                 widget.team.name,
+                maxLines: 2,
+                softWrap: true,
+                overflow: TextOverflow.ellipsis, // για ασφάλεια αν είναι πολύ μεγάλο
                 style: TextStyle(
-                fontSize: 23,
-                fontWeight: FontWeight.bold,
-                fontFamily: 'Arial',
-                fontStyle: FontStyle.italic,
-                  color: Colors.white
-                          ),
-                        ),
+                  fontSize: 21,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'Arial',
+                  fontStyle: FontStyle.italic,
+                  color: Colors.white,
+                ),
+              ),)
               ],
             ),
             actions: [

@@ -24,7 +24,10 @@ class matchesContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _buildMatches();
+    return ListView(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      children: _buildMatchList(matches),
+    );
   }
 
   List<Widget> _buildMatchList(List<MatchDetails> matches) {
@@ -59,44 +62,6 @@ class matchesContainer extends StatelessWidget {
       widgets.add(eachMatchContainer(match));
     }
     return widgets;
-  }
-
-
-  Widget _buildMatches() {
-
-    return ListView(
-      padding: const EdgeInsets.symmetric(vertical: 10),
-      children: _buildMatchList(matches),
-    );
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SizedBox(height: 10),
-        for (int i = 0; i < matches.length; i++) ...[
-          if (i == 0 ||
-              matches[i].day != matches[i - 1].day ||
-              matches[i].month != matches[i - 1].month ||
-              matches[i].year != matches[i - 1].year) ...[
-            // Add extra spacing ONLY if it's a new date (not the first item)
-            if (i != 0) SizedBox(height: 20), // ← Larger gap for new dates
-            Text(
-              " ${matches[i].day}/${matches[i].month}/${matches[i].year}",
-              style: TextStyle(
-                fontSize: 14.5,
-                fontWeight: FontWeight.bold,
-                fontFamily: 'Arial',
-                color: darkModeNotifier.value ? Colors.white : Colors.white,
-                letterSpacing: 0.5,
-              ),
-            ),
-            SizedBox(height: 8),
-          ],
-          // Match container
-          eachMatchContainer(matches[i]),
-        ],
-      ],
-    );
   }
 
   void sortMatches() {

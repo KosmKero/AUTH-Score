@@ -73,7 +73,7 @@ class _AdminRequestScreenState extends State<AdminRequestScreen> {
             ),
             SizedBox(height: 16),
             DropdownButton<String>(
-              hint: Text('Select a group'),
+              hint: Text('Select a team'),
               value: _selectedGroup,
               onChanged: (String? newValue) {
                 setState(() {

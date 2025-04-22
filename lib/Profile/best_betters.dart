@@ -35,7 +35,7 @@ class TopUsersListPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(  // Τοποθετούμε το TopUsersList μέσα σε ένα Scaffold
       appBar: AppBar(
-        title: Text('Top 20 Users'),
+        title: Text('Top 20 Tipsters'),
         backgroundColor: Colors.blueAccent,  // Αλλαγή χρώματος AppBar
       ),
       body: TopUsersList(),  // Το widget που καλεί τη λίστα χρηστών
