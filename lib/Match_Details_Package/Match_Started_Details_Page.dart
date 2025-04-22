@@ -12,6 +12,8 @@ import '../Data_Classes/Team.dart';
 import '../Data_Classes/match_facts.dart';
 import 'Match_Not_Started/Match_Not_Started_Details_Page.dart';
 import 'Starting__11_Display_Card.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
+import '../../ad_manager.dart';
 
 class matchStartedPage extends StatelessWidget {
   final MatchDetails match;
@@ -39,6 +41,8 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
   late int _secondsElapsed;
   Timer? _timer;
   late int _startTimeInSeconds;
+  BannerAd? _bannerAd;
+  bool _isBannerAdReady = false;
 
   @override
   void initState() {
@@ -46,6 +50,20 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
     _startTimeInSeconds = widget.match.startTimeInSeconds;
     _syncTime();
     _startTimer();
+    _bannerAd = AdManager.createBannerAd(
+      onStatusChanged: (status) {
+        setState(() {
+          _isBannerAdReady = status;
+        });
+      }
+    )..load();
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    _bannerAd?.dispose();
+    super.dispose();
   }
 
   @override
@@ -58,12 +76,6 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
   }
   void _syncTime() {
     _secondsElapsed = DateTime.now().millisecondsSinceEpoch ~/ 1000 - _startTimeInSeconds;
-  }
-
-  @override
-  void dispose() {
-    _timer?.cancel();
-    super.dispose();
   }
 
   void _startTimer() {
@@ -112,11 +124,11 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
                     // ),
                     Center(
                         child: Text(
-                      widget.match.matchweekInfo(),
-                      style: TextStyle(
-                          fontSize: 13,
-                          color: darkModeNotifier.value?Colors.white: Colors.grey[800]),
-                    )),
+                          widget.match.matchweekInfo(),
+                          style: TextStyle(
+                              fontSize: 13,
+                              color: darkModeNotifier.value?Colors.white: Colors.grey[800]),
+                        )),
                     SizedBox(
                       height: 10,
                     ),
@@ -158,7 +170,13 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
                 ),
               ),
             ),
-            _sectionChooser(selectedIndex, widget.match)
+            _sectionChooser(selectedIndex, widget.match),
+            if (_isBannerAdReady && _bannerAd != null)
+              SizedBox(
+                width: _bannerAd!.size.width.toDouble(),
+                height: _bannerAd!.size.height.toDouble(),
+                child: AdWidget(ad: _bannerAd!),
+              ),
           ],
         ),
       ),

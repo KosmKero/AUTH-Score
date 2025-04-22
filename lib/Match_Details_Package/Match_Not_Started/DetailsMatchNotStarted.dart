@@ -6,65 +6,63 @@ import '../../Team_Display_Page_Package/TeamDisplayPage.dart';
 import '../../globals.dart';
 import 'betting_chooser.dart';
 
-
 //ΤΟ ΚΟΜΜΑΤΙ ΑΥΤΟ ΑΦΟΡΑ ΟΛΟ ΤΟ ΥΠΟΛΟΙΠΟ ΜΕΡΟΣ ΤΗΣ ΣΕΛΙΔΑΣ
 class DetailsMatchNotStarted extends StatelessWidget {
   const DetailsMatchNotStarted({super.key, required this.match});
   final MatchDetails match;
+
   @override
   Widget build(BuildContext context) {
     return Container(
       color: darkModeNotifier.value?Color.fromARGB(255,30, 30, 30):Colors.white,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            SizedBox(height: 70,),
-            Padding(
-              padding: EdgeInsets.only(right: 10),
-              child:Text(
-                greek?'Ποιός Θα κερδίσει?🏆':"Who will win?🏆",
-                style: TextStyle(
-                    fontSize: 19,
-                    fontWeight: FontWeight.bold,
-                    fontFamily: 'Arial',
-                    color: darkModeNotifier.value?Colors.white:Colors.black
-                ),
-              ),
-            ),
-            SizedBox(height: 8),
-            BettingChooser(match: match,), //TO KOYMΠΙ ΜΕ ΤΙΣ 3 ΕΠΙΛΟΓΕΣ (1Χ2)
-            SizedBox(
-              height: 70,
-            ),
-            Text(
-              greek?'Αποτελέσματα τελευταίων 5 αγωνιστικών:':"Result of the last 5 games:",
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          SizedBox(height: 70,),
+          Padding(
+            padding: EdgeInsets.only(right: 10),
+            child:Text(
+              greek?'Ποιός Θα κερδίσει?🏆':"Who will win?🏆",
               style: TextStyle(
-                fontSize: 18,
-                fontFamily: "Arial", color: darkModeNotifier.value?Colors.white:Colors.black
+                  fontSize: 19,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'Arial',
+                  color: darkModeNotifier.value?Colors.white:Colors.black
               ),
             ),
-            SizedBox(
-              height: 1,
+          ),
+          SizedBox(height: 8),
+          BettingChooser(match: match,), //TO KOYMΠΙ ΜΕ ΤΙΣ 3 ΕΠΙΛΟΓΕΣ (1Χ2)
+          SizedBox(
+            height: 70,
+          ),
+          Text(
+            greek?'Αποτελέσματα τελευταίων 5 αγωνιστικών:':"Result of the last 5 games:",
+            style: TextStyle(
+              fontSize: 18,
+              fontFamily: "Arial", color: darkModeNotifier.value?Colors.white:Colors.black
             ),
-            Padding( //ΑΦΟΡΑ ΤΗΝ ΑΠΟΣΤΑΣΗ ΑΠΟ ΤΑ ΚΥΚΛΑΚΙΑ ΜΕ ΤΟ ΟΝΟΜΑ
-              padding: const EdgeInsets.symmetric(horizontal:10.0),
-              child: Column(
-                children: [ //ΔΗΜΙΟΥΡΓΕΙ ΤΙΣ ΟΜΑΔΕΣ
-                  TeamFormWidget(team: match.homeTeam),
-                  SizedBox(height: 5),
-                  TeamFormWidget(team: match.awayTeam),
-                ],
-              ),
+          ),
+          SizedBox(
+            height: 1,
+          ),
+          Padding( //ΑΦΟΡΑ ΤΗΝ ΑΠΟΣΤΑΣΗ ΑΠΟ ΤΑ ΚΥΚΛΑΚΙΑ ΜΕ ΤΟ ΟΝΟΜΑ
+            padding: const EdgeInsets.symmetric(horizontal:10.0),
+            child: Column(
+              children: [ //ΔΗΜΙΟΥΡΓΕΙ ΤΙΣ ΟΜΑΔΕΣ
+                TeamFormWidget(team: match.homeTeam),
+                SizedBox(height: 5),
+                TeamFormWidget(team: match.awayTeam),
+              ],
             ),
-            SizedBox(
-              height: 20,
-            )
-          ],
-        ));
+          ),
+          SizedBox(
+            height: 20,
+          ),
+        ],
+      ),
+    );
   }
-
-
-
 }
 
 Future<List<num>> loadPercentages(MatchDetails match) async {
@@ -72,15 +70,10 @@ Future<List<num>> loadPercentages(MatchDetails match) async {
   return teamsHandle.getPercentages('${match.homeTeam.nameEnglish}${match.awayTeam.nameEnglish}${match.dateString}');
 }
 
-
-
-
 Future<List<String>> getFinalFive(String teamName) async{
-
   TeamsHandle teamsHandle = TeamsHandle();
   return teamsHandle.getPreviousResults(teamName);
 }
-
 
 //ΑΦΟΡΑ ΤΗΝ ΚΑΤΑΣΚΕΥΗ ΤΩΝ ΟΝΟΜΑΤΩΝ ΤΩΝ ΟΜΑΔΩΝ ΣΤΟ ΚΑΤΩ ΜΕΡΟΣ
 class TeamFormWidget extends StatelessWidget {

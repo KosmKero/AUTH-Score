@@ -10,6 +10,8 @@ import '../../championship_details/StandingsPage.dart';
 import '../../globals.dart';
 import '../../main.dart';
 import '../Starting__11_Display_Card.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
+import '../../ad_manager.dart';
 
 //ΟΛΟ ΕΔΩ ΑΦΟΡΑ ΤΟ ΕΠΑΝΩ ΚΟΜΜΑΤΙ ΤΗΣ ΣΕΛΙΔΑΣ. ΓΙΑ ΤΗΝ ΩΡΑ =,ΜΕΡΑ ΚΙΑ ΤΙς ΟΜΑΔΕΣ. ΤΟ ΜΠΛΕ ΠΛΑΙΣΙΟ ΣΤΗΝ ΑΡΧΗ ΑΡΧΗ ΠΑΝΩ
 class MatchNotStartedDetails extends StatefulWidget {
@@ -23,6 +25,27 @@ class MatchNotStartedDetails extends StatefulWidget {
 
 class _MatchNotStartedDetailsState extends State<MatchNotStartedDetails> {
   int selectedIndex = 0;
+  BannerAd? _bannerAd;
+  bool _isBannerAdReady = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _bannerAd = AdManager.createBannerAd(
+      onStatusChanged: (status) {
+        setState(() {
+          _isBannerAdReady = status;
+        });
+      }
+    )..load();
+  }
+
+  @override
+  void dispose() {
+    _bannerAd?.dispose();
+    super.dispose();
+  }
+
   void _changeSection(int index) {
     setState(() {
       selectedIndex = index;
@@ -66,9 +89,15 @@ class _MatchNotStartedDetailsState extends State<MatchNotStartedDetails> {
             ),
           ),
         ),
-        _sectionChooser(selectedIndex, widget.match)
+        _sectionChooser(selectedIndex, widget.match),
+        SizedBox(height: 20,),
+        if (_isBannerAdReady && _bannerAd != null)
+          Container(
+            width: _bannerAd!.size.width.toDouble(),
+            height: _bannerAd!.size.height.toDouble(),
+            child: AdWidget(ad: _bannerAd!),
+          ),
       ])
-
     );
   }
 
