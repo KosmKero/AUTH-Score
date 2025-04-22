@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:untitled1/Profile/admin/see_feedback.dart';
 import 'admins_handle.dart';
 import 'request_approval_or_disapproval.dart';
 
@@ -22,7 +23,7 @@ class _RequestApprovalScreenState extends State<RequestApprovalScreen> {
       body: Column(
         children: [
           _NavigationButtons(onSectionChange: _changeSection),
-           selectedIndex==0 ? Expanded(child: RequestHandlePage()): AdminListWidget()
+           selectedIndex==0 ? Expanded(child: RequestHandlePage()): selectedIndex==1 ? AdminListWidget() : Expanded(child: FeedbackViewPage())
         ],
       ),
     );
@@ -60,8 +61,10 @@ class _NavigationButtonsState extends State<_NavigationButtons> {
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             _buildTextButton("See Requests", 0),
-            SizedBox(width: 15),
+            SizedBox(width: 10),
             _buildTextButton("See Admins", 1),
+            SizedBox(width: 10,),
+            _buildTextButton("See Feedback", 2),
           ],
         ),
     );

@@ -441,7 +441,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
                   Container(
                     margin: EdgeInsets.all(20),
-                    padding: EdgeInsets.all(20),
+                    padding: EdgeInsets.symmetric(horizontal: 3, vertical: 10),
                     decoration: BoxDecoration(
                       color: darkModeOn ? Color(0xFF1E1E1E) : Colors.white,
                       borderRadius: BorderRadius.circular(15),
@@ -458,102 +458,66 @@ class _ProfilePageState extends State<ProfilePage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.contact_support,
-                              color: darkModeOn ? Colors.white : Colors.blue,
+                        ListTile(
+                          dense: true,
+                          leading: Icon(
+                            Icons.contact_support,
+                            color: darkModeOn ? Colors.white : Colors.blue,
+                          ),
+                          title: Text(
+                            greek ? "Επικοινωνία για προβλήματα" : "Communication for problems",
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                              color: darkModeOn ? Colors.white : Colors.black87,
                             ),
-                            SizedBox(width: 10),
-                            Text(
-                              greek
-                                  ? "Επικοινωνία για προβλήματα"
-                                  : "Communication for problems",
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w600,
-                                color:
-                                    darkModeOn ? Colors.white : Colors.black87,
-                              ),
-                            ),
-                          ],
+                          ),
                         ),
-                        SizedBox(height: 20),
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.email,
-                              color: darkModeOn
-                                  ? Colors.white70
-                                  : Colors.blue[700],
-                            ),
-                            SizedBox(width: 10),
-                            Text(
-                              "authscore@gmail.com",
-                              style: TextStyle(
-                                color: darkModeOn
-                                    ? Colors.white70
-                                    : Colors.black87,
-                                fontSize: 16,
-                              ),
-                            ),
-
-                          ],
-                        ),
-                        SizedBox(height: 5,),
                         Divider(),
-                        Row(
-                          children: [
-                            Icon(Icons.messenger,color: Colors.blue,),
-                            TextButton(
-                              onPressed: () {
-                                if (isLoggedIn) {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(builder: (context) => FeedbackPage()),
-                                  );
-                                }
-                              },
-                              style: TextButton.styleFrom(
-                                //backgroundColor: darkModeOn ? Colors.white10 : Colors.grey.shade200,
-                                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 12),
-
-                              ),
+                        ListTile(
+                          dense: true,
+                          leading: Icon(
+                            Icons.email,
+                            color: darkModeOn ? Colors.white70 : Colors.blue[700],
+                          ),
+                          title: Text(
+                            "authscore@gmail.com",
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: darkModeOn ? Colors.white70 : Colors.black87,
+                            ),
+                          ),
+                        ),
+                        ListTile(
+                          dense: true,
+                          leading: Icon(
+                            Icons.messenger,
+                            color: darkModeOn ? Colors.white : Colors.blue,
+                          ),
+                          title: TextButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => FeedbackPage()),
+                              );
+                            },
+                            child: Align(
+                              alignment: Alignment.centerLeft,
                               child: Text(
-                                "Send feedback",
+                                greek ? "Αποστολή feedback" : "Send feedback",
                                 style: TextStyle(
-                                  color: darkModeOn ? Colors.white : Colors.black87,
                                   fontSize: 16,
-                                  fontWeight: FontWeight.w400,
+                                  fontWeight: FontWeight.w600,
+                                  color: darkModeOn ? Colors.white : Colors.blue[900],
                                 ),
                               ),
-                            )
-
-                          ],
-                        ),
-                        //SizedBox(height: 15),
-
-                        /*Row(
-                          children: [
-                            Icon(
-                              Icons.email,
-                              color: darkModeOn ? Colors.white70 : Colors.blue[700],
                             ),
-                            SizedBox(width: 10),
-                            Text(
-                              "kosma pes email",
-                              style: TextStyle(
-                                color: darkModeOn ? Colors.white70 : Colors.black87,
-                                fontSize: 16,
-                              ),
-                            ),
-                          ],
+                          ),
                         ),
-
-                         */
                       ],
                     ),
                   ),
+
                   FutureBuilder<bool>(
                     future: _isSuperAdminFuture,
                     builder: (context, snapshot) {
