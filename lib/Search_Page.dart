@@ -61,7 +61,6 @@ class _SearchPageState extends State<SearchPage> {
               children: [
                 _buildTextButton(greek?"Ομάδα":"Team", 0),
                 _buildTextButton(greek?"Αγώνας":"Match", 1),
-                _buildTextButton(greek?"Παίχτης":"Player", 2),
               ],
             ),
           ),
@@ -288,9 +287,6 @@ class _searchDetailsState extends State<searchDetails> {
         case 1:
           matchSearchList = matchSearch(name);
           break;
-        case 2:
-          playerSearchList = playerSearch(name);
-          break;
       }
     });
   }
@@ -316,15 +312,15 @@ class _searchDetailsState extends State<searchDetails> {
     return matchSearchList;
   }
 
-  List<Player> playerSearch(String name) {
-    playerSearchList.clear();
-    for (Player player in players) {
-      if (player.name.toLowerCase().contains(name.toLowerCase())) {
-        playerSearchList.add(player);
-      }
-    }
-    return playerSearchList;
-  }
+  //List<Player> playerSearch(String name) {
+  //  playerSearchList.clear();
+  //  for (Player player in players) {
+  //    if (player.name.toLowerCase().contains(name.toLowerCase())) {
+  //      playerSearchList.add(player);
+  //    }
+  //  }
+  //  return playerSearchList;
+  //}
 
   @override
   void dispose() {

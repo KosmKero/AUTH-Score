@@ -8,6 +8,7 @@ import 'package:untitled1/Profile/admin/update_betting_results_button.dart';
 import 'package:untitled1/Profile/admin_request_screen.dart';
 import 'package:untitled1/globals.dart';
 import '../Data_Classes/AppUser.dart';
+import '../Firebase_Handle/betting_result_update.dart';
 import 'LogInScreen.dart';
 import 'admin/requests_and_admins_page.dart';
 import 'best_betters.dart';
@@ -30,16 +31,18 @@ class _ProfilePageState extends State<ProfilePage> {
   String selectedLanguage = "";
   UserHandleBase userHandleBase = UserHandleBase();
 
+  late Future<bool> _isSuperAdminFuture;
   @override
   void initState() {
     super.initState();
     _loadLanguage();
+    _isSuperAdminFuture = globalUser.isSuperUser();
   }
 
   Future<void> _loadLanguage() async {
     if (isLoggedIn) {
       String lang =
-      await UserHandleBase().getSelectedLanguage(globalUser.username);
+          await UserHandleBase().getSelectedLanguage(globalUser.username);
       setState(() {
         isGreek = (lang == "Ελληνικά");
         selectedLanguage = lang;
@@ -71,7 +74,8 @@ class _ProfilePageState extends State<ProfilePage> {
                 children: [
                   Container(
                     width: double.infinity,
-                    padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 15),
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 20, horizontal: 15),
                     decoration: BoxDecoration(
                       color: darkModeOn ? Color(0xFF1E1E1E) : Colors.blue[50],
                       borderRadius: BorderRadius.only(
@@ -80,7 +84,9 @@ class _ProfilePageState extends State<ProfilePage> {
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: darkModeOn ? Colors.black.withOpacity(0.3) : Colors.blue.withOpacity(0.1),
+                          color: darkModeOn
+                              ? Colors.black.withOpacity(0.3)
+                              : Colors.blue.withOpacity(0.1),
                           blurRadius: 10,
                           offset: Offset(0, 5),
                         ),
@@ -97,32 +103,47 @@ class _ProfilePageState extends State<ProfilePage> {
                       ),
                     ),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: darkModeOn ? Color(0xFF2196F3) : Colors.blue,
-                        padding: EdgeInsets.symmetric(vertical: 12, horizontal: 20),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15),
+                  Container(
+                    margin: EdgeInsets.symmetric(vertical: 10,horizontal: 20),
+                    padding: EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: darkModeOn ? Color(0xFF1E1E1E ) : Colors.white,
+                      borderRadius: BorderRadius.circular(15),
+                      boxShadow: [
+                        BoxShadow(
+                          color: darkModeOn
+                              ? Colors.black.withOpacity(0.3)
+                              : Colors.black.withOpacity(0.1),
+                          blurRadius: 10,
+                          offset: Offset(0, 5),
                         ),
-                        elevation: darkModeOn ? 8 : 4,
+                      ],
+                    ),
+                    child: ListTile(
+                      dense: true,
+                      leading: Icon(
+                        Icons.leaderboard_rounded,
+                        color: darkModeOn ? Colors.white : Colors.blue,
                       ),
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => TopUsersListPage()),
-                        );
-                      },
-                      child: Text(
-                        "Top 20 μύστες",
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
-                        ),
-                      ),
+                      title: TextButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => TopUsersListPage()),
+                            );
+                          },
+                          child: Text(
+
+                                 "Top 20 Tipsters",
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w500,
+                              color: darkModeOn
+                                  ? Colors.white
+                                  : Colors.black,
+                            ),
+                          )),
                     ),
                   ),
                   SizedBox(height: 20),
@@ -133,7 +154,9 @@ class _ProfilePageState extends State<ProfilePage> {
                       borderRadius: BorderRadius.circular(15),
                       boxShadow: [
                         BoxShadow(
-                          color: darkModeOn ? Colors.black.withOpacity(0.3) : Colors.black.withOpacity(0.1),
+                          color: darkModeOn
+                              ? Colors.black.withOpacity(0.3)
+                              : Colors.black.withOpacity(0.1),
                           blurRadius: 10,
                           offset: Offset(0, 5),
                         ),
@@ -158,7 +181,9 @@ class _ProfilePageState extends State<ProfilePage> {
                                 );
                               },
                               child: Text(
-                                greek ? "Αλλαγή ονόματος χρήστη" : "Change username",
+                                greek
+                                    ? "Αλλαγή ονόματος χρήστη"
+                                    : "Change username",
                                 style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w600,
@@ -185,7 +210,9 @@ class _ProfilePageState extends State<ProfilePage> {
                                 );
                               },
                               child: Text(
-                                greek ? "Αλλαγή κωδικού σύνδεσης" : "Change password",
+                                greek
+                                    ? "Αλλαγή κωδικού σύνδεσης"
+                                    : "Change password",
                                 style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w600,
@@ -214,7 +241,8 @@ class _ProfilePageState extends State<ProfilePage> {
                                               LogInScreen(user: widget.user)));
                                 } else {
                                   isLoggedIn = false;
-                                  globalUser = AppUser(" ", " ", [], [], "user",{});
+                                  globalUser =
+                                      AppUser(" ", " ", [], [], "user", {});
                                   signOutUser();
                                 }
                               });
@@ -230,7 +258,11 @@ class _ProfilePageState extends State<ProfilePage> {
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
-                                color: isLoggedIn?Colors.red: darkModeOn ? Colors.white : Colors.black,
+                                color: isLoggedIn
+                                    ? Colors.red
+                                    : darkModeOn
+                                        ? Colors.white
+                                        : Colors.black,
                               ),
                             ),
                           ),
@@ -247,11 +279,14 @@ class _ProfilePageState extends State<ProfilePage> {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                      builder: (context) => AdminRequestScreen()),
+                                      builder: (context) =>
+                                          AdminRequestScreen()),
                                 );
                               },
                               child: Text(
-                                greek?"Άιτημα διαχείρισης ομάδας":"Team management request",
+                                greek
+                                    ? "Άιτημα διαχείρισης ομάδας"
+                                    : "Team management request",
                                 style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w600,
@@ -266,7 +301,8 @@ class _ProfilePageState extends State<ProfilePage> {
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
                     child: LogInButton(
                       user: widget.user,
                       onLoginStateChanged: () {
@@ -282,7 +318,9 @@ class _ProfilePageState extends State<ProfilePage> {
                       borderRadius: BorderRadius.circular(15),
                       boxShadow: [
                         BoxShadow(
-                          color: darkModeOn ? Colors.black.withOpacity(0.3) : Colors.black.withOpacity(0.1),
+                          color: darkModeOn
+                              ? Colors.black.withOpacity(0.3)
+                              : Colors.black.withOpacity(0.1),
                           blurRadius: 10,
                           offset: Offset(0, 5),
                         ),
@@ -297,7 +335,8 @@ class _ProfilePageState extends State<ProfilePage> {
                               children: [
                                 Icon(
                                   Icons.language,
-                                  color: darkModeOn ? Colors.white : Colors.blue,
+                                  color:
+                                      darkModeOn ? Colors.white : Colors.blue,
                                 ),
                                 SizedBox(width: 10),
                                 Text(
@@ -305,20 +344,27 @@ class _ProfilePageState extends State<ProfilePage> {
                                   style: TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.w600,
-                                    color: darkModeOn ? Colors.white : Colors.black87,
+                                    color: darkModeOn
+                                        ? Colors.white
+                                        : Colors.black87,
                                   ),
                                 ),
                               ],
                             ),
                             DropdownButtonHideUnderline(
                               child: DropdownButton<String>(
-                                dropdownColor:
-                                darkModeOn ? Colors.grey[850] : Colors.white,
+                                dropdownColor: darkModeOn
+                                    ? Colors.grey[850]
+                                    : Colors.white,
                                 value: greek ? "Ελληνικά" : "English",
                                 icon: Icon(Icons.arrow_drop_down,
-                                    color: darkModeOn ? Colors.white : Colors.black87),
+                                    color: darkModeOn
+                                        ? Colors.white
+                                        : Colors.black87),
                                 style: TextStyle(
-                                  color: darkModeOn ? Colors.white : Colors.black87,
+                                  color: darkModeOn
+                                      ? Colors.white
+                                      : Colors.black87,
                                   fontWeight: FontWeight.w500,
                                 ),
                                 borderRadius: BorderRadius.circular(12),
@@ -360,15 +406,21 @@ class _ProfilePageState extends State<ProfilePage> {
                             ),
                           ],
                         ),
-                        Divider(color: darkModeOn ? Colors.grey[700] : Colors.grey[300]),
+                        Divider(
+                            color: darkModeOn
+                                ? Colors.grey[700]
+                                : Colors.grey[300]),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Row(
                               children: [
                                 Icon(
-                                  darkModeOn ? Icons.dark_mode : Icons.light_mode,
-                                  color: darkModeOn ? Colors.white : Colors.blue,
+                                  darkModeOn
+                                      ? Icons.dark_mode
+                                      : Icons.light_mode,
+                                  color:
+                                      darkModeOn ? Colors.white : Colors.blue,
                                 ),
                                 SizedBox(width: 10),
                                 Text(
@@ -376,7 +428,9 @@ class _ProfilePageState extends State<ProfilePage> {
                                   style: TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.w600,
-                                    color: darkModeOn ? Colors.white : Colors.black87,
+                                    color: darkModeOn
+                                        ? Colors.white
+                                        : Colors.black87,
                                   ),
                                 ),
                               ],
@@ -395,7 +449,9 @@ class _ProfilePageState extends State<ProfilePage> {
                       borderRadius: BorderRadius.circular(15),
                       boxShadow: [
                         BoxShadow(
-                          color: darkModeOn ? Colors.black.withOpacity(0.3) : Colors.black.withOpacity(0.1),
+                          color: darkModeOn
+                              ? Colors.black.withOpacity(0.3)
+                              : Colors.black.withOpacity(0.1),
                           blurRadius: 10,
                           offset: Offset(0, 5),
                         ),
@@ -418,7 +474,8 @@ class _ProfilePageState extends State<ProfilePage> {
                               style: TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.w600,
-                                color: darkModeOn ? Colors.white : Colors.black87,
+                                color:
+                                    darkModeOn ? Colors.white : Colors.black87,
                               ),
                             ),
                           ],
@@ -428,13 +485,17 @@ class _ProfilePageState extends State<ProfilePage> {
                           children: [
                             Icon(
                               Icons.email,
-                              color: darkModeOn ? Colors.white70 : Colors.blue[700],
+                              color: darkModeOn
+                                  ? Colors.white70
+                                  : Colors.blue[700],
                             ),
                             SizedBox(width: 10),
                             Text(
                               "authscore@gmail.com",
                               style: TextStyle(
-                                color: darkModeOn ? Colors.white70 : Colors.black87,
+                                color: darkModeOn
+                                    ? Colors.white70
+                                    : Colors.black87,
                                 fontSize: 16,
                               ),
                             ),
@@ -462,6 +523,104 @@ class _ProfilePageState extends State<ProfilePage> {
                       ],
                     ),
                   ),
+                  FutureBuilder<bool>(
+                    future: _isSuperAdminFuture,
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return CircularProgressIndicator(); // Ή SizedBox.shrink() αν θες να μη φαίνεται τίποτα
+                      }
+                      if (snapshot.hasData &&
+                          snapshot.data! &&
+                          globalUser.isAdmin &&
+                          globalUser.isLoggedIn) {
+                        return Container(
+                          margin: EdgeInsets.all(20),
+                          padding:
+                              EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                          decoration: BoxDecoration(
+                            color:
+                                darkModeOn ? Color(0xFF1E1E1E) : Colors.white,
+                            borderRadius: BorderRadius.circular(15),
+                            boxShadow: [
+                              BoxShadow(
+                                color: darkModeOn
+                                    ? Colors.black.withOpacity(0.3)
+                                    : Colors.black.withOpacity(0.1),
+                                blurRadius: 10,
+                                offset: Offset(0, 5),
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              ListTile(
+                                dense: true,
+                                leading: Icon(
+                                  Icons.admin_panel_settings,
+                                  color:
+                                      darkModeOn ? Colors.white : Colors.blue,
+                                ),
+                                title: TextButton(
+                                  onPressed: () async {
+                                    if (await _isSuperAdminFuture) {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              RequestApprovalScreen(),
+                                        ),
+                                      );
+                                    }
+                                  },
+                                  child: Text(
+                                    greek ? "Διαχειριστές" : "Admins handle",
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                      color: darkModeOn
+                                          ? Colors.white
+                                          : Colors.blue[900],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              ListTile(
+                                dense: true,
+                                leading: Icon(
+                                  Icons.admin_panel_settings,
+                                  color:
+                                      darkModeOn ? Colors.white : Colors.blue,
+                                ),
+                                title: TextButton(
+                                  onPressed: () async {
+                                    if (await _isSuperAdminFuture) {
+                                      BettingResultUpdate()
+                                          .checkAndUpdateStats();
+                                    }
+                                  },
+                                  child: Text(
+                                    greek
+                                        ? "Ανανέωση στοιχημάτων"
+                                        : "Betting update",
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                      color: darkModeOn
+                                          ? Colors.white
+                                          : Colors.blue[900],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      } else {
+                        return SizedBox.shrink();
+                      }
+                    },
+                  )
                 ],
               ),
             ],
@@ -489,10 +648,9 @@ class _LogInButtonState extends State<LogInButton> {
   Widget build(BuildContext context) {
     return Column(children: [
       Padding(
-          padding: EdgeInsets.only(bottom: widget.user.isLoggedIn ? 70 : 70),
+          padding: EdgeInsets.only(bottom: widget.user.isLoggedIn ? 30 : 50),
           child: Padding(
             padding: EdgeInsets.symmetric(horizontal: 30),
-
           )),
     ]);
   }
@@ -534,7 +692,7 @@ class _OvalToggleButtonState extends State<OvalToggleButton> {
             child: AnimatedAlign(
               duration: Duration(milliseconds: 300),
               alignment:
-              isToggled ? Alignment.centerRight : Alignment.centerLeft,
+                  isToggled ? Alignment.centerRight : Alignment.centerLeft,
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 5),
                 child: Container(

@@ -9,6 +9,7 @@ import '../../Data_Classes/MatchDetails.dart';
 import 'package:provider/provider.dart';
 import '../API/user_handle.dart';
 import '../Data_Classes/Team.dart';
+import '../Data_Classes/match_facts.dart';
 import 'Match_Not_Started/Match_Not_Started_Details_Page.dart';
 import 'Starting__11_Display_Card.dart';
 
@@ -309,9 +310,8 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
 
   Widget buildGoalIndicator(Goal goal) {
     return InkWell(
-        onLongPress: (globalUser.controlTheseTeams(
-                    widget.match.homeTeam.name, widget.match.awayTeam.name) ??
-                false)
+        onLongPress: (widget.match.hasMatchStarted && !widget.match.hasMatchFinished && globalUser.controlTheseTeams(
+                    widget.match.homeTeam.name, widget.match.awayTeam.name) )
             ? () {
                 setState(() {
                   _cancelGoalDialog(context, goal);

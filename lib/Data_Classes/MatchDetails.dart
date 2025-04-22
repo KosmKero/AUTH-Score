@@ -10,6 +10,7 @@ import 'package:untitled1/Firebase_Handle/TeamsHandle.dart';
 
 import '../globals.dart';
 import 'Team.dart';
+import 'match_facts.dart';
 
 class MatchDetails extends ChangeNotifier {
   //με το _ γινεται private
@@ -353,79 +354,78 @@ class MatchDetails extends ChangeNotifier {
 
   //ετοιμο
   Future<void> homeScored(String name) async {
-    int half;
-    (!_hasSecondHalfStarted) ? half = 0 : half = 1;
+    if (hasMatchStarted && globalUser.controlTheseTeams(homeTeam.name, awayTeam.name)) {
+      int half;
+      (!_hasSecondHalfStarted) ? half = 0 : half = 1;
 
-    _scoreHome++;
-    homeScoredBase();
+      _scoreHome++;
+      homeScoredBase();
 
-    Goal goal = Goal(
-        scorerName: name,
-        homeScore: _scoreHome,
-        awayScore: _scoreAway,
-        minute:
-            DateTime.now().millisecondsSinceEpoch ~/ 1000 - startTimeInSeconds,
-        isHomeTeam: true,
-        team: homeTeam,
-        half: half);
+      Goal goal = Goal(
+          scorerName: name,
+          homeScore: _scoreHome,
+          awayScore: _scoreAway,
+          minute: DateTime.now().millisecondsSinceEpoch ~/ 1000 -
+              startTimeInSeconds,
+          isHomeTeam: true,
+          team: homeTeam,
+          half: half);
 
-    _matchFacts[half]?.add(goal);
+      _matchFacts[half]?.add(goal);
 
-    for (Player player in homeTeam.players) {
-      if ("${player.name.substring(0, 1)}. ${player.surname}" == name) {
-        TopPlayersHandle().playerScored(player);
-        break;
+      for (Player player in homeTeam.players) {
+        if ("${player.name.substring(0, 1)}. ${player.surname}" == name) {
+          TopPlayersHandle().playerScored(player);
+          break;
+        }
       }
+
+      MatchFactsStorageHelper().addMatchFact(
+          matchDoc:
+              FirebaseFirestore.instance.collection('matches').doc(matchDocId),
+          half: half,
+          factMap: goal.toMap());
+
+      notifyListeners();
     }
-
-    MatchFactsStorageHelper().addMatchFact(
-        matchDoc: FirebaseFirestore.instance.collection('matches').doc(matchDocId),
-        half: half,
-        factMap: goal.toMap());
-
-
-
-    notifyListeners();
   }
 
   //ετοιμο
   void awayScored(String name) {
-    int half;
-    (!_hasSecondHalfStarted) ? half = 0 : half = 1;
+    if (!hasMatchFinished && globalUser.controlTheseTeams(homeTeam.name, awayTeam.name)) {
+      int half;
+      (!_hasSecondHalfStarted) ? half = 0 : half = 1;
 
-    _scoreAway++;
-    awayScoredBase();
+      _scoreAway++;
+      awayScoredBase();
 
+      Goal goal = Goal(
+          scorerName: name,
+          homeScore: _scoreHome,
+          awayScore: _scoreAway,
+          minute: DateTime.now().millisecondsSinceEpoch ~/ 1000 -
+              startTimeInSeconds,
+          isHomeTeam: false,
+          team: awayTeam,
+          half: half);
 
+      _matchFacts[half]?.add(goal);
 
-    Goal goal = Goal(
-        scorerName: name,
-        homeScore: _scoreHome,
-        awayScore: _scoreAway,
-        minute:
-            DateTime.now().millisecondsSinceEpoch ~/ 1000 - startTimeInSeconds,
-        isHomeTeam: false,
-        team: awayTeam,
-        half: half);
-
-    _matchFacts[half]?.add(goal);
-
-    for (Player player in awayTeam.players) {
-      if ("${player.name.substring(0, 1)}. ${player.surname}" == name) {
-        TopPlayersHandle().playerScored(player);
-        break;
+      for (Player player in awayTeam.players) {
+        if ("${player.name.substring(0, 1)}. ${player.surname}" == name) {
+          TopPlayersHandle().playerScored(player);
+          break;
+        }
       }
+
+      MatchFactsStorageHelper().addMatchFact(
+          matchDoc:
+              FirebaseFirestore.instance.collection('matches').doc(matchDocId),
+          half: half,
+          factMap: goal.toMap());
+
+      notifyListeners();
     }
-
-    MatchFactsStorageHelper().addMatchFact(
-        matchDoc: FirebaseFirestore.instance.collection('matches').doc(matchDocId),
-        half: half,
-        factMap: goal.toMap());
-
-
-
-
-    notifyListeners();
   }
 
   //ετοιμο
@@ -514,87 +514,97 @@ class MatchDetails extends ChangeNotifier {
   //ετοιμο
   Future<void> playerGotCard(
       String name, Team team, bool isYellow, int? minute, bool isHomeTeam) async {
-    for (Player player in team.players) {
-      if ("${player.name.substring(0, 1)}. ${player.surname}" == name) {
-        isYellow ? await player.gotYellowCard() : await player.gotRedCard();
-        break;
+    if (!hasMatchFinished && globalUser.controlTheseTeams(homeTeam.name, awayTeam.name)) {
+
+      for (Player player in team.players) {
+        if ("${player.name.substring(0, 1)}. ${player.surname}" == name) {
+          isYellow ? await player.gotYellowCard() : await player.gotRedCard();
+          break;
+        }
       }
+      int half;
+      (!_hasSecondHalfStarted) ? half = 0 : half = 1;
+
+      CardP card = CardP(
+          playerName: name,
+          team: team,
+          isYellow: isYellow,
+          minute: minute ??
+              (DateTime.now().millisecondsSinceEpoch ~/ 1000) -
+                  startTimeInSeconds,
+          isHomeTeam: isHomeTeam,
+          half: half);
+
+      _matchFacts[half]?.add(card);
+      await MatchFactsStorageHelper().addMatchFact(
+          matchDoc:
+              FirebaseFirestore.instance.collection('matches').doc(matchDocId),
+          half: half,
+          factMap: card.toMap());
+      notifyListeners();
     }
-    int half;
-    (!_hasSecondHalfStarted) ? half = 0 : half = 1;
-
-    CardP card = CardP(
-        playerName: name,
-        team: team,
-        isYellow: isYellow,
-        minute: minute ??
-            (DateTime.now().millisecondsSinceEpoch ~/ 1000) -
-                startTimeInSeconds,
-        isHomeTeam: isHomeTeam,
-        half: half);
-
-    _matchFacts[half]?.add(card);
-    await MatchFactsStorageHelper().addMatchFact(
-        matchDoc: FirebaseFirestore.instance.collection('matches').doc(matchDocId),
-        half: half,
-        factMap: card.toMap());
-    notifyListeners();
   }
 
   //ετοιμο
   Future<void> cancelGoal(Goal goal1) async {
-    if (_matchFacts.containsKey(goal1.half)) {
+    if (!hasMatchFinished && globalUser.controlTheseTeams(homeTeam.name, awayTeam.name)) {
+      if (_matchFacts.containsKey(goal1.half)) {
+        _matchFacts[goal1.half]!
+            .removeWhere((goal) => goal is Goal && goal == goal1);
 
-      _matchFacts[goal1.half]!
-          .removeWhere((goal) => goal is Goal && goal == goal1);
-
-      goal1.isHomeTeam ? _scoreHome-- : _scoreAway--;
-      for (Player player in goal1.team.players) {
-        if ("${player.name[0]}. ${player.surname}" ==
-            goal1.scorerName) {
-          TopPlayersHandle().goalCancelled(player);
-          break;
+        goal1.isHomeTeam ? _scoreHome-- : _scoreAway--;
+        for (Player player in goal1.team.players) {
+          if ("${player.name[0]}. ${player.surname}" == goal1.scorerName) {
+            TopPlayersHandle().goalCancelled(player);
+            break;
+          }
         }
-      }
 
-      await MatchFactsStorageHelper().deleteMatchFact(
-          matchDoc: FirebaseFirestore.instance.collection('matches').doc(matchDocId),
-          half: goal1.half,
-          factMap: goal1.toMap());
+        await MatchFactsStorageHelper().deleteMatchFact(
+            matchDoc: FirebaseFirestore.instance
+                .collection('matches')
+                .doc(matchDocId),
+            half: goal1.half,
+            factMap: goal1.toMap());
 
-      String type;
-      (goal1.isHomeTeam) ? (type = 'GoalHome') : (type = 'GoalAway');
+        String type;
+        (goal1.isHomeTeam) ? (type = 'GoalHome') : (type = 'GoalAway');
         await FirebaseFirestore.instance
             .collection('matches')
             .doc(matchDocId)
             .set({
-          type : FieldValue.increment(-1),
+          type: FieldValue.increment(-1),
         }, SetOptions(merge: true));
 
-
-      notifyListeners(); // Ενημέρωση των listeners για την αλλαγή
+        notifyListeners(); // Ενημέρωση των listeners για την αλλαγή
+      }
     }
   }
 
   //ετοιμο
   void cancelCard(CardP card1) {
-    if (_matchFacts.containsKey(card1.half)) {
-      _matchFacts[card1.half]!
-          .removeWhere((card) => card is CardP && card == card1);
+    if (!hasMatchFinished && globalUser.controlTheseTeams(homeTeam.name, awayTeam.name)) {
+      if (_matchFacts.containsKey(card1.half)) {
+        _matchFacts[card1.half]!
+            .removeWhere((card) => card is CardP && card == card1);
 
-      for (Player player in card1.team.players) {
-        if ("${player.name.substring(0, 1)}. ${player.surname}" == card1.name) {
-          card1.isYellow ? player.cancelYellowCard() : player.cancelRedCard();
-          break;
+        for (Player player in card1.team.players) {
+          if ("${player.name.substring(0, 1)}. ${player.surname}" ==
+              card1.name) {
+            card1.isYellow ? player.cancelYellowCard() : player.cancelRedCard();
+            break;
+          }
         }
+
+        MatchFactsStorageHelper().deleteMatchFact(
+            matchDoc: FirebaseFirestore.instance
+                .collection('matches')
+                .doc(matchDocId),
+            half: card1.half,
+            factMap: card1.toMap());
+
+        notifyListeners(); // Ενημέρωση των listeners για την αλλαγή
       }
-
-      MatchFactsStorageHelper().deleteMatchFact(
-          matchDoc: FirebaseFirestore.instance.collection('matches').doc(matchDocId),
-          half: card1.half,
-          factMap: card1.toMap());
-
-      notifyListeners(); // Ενημέρωση των listeners για την αλλαγή
     }
   }
 
@@ -688,114 +698,7 @@ class MatchDetails extends ChangeNotifier {
 
 }
 
-class Goal extends MatchFact {
-  Goal(
-      {required String scorerName,
-      required int homeScore,
-      required int awayScore,
-      required int minute,
-      String? assistName,
-      required bool isHomeTeam,
-      required Team team,
-      required int half})
-      : _homeScore = homeScore,
-        _awayScore = awayScore,
-        _assistName = assistName,
-        super(scorerName, team, minute, isHomeTeam, half);
 
-  final int _homeScore, _awayScore;
-  final String? _assistName;
-
-  String get scorerName => _name;
-  int get homeScore => _homeScore;
-  int get awayScore => _awayScore;
-  String? get assistName => _assistName;
-
-  factory Goal.fromMap(Map<String, dynamic> map, Team team) {
-    return Goal(
-      scorerName: map['scorerName'],
-      homeScore: map['homeScore'],
-      awayScore: map['awayScore'],
-      assistName: map['assistName'] == "null" ? null : map['assistName'],
-      minute: map['minute'],
-      isHomeTeam: map['isHomeTeam'],
-      team: team,
-      half: map['half'],
-    );
-  }
-
-  Map<String, dynamic> toMap() {
-
-    return {
-      'type': "goal",
-      'scorerName': scorerName,
-      'homeScore': homeScore,
-      'awayScore': awayScore,
-      'assistName': assistName ?? "null",
-      'minute': minute,
-      'isHomeTeam': isHomeTeam,
-      'team': team.name,
-      'half': half,
-    };
-  }
-}
-
-class CardP extends MatchFact {
-  CardP(
-      {required String playerName,
-      required Team team,
-      required bool isYellow,
-      required int minute,
-      required bool isHomeTeam,
-      required int half})
-      : _isYellow = isYellow,
-        super(playerName, team, minute, isHomeTeam, half);
-
-  final bool _isYellow;
-  bool get isYellow => _isYellow;
-
-  Map<String, dynamic> toMap() {
-    return {
-      'type': 'card', // προσθήκη τύπου για αναγνώριση
-      'playerName': name,
-      'minute': minute,
-      'isYellow': isYellow,
-      'isHomeTeam': isHomeTeam,
-      'team': team.name,
-      'half': half,
-    };
-  }
-
-  factory CardP.fromMap(Map<String, dynamic> map, Team team) {
-    return CardP(
-      playerName: map['playerName'],
-      minute: map['minute'],
-      isYellow: map['isYellow'],
-      isHomeTeam: map['isHomeTeam'],
-      team: team,
-      half: map['half'],
-    );
-  }
-}
-
-class MatchFact extends ChangeNotifier {
-  MatchFact(this._name, this._team, this._minute, this._isHomeTeam, this._half);
-
-  final String _name;
-  final Team _team;
-  final int _minute;
-  final bool _isHomeTeam;
-  final int _half;
-  String get timeString {
-    return ((_minute ~/ 60) + 1).toString().padLeft(2, '0');
-  }
-
-  String get name => _name;
-  Team get team => _team;
-  bool get isHomeTeam => _isHomeTeam;
-  int get half => _half;
-  int get minute => _minute;
-}
 
 class MatchFactsStorageHelper {
   // Μετατρέπει το Map<int, List<MatchFact>> σε Map<String, dynamic> για Firestore
