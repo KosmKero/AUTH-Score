@@ -37,7 +37,7 @@ class _TeamPlayersDisplayWidgetState extends State<TeamPlayersDisplayWidget> {
             playersCard(3, positionList(3)),
             if((globalUser.controlTheseTeams(widget.team.name,null)))
               Padding(
-                padding: EdgeInsets.only(top: 300,left: 10),
+                padding: EdgeInsets.only(top: 20,left: 10),
                 child: Text(
                   greek? "*Για να διαγράψεις ένα παίκτη πάτα παρατεταμένα πάνω του.": "*To remove a player, long-press on their name.",
                   style: TextStyle(

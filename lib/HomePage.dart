@@ -40,14 +40,16 @@ class _HomePageState extends State<HomePage> {
     super.initState();
 
     // Create banner ad with listener
-    _bannerAd = AdManager.createBannerAd(
+    if (_bannerAd == null && !_isBannerAdReady) {
+      _bannerAd = AdManager.createBannerAd(
         onStatusChanged: (status) {
           setState(() {
             _isBannerAdReady = status;
           });
-        }
-    )..load();
-  }
+        },
+      )..load();
+    }
+    }
 
   @override
   void dispose() {

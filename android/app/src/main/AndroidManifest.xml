@@ -8,7 +8,7 @@
         <!-- ✅ AdMob App ID -->
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-1918416043234880~1234567890" /> <!-- ΒΑΛΕ ΕΔΩ ΤΟ ΣΩΣΤΟ App ID -->
+            android:value="ca-app-pub-3940256099942544~3347511713"/> <!--ca-app-pub-1918416043234880~6648303825 == ΔΙΚΟ ΜΑΣ   ca-app-pub-3940256099942544~3347511713 == ΤΟ ΑΛΛΟΥ-->
 
         <!-- Firebase notification icon -->
         <meta-data
