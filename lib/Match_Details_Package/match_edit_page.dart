@@ -265,7 +265,7 @@ class _MatchEditPageState extends State<MatchEditPage> {
             const SizedBox(height: 16),
             (!_isGroupPhase)?TextField(
               controller: _gameController,
-              decoration:  InputDecoration(labelText: 'Παιχνίδι',
+              decoration:  InputDecoration(labelText: greek ? 'Φάση play-off' : "Play-off stage",
                   labelStyle: TextStyle(
                       color: darkModeNotifier.value? Colors.white: Colors.black,
                       fontSize: 20

@@ -25,26 +25,6 @@ class MatchNotStartedDetails extends StatefulWidget {
 
 class _MatchNotStartedDetailsState extends State<MatchNotStartedDetails> {
   int selectedIndex = 0;
-  BannerAd? _bannerAd;
-  bool _isBannerAdReady = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _bannerAd = AdManager.createBannerAd(
-      onStatusChanged: (status) {
-        setState(() {
-          _isBannerAdReady = status;
-        });
-      }
-    )..load();
-  }
-
-  @override
-  void dispose() {
-    _bannerAd?.dispose();
-    super.dispose();
-  }
 
   void _changeSection(int index) {
     setState(() {
@@ -91,12 +71,6 @@ class _MatchNotStartedDetailsState extends State<MatchNotStartedDetails> {
         ),
         _sectionChooser(selectedIndex, widget.match),
         SizedBox(height: 20,),
-        if (_isBannerAdReady && _bannerAd != null)
-          Container(
-            width: _bannerAd!.size.width.toDouble(),
-            height: _bannerAd!.size.height.toDouble(),
-            child: AdWidget(ad: _bannerAd!),
-          ),
       ])
     );
   }

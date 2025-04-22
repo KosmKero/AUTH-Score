@@ -1,15 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
 import 'package:untitled1/Firebase_Handle/TeamsHandle.dart';
 import 'package:untitled1/Match_Details_Package/Match_Not_Started/Match_Not_Started_Details_Page.dart';
 import 'package:untitled1/Match_Details_Package/Match_Started_Details_Page.dart';
 import '../Data_Classes/MatchDetails.dart';
+import '../ad_manager.dart';
 import '../globals.dart';
 import 'match_edit_page.dart';
 
 class matchDetailsPage extends StatelessWidget {
   final MatchDetails match;
   const matchDetailsPage(this.match, {Key? key,}): super(key: key);
+
+
 
 
   @override
@@ -21,12 +25,36 @@ class matchDetailsPage extends StatelessWidget {
   }
 }
 
-class _matchDetailsPageView extends StatelessWidget {
+class _matchDetailsPageView extends StatefulWidget {
   const _matchDetailsPageView();
 
-  //const MatchDetailsPage({super.key,required this.match});
-  //final Match match;
-  
+  @override
+  State<_matchDetailsPageView> createState() => _matchDetailsPageViewState();
+}
+
+class _matchDetailsPageViewState extends State<_matchDetailsPageView> {
+  BannerAd? _bannerAd;
+
+  bool _isBannerAdReady = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _bannerAd = AdManager.createBannerAd(
+      onStatusChanged: (status) {
+        setState(() {
+          _isBannerAdReady = status;
+        });
+      },
+    )..load();
+  }
+
+  @override
+  void dispose() {
+    _bannerAd?.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final match = Provider.of<MatchDetails>(context);
@@ -99,6 +127,18 @@ class _matchDetailsPageView extends StatelessWidget {
         ],
       ),
       body: matchProgress(match),
+      bottomNavigationBar: Column(
+        mainAxisSize: MainAxisSize.min, // Για να μην γεμίζει όλη την οθόνη
+        children: [
+          if (_isBannerAdReady && _bannerAd != null)
+            SizedBox(
+              width: _bannerAd!.size.width.toDouble(),
+              height: _bannerAd!.size.height.toDouble(),
+              child: AdWidget(ad: _bannerAd!),
+            ),
+        ],
+      ),
+
 
 
     );

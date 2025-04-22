@@ -278,7 +278,7 @@ class _AddMatchScreenState extends State<AddMatchScreen> {
               ),
               if (!isGroupPhase) TextFormField(
                 decoration: InputDecoration(
-                    labelText: 'Αριθμός Αγωνιστικής',
+                    labelText: greek ? 'Φάση play-off' : "Play-off stage",
                     labelStyle: TextStyle(
                         color: darkModeNotifier.value
                             ? Colors.white
