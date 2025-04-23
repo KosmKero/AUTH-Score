@@ -51,7 +51,7 @@ dependencies:
 flutter_launcher_icons:
   android: true
   ios: true
-  image_path: "AUTHScorelogo/AUTH_Score_logo6.png"
+  image_path: "AUTHScorelogo/AUTH_Score_logo9.png"
 
 
 dev_dependencies:
