@@ -135,33 +135,33 @@ class _TeamPlayersDisplayWidgetState extends State<TeamPlayersDisplayWidget> {
             SizedBox(
                 width: 31, height: 31, child: Image.asset('fotos/randomUserPic.png')),
             SizedBox(width: 10),
-            Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+            Text(" ${player.number < 10 ? ' ${player.number}' : '${player.number}'}", style: TextStyle(color: darkModeNotifier.value?Colors.white:Colors.black,
+                fontFamily: "Arial",
+                fontSize: 15,
+                fontWeight: FontWeight.bold
+            )
+            ),
+            SizedBox(width: 10,),
+
                 Text(" ${player.name} ${player.surname}",
                 style: TextStyle(
                   color:darkModeNotifier.value?Colors.white:Colors.black,
                   fontFamily: "Arial",
                   fontSize: 16.5
                 ),),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    Text(" ${player.number}", style: TextStyle(color: darkModeNotifier.value?Colors.white:Colors.black,
-                      fontFamily: "Arial",
-                      fontSize: 15
-                      )
-                    ),
-                    Text("  ${player.age} έτη", style: TextStyle(color:darkModeNotifier.value?Colors.white:Colors.black,
-                      fontFamily: "Arial",
-                      fontSize: 15
-                      )
-                    ),
-                  ],
-                ),
-              ],
-            )
+                //για ηλικία παικτών
+                //Row(
+                //  mainAxisAlignment: MainAxisAlignment.start,
+                //  children: [
+//
+                //    Text("  ${player.age} έτη", style: TextStyle(color:darkModeNotifier.value?Colors.white:Colors.black,
+                //      fontFamily: "Arial",
+                //      fontSize: 15
+                //      )
+                //    ),
+                //  ],
+                //),
+
           ]),
           SizedBox(height: 3),
         ],
