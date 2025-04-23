@@ -207,26 +207,10 @@ class _CreateBody extends State<CreateBody>
 }
 
 
-
-class CreateConfirmButton extends StatelessWidget {
-  final AppUser user;
-
-  const CreateConfirmButton({super.key, required this.user});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 10),
-      child: CreateConfrimButton(),
-    );
-  }
-}
-
-
-class CreateConfrimButton extends StatelessWidget
+class CreateConfirmButton extends StatelessWidget
 {
-  const CreateConfrimButton({super.key});
-
+  const CreateConfirmButton({super.key, required this.user});
+  final AppUser user;
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -259,76 +243,35 @@ class CreateConfrimButton extends StatelessWidget
   }
 }
 
-Future<void> updatePassword(BuildContext context, String username, String oldPassword,String newPassword) async {
+Future<void> updatePassword(BuildContext context, String username, String oldPassword, String newPassword) async {
   try {
-    // Find the user document
-    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-        .collection('users')
-        .where('Username', isEqualTo: username)
-        .limit(1)
-        .get();
+    final user = FirebaseAuth.instance.currentUser;
 
+    String email = globalUser.email;
 
-    if (querySnapshot.docs.isNotEmpty)
-    {
+    // Δημιουργούμε credentials για επανέλεγχο ταυτότητας
+    AuthCredential credential = EmailAuthProvider.credential(
+      email: email,
+      password: oldPassword,
+    );
 
-      DocumentReference userDocRef = querySnapshot.docs.first.reference;
-      DocumentSnapshot userSnapshot = await userDocRef.get();
+    // Reauthenticate
+    await user!.reauthenticateWithCredential(credential);
 
-      if (userSnapshot.get("Password").toString() != oldPassword) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar( //ΕΜΦΑΝΙΖΩ ΜΗΝΥΜΑ ΛΑΘΟΥΣ ΑΝ ΕΧΕΙ ΚΑΠΟΙΟ ΠΕΔΙΟ ΚΕΝΟ
-            content: Text('The password does not match the username!'),
-            backgroundColor: Colors.red,
-            duration: Duration(seconds: 2),
-          ),
-        );
-      }
-      else {
-        bool userConfirmed = await _showMyDialog(context);
+    // Αν όλα είναι ΟΚ, κάνουμε update τον νέο κωδικό
+    await user.updatePassword(newPassword);
 
-        if (userConfirmed) {
-          // Get the user document reference
-          DocumentReference userDocRef = querySnapshot.docs.first.reference;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text("Password updated successfully!"), backgroundColor: Colors.green),
+    );
 
-          // Update the username in Firestore
-          await userDocRef.update({'Password': newPassword});
+    // Navigate or do whatever else you want after success
+    navigatorKey.currentState?.pushReplacementNamed('/home');
 
-          AppUser user = AppUser(
-              username,
-              globalUser.university,
-              [],
-              [],
-              "user",
-              {}
-          );
-
-          // Update the globalUser variable
-          globalUser = user;
-
-          _textController1.clear();
-          _textController2.clear();
-          _textController3.clear();
-
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => MyApp()),
-          );
-        }
-      }
-    }
-    else
-    {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar( //ΕΜΦΑΝΙΖΩ ΜΗΝΥΜΑ ΛΑΘΟΥΣ ΑΝ ΕΧΕΙ ΚΑΠΟΙΟ ΠΕΔΙΟ ΚΕΝΟ
-          content: Text('This username was not found!'),
-          backgroundColor: Colors.red,
-          duration: Duration(seconds: 2),
-        ),
-      );
-    }
-  } catch (e) {
-    // ...error handling
+  } on FirebaseAuthException catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(e.message ?? "An error occurred"), backgroundColor: Colors.red),
+    );
   }
 }
 

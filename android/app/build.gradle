@@ -15,7 +15,7 @@ if (localPropertiesFile.exists()) {
 
 android {
     namespace = "com.example.untitled1"
-    compileSdk = 34  // Changed from 35 to match targetSdk
+    compileSdk = 35  // Changed from 35 to match targetSdk
 
     compileOptions {
         // Enable core library desugaring

@@ -49,7 +49,7 @@ class UserHandleBase
           });
 
 
-          globalUser = AppUser(username, uni, [], [],"user",{});
+          globalUser = AppUser(username, uni, [], [],"user",{},"");
           globalUser.loggedIn();
           return true;
         }
@@ -107,7 +107,20 @@ class UserHandleBase
 
   Future<bool> login(String username, String password) async {
     try {
-      String email = "$username@myapp.com"; // Αυτόματη μετατροπή σε email
+
+      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+          .collection("users")
+          .where("username", isEqualTo: username)
+          .limit(1)
+          .get();
+
+      if (querySnapshot.docs.isEmpty) {
+        print("Username not found");
+        return false;
+      }
+
+      // Πάρε το email από το user document
+      String email = querySnapshot.docs.first.get("email");
 
 
       UserCredential userCredential =
@@ -142,7 +155,9 @@ class UserHandleBase
           (userDoc['Favourite Teams'] as List<dynamic>).map((e) => e.toString()).toList(),
           (userDoc['Controlled Teams'] as List<dynamic>).map((e) => e.toString()).toList(),
           userDoc['role'],
-          matchKeys
+          matchKeys,
+          userDoc['email']
+
 
         );
         globalUser.loggedIn();
@@ -305,7 +320,8 @@ class UserHandleBase
         (userDoc['Favourite Teams'] as List<dynamic>).map((e) => e.toString()).toList(),
         (userDoc['Controlled Teams'] as List<dynamic>).map((e) => e.toString()).toList(),
         userDoc['role'],
-       matchKeys
+       matchKeys,
+        userDoc['email']
       );
       globalUser.loggedIn();
       isLoggedIn = true;

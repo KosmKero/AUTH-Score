@@ -12,19 +12,20 @@ import 'Team.dart';
 
 class AppUser
 {
-  String _username,_university;
+  String _username,_university,_email;
   bool _isLoggedIn=false;
   late bool _isAdmin;
 
   List<String> favoriteList=[];
   List<String> _controlledTeams=[];
   Map<String,bool>  _matchKeys={};
-  AppUser(this._username,this._university,this.favoriteList,this._controlledTeams,String role,this._matchKeys){
+  AppUser(this._username,this._university,this.favoriteList,this._controlledTeams,String role,this._matchKeys,this._email){
     (role=="admin") ? (_isAdmin=true) : (_isAdmin=false);
   }
 
   String get username => _username;
   String get university => _university;
+  String get email => _email;
   bool get isLoggedIn => _isLoggedIn;
   bool get isAdmin=> _isAdmin;
   List<String> get controlledTeams=> _controlledTeams;
@@ -161,7 +162,7 @@ class AppUser
 
     // Ελέγχει αν ο χρήστης είναι superuser
     if (userDoc.exists && userDoc.data()?['superuser'] ==
-    "super123user"){
+    "super123userRR"){
       return true;
     }
     return false;

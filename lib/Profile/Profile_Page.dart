@@ -240,7 +240,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                 } else {
                                   isLoggedIn = false;
                                   globalUser =
-                                      AppUser(" ", " ", [], [], "user", {});
+                                      AppUser(" ", " ", [], [], "user", {},"");
                                   signOutUser();
                                 }
                               });

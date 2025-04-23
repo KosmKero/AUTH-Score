@@ -230,78 +230,71 @@ class CreateConfrimButton extends StatelessWidget {
 
 Future<void> updateUsername(BuildContext context, String oldUsername, String newUsername) async {
   try {
-    // Find the user document
-    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-        .collection('users')
-        .where('username', isEqualTo: oldUsername)
-        .get();
-
-    if (querySnapshot.docs.isNotEmpty)
-    {
-      bool userConfirmed = await _showMyDialog(context);
-      bool isAvailable = await UserHandleBase().isUsernameAvailable(newUsername);
-
-      if(isAvailable)
-      {
-        if (userConfirmed) {
-          // Get the user document reference
-          DocumentReference userDocRef = querySnapshot.docs.first.reference;
-
-          // Update the username in Firestore
-          await userDocRef.update({'username': newUsername});
-          await userDocRef.update({"email": newUsername+"@myapp.com"});
-
-          AppUser user = AppUser(
-              newUsername,
-              globalUser.university,
-              [],
-              [],
-              "user",
-            {}
-          );
-
-          // Update the globalUser variable
-          globalUser = user;
-
-          // Show success message
-          /*ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Username updated successfully!'),
-              backgroundColor: Colors.red,
-              duration: Duration(seconds: 2),
-            ),
-          );*/
-          _textController1.clear();
-          _textController2.clear();
-
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => MyApp()),
-          );
-        }
-      }
-      else
-        {
-        SnackBar( //ΕΜΦΑΝΙΖΩ ΜΗΝΥΜΑ ΛΑΘΟΥΣ ΑΝ ΕΧΕΙ ΚΑΠΟΙΟ ΠΕΔΙΟ ΚΕΝΟ
-            content: Text('This is already used!'),
-            backgroundColor: Colors.red,
-            duration: Duration(seconds: 2),);
-      }
-    }
-    else
-    {
+    if (globalUser.username != oldUsername) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar( //ΕΜΦΑΝΙΖΩ ΜΗΝΥΜΑ ΛΑΘΟΥΣ ΑΝ ΕΧΕΙ ΚΑΠΟΙΟ ΠΕΔΙΟ ΚΕΝΟ
+        SnackBar(
           content: Text('This username was not found!'),
           backgroundColor: Colors.red,
           duration: Duration(seconds: 2),
         ),
       );
+      return;
+    }
+
+    bool userConfirmed = await _showMyDialog(context);
+    bool isAvailable = await UserHandleBase().isUsernameAvailable(newUsername);
+
+    if (!isAvailable) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('This username is already used!'),
+          backgroundColor: Colors.red,
+          duration: Duration(seconds: 2),
+        ),
+      );
+      return;
+    }
+
+    if (userConfirmed) {
+      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .where('username', isEqualTo: oldUsername)
+          .get();
+
+      if (querySnapshot.docs.isEmpty) throw Exception("User not found");
+
+      DocumentReference userDocRef = querySnapshot.docs.first.reference;
+
+      await userDocRef.update({
+        'username': newUsername,
+      });
+
+      globalUser = AppUser(
+          newUsername,
+          globalUser.university,
+          [],
+          [],
+          "user",
+          {},
+          ""
+      );
+
+      _textController1.clear();
+      _textController2.clear();
+
+      navigatorKey.currentState?.pushReplacementNamed('/home');
     }
   } catch (e) {
-    // ...error handling
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Something went wrong!}'),
+        backgroundColor: Colors.red,
+        duration: Duration(seconds: 2),
+      ),
+    );
   }
 }
+
 
 
 Future<bool> _showMyDialog(BuildContext context) async {

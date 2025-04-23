@@ -13,7 +13,7 @@ bool isLoggedIn=false;
 ValueNotifier<bool> darkModeNotifier = ValueNotifier<bool>(false);
 bool greek = true;
 String username = "";
-AppUser globalUser= AppUser("","",[],[],"user",{});
+AppUser globalUser= AppUser("","",[],[],"user",{},"");
 bool isToggled = false;
 
 List<Team> topTeams = [];
