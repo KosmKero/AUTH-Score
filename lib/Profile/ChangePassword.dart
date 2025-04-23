@@ -270,7 +270,7 @@ Future<void> updatePassword(BuildContext context, String username, String oldPas
 
   } on FirebaseAuthException catch (e) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(e.message ?? "An error occurred"), backgroundColor: Colors.red),
+      SnackBar(content: Text("An error occurred"), backgroundColor: Colors.red),
     );
   }
 }

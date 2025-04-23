@@ -48,6 +48,13 @@ class _OneGroupStandingsState extends State<OneGroupStandings> {
           .where((t) => t.totalPoints == a.totalPoints)
           .toList();
 
+      if (!tiedTeams.any((t) => t.name == b.name)) {
+        // Αν το b δεν είναι καν στην ισοβαθμία, δεν έχει νόημα tie-breaker
+        return 0;
+      }
+
+
+
       // Αν η ισοβαθμία είναι πάνω από 2 ομάδες
       if (tiedTeams.length > 2) {
         Map<String, int> teamPoints = {
