@@ -193,20 +193,20 @@ class _CreateSignIn extends State<CreateSignIn> {
           ),
         ),
         SizedBox(height: 10),
-        Padding(
-          padding: EdgeInsets.only(right: greek?190:200),
-          child: TextButton(
-            onPressed: () {},
-            child: Text(
-              greek?"Ξέχασες τον κωδικό":"Forgot Password?",
-              style: TextStyle(
-                  fontSize: 15,
-                  color: Colors.blueAccent
-              ),
-            ),
-          ),
-        ),
-        SizedBox(height: 10),
+        //Padding(
+        //  padding: EdgeInsets.only(right: greek?190:200),
+        //  child: TextButton(
+        //    onPressed: () {},
+        //    child: Text(
+        //      greek?"Ξέχασες τον κωδικό":"Forgot Password?",
+        //      style: TextStyle(
+        //          fontSize: 15,
+        //          color: Colors.blueAccent
+        //      ),
+        //    ),
+        //  ),
+        //),
+        //SizedBox(height: 10),
         CreateButton(
           signIn: true,
           controller1: _textController4,
