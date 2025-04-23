@@ -29,8 +29,8 @@ Color lightModeContainer = Color.fromARGB(255, 245, 245, 245);
 Color lightModeText = Color.fromARGB(255, 20, 13, 29);
 
 Color darkModeBackGround = Color.fromARGB(250, 50, 50, 50);
-Color? darkModeWidgets = Colors.grey[800];
-Color? darkModeMatches =  Colors.grey[800];
+Color darkModeWidgets = Colors.grey[800]!;
+Color darkModeMatches = Colors.grey[800]!;
 Color darkModeText = Colors.blueGrey;
 
 

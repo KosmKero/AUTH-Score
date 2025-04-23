@@ -48,7 +48,10 @@ class _LogInScreen extends State<LogInScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CreateAppBar(signIn: signIn), // Pass signIn to AppBar
+      appBar: CreateAppBar(
+          signIn: signIn,
+
+      ), // Pass signIn to AppBar
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -82,7 +85,8 @@ class _createAppBarState extends State<CreateAppBar> {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      backgroundColor: Colors.lightBlueAccent,
+      backgroundColor: const Color.fromARGB(250, 46, 90, 136),
+      iconTheme: IconThemeData(color: Colors.white),
     );
   }
 
@@ -108,13 +112,14 @@ class _CreateSignIn extends State<CreateSignIn> {
     return Column(
       children: [
         Padding(
-          padding: EdgeInsets.only(right: 30, top: 30),
+          padding: EdgeInsets.only(right: 30, top: 10),
           child: Text(
             greek?"Σύνδεση":"Sign in",
             style: TextStyle(
-              fontSize: 25,
+              fontSize: 26,
               fontWeight: FontWeight.bold,
               color: Colors.black,
+              fontFamily: "Arial"
             ),
           ),
         ),
@@ -213,16 +218,16 @@ class _CreateSignIn extends State<CreateSignIn> {
           controller2: _textController5,
           controller3: searchController,
         ),
-        SizedBox(height: 60),
+        SizedBox(height: 15),
         Row(
-            mainAxisAlignment: MainAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
                 greek?"Άμα δεν έχεις λογαριασμό":"If you don't have an account",
                 style: TextStyle(
                     fontSize: 16,
                     color: Colors.black,
-                  fontWeight: FontWeight.w500
+                    fontWeight: FontWeight.w500
                 ),
               ),
               TextButton(
@@ -500,17 +505,17 @@ class _CreateSignUp extends State<CreateSignUp> {
           controller3: searchController,
         ),
 
-        SizedBox(height:25),
+        SizedBox(height:15),
 
         Row(
-            mainAxisAlignment: MainAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
                 greek?"Έχεις ήδη λογαριασμό?" :"Already have an account?",
                 style: TextStyle(
                     fontSize: 16,
                     color: Colors.black,
-                  fontWeight: FontWeight.w500
+                    fontWeight: FontWeight.w500
                 ),
               ),
               TextButton(
@@ -599,26 +604,26 @@ void checkBase(BuildContext context,controller1,controller2,controller3) async
 
      */
 
-      bool loginSuccess = await UserHandleBase().login(username, password);
-      if (loginSuccess) {
+    bool loginSuccess = await UserHandleBase().login(username, password);
+    if (loginSuccess) {
 
-        print('✅ ton brhkameeee!'); //ΥΠΑΡΧΕΙ ΑΝΤΙΣΤΟΙΧΙΑ ΔΕΔΟΜΕΝΩΝ
-        isLoggedIn = true;
-        controller1.clear();
-        controller2.clear();
+      print('✅ ton brhkameeee!'); //ΥΠΑΡΧΕΙ ΑΝΤΙΣΤΟΙΧΙΑ ΔΕΔΟΜΕΝΩΝ
+      isLoggedIn = true;
+      controller1.clear();
+      controller2.clear();
 
 
-        //ΕΠΙΣΤΡΕΦΩ ΣΤΗΝ ΑΡΧΙΚΗ ΣΕΛΙΔΑ!!
-        try
-        {
-          greek = await getValue(globalUser.username,"Language");
-          navigatorKey.currentState?.pushReplacementNamed('/home');
+      //ΕΠΙΣΤΡΕΦΩ ΣΤΗΝ ΑΡΧΙΚΗ ΣΕΛΙΔΑ!!
+      try
+      {
+        greek = await getValue(globalUser.username,"Language");
+        navigatorKey.currentState?.pushReplacementNamed('/home');
 
-        } catch (navError) {
-          print('🚨 Navigation Error: $navError');
-        }
+      } catch (navError) {
+        print('🚨 Navigation Error: $navError');
       }
-      else
+    }
+    else
     {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar( //ΕΜΦΑΝΙΖΩ ΜΗΝΥΜΑ ΛΑΘΟΥΣ ΑΝ ΕΧΕΙ ΚΑΠΟΙΟ ΠΕΔΙΟ ΚΕΝΟ
@@ -664,23 +669,22 @@ void addInBase(BuildContext context, controller1, controller2, controller3) asyn
     );
   }
   else if(!found)
-    {
-      //κενη για τωρα για να εμφανιζουμε σωστο μηνυμα λαθους ρε
-    }
+  {
+    //κενη για τωρα για να εμφανιζουμε σωστο μηνυμα λαθους ρε
+  }
   else
   {
-      //AppUser currentUser = AppUser(text1,text2,text3);
-      isLoggedIn = true; //ΑΛΛΑΖΩ ΚΑΤΑΣΤΑΣΗ ΧΡΗΣΤΗ
+    //AppUser currentUser = AppUser(text1,text2,text3);
+    isLoggedIn = true; //ΑΛΛΑΖΩ ΚΑΤΑΣΤΑΣΗ ΧΡΗΣΤΗ
 
-      //ΚΑΘΑΡΙΖΩ ΤΑ ΠΕΔΙΑ ΟΤΑΝ ΠΑΤΗΣΕΙ ΤΟ ΚΟΥΜΠΙ ΕΓΓΡΑΦΗΣ
-      controller1.clear();
-      controller2.clear();
-      controller3.clear();
+    //ΚΑΘΑΡΙΖΩ ΤΑ ΠΕΔΙΑ ΟΤΑΝ ΠΑΤΗΣΕΙ ΤΟ ΚΟΥΜΠΙ ΕΓΓΡΑΦΗΣ
+    controller1.clear();
+    controller2.clear();
+    controller3.clear();
 
-      username = text1;
-      print("Data successfully added!");
-      navigatorKey.currentState?.pushReplacementNamed('/home');
+    username = text1;
+    print("Data successfully added!");
+    navigatorKey.currentState?.pushReplacementNamed('/home');
 
   }
 }
-
