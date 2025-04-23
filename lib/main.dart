@@ -157,7 +157,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
   Widget build(BuildContext context) {
 
     return Scaffold(
-      backgroundColor: Color.fromARGB(250, 50, 120, 90),
+      backgroundColor: lightModeBackGround,
       body: Center(
         child: _hasError
             ? _buildErrorWidget()
