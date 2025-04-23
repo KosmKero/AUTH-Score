@@ -24,10 +24,13 @@ class _StandingsOrKnockoutsChooserPageState extends State<StandingsOrKnockoutsCh
 
   @override
   Widget build(BuildContext context) {
+    DateTime now = DateTime.now();
+    int seasonYear = now.month > 8 ? now.year : now.year - 1;
+
     return Column(
       children: [
         _NavigationButtons(onSectionChange: _changeSection),
-        (indexChoice==0)? StandingsPage() : (indexChoice==1)? KnockOutsPage():TopPlayersProvider()
+        (indexChoice==0)? StandingsPage(seasonYear) : (indexChoice==1)? KnockOutsPage():TopPlayersProvider()
       ],
     );
   }

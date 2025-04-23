@@ -11,6 +11,7 @@ import 'package:provider/provider.dart';
 import '../API/user_handle.dart';
 import '../Data_Classes/Team.dart';
 import '../Data_Classes/match_facts.dart';
+import '../Team_Display_Page_Package/one_group_standings.dart';
 import 'Match_Not_Started/Match_Not_Started_Details_Page.dart';
 import 'Starting__11_Display_Card.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
@@ -448,7 +449,9 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
      //     match: match,
      //   );
       case 1:
-        return StandingsPage1().buildGroupStandings(match.homeTeam.group);
+        DateTime now = DateTime.now();
+        int seasonYear = now.month > 8 ? now.year : now.year - 1;
+        return OneGroupStandings(group: match.homeTeam.group, seasonYear: seasonYear,);
       default:
         return _buildMatchdetails();
     }

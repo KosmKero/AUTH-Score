@@ -313,7 +313,14 @@ Widget _sectionChooser(int selectedIndex, MatchDetails match) {
     //case 1:
     //  return Starting11Display(match: match,);
     case 1:
-      return OneGroupStandings(group: match.homeTeam.group);
+      int year;
+      if (match.month>8) {
+        year=match.year;
+      } else {
+        year=match.year-1;
+      }
+
+      return OneGroupStandings(group: match.homeTeam.group,seasonYear: year,);
     default:
       return DetailsMatchNotStarted(match: match);
   }

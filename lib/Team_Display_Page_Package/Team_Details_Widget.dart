@@ -280,7 +280,9 @@ class GroupStandingsWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return OneGroupStandings(group: group);
+    DateTime now = DateTime.now();
+    int seasonYear = now.month > 8 ? now.year : now.year - 1;
+    return OneGroupStandings(group: group,seasonYear: seasonYear);
   }
 }
 

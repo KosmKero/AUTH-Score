@@ -3,10 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:untitled1/Team_Display_Page_Package/TeamDisplayPage.dart';
 import 'package:untitled1/main.dart';
 
+import '../Data_Classes/MatchDetails.dart';
 import '../Data_Classes/Team.dart';
 import '../globals.dart';
 
 class StandingsPage extends StatefulWidget {
+  StandingsPage(this.seasonYear);
+  int seasonYear;
   @override
   State<StandingsPage> createState() => StandingsPage1();
 }
@@ -45,9 +48,88 @@ class StandingsPage1 extends State<StandingsPage> {
 
   Widget buildGroupStandings(int group) {
     final isDark = darkModeNotifier.value;
-    List<Team> groupTeams = teams.where((team) => team.group == group).toList()
-      ..sort((a, b) => b.totalPoints.compareTo(a.totalPoints));
 
+
+
+    List<Team> groupTeams = teams
+        .where((team) => team.group == group)
+        .toList();
+
+    DateTime seasonStart = DateTime(widget.seasonYear, 9, 1);
+    DateTime seasonEnd = DateTime(widget.seasonYear + 1, 6, 30);
+
+    List<MatchDetails> validMatches = previousMatches.where((match) {
+      DateTime matchDate = DateTime(match.year, match.month, match.day);
+      return match.isGroupPhase &&
+          matchDate.isAfter(seasonStart.subtract(Duration(days: 1))) &&
+          matchDate.isBefore(seasonEnd.add(Duration(days: 1)));
+    }).toList();
+
+
+    groupTeams.sort((a, b) {
+      int pointsCompare = b.totalPoints.compareTo(a.totalPoints);
+      if (pointsCompare != 0) return pointsCompare;
+
+      // Βρες ομάδες με ίδιους βαθμούς
+      List<Team> tiedTeams = groupTeams
+          .where((t) => t.totalPoints == a.totalPoints)
+          .toList();
+
+      // Αν η ισοβαθμία είναι πάνω από 2 ομάδες
+      if (tiedTeams.length > 2) {
+        Map<String, int> teamPoints = {
+          for (var t in tiedTeams) t.name: 0,
+        };
+
+        for (var match in validMatches) {
+          if (teamPoints.containsKey(match.homeTeam.name) &&
+              teamPoints.containsKey(match.awayTeam.name)) {
+            if (match.scoreHome > match.scoreAway) {
+              teamPoints[match.homeTeam.name] = teamPoints[match.homeTeam.name]! + 3;
+            } else if (match.scoreHome == match.scoreAway) {
+              teamPoints[match.homeTeam.name] = teamPoints[match.homeTeam.name]! + 1;
+              teamPoints[match.awayTeam.name] = teamPoints[match.awayTeam.name]! + 1;
+            } else {
+              teamPoints[match.awayTeam.name] = teamPoints[match.awayTeam.name]! + 3;
+            }
+          }
+        }
+
+        int multiCompare = teamPoints[b.name]!.compareTo(teamPoints[a.name]!);
+        if (multiCompare != 0) return multiCompare;
+      } else {
+        // Αν είναι μόνο δύο ομάδες
+        final headToHead = validMatches.where((match) =>
+        (match.homeTeam.name == a.name && match.awayTeam.name == b.name) ||
+            (match.homeTeam.name == b.name && match.awayTeam.name == a.name)
+        );
+
+        int aPoints = 0;
+        int bPoints = 0;
+
+        for (var match in headToHead) {
+          if (match.homeTeam.name == a.name) {
+            if (match.scoreHome > match.scoreAway) aPoints += 3;
+            else if (match.scoreHome == match.scoreAway) {
+              aPoints += 1;
+              bPoints += 1;
+            } else bPoints += 3;
+          } else {
+            if (match.scoreAway > match.scoreHome) aPoints += 3;
+            else if (match.scoreAway == match.scoreHome) {
+              aPoints += 1;
+              bPoints += 1;
+            } else bPoints += 3;
+          }
+        }
+
+        int headToHeadCompare = bPoints.compareTo(aPoints);
+        if (headToHeadCompare != 0) return headToHeadCompare;
+      }
+
+      // Τελευταίο κριτήριο: διαφορά τερμάτων
+      return b.goalDifference.compareTo(a.goalDifference);
+    });
     topTeams.addAll(groupTeams.take(4));
 
     final Color rowColor1 = isDark ? Color.fromARGB(255, 55, 55, 55) : Color.fromARGB(255, 235, 244, 255);

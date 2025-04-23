@@ -133,8 +133,6 @@ class TopUsersList extends StatelessWidget {
                   itemCount: topUsers.length,
                   itemBuilder: (context, index) {
                     final user = topUsers[index];
-                    if (user['uid'] == currentUserUid) return SizedBox.shrink();
-
                     return Card(
                       margin: EdgeInsets.symmetric(vertical: 8),
                       elevation: 4,

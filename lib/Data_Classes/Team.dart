@@ -40,6 +40,8 @@ class Team {
   int get group => _group;
   int get goalsFor => _goalsFor;
   int get goalsAgainst => _goalsAgainst;
+  int get goalDifference => _goalsFor -_goalsAgainst;
+
   List<Player> get players => _players;
   int get totalPoints=> (3*_wins+_draws);
   int get totalGames=> ( _wins + _draws + _losses );
