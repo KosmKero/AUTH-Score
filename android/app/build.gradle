@@ -14,22 +14,30 @@ if (localPropertiesFile.exists()) {
 }
 
 android {
-    namespace = "com.example.untitled1"
+    namespace = "com.example.authscore"
     compileSdk = 35  // Changed from 35 to match targetSdk
+
+    lint {
+        baseline = file("lint-baseline.xml")
+    }
+    lintOptions {
+        checkReleaseBuilds false
+        abortOnError false
+    }
 
     compileOptions {
         // Enable core library desugaring
         coreLibraryDesugaringEnabled true
-        sourceCompatibility JavaVersion.VERSION_17
-        targetCompatibility JavaVersion.VERSION_17
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
     }
 
     kotlinOptions {
-        jvmTarget = '17'
+        jvmTarget = '11'
     }
 
     defaultConfig {
-        applicationId = "com.example.untitled1"
+        applicationId = "com.example.authscore"
         minSdk = 23
         targetSdk = 34
         versionCode = flutter.versionCode?.toInteger() ?: 1
@@ -37,9 +45,18 @@ android {
         multiDexEnabled true
     }
 
+    signingConfigs {
+        release {
+            storeFile file("C:/Users/kosma/IdeaProjects/authscorerelease.jks") // Χρησιμοποιώντας κανονικές κάθετες
+            storePassword "AUTH_Score_vamos10"       // Αντικατάστησε με τον κωδικό πρόσβασης του keystore
+            keyAlias "authscore-key"                    // Αντικατάστησε με το alias του key
+            keyPassword "AUTH_Score_vamos10"              // Αντικατάστησε με τον κωδικό πρόσβασης του key
+        }
+    }
+
     buildTypes {
         release {
-            signingConfig signingConfigs.debug
+            signingConfig signingConfigs.release      // Χρησιμοποιεί το release signing config
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
@@ -56,9 +73,10 @@ flutter {
 }
 
 dependencies {
-    implementation platform('com.google.firebase:firebase-bom:32.7.1')
+    implementation platform('com.google.firebase:firebase-bom:33.12.0')
     implementation 'com.google.firebase:firebase-auth'
     implementation 'com.google.firebase:firebase-analytics'
     implementation 'androidx.multidex:multidex:2.0.1'
-    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.0.4'
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.5'
+    implementation 'androidx.appcompat:appcompat:1.7.0'
 }
