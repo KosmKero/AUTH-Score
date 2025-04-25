@@ -655,7 +655,7 @@ void addInBase(BuildContext context, controller1, controller2, controller3) asyn
   String text3 = controller3.text;
 
 
-  bool found = await UserHandleBase().signUpWithUsername(text1,text2,text3,context);
+
 
   if(text1.isEmpty || text2.isEmpty || text3.isEmpty)
   {
@@ -667,8 +667,10 @@ void addInBase(BuildContext context, controller1, controller2, controller3) asyn
         duration: Duration(seconds: 2),
       ),
     );
+    return;
   }
-  else if(!found)
+  bool found = await UserHandleBase().signUpWithUsername(text1,text2,text3,context);
+  if(!found)
   {
     //κενη για τωρα για να εμφανιζουμε σωστο μηνυμα λαθους ρε
   }
