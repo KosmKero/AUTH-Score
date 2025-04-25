@@ -422,7 +422,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                 ),
                                 SizedBox(width: 10),
                                 Text(
-                                  greek ? "Σκοτεινή λειτουργία" : "Dark mode",
+                                  "Dark mode",
                                   style: TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.w600,
