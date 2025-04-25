@@ -18,19 +18,22 @@ class StandingsPage1 extends State<StandingsPage> {
   @override
   Widget build(BuildContext context) {
     final isDark = darkModeNotifier.value;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+    
     return Expanded(
       child: Container(
         color: isDark ? Color(0xFF121212) : lightModeBackGround,
         child: Column(children: [
-          SizedBox(height: 5,),
+          SizedBox(height: screenHeight * 0.01),
           Text(greek?"Βαθμολογικός Πίνακας":"Standings Table",
               style: TextStyle(
-                  fontSize: 23,
+                  fontSize: screenWidth * 0.06,
                   fontWeight: FontWeight.bold,
                   color: isDark ? Colors.white : Colors.white,
                   fontFamily: 'Arial',
               )),
-          SizedBox(height: 8,),
+          SizedBox(height: screenHeight * 0.01),
           Expanded(
               child: SingleChildScrollView(
                   child: Column(
@@ -48,8 +51,8 @@ class StandingsPage1 extends State<StandingsPage> {
 
   Widget buildGroupStandings(int group) {
     final isDark = darkModeNotifier.value;
-
-
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
 
     List<Team> groupTeams = teams
         .where((team) => team.group == group)
@@ -64,7 +67,6 @@ class StandingsPage1 extends State<StandingsPage> {
           matchDate.isAfter(seasonStart.subtract(Duration(days: 1))) &&
           matchDate.isBefore(seasonEnd.add(Duration(days: 1)));
     }).toList();
-
 
     groupTeams.sort((a, b) {
       int pointsCompare = b.totalPoints.compareTo(a.totalPoints);
@@ -138,138 +140,315 @@ class StandingsPage1 extends State<StandingsPage> {
     final Color headerTextColor = isDark ? Colors.white70 : Colors.black54;
 
     return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 5.0, vertical: 2.0),
+      margin: EdgeInsets.symmetric(
+        horizontal: screenWidth * 0.02,
+        vertical: screenHeight * 0.01
+      ),
       elevation: isDark ? 2 : 4,
       color: isDark ? Color.fromARGB(255, 50, 50, 50) : Colors.white,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 10),
+        padding: EdgeInsets.symmetric(
+          horizontal: screenWidth * 0.02,
+          vertical: screenHeight * 0.01
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               greek ? "Όμιλος $group" : "Group $group",
               style: TextStyle(
-                fontSize: 18,
+                fontSize: screenWidth * 0.045,
                 fontWeight: FontWeight.bold,
                 color: textColor,
               ),
             ),
-            const SizedBox(height: 4),
-            DataTable(
-              columnSpacing: 20.0,
-              headingRowHeight: 40.0,
-              dataRowHeight: 60.0,
-              headingTextStyle: TextStyle(
-                color: headerTextColor,
-                fontWeight: FontWeight.bold,
-              ),
-              dataTextStyle: TextStyle(color: textColor),
-              columns: [
-                _buildColumn("  #", numeric: false, textColor: headerTextColor),
-                _buildColumn(greek ? "Ομάδα" : "Team", textColor: headerTextColor),
-                _buildColumn(greek ? "Π" : "G", numeric: true, textColor: headerTextColor),
-                _buildColumn(greek ? "Ν" : "W", numeric: true, textColor: headerTextColor),
-                _buildColumn(greek ? "Ι" : "D", numeric: true, textColor: headerTextColor),
-                _buildColumn(greek ? "Η" : "L", numeric: true, textColor: headerTextColor),
-                DataColumn(
-                  label: Center(
-                    child: Text(
-                      greek ? "Πόντοι" : "Points",
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: headerTextColor,
-                      ),
-                    ),
-                  ),
-                  numeric: true,
-                ),
-              ],
-              rows: List<DataRow>.generate(groupTeams.length, (index) {
-                final team = groupTeams[index];
-                final rowColor = index % 2 == 0 ? rowColor1 : rowColor2;
-                final isPromotionSpot = index < 4;
+            SizedBox(height: screenHeight * 0.005),
+            LayoutBuilder(
+              builder: (context, constraints) {
+                // Calculate column widths based on available space
+                final availableWidth = constraints.maxWidth;
+                final positionWidth = availableWidth * 0.065;
+                final teamWidth = availableWidth * 0.39;
+                final statsWidth = availableWidth * 0.085;
+                final pointsWidth = availableWidth * 0.12;
 
-                return DataRow(
-                  color: WidgetStateProperty.all(rowColor),
-                  cells: [
-                    DataCell(
-                      isPromotionSpot
-                          ? Container(
-                        width: 26,
-                        height: 26,
-                        decoration: BoxDecoration(
-                          color: isDark ? Colors.green.shade700 : Colors.green,
-                          shape: BoxShape.circle,
-                        ),
-                        child: Center(
-                          child: Text(
-                            (index + 1).toString(),
-                            style: TextStyle(
-                              color: isDark ? Colors.white : Colors.black,
-                              fontWeight: FontWeight.bold,
-                            ),
+                return DataTable(
+                  columnSpacing: 0,
+                  headingRowHeight: screenHeight * 0.05,
+                  dataRowHeight: screenHeight * 0.07,
+                  headingTextStyle: TextStyle(
+                    color: headerTextColor,
+                    fontWeight: FontWeight.bold,
+                    fontSize: screenWidth * 0.03,
+                  ),
+                  dataTextStyle: TextStyle(
+                    color: textColor,
+                    fontSize: screenWidth * 0.03,
+                  ),
+                  columns: [
+                    DataColumn(
+                      label: Container(
+                        width: positionWidth,
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          "  #",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: headerTextColor,
+                            fontSize: screenWidth * 0.03,
                           ),
                         ),
-                      )
-                          : Container(
-                        width: 26,
-                        height: 26,
-                        decoration: BoxDecoration(
-                          color: isDark ? Colors.grey.shade700 : Colors.grey,
-                          shape: BoxShape.circle,
+                      ),
+                    ),
+                    DataColumn(
+                      label: Container(
+                        width: teamWidth,
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          greek ? "Ομάδα" : "Team",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: headerTextColor,
+                            fontSize: screenWidth * 0.03,
+                          ),
                         ),
+                      ),
+                    ),
+                    DataColumn(
+                      label: Container(
+                        width: statsWidth,
                         child: Center(
                           child: Text(
-                            (index + 1).toString(),
+                            greek ? "Π" : "G",
                             style: TextStyle(
-                              color: isDark ? Colors.white : Colors.black,
                               fontWeight: FontWeight.bold,
+                              color: headerTextColor,
+                              fontSize: screenWidth * 0.03,
                             ),
                           ),
                         ),
                       ),
                     ),
-                    DataCell(TextButton(
-                      onPressed: () async {
-                        if (!mounted) return;
-                        await Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => TeamDisplayPage(team)),
-                        );
-                        if (mounted) {
-                          setState(() {});
-                        }
-                      },
-                      child: Text(team.name,
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                          color: textColor,
+                    DataColumn(
+                      label: Container(
+                        width: statsWidth,
+                        child: Center(
+                          child: Text(
+                            greek ? "Ν" : "W",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: headerTextColor,
+                              fontSize: screenWidth * 0.03,
+                            ),
+                          ),
                         ),
                       ),
-                    )),
-                    DataCell(Text(team.totalGames.toString(), style: TextStyle(color: textColor))),
-                    DataCell(Text(team.wins.toString(), style: TextStyle(color: textColor))),
-                    DataCell(Text(team.draws.toString(), style: TextStyle(color: textColor))),
-                    DataCell(Text(team.losses.toString(), style: TextStyle(color: textColor))),
-                    DataCell(
-                      Center(
-                        child: Text(
-                          team.totalPoints.toString(),
-                          style: TextStyle(color: textColor),
-                          textAlign: TextAlign.center,
+                    ),
+                    DataColumn(
+                      label: Container(
+                        width: statsWidth,
+                        child: Center(
+                          child: Text(
+                            greek ? "Ι" : "D",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: headerTextColor,
+                              fontSize: screenWidth * 0.03,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    DataColumn(
+                      label: Container(
+                        width: statsWidth,
+                        child: Center(
+                          child: Text(
+                            greek ? "Η" : "L",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: headerTextColor,
+                              fontSize: screenWidth * 0.03,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    DataColumn(
+                      label: Container(
+                        width: pointsWidth,
+                        child: Center(
+                          child: Text(
+                            greek ? "Πόντοι" : "Points",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: headerTextColor,
+                              fontSize: screenWidth * 0.03,
+                            ),
+                          ),
                         ),
                       ),
                     ),
                   ],
+                  rows: List<DataRow>.generate(groupTeams.length, (index) {
+                    final team = groupTeams[index];
+                    final rowColor = index % 2 == 0 ? rowColor1 : rowColor2;
+                    final isPromotionSpot = index < 4;
+
+                    return DataRow(
+                      color: WidgetStateProperty.all(rowColor),
+                      cells: [
+                        DataCell(
+                          Container(
+                            width: positionWidth,
+                            alignment: Alignment.centerLeft,
+                            child: isPromotionSpot
+                                ? Container(
+                                    width: screenWidth * 0.06,
+                                    height: screenWidth * 0.06,
+                                    decoration: BoxDecoration(
+                                      color: isDark ? Colors.green.shade700 : Colors.green,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Center(
+                                      child: Text(
+                                        (index + 1).toString(),
+                                        style: TextStyle(
+                                          color: isDark ? Colors.white : Colors.black,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: screenWidth * 0.03,
+                                        ),
+                                      ),
+                                    ),
+                                  )
+                                : Container(
+                                    width: screenWidth * 0.06,
+                                    height: screenWidth * 0.06,
+                                    decoration: BoxDecoration(
+                                      color: isDark ? Colors.grey.shade700 : Colors.grey,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Center(
+                                      child: Text(
+                                        (index + 1).toString(),
+                                        style: TextStyle(
+                                          color: isDark ? Colors.white : Colors.black,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: screenWidth * 0.03,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                          ),
+                        ),
+                        DataCell(
+                          Container(
+                            width: teamWidth,
+                            alignment: Alignment.centerLeft,
+                            child: TextButton(
+                              onPressed: () async {
+                                if (!mounted) return;
+                                await Navigator.push(
+                                  context,
+                                  MaterialPageRoute(builder: (context) => TeamDisplayPage(team)),
+                                );
+                                if (mounted) {
+                                  setState(() {});
+                                }
+                              },
+                              child: Text(
+                                team.name,
+                                style: TextStyle(
+                                  fontSize: screenWidth * 0.03,
+                                  fontWeight: FontWeight.w500,
+                                  color: textColor,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        DataCell(
+                          Container(
+                            width: statsWidth,
+                            child: Center(
+                              child: Text(
+                                team.totalGames.toString(),
+                                style: TextStyle(
+                                  color: textColor,
+                                  fontSize: screenWidth * 0.03,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        DataCell(
+                          Container(
+                            width: statsWidth,
+                            child: Center(
+                              child: Text(
+                                team.wins.toString(),
+                                style: TextStyle(
+                                  color: textColor,
+                                  fontSize: screenWidth * 0.03,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        DataCell(
+                          Container(
+                            width: statsWidth,
+                            child: Center(
+                              child: Text(
+                                team.draws.toString(),
+                                style: TextStyle(
+                                  color: textColor,
+                                  fontSize: screenWidth * 0.03,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        DataCell(
+                          Container(
+                            width: statsWidth,
+                            child: Center(
+                              child: Text(
+                                team.losses.toString(),
+                                style: TextStyle(
+                                  color: textColor,
+                                  fontSize: screenWidth * 0.03,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        DataCell(
+                          Container(
+                            width: pointsWidth,
+                            child: Center(
+                              child: Text(
+                                team.totalPoints.toString(),
+                                style: TextStyle(
+                                  color: textColor,
+                                  fontSize: screenWidth * 0.03,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+                  }),
                 );
-              }),
+              },
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: screenHeight * 0.01),
             Text(
               greek ? "Οι 4 πρώτοι περνούν στην επόμενη φάση." : "Top 4 teams advance to the next round.",
               style: TextStyle(
-                  fontSize: 13,
+                  fontSize: screenWidth * 0.035,
                   fontStyle: FontStyle.italic,
                   color: isDark ? Colors.white70 : Colors.black54
               ),
@@ -277,21 +456,6 @@ class StandingsPage1 extends State<StandingsPage> {
           ],
         ),
       ),
-    );
-  }
-
-  DataColumn _buildColumn(String label, {bool numeric = false, required Color textColor}) {
-    return DataColumn(
-      label: Center(
-        child: Text(
-          label,
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: textColor,
-          ),
-        ),
-      ),
-      numeric: numeric,
     );
   }
 }
