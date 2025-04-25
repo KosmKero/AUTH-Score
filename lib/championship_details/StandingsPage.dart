@@ -172,6 +172,8 @@ class StandingsPage1 extends State<StandingsPage> {
                 final statsWidth = availableWidth * 0.085;
                 final pointsWidth = availableWidth * 0.12;
 
+
+
                 return DataTable(
                   columnSpacing: 0,
                   headingRowHeight: screenHeight * 0.05,
