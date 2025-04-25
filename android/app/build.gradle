@@ -14,7 +14,7 @@ if (localPropertiesFile.exists()) {
 }
 
 android {
-    namespace = "com.example.authscore"
+    namespace = "com.authteam.authscore"
     compileSdk = 35  // Changed from 35 to match targetSdk
 
     lint {
@@ -37,7 +37,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.example.authscore"
+        applicationId = "com.authteam.authscore"
         minSdk = 23
         targetSdk = 34
         versionCode = flutter.versionCode?.toInteger() ?: 1

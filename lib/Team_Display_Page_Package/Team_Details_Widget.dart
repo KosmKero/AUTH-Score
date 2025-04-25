@@ -92,27 +92,31 @@ class _TeamDetailsWidgetState extends State<TeamDetailsWidget> {
                   icon: Icon(Icons.edit)),
             Row(
               mainAxisAlignment:
-                  MainAxisAlignment.start, // Στοίχιση αριστερά-δεξιά
+                  MainAxisAlignment.spaceBetween, // Στοίχιση αριστερά-δεξιά
               children: [
-                Padding(
-                  padding: EdgeInsets.only(left: 2),
-                  child: Icon(Icons.event, color: Colors.blueAccent),
-                ),
-                Padding(
-                  padding: EdgeInsets.only(left: 10),
-                  child: Text(
-                    'Έτος ίδρυσης:',
-                    style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w600,
-                        fontFamily: "Arial",
-                        letterSpacing: 0.3,
-                      color: darkModeNotifier.value?Colors.white:Colors.black
+                Row(
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.only(left: 2),
+                      child: Icon(Icons.event, color: Colors.blueAccent),
                     ),
-                  ),
+                    Padding(
+                      padding: EdgeInsets.only(left: 10),
+                      child: Text(
+                        'Έτος ίδρυσης:',
+                        style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w600,
+                            fontFamily: "Arial",
+                            letterSpacing: 0.3,
+                          color: darkModeNotifier.value?Colors.white:Colors.black
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
                 Padding(
-                    padding: EdgeInsets.only(left: 130),
+                    padding: EdgeInsets.only(right: 7),
                     child: Text(
                       '${widget.team.foundationYear}',
                       style: TextStyle(
@@ -123,29 +127,33 @@ class _TeamDetailsWidgetState extends State<TeamDetailsWidget> {
             SizedBox(height: 10),
             Row(
               mainAxisAlignment:
-                  MainAxisAlignment.start, // Στοίχιση αριστερά-δεξιά
+                  MainAxisAlignment.spaceBetween, // Στοίχιση αριστερά-δεξιά
               children: [
-                Padding(
-                  padding: EdgeInsets.only(left: 4),
-                  child: Icon(
-                    Icons.emoji_events,
-                    color: Color.fromARGB(255, 202, 188, 0),
-                  ),
-                ),
-                Padding(
-                  padding: EdgeInsets.only(left: 9),
-                  child: Text(
-                    'Τίτλοι:',
-                    style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w600,
-                        fontFamily: "Arial",
-                        color:darkModeNotifier.value?Colors.white:Colors.black
+                Row(
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.only(left: 4),
+                      child: Icon(
+                        Icons.emoji_events,
+                        color: Color.fromARGB(255, 202, 188, 0),
+                      ),
                     ),
-                  ),
+                    Padding(
+                      padding: EdgeInsets.only(left: 9),
+                      child: Text(
+                        'Τίτλοι:',
+                        style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w600,
+                            fontFamily: "Arial",
+                            color:darkModeNotifier.value?Colors.white:Colors.black
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
                 Padding(
-                    padding: EdgeInsets.only(left: 225),
+                    padding: EdgeInsets.only(right: 7),
                     child: Text(
                       '${widget.team.titles}',
                       style: TextStyle(
@@ -153,33 +161,38 @@ class _TeamDetailsWidgetState extends State<TeamDetailsWidget> {
                     )),
               ],
             ),
+            SizedBox(height: 10),
             //ΓΙΑ ΤΟΝ ΠΡΟΠΟΝΗΤΗ!!
             Row(
               mainAxisAlignment:
-                  MainAxisAlignment.start, // Στοίχιση αριστερά-δεξιά
+                  MainAxisAlignment.spaceBetween, // Στοίχιση αριστερά-δεξιά
               children: [
-                Padding(
-                  padding: EdgeInsets.only(left: 2),
-                  child: Icon(Icons.person, color: Colors.blueAccent),
-                ),
-                Padding(
-                  padding: EdgeInsets.only(left: 10),
-                  child: Text(
-                    'Προπονητής:',
-                    style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w600,
-                        fontFamily: "Arial",
-                      color: darkModeNotifier.value?Colors.white:Colors.black
+                Row(
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.only(left: 2),
+                      child: Icon(Icons.person, color: Colors.blueAccent),
                     ),
-                  ),
+                    Padding(
+                      padding: EdgeInsets.only(left: 10),
+                      child: Text(
+                        'Προπονητής:',
+                        style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w600,
+                            fontFamily: "Arial",
+                          color: darkModeNotifier.value?Colors.white:Colors.black
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
                 Padding(
-                    padding: EdgeInsets.only(left: 70),
+                    padding: EdgeInsets.only(right: 7),
                     child: Text(
                       '${widget.team.coach}',
                       style: TextStyle(
-                          fontSize: 17, fontWeight: FontWeight.bold,color: darkModeNotifier.value?Colors.white:Colors.black),
+                          fontSize: 20, fontWeight: FontWeight.bold,color: darkModeNotifier.value?Colors.white:Colors.black),
                     )),
               ],
             ),

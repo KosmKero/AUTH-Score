@@ -223,7 +223,7 @@ class _CreateSignIn extends State<CreateSignIn> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                greek?"Άμα δεν έχεις λογαριασμό":"If you don't have an account",
+                greek?"Δεν έχεις λογαριασμό;":"If you don't have an account:",
                 style: TextStyle(
                     fontSize: 16,
                     color: Colors.black,

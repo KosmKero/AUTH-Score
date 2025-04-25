@@ -500,7 +500,7 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
 
   Widget _matchProgressAdmin() {
     //3 ωρες μετα το ματς δεν μπορεις να το κανεις κανσελ
-    if (DateTime.now().millisecondsSinceEpoch ~/ 1000>widget.match.startTimeInSeconds + 3*3600){
+    if ((DateTime.now().millisecondsSinceEpoch ~/ 1000>widget.match.startTimeInSeconds + 3*3600 || DateTime.now().month>widget.match.month || DateTime.now().year>widget.match.year) && widget.match.hasMatchFinished){
       return SizedBox(
         height: 5,
       );

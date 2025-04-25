@@ -487,7 +487,7 @@ class MatchDetails extends ChangeNotifier {
   void matchCancelProgressed() {
     if (_hasMatchFinished &&
         (DateTime.now().millisecondsSinceEpoch ~/ 1000) - startTimeInSeconds <
-            3600) {
+           3* 3600 && DateTime.now().day==_day && DateTime.now().month==_month && DateTime.now().year==_year) {
       if (_hasMatchFinished) {
         MatchHandle().matchNotFinished(this);
         updateStandings(false);

@@ -68,6 +68,7 @@ class _TeamPlayersDisplayWidgetState extends State<TeamPlayersDisplayWidget> {
     } else {
       pos = "Επιθετικός";
     }
+    players.sort((a, b) => a.number.compareTo(b.number));
 
     return SingleChildScrollView(
       scrollDirection: Axis.vertical,

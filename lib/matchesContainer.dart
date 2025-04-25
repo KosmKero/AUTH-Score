@@ -368,33 +368,44 @@ class _MatchNotificationIconState extends State<MatchNotificationIcon> {
   }
 
   Future<void> toggleNotification() async {
-    final newValue = !widget.match.notify.value;
+    if (globalUser.isLoggedIn) {
+      final newValue = !widget.match.notify.value;
 
-    widget.match.enableNotify(newValue);
+      widget.match.enableNotify(newValue);
 
-    // Προαιρετικά ενημερωτικό μήνυμα
-    if (newValue) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('Reminder set for ${widget.match}'),
-        duration: Duration(seconds: 2),
-      ));
+      // Προαιρετικά ενημερωτικό μήνυμα
+      if (newValue) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Reminder set for ${widget.match}'),
+          duration: Duration(seconds: 2),
+        ));
+      }
+
+      final isFavorite =
+          globalUser.favoriteList.contains(widget.match.homeTeam.name) ||
+              globalUser.favoriteList.contains(widget.match.awayTeam.name);
+
+      if (newValue) {
+        if (!isFavorite) {
+          await UserHandleBase().addNotifyMatch(widget.match);
+        } else {
+          await UserHandleBase().deleteNotifyMatch(widget.match);
+        }
+      } else {
+        if (!isFavorite) {
+          await UserHandleBase().deleteNotifyMatch(widget.match);
+        } else {
+          await UserHandleBase().addNotifyMatch(widget.match);
+        }
+      }
     }
-
-    final isFavorite = globalUser.favoriteList.contains(widget.match.homeTeam.name) ||
-        globalUser.favoriteList.contains(widget.match.awayTeam.name);
-
-    if (newValue) {
-      if (!isFavorite) {
-        await UserHandleBase().addNotifyMatch(widget.match);
-      } else {
-        await UserHandleBase().deleteNotifyMatch(widget.match);
-      }
-    } else {
-      if (!isFavorite) {
-        await UserHandleBase().deleteNotifyMatch(widget.match);
-      } else {
-        await UserHandleBase().addNotifyMatch(widget.match);
-      }
+    else{
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(greek? "Πρέπει να συνδεθείς για να έχεις ειδοποιήσεις." : "Please log in to receive notifications."),
+        duration: Duration(seconds: 2),
+       // behavior: SnackBarBehavior.floating,
+        backgroundColor: Colors.redAccent.withOpacity(0.9),
+      ));
     }
   }
 

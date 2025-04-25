@@ -68,7 +68,7 @@ class TeamsHandle {
 
               playersData.forEach((name, playerData) {
                 players.add(Player(
-                  playersData["Name"] ?? "",
+                  playerData["Name"] ?? "",
                   playerData['Surname'] ?? "",
                   playerData['Position'] ?? 0,
                   playerData['Goals'] ?? 0,
