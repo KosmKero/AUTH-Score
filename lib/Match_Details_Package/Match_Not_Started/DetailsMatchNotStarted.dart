@@ -44,7 +44,7 @@ class DetailsMatchNotStarted extends StatelessWidget {
             ),
           ),
           SizedBox(
-            height: 1,
+            height: 40,
           ),
           Padding( //ΑΦΟΡΑ ΤΗΝ ΑΠΟΣΤΑΣΗ ΑΠΟ ΤΑ ΚΥΚΛΑΚΙΑ ΜΕ ΤΟ ΟΝΟΜΑ
             padding: const EdgeInsets.symmetric(horizontal:10.0),
@@ -83,14 +83,17 @@ class TeamFormWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final teamNameWidth = screenWidth * 0.46; // 40% of screen width for team name
+    final resultsWidth = screenWidth * 0.46; // 50% of screen width for results
+
     return FutureBuilder<List<String>>(
       future: getFinalFive(team.name),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const CircularProgressIndicator(); // ή κάποιο placeholder
+          return const CircularProgressIndicator();
         }
-        else if (snapshot.hasError)
-        {
+        else if (snapshot.hasError) {
           return const Text("Error loading results");
         } else {
           final results = snapshot.data ?? [];
@@ -102,7 +105,7 @@ class TeamFormWidget extends StatelessWidget {
               children: [
                 // Team Name
                 Container(
-                  width: 160,
+                  width: teamNameWidth,
                   alignment: Alignment.centerLeft,
                   child: TextButton(
                     onPressed: () {
@@ -115,23 +118,24 @@ class TeamFormWidget extends StatelessWidget {
                     child: Text(
                       team.name,
                       style: TextStyle(
-                        fontSize: 16,
+                        fontSize: screenWidth * 0.037, // Responsive font size
                         fontWeight: FontWeight.w600,
                         color: darkModeNotifier.value?Colors.white:Colors.black,
-                        letterSpacing: 1.5,
+                        letterSpacing: 1.3,
                       ),
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                 ),
-                SizedBox(width: 30),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: displayResults.map((result) => Padding(
-                    padding:
-                    const EdgeInsets.symmetric(horizontal: 3),
-                    child: _buildResultIcon(result),
-                  ))
-                      .toList(),
+                Container(
+                  width: resultsWidth,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: displayResults.map((result) => Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 3),
+                      child: _buildResultIcon(result),
+                    )).toList(),
+                  ),
                 ),
               ],
             ),
