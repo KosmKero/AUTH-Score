@@ -7,9 +7,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:71180680310:android:af3edce1f09ff89f1cf357",
+        "mobilesdk_app_id": "1:71180680310:android:50dcb5d50ba150081cf357",
         "android_client_info": {
-          "package_name": "com.example.authscore"
+          "package_name": "com.authteam.authscore"
         }
       },
       "oauth_client": [],
@@ -26,9 +26,9 @@
     },
     {
       "client_info": {
-        "mobilesdk_app_id": "1:71180680310:android:9ef4f227543393171cf357",
+        "mobilesdk_app_id": "1:71180680310:android:af3edce1f09ff89f1cf357",
         "android_client_info": {
-          "package_name": "com.example.untitled1"
+          "package_name": "com.example.authscore"
         }
       },
       "oauth_client": [],
