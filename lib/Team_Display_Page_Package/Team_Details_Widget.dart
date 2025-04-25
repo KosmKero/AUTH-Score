@@ -213,11 +213,13 @@ class TeamFormWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    
     return FutureBuilder<List<String>>(
       future: getFinalFive(team.name),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const CircularProgressIndicator(); // ή κάποιο placeholder
+          return const CircularProgressIndicator();
         } else if (snapshot.hasError) {
           return const Text("Error loading results");
         } else {
@@ -226,28 +228,32 @@ class TeamFormWidget extends StatelessWidget {
               results.length == 6 ? results.sublist(1) : results;
 
           return Padding(
-            padding: EdgeInsets.only(left: 1, top: 10),
+            padding: EdgeInsets.only(left: 0, top: 10),
             child: Row(
               children: [
                 // Team Name
                 SizedBox(
-                  width: 155,
-                  child: Text(
-                    team.name,
-                    style: TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w600,
-                      color:darkModeNotifier.value?Colors.white: Colors.black,
-                      letterSpacing: 1.5,
+                  width: screenWidth * 0.43,
+                  child: Padding(
+                    padding: EdgeInsets.only(left: screenWidth * 0.025),
+                    child: Text(
+                      team.name,
+                      style: TextStyle(
+                        fontSize: screenWidth * 0.036,
+                        fontWeight: FontWeight.w600,
+                        color: darkModeNotifier.value ? Colors.white : Colors.black,
+                        letterSpacing: 1.5,
+                      ),
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                 ),
-                SizedBox(width: 30),
+                SizedBox(width: screenWidth * 0.05),
                 Row(
                   children: displayResults
                       .map((result) => Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 3),
-                            child: _buildResultIcon(result),
+                            padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.01),
+                            child: _buildResultIcon(result, screenWidth),
                           ))
                       .toList(),
                 ),
@@ -259,7 +265,7 @@ class TeamFormWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildResultIcon(String result) {
+  Widget _buildResultIcon(String result, double screenWidth) {
     IconData icon;
     Color color;
 
@@ -281,7 +287,7 @@ class TeamFormWidget extends StatelessWidget {
         color = Colors.grey;
     }
 
-    return Icon(icon, color: color, size: 30);
+    return Icon(icon, color: color, size: screenWidth * 0.07);
   }
 }
 

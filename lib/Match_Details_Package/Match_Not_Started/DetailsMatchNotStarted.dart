@@ -118,7 +118,7 @@ class TeamFormWidget extends StatelessWidget {
                     child: Text(
                       team.name,
                       style: TextStyle(
-                        fontSize: screenWidth * 0.037, // Responsive font size
+                        fontSize: screenWidth * 0.036, // Responsive font size
                         fontWeight: FontWeight.w600,
                         color: darkModeNotifier.value?Colors.white:Colors.black,
                         letterSpacing: 1.3,
