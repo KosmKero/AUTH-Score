@@ -16,12 +16,25 @@ class UserHandleBase
 
 
   //Επιστρέφει true αν συνδεθει και false αν το username υπάρχει ήδη ή συναντήσει πρόβλημα
-  Future<bool> signUpWithUsername(String username, String password,String uni,BuildContext context) async
+  Future<bool> signUpWithEmail(String email,String username, String password,String uni,BuildContext context) async
   {
+
+    if (!isValidEmail(email)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(greek
+              ? "Παρακαλώ δώστε ένα έγκυρο email."
+              : "Please enter a valid email."),
+          duration: Duration(seconds: 2),
+        ),
+      );
+      return false;
+    }
+
+
     if (await isUsernameAvailable(username))
     {
       try {
-        String email = "$username@myapp.com"; // Αυτόματη μετατροπή σε email
 
         UserCredential userCredential =
             await FirebaseAuth.instance.createUserWithEmailAndPassword(
@@ -51,19 +64,69 @@ class UserHandleBase
 
           globalUser = AppUser(username, uni, [], [],"user",{},"");
           globalUser.loggedIn();
+
+         //await user?.sendEmailVerification();
+
+
           return true;
         }
       }
       catch (e) {
-        if(password.length<6 && password.isNotEmpty) {
+        if (password.length < 6 && password.isNotEmpty) {
+          // Εμφανίζουμε μήνυμα για κωδικό μικρότερο από 6 χαρακτήρες
           ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              backgroundColor: Colors.red,
+              content: Text(greek
+                  ? "Ο κωδικός πρέπει να έχει τουλάχιστον 6 χαρακτήρες."
+                  : "Password must be at least 6 characters."),
+              duration: Duration(seconds: 2),
+            ),
+          );
+        } else if (e is FirebaseAuthException) {
+          // Διαχείριση σφαλμάτων από το FirebaseAuth
+          if (e.code == 'email-already-in-use') {
+            ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 backgroundColor: Colors.red,
                 content: Text(greek
-                    ? "Ο κωδικός πρέπει να έχει μήκος τουλάχιστον 6."
-                    : "Password must be at least 6 characters long"),
+                    ? "Αυτό το email χρησιμοποιείται ήδη. Δοκιμάστε με άλλο email."
+                    : "This email is already in use. Please try another email."),
                 duration: Duration(seconds: 2),
-              ));
+              ),
+            );
+          } else if (e.code == 'invalid-email') {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                backgroundColor: Colors.red,
+                content: Text(greek
+                    ? "Το email που καταχωρήσατε δεν είναι έγκυρο."
+                    : "The email address is not valid."),
+                duration: Duration(seconds: 2),
+              ),
+            );
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                backgroundColor: Colors.red,
+                content: Text(greek
+                    ? "Προέκυψε σφάλμα κατά την εγγραφή. Δοκιμάστε ξανά."
+                    : "An error occurred during signup. Please try again."),
+                duration: Duration(seconds: 2),
+              ),
+            );
+          }
+        } else {
+          // Γενικό σφάλμα
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              backgroundColor: Colors.red,
+              content: Text(greek
+                  ? "Προέκυψε σφάλμα κατά την εγγραφή. Δοκιμάστε ξανά."
+                  : "An error occurred during signup. Please try again."),
+              duration: Duration(seconds: 2),
+            ),
+          );
         }
         return false;
       }
@@ -72,13 +135,20 @@ class UserHandleBase
     {
       ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(greek?"Αυτό το όνομα χρησιμοποιείται ήδη! Επέλεξε κάποιο άλλο.":'This username already exists! Please try another one.'),
+            content: Text(greek?"Αυτό το όνομα χρήστη χρησιμοποιείται ήδη! Επέλεξε κάποιο άλλο.":'This username already exists! Please try another one.'),
             duration: Duration(seconds: 2),
           ));
       return false;
     }
     return false;
   }
+
+  bool isValidEmail(String email) {
+    final emailRegex = RegExp(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$");
+    return emailRegex.hasMatch(email);
+  }
+
+
 
   //συναρτηση για ελεγχο αν υπαρχει το username
   Future<bool> isUsernameAvailable(String username) async {
@@ -105,37 +175,18 @@ class UserHandleBase
 
 
 
-  Future<bool> login(String username, String password) async {
+  Future<bool> login(String email, String password) async {
     try {
-
-      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-          .collection("users")
-          .where("username", isEqualTo: username)
-          .limit(1)
-          .get();
-
-      if (querySnapshot.docs.isEmpty) {
-        print("Username not found");
-        return false;
-      }
-
-      // Πάρε το email από το user document
-      String email = querySnapshot.docs.first.get("email");
-
-
       UserCredential userCredential =
           await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
 
-
-
       user = userCredential.user;
 
 
       DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection("users").doc(FirebaseAuth.instance.currentUser!.uid).get();
-
 
 
       if (userDoc.exists && userDoc.data() != null)
@@ -157,9 +208,8 @@ class UserHandleBase
           userDoc['role'],
           matchKeys,
           userDoc['email']
-
-
         );
+
         globalUser.loggedIn();
         darkModeNotifier.value = userDoc.get("darkMode");
         if(darkModeNotifier.value) {
@@ -176,10 +226,6 @@ class UserHandleBase
         print("Error: User document does not exist or is empty.");
       }
 
-     globalUser = globalUser;
-
-
-      print("object");
       return true;
 
     } catch (e) {
@@ -187,8 +233,50 @@ class UserHandleBase
       return false;
     }
 
-    return false;
   }
+
+  Future<void> resetPassword(BuildContext context, String email) async {
+    try {
+      if (!isValidEmail(email)){
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(greek ? 'Συμπλήρωσε σωστά το email σου' : 'Please fill in your email.') ,
+            backgroundColor: Colors.red,
+            duration: Duration(seconds: 2),
+          ),
+        );
+        return;
+      }
+      await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(greek ? 'Ένα email επαναφοράς κωδικού στάλθηκε!' :  'A password reset email has been sent!'),
+          backgroundColor: Colors.green,
+          duration: Duration(seconds: 2),
+        ),
+      );
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'user-not-found') {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Δεν υπάρχει χρήστης με αυτό το email.'),
+            backgroundColor: Colors.red,
+            duration: Duration(seconds: 2),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Σφάλμα'),
+            backgroundColor: Colors.red,
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    }
+  }
+
 
 
   //συνάρτηση που προσθέτει το ονομα της ομαδας που θα μπορει να ελέγχει ο admin
@@ -382,6 +470,8 @@ class UserHandleBase
 
     print('Deleted $key successfully');
   }
+
+
 
 
 

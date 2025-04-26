@@ -104,6 +104,9 @@ class AppUser
     return false;
   }
 
+  void changeUsername(String username){
+    _username = username;
+  }
 
 
 

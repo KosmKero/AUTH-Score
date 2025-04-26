@@ -8,7 +8,7 @@ import '../main.dart';
 
 
 final TextEditingController _textController1 = TextEditingController();
-final TextEditingController _textController2 = TextEditingController();
+final TextEditingController newUsernameText = TextEditingController();
 bool isSure=false;
 
 class ChangeUserName extends StatefulWidget
@@ -92,39 +92,46 @@ class _CreateBody extends State<CreateBody>
   @override
   Widget build(BuildContext context) {
     return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: EdgeInsets.only(right: greek?150:180,top: 60),
+          padding: EdgeInsets.only(left: 10,top: 50),
           child: Text(
-            greek?"Τωρινό όνομα χρήστη":"Current Username",
+            greek ? "Τωρινό όνομα χρήστη:" : "Current Username",
             style: TextStyle(
               fontSize: 20,
-              fontWeight: FontWeight.bold
-            )
-          )
+              fontWeight: FontWeight.bold,
+              color: Colors.black87,
+            ),
+          ),
         ),
 
+// Εμφάνιση του τωρινού ονόματος χρήστη με πιο όμορφο σχεδιασμό
         Padding(
-          padding: EdgeInsets.only(top: 15),
-          child:TextField(
-            controller: _textController1,
-            decoration: InputDecoration(
-             // prefixIcon: Icon(Icons.person, color: Colors.blue[700]),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(15),
-                borderSide: BorderSide(color: Colors.black87, width: 4),
-              ),
-              hintText: 'Enter your username...',
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(15),
-                borderSide: BorderSide(color: Colors.blue, width: 2),
+          padding: EdgeInsets.only(left:20,top: 15),
+          child: Card(
+            elevation: 4,  // Προσθήκη σκιάς για να ξεχωρίζει το κουτί
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15),  // Γωνίες με στρογγυλεμένες ακμές
+            ),
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              child: Text(
+                globalUser.username,  // Προβολή του τωρινού ονόματος χρήστη
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,  // Ελαφρώς έντονη γραφή για καλύτερη αναγνωσιμότητα
+                  color: Colors.blueAccent,  // Χρώμα για να ξεχωρίζει
+                ),
               ),
             ),
           ),
         ),
 
+
         Padding(
-            padding: EdgeInsets.only(right: greek?120:200,top: 60),
+            padding: EdgeInsets.only(left: 10,top: 40),
             child: Text(
                 greek?"Καινούριο όνομα χρήστη":"New Username",
                 style: TextStyle(
@@ -137,7 +144,7 @@ class _CreateBody extends State<CreateBody>
         Padding(
           padding: EdgeInsets.only(top: 15),
           child:TextField(
-            controller: _textController2,
+            controller: newUsernameText,
             decoration: InputDecoration(
               // prefixIcon: Icon(Icons.person, color: Colors.blue[700]),
               border: OutlineInputBorder(
@@ -153,7 +160,7 @@ class _CreateBody extends State<CreateBody>
           ),
         ),
 
-        SizedBox(height: 80,),
+        SizedBox(height: 40,),
 
         Padding(
           padding: EdgeInsets.symmetric(horizontal: 10),
@@ -166,8 +173,8 @@ class _CreateBody extends State<CreateBody>
             ),
             ),
           ),
-
-        CreateConfirmButton(user: widget.user)
+        SizedBox(height: 90,),
+        Center(child: CreateConfirmButton(user: widget.user))
       ],
     );
   }
@@ -195,11 +202,9 @@ class CreateConfrimButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 80),
-      child: ElevatedButton(
+    return ElevatedButton(
         onPressed: () {
-          updateUsername(context, _textController1.text,_textController2.text);
+          updateUsername(context, newUsernameText.text);
         },
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.blue,
@@ -222,18 +227,19 @@ class CreateConfrimButton extends StatelessWidget {
             fontFamily: 'Trajan Pro',
           ),
         ),
-      ),
     );
   }
 }
 
 
-Future<void> updateUsername(BuildContext context, String oldUsername, String newUsername) async {
+Future<void> updateUsername(BuildContext context, String newUsername) async {
   try {
-    if (globalUser.username != oldUsername) {
+    User? user = FirebaseAuth.instance.currentUser;
+
+    if (user == null){
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('This username was not found!'),
+          content: Text(greek ? 'Πρέπει να συνδεθείς για να αλλάξεις username!' : 'Please log in to change username.'),
           backgroundColor: Colors.red,
           duration: Duration(seconds: 2),
         ),
@@ -241,53 +247,56 @@ Future<void> updateUsername(BuildContext context, String oldUsername, String new
       return;
     }
 
-    bool userConfirmed = await _showMyDialog(context);
+    if (newUsername == globalUser.username) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(greek
+              ? 'Χρησιμοποιείς ήδη αυτό το όνομα χρήστη!'
+              : 'You are already using this username!',),
+          backgroundColor: Colors.red,
+          duration: Duration(seconds: 2),
+        ),
+      );
+      return;
+    }
+
+
     bool isAvailable = await UserHandleBase().isUsernameAvailable(newUsername);
 
     if (!isAvailable) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('This username is already used!'),
+          content: Text(greek ? 'Το username υπάρχει ήδη. Παρακαλώ επίλεξε κάποιο άλλο!' : 'This username is already used!'),
           backgroundColor: Colors.red,
           duration: Duration(seconds: 2),
         ),
       );
       return;
     }
+    bool userConfirmed = await _showMyDialog(context);
 
     if (userConfirmed) {
-      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-          .collection('users')
-          .where('username', isEqualTo: oldUsername)
-          .get();
 
-      if (querySnapshot.docs.isEmpty) throw Exception("User not found");
 
-      DocumentReference userDocRef = querySnapshot.docs.first.reference;
 
-      await userDocRef.update({
-        'username': newUsername,
+      await FirebaseFirestore.instance
+          .collection('users')  // Το όνομα της συλλογής
+          .doc(user.uid)             // Το document με το UID ως κλειδί
+          .update({
+        'username': newUsername, // Το πεδίο που θέλεις να αλλάξεις
       });
 
-      globalUser = AppUser(
-          newUsername,
-          globalUser.university,
-          [],
-          [],
-          "user",
-          {},
-          ""
-      );
+      globalUser.changeUsername(newUsername);
 
       _textController1.clear();
-      _textController2.clear();
+      newUsernameText.clear();
 
       navigatorKey.currentState?.pushReplacementNamed('/home');
     }
   } catch (e) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Something went wrong!}'),
+        content: Text(greek ? 'Κάτι πήγε στραβά!' : 'Something went wrong!'),
         backgroundColor: Colors.red,
         duration: Duration(seconds: 2),
       ),
@@ -304,24 +313,24 @@ Future<bool> _showMyDialog(BuildContext context) async {
     barrierDismissible: false,
     builder: (BuildContext context) {
       return AlertDialog(
-        title: const Text('Confirmation'),
-        content: const SingleChildScrollView(
+        title: Text(greek ? 'Επιβεβαίωση' : 'Confirmation'),
+        content: SingleChildScrollView(
           child: ListBody(
             children: <Widget>[
-              Text('Are you sure you want to change your username?'),
+              Text(greek ? 'Είσαι σίγουρος ότι θες να αλλάξεις username;' : 'Are you sure you want to change your username?'),
             ],
           ),
         ),
         actions: <Widget>[
           TextButton(
-            child: const Text('Decline'),
+            child: Text(greek ? 'Ακύρωση' : 'Decline'),
             onPressed: () {
               result = false;
               Navigator.of(context).pop();
             },
           ),
           TextButton(
-            child: const Text('Approve'),
+            child: Text(greek ? 'Επιβεβαίωση' : 'Approve'),
             onPressed: () {
               result = true;
               Navigator.of(context).pop();

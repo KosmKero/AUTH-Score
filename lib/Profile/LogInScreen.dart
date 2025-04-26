@@ -61,9 +61,9 @@ List<String> filteredItems = [];
 TextEditingController searchController = TextEditingController();
 bool showSuggestions = false;
 
-final TextEditingController _textController1 = TextEditingController();
-final TextEditingController _textController2 = TextEditingController();
-final TextEditingController _textController3 = TextEditingController();
+final TextEditingController _emailText = TextEditingController();
+final TextEditingController _passwordText = TextEditingController();
+final TextEditingController _usernameText = TextEditingController();
 
 final TextEditingController _textController4 = TextEditingController();
 final TextEditingController _textController5 = TextEditingController();
@@ -156,9 +156,11 @@ class _CreateSignIn extends State<CreateSignIn> {
   @override
   Widget build(BuildContext context) {
     return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: EdgeInsets.only(right: 30, top: 10),
+          padding: EdgeInsets.only(left: 5, top: 10),
           child: Text(
             greek?"Σύνδεση":"Sign in",
             style: TextStyle(
@@ -171,9 +173,9 @@ class _CreateSignIn extends State<CreateSignIn> {
         ),
         SizedBox(height: 50),
         Padding(
-          padding: EdgeInsets.only(right: greek?210: 250),
+          padding: EdgeInsets.only(left: 5),
           child: Text(
-            greek?"Όνομα χρήστη":"Username",
+            'Email',
             style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold
@@ -192,7 +194,7 @@ class _CreateSignIn extends State<CreateSignIn> {
                 borderRadius: BorderRadius.circular(15),
                 borderSide: BorderSide(color: Colors.black87, width: 3),
               ),
-              hintText: 'Enter your username',
+              hintText: 'Enter your email',
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(15),
                 borderSide: BorderSide(color: Colors.blue, width: 2),
@@ -203,7 +205,7 @@ class _CreateSignIn extends State<CreateSignIn> {
         SizedBox(height: 40),
 
         Padding(
-          padding: EdgeInsets.only(right: greek?140:250),
+          padding: EdgeInsets.only(left: 5),
           child: Text(
             greek?"Κωδικός πρόσβασης":"Password",
             style: TextStyle(
@@ -243,26 +245,28 @@ class _CreateSignIn extends State<CreateSignIn> {
             ),
           ),
         ),
-        SizedBox(height: 10),
-        //Padding(
-        //  padding: EdgeInsets.only(right: greek?190:200),
-        //  child: TextButton(
-        //    onPressed: () {},
-        //    child: Text(
-        //      greek?"Ξέχασες τον κωδικό":"Forgot Password?",
-        //      style: TextStyle(
-        //          fontSize: 15,
-        //          color: Colors.blueAccent
-        //      ),
-        //    ),
-        //  ),
-        //),
-        //SizedBox(height: 10),
+        SizedBox(height: 7),
+        Padding(
+          padding: EdgeInsets.only(left: 10),
+          child: TextButton(
+            onPressed: () {
+
+              UserHandleBase().resetPassword(context, _textController4.text);
+            },
+            child: Text(
+              greek?"Ξέχασα τον κωδικό":"Forgot my password?",
+              style: TextStyle(
+                  fontSize: 15,
+                  color: Colors.blueAccent
+              ),
+            ),
+          ),
+        ),
+        SizedBox(height: 13),
         CreateButton(
           signIn: true,
-          controller1: _textController4,
-          controller2: _textController5,
-          controller3: searchController,
+          emailText: _textController4,
+          passwordText: _textController5,
         ),
         SizedBox(height: 15),
         Row(
@@ -317,22 +321,22 @@ class _CreateSignUp extends State<CreateSignUp> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SizedBox(height: 10,),
-        Center(
+        Padding(
+          padding: const EdgeInsets.only(left: 5.0),
           child: Text(
-            greek?"Δημιουργία λογαριασμού":"Create an account",
-            style: TextStyle(
-              fontSize: 25,
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
+              greek?"Δημιουργία λογαριασμού":"Create an account",
+              style: TextStyle(
+                fontSize: 25,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
             ),
-          ),
         ),
         SizedBox(height: 40),
-
         Padding(
           padding: EdgeInsets.only(left: 5),
           child: Text(
-            greek?"Όνομα χρήστη":"Username",
+            greek? "Email" : "Username",
             style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold
@@ -345,7 +349,42 @@ class _CreateSignUp extends State<CreateSignUp> {
         Padding(
           padding: EdgeInsets.only(left: 5, right: 30),
           child: TextField(
-            controller: _textController1,
+            controller: _emailText,
+            decoration: InputDecoration(
+              prefixIcon: Icon(Icons.person, color: Colors.blue[700]),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(15),
+                borderSide: BorderSide(color: Colors.black87, width: 3),
+              ),
+              hintText: 'Enter your email',
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(15),
+                borderSide: BorderSide(color: Colors.blue, width: 2),
+              ),
+            ),
+          ),
+        ),
+
+        SizedBox(height: 20),
+
+        Padding(
+          padding: EdgeInsets.only(left: 5),
+          child: Text(
+            greek? "Όνομα χρήστη" : "Username",
+            style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold
+            ),
+          ),
+        ),
+
+        SizedBox(height: 10),
+
+        //TEXTFIELD 1!!!
+        Padding(
+          padding: EdgeInsets.only(left: 5, right: 30),
+          child: TextField(
+            controller: _usernameText,
             decoration: InputDecoration(
               prefixIcon: Icon(Icons.person, color: Colors.blue[700]),
               border: OutlineInputBorder(
@@ -360,7 +399,7 @@ class _CreateSignUp extends State<CreateSignUp> {
             ),
           ),
         ),
-        SizedBox(height: 30),
+        SizedBox(height: 20),
 
         Padding(
           padding: EdgeInsets.only(left: 5),
@@ -378,7 +417,7 @@ class _CreateSignUp extends State<CreateSignUp> {
         Padding(
           padding: EdgeInsets.only(left: 5, right: 30),
           child: TextField(
-            controller: _textController2,
+            controller: _passwordText,
             obscureText: passwordVisible,
             decoration: InputDecoration(
               prefixIcon: Icon(Icons.lock, color: Colors.blue[700]),
@@ -405,7 +444,7 @@ class _CreateSignUp extends State<CreateSignUp> {
             ),
           ),
         ),
-        SizedBox(height: 30),
+        SizedBox(height: 20),
 
         Padding(
           padding: EdgeInsets.only(left: 5), // το έφερα λίγο πιο μέσα
@@ -564,9 +603,10 @@ class _CreateSignUp extends State<CreateSignUp> {
 
         CreateButton(
           signIn: false,
-          controller1: _textController1,
-          controller2: _textController2,
-          controller3: searchController,
+          emailText: _emailText,
+          passwordText: _passwordText,
+          usernameText: _usernameText,
+          sxolhText: searchController,
         ),
 
         SizedBox(height:15),
@@ -605,16 +645,18 @@ class _CreateSignUp extends State<CreateSignUp> {
 //ΔΗΜΙΟΥΡΓΕΙ ΤΟ ΚΟΥΜΠΙ ΓΙΑ ΤΟ SIGN IN/ SIGN UP
 class CreateButton extends StatelessWidget {
   final bool signIn;
-  final TextEditingController controller1;
-  final TextEditingController controller2;
-  final TextEditingController controller3;
+  final TextEditingController emailText;
+  final TextEditingController passwordText;
+  final TextEditingController? sxolhText;
+  final TextEditingController? usernameText;
   //final User user;
   const CreateButton({
     super.key,
     required this.signIn,
-    required this.controller1,
-    required this.controller2,
-    required this.controller3,
+    required this.emailText,
+    required this.passwordText,
+    this.usernameText,
+    this.sxolhText,
   });
 
   //ΔΗΜΙΟΥΡΓΕΙ ΤΟ ΚΟΥΜΠΙ ΠΟΥ ΘΑ ΠΑΤΗΣΕΙ ΑΝ ΘΕΛΕΙ ΝΑ ΚΑΝΕΙΟ SIGN IN Ή LOG IN
@@ -622,14 +664,14 @@ class CreateButton extends StatelessWidget {
   Widget build(BuildContext context)
   {
     return Padding(
-      padding: EdgeInsets.only(left: 25, right: 25, top: 50),
+      padding: EdgeInsets.only(left: 25, right: 25),
       child: Container(
         width: double.infinity,
         height: 50,
         child: ElevatedButton(
           onPressed: () //ΑΝΑΛΟΓΑ ΜΕ ΤΗΝ ΚΑΤΑΣΤΑΣΗ ΠΟΥ ΕΙΜΑΣΤΕ ΚΑΛΟΥΜΕ ΜΙΑ ΑΠΟ ΤΙΣ 2 ΣΥΝΑΡΤΗΣΕΙΣ
           {
-            signIn ? checkBase(context,controller1,controller2,controller3) : addInBase(context,controller1,controller2,controller3);
+            signIn ? checkBase(context,emailText,passwordText) : addInBase(context,emailText,passwordText,sxolhText,usernameText);
           },
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.blue[700],
@@ -654,13 +696,13 @@ class CreateButton extends StatelessWidget {
 }
 
 
-void checkBase(BuildContext context,controller1,controller2,controller3) async
+void checkBase(BuildContext context,emailText,passwordText) async
 {
 
   try
   {
-    String username = controller1.text;
-    String password = controller2.text;
+    String username = emailText.text;
+    String password = passwordText.text;
 
     /*print('Attempting login with:');
     print('Username: $username');
@@ -673,8 +715,8 @@ void checkBase(BuildContext context,controller1,controller2,controller3) async
 
       print('✅ ton brhkameeee!'); //ΥΠΑΡΧΕΙ ΑΝΤΙΣΤΟΙΧΙΑ ΔΕΔΟΜΕΝΩΝ
       isLoggedIn = true;
-      controller1.clear();
-      controller2.clear();
+      emailText.clear();
+      passwordText.clear();
 
 
       //ΕΠΙΣΤΡΕΦΩ ΣΤΗΝ ΑΡΧΙΚΗ ΣΕΛΙΔΑ!!
@@ -711,17 +753,18 @@ void checkBase(BuildContext context,controller1,controller2,controller3) async
 }
 
 
-void addInBase(BuildContext context, controller1, controller2, controller3) async
+void addInBase(BuildContext context,TextEditingController  emailText,TextEditingController  passwordText, sxolhText, usernameText) async
 {
   //ΠΑΙΡΝΩ ΤΙΣ ΤΙΜΕΣ ΤΩΝ ΠΕΔΙΩΝ!!
-  String text1 = controller1.text;
-  String text2 = controller2.text;
-  String text3 = controller3.text;
+  String email = emailText.text;
+  String password = passwordText.text;
+  String sxolh = sxolhText.text;
+  String username = usernameText.text;
 
 
 
 
-  if(text1.isEmpty || text2.isEmpty)
+  if(email.isEmpty || password.isEmpty || username.isEmpty)
   {
     // Show SnackBar with error message
     ScaffoldMessenger.of(context).showSnackBar(
@@ -733,22 +776,22 @@ void addInBase(BuildContext context, controller1, controller2, controller3) asyn
     );
     return;
   }
-  bool found = await UserHandleBase().signUpWithUsername(text1,text2,text3,context);
+  bool found = await UserHandleBase().signUpWithEmail(email,username,password,sxolh,context);
   if(!found)
   {
     //κενη για τωρα για να εμφανιζουμε σωστο μηνυμα λαθους ρε
   }
   else
   {
-    //AppUser currentUser = AppUser(text1,text2,text3);
+    //AppUser currentUser = AppUser(_email,_password,_sxolh);
     isLoggedIn = true; //ΑΛΛΑΖΩ ΚΑΤΑΣΤΑΣΗ ΧΡΗΣΤΗ
 
     //ΚΑΘΑΡΙΖΩ ΤΑ ΠΕΔΙΑ ΟΤΑΝ ΠΑΤΗΣΕΙ ΤΟ ΚΟΥΜΠΙ ΕΓΓΡΑΦΗΣ
-    controller1.clear();
-    controller2.clear();
-    controller3.clear();
+    emailText.clear();
+    passwordText.clear();
+    sxolhText.clear();
 
-    username = text1;
+    username = email;
     print("Data successfully added!");
     navigatorKey.currentState?.pushReplacementNamed('/home');
 

@@ -6,9 +6,9 @@ import '../Data_Classes/AppUser.dart';
 import '../main.dart';
 
 
-final TextEditingController _textController1 = TextEditingController();
-final TextEditingController _textController2 = TextEditingController();
-final TextEditingController _textController3 = TextEditingController();
+final TextEditingController _emailText = TextEditingController();
+final TextEditingController _oldPasswordText = TextEditingController();
+final TextEditingController _newPasswordText = TextEditingController();
 
 bool isSure=false;
 
@@ -93,40 +93,12 @@ class _CreateBody extends State<CreateBody>
   @override
   Widget build(BuildContext context) {
     return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-            padding: EdgeInsets.only(right: greek?225:250,top: 20),
-            child: Text(
-                greek?"Όνομα χρήστη":"Username",
-                style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold
-                )
-            )
-        ),
 
         Padding(
-          padding: EdgeInsets.only(top: 15),
-          child:TextField(
-            controller: _textController1,
-            decoration: InputDecoration(
-              // prefixIcon: Icon(Icons.person, color: Colors.blue[700]),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(15),
-                borderSide: BorderSide(color: Colors.black87, width: 4),
-              ),
-              hintText: 'Πληκτρολόγησε το όνομα χρήστη σου...',
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(15),
-                borderSide: BorderSide(color: Colors.blue, width: 2),
-              ),
-            ),
-          ),
-        ),
-        SizedBox(height: 20,),
-
-        Padding(
-            padding: EdgeInsets.only(right: greek?200:220,top: 20),
+            padding: EdgeInsets.only(left: 10,top: 20),
             child: Text(
                 greek?"Παλιός κωδικός":"Old password",
                 style: TextStyle(
@@ -139,7 +111,7 @@ class _CreateBody extends State<CreateBody>
         Padding(
           padding: EdgeInsets.only(top: 15),
           child:TextField(
-            controller: _textController2,
+            controller: _oldPasswordText,
             decoration: InputDecoration(
               // prefixIcon: Icon(Icons.person, color: Colors.blue[700]),
               border: OutlineInputBorder(
@@ -154,10 +126,9 @@ class _CreateBody extends State<CreateBody>
             ),
           ),
         ),
-        SizedBox(height: 20,),
 
         Padding(
-            padding: EdgeInsets.only(right: greek?170:210,top: 20),
+            padding: EdgeInsets.only(left: 10,top: 30),
             child: Text(
                 greek?"Καινούριος κωδικός":"New password",
                 style: TextStyle(
@@ -170,7 +141,7 @@ class _CreateBody extends State<CreateBody>
         Padding(
           padding: EdgeInsets.only(top: 15),
           child:TextField(
-            controller: _textController3,
+            controller: _newPasswordText,
             decoration: InputDecoration(
               // prefixIcon: Icon(Icons.person, color: Colors.blue[700]),
               border: OutlineInputBorder(
@@ -186,11 +157,9 @@ class _CreateBody extends State<CreateBody>
           ),
         ),
 
-        SizedBox(height: 80,),
-
         Padding(
-          padding: EdgeInsets.symmetric(horizontal: 10),
-          child: Text(
+          padding: EdgeInsets.symmetric(horizontal: 10,vertical: 50),
+          child: Text(greek ? "Σημείωση: Πρέπει να θυμάσαι τον νέο σου κωδικό για να μπορέσεις να συνδεθείς στον λογαριασμό σου!" :
             "Note: You must remember your new password to connect to your account!!",
             style: TextStyle(
                 fontSize: 15,
@@ -200,7 +169,7 @@ class _CreateBody extends State<CreateBody>
           ),
         ),
 
-        CreateConfirmButton(user: widget.user)
+        Center(child: CreateConfirmButton(user: widget.user))
       ],
     );
   }
@@ -214,10 +183,10 @@ class CreateConfirmButton extends StatelessWidget
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 80),
+      padding: EdgeInsets.only(top: 50),
       child: ElevatedButton(
         onPressed: () {
-          updatePassword(context, _textController1.text,_textController2.text,_textController3.text);
+          changePassword( _oldPasswordText.text,_newPasswordText.text,context);
         },
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.blue,
@@ -243,37 +212,42 @@ class CreateConfirmButton extends StatelessWidget
   }
 }
 
-Future<void> updatePassword(BuildContext context, String username, String oldPassword, String newPassword) async {
+Future<bool> changePassword(String oldPassword, String newPassword, BuildContext context) async {
   try {
-    final user = FirebaseAuth.instance.currentUser;
+    User user = FirebaseAuth.instance.currentUser!;
 
-    String email = globalUser.email;
-
-    // Δημιουργούμε credentials για επανέλεγχο ταυτότητας
+    // 1. Reauthenticate
     AuthCredential credential = EmailAuthProvider.credential(
-      email: email,
+      email: user.email!,
       password: oldPassword,
     );
+    await user.reauthenticateWithCredential(credential);
 
-    // Reauthenticate
-    await user!.reauthenticateWithCredential(credential);
-
-    // Αν όλα είναι ΟΚ, κάνουμε update τον νέο κωδικό
+    // 2. Change password
     await user.updatePassword(newPassword);
 
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text("Password updated successfully!"), backgroundColor: Colors.green),
+      SnackBar(
+        content: Text(greek ? 'Ο κωδικός άλλαξε με επιτυχία!' : 'Password changed successfully!'),
+        backgroundColor: Colors.green,
+      ),
     );
 
-    // Navigate or do whatever else you want after success
     navigatorKey.currentState?.pushReplacementNamed('/home');
 
-  } on FirebaseAuthException catch (e) {
+    return true;
+  } catch (e) {
+    print("Error changing password: $e");
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text("An error occurred"), backgroundColor: Colors.red),
+      SnackBar(
+        content: Text(greek ? 'Αποτυχία αλλαγής κωδικού. Βεβαιώσου ότι έβαλες σωστό παλιό κωδικό.' : 'Failed to change password. Please ensure your old password is correct.'),
+        backgroundColor: Colors.red,
+      ),
     );
+    return false;
   }
 }
+
 
 
 Future<bool> _showMyDialog(BuildContext context) async {
