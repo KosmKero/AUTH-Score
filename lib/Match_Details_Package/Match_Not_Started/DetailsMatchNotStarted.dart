@@ -44,16 +44,28 @@ class DetailsMatchNotStarted extends StatelessWidget {
             ),
           ),
           SizedBox(
-            height: 40,
+            height: 20,
           ),
-          Padding( //ΑΦΟΡΑ ΤΗΝ ΑΠΟΣΤΑΣΗ ΑΠΟ ΤΑ ΚΥΚΛΑΚΙΑ ΜΕ ΤΟ ΟΝΟΜΑ
-            padding: const EdgeInsets.symmetric(horizontal:10.0),
-            child: Column(
-              children: [ //ΔΗΜΙΟΥΡΓΕΙ ΤΙΣ ΟΜΑΔΕΣ
-                TeamFormWidget(team: match.homeTeam),
-                SizedBox(height: 5),
-                TeamFormWidget(team: match.awayTeam),
-              ],
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 0.0),
+            child: Card(
+
+              elevation: 8,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+
+              ),
+              color: darkModeNotifier.value ? Color.fromARGB(255, 45, 45, 45) : Colors.white,
+              child: Padding(
+                padding: EdgeInsets.all(12),
+                child: Column(
+                  children: [
+                    TeamFormWidget(team: match.homeTeam),
+                    SizedBox(height: 15),
+                    TeamFormWidget(team: match.awayTeam),
+                  ],
+                ),
+              ),
             ),
           ),
           SizedBox(
@@ -84,7 +96,7 @@ class TeamFormWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-    final teamNameWidth = screenWidth * 0.46; // 40% of screen width for team name
+    final teamNameWidth = screenWidth * 0.45; // 40% of screen width for team name
     final resultsWidth = screenWidth * 0.46; // 50% of screen width for results
 
     return FutureBuilder<List<String>>(
@@ -130,7 +142,7 @@ class TeamFormWidget extends StatelessWidget {
                 Container(
                   width: resultsWidth,
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: displayResults.map((result) => Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 3),
                       child: _buildResultIcon(result),

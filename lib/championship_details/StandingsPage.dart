@@ -167,12 +167,10 @@ class StandingsPage1 extends State<StandingsPage> {
               builder: (context, constraints) {
                 // Calculate column widths based on available space
                 final availableWidth = constraints.maxWidth;
-                final positionWidth = availableWidth * 0.065;
-                final teamWidth = availableWidth * 0.39;
+                final positionWidth = availableWidth * 0.09;
+                final teamWidth = availableWidth * 0.385;
                 final statsWidth = availableWidth * 0.085;
                 final pointsWidth = availableWidth * 0.12;
-
-
 
                 return DataTable(
                   columnSpacing: 0,
@@ -279,14 +277,14 @@ class StandingsPage1 extends State<StandingsPage> {
                     DataColumn(
                       label: Container(
                         width: pointsWidth,
-                        child: Center(
-                          child: Text(
-                            greek ? "Πόντοι" : "Points",
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: headerTextColor,
-                              fontSize: screenWidth * 0.03,
-                            ),
+                        alignment: Alignment.center,
+                        padding: EdgeInsets.only(right: screenWidth * 0.01),
+                        child: Text(
+                          greek ? "Πόντοι" : "Points",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: headerTextColor,
+                            fontSize: screenWidth * 0.028,
                           ),
                         ),
                       ),
@@ -304,19 +302,27 @@ class StandingsPage1 extends State<StandingsPage> {
                           Container(
                             width: positionWidth,
                             alignment: Alignment.centerLeft,
+                            padding: EdgeInsets.only(left: screenWidth * 0.01, right: screenWidth * 0.02),
                             child: isPromotionSpot
                                 ? Container(
-                                    width: screenWidth * 0.06,
-                                    height: screenWidth * 0.06,
+                                    width: screenWidth * 0.055,
+                                    height: screenWidth * 0.055,
                                     decoration: BoxDecoration(
                                       color: isDark ? Colors.green.shade700 : Colors.green,
                                       shape: BoxShape.circle,
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: isDark ? Colors.black26 : Colors.green.withOpacity(0.3),
+                                          blurRadius: 4,
+                                          offset: Offset(0, 2),
+                                        ),
+                                      ],
                                     ),
                                     child: Center(
                                       child: Text(
                                         (index + 1).toString(),
                                         style: TextStyle(
-                                          color: isDark ? Colors.white : Colors.black,
+                                          color: Colors.white,
                                           fontWeight: FontWeight.bold,
                                           fontSize: screenWidth * 0.03,
                                         ),
@@ -324,18 +330,22 @@ class StandingsPage1 extends State<StandingsPage> {
                                     ),
                                   )
                                 : Container(
-                                    width: screenWidth * 0.06,
-                                    height: screenWidth * 0.06,
+                                    width: screenWidth * 0.055,
+                                    height: screenWidth * 0.055,
                                     decoration: BoxDecoration(
-                                      color: isDark ? Colors.grey.shade700 : Colors.grey,
+                                      color: isDark ? Colors.grey.shade800 : Colors.grey.shade200,
                                       shape: BoxShape.circle,
+                                      border: Border.all(
+                                        color: isDark ? Colors.grey.shade700 : Colors.grey.shade300,
+                                        width: 1,
+                                      ),
                                     ),
                                     child: Center(
                                       child: Text(
                                         (index + 1).toString(),
                                         style: TextStyle(
-                                          color: isDark ? Colors.white : Colors.black,
-                                          fontWeight: FontWeight.bold,
+                                          color: isDark ? Colors.white70 : Colors.black54,
+                                          fontWeight: FontWeight.w500,
                                           fontSize: screenWidth * 0.03,
                                         ),
                                       ),
@@ -358,14 +368,40 @@ class StandingsPage1 extends State<StandingsPage> {
                                   setState(() {});
                                 }
                               },
-                              child: Text(
-                                team.name,
-                                style: TextStyle(
-                                  fontSize: screenWidth * 0.03,
-                                  fontWeight: FontWeight.w500,
-                                  color: textColor,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    width: screenWidth * 0.06,
+                                    height: screenWidth * 0.06,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: isDark ? Colors.grey.shade800 : Colors.white,
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: isDark ? Colors.black26 : Colors.grey.withOpacity(0.2),
+                                          blurRadius: 4,
+                                          offset: Offset(0, 2),
+                                        ),
+                                      ],
+                                    ),
+                                    child: ClipOval(
+                                      child: team.image,
+                                    ),
+                                  ),
+                                  SizedBox(width: screenWidth * 0.02),
+                                  Flexible(
+                                    child: Text(
+                                      team.name,
+                                      style: TextStyle(
+                                        fontSize: screenWidth * 0.027,
+                                        fontWeight: FontWeight.bold,
+                                        color: textColor,
+                                      ),
+                                      softWrap: true,
+                                      overflow: TextOverflow.visible,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ),
@@ -429,13 +465,14 @@ class StandingsPage1 extends State<StandingsPage> {
                         DataCell(
                           Container(
                             width: pointsWidth,
-                            child: Center(
-                              child: Text(
-                                team.totalPoints.toString(),
-                                style: TextStyle(
-                                  color: textColor,
-                                  fontSize: screenWidth * 0.03,
-                                ),
+                            alignment: Alignment.center,
+                            padding: EdgeInsets.only(right: screenWidth * 0.01),
+                            child: Text(
+                              team.totalPoints.toString(),
+                              style: TextStyle(
+                                color: textColor,
+                                fontSize: screenWidth * 0.028,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
                           ),

@@ -14,7 +14,7 @@ class BettingChooser extends StatefulWidget {
     super.key,
     required this.match,
   }){
-   matchKey = '${match.homeTeam.nameEnglish}${match.awayTeam.nameEnglish}${match.dateString}';
+    matchKey = '${match.homeTeam.nameEnglish}${match.awayTeam.nameEnglish}${match.dateString}';
   }
 
   @override
@@ -41,7 +41,7 @@ class _BettingChooserState extends State<BettingChooser> {
     if (vote != null && mounted) {
       // Φόρτωσε τα ποσοστά και όχι μόνο την επιλογή
       final loadedPercentages = await loadPercentages(
-       widget.match
+          widget.match
       );
       setState(() {
         hasChosen = true;
@@ -88,55 +88,57 @@ class _BettingChooserState extends State<BettingChooser> {
       child: Column(
         children: [
           SizedBox(
-            width: 320,
-            child:SegmentedButton<String>(
-              segments: [
-                ButtonSegment(
-                  value: '1',
-                  label: Text(
-                    hasChosen && percentages.isNotEmpty ? percentages[0].toStringAsFixed(2) : "1",
-                    style: TextStyle(
+              width: 320,
+              child:SegmentedButton<String>(
+                segments: [
+                  ButtonSegment(
+                    value: '1',
+                    label: Text(
+                      hasChosen && percentages.isNotEmpty ? percentages[0].toStringAsFixed(2) : "1",
+                      style: TextStyle(
                         fontSize: 15,
+                      ),
+                      textAlign: TextAlign.center,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    textAlign: TextAlign.center,
-                    overflow: TextOverflow.ellipsis,
                   ),
-                ),
-                ButtonSegment(
-                  value: 'X',
-                  label: Text(
-                    hasChosen && percentages.isNotEmpty ? percentages[2].toStringAsFixed(2) : 'X',
-                    style: TextStyle(fontSize: 15),
+                  ButtonSegment(
+                    value: 'X',
+                    label: Text(
+                      hasChosen && percentages.isNotEmpty ? percentages[2].toStringAsFixed(2) : 'X',
+                      style: TextStyle(fontSize: 15),
+                    ),
                   ),
-                ),
-                ButtonSegment(
-                  value: '2',
-                  label: Text(
-                    hasChosen && percentages.isNotEmpty ? percentages[1].toStringAsFixed(2) : '2',
-                    style: TextStyle(fontSize: 15),
+                  ButtonSegment(
+                    value: '2',
+                    label: Text(
+                      hasChosen && percentages.isNotEmpty ? percentages[1].toStringAsFixed(2) : '2',
+                      style: TextStyle(fontSize: 15),
+                    ),
                   ),
-                ),
-              ],
-              style: ButtonStyle(
-                fixedSize: WidgetStateProperty.all(Size(540, 50)),
-                shape: WidgetStateProperty.all(
-                  RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(9),
-                    side: BorderSide(color: Colors.black, width: 1.5),
+                ],
+                style: ButtonStyle(
+                  fixedSize: WidgetStateProperty.all(Size(540, 50)),
+                  shape: WidgetStateProperty.all(
+                    RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(9),
+                      side: BorderSide(color: Colors.black, width: 1.5),
+                    ),
                   ),
+                  backgroundColor:
+                  WidgetStateProperty.all(Color.fromARGB(255, 243, 246, 255)),
+                  elevation: WidgetStateProperty.all(3),
+                  shadowColor: WidgetStateProperty.all(Colors.black.withOpacity(0.3)),
                 ),
-                backgroundColor:
-                WidgetStateProperty.all(Color.fromARGB(255, 243, 246, 255)),
-              ),
-              showSelectedIcon: true,
-              selected: _selected.isNotEmpty ? {_selected} : <String>{},
-              emptySelectionAllowed: true,
-              onSelectionChanged: hasChosen
-                  ? null
-                  : (newSelection) {
-                _updateCount(newSelection.first);
-              },
-            )
+                showSelectedIcon: true,
+                selected: _selected.isNotEmpty ? {_selected} : <String>{},
+                emptySelectionAllowed: true,
+                onSelectionChanged: hasChosen
+                    ? null
+                    : (newSelection) {
+                  _updateCount(newSelection.first);
+                },
+              )
 
           ),
           SizedBox(height: 10),
