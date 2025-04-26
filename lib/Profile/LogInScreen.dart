@@ -10,7 +10,53 @@ import '../main.dart';
 
 // Remove the global variables since we're moving them to the state class
 bool secure = true;
-List<String> allItems = ['Πληροφορική', 'Οικονομικό', 'Φυσικό', 'Νομική', 'Ψυχολογία', 'Μαθηματικό', 'Βιολογικό', 'Χημικό', 'Παμάκ'];
+List<String> allItems = [
+  'Αγγλικής Γλώσσας και Φιλολογίας',
+  'Αγροτικής Ανάπτυξης',
+  'Αρχιτεκτόνων Μηχανικών',
+  'Βιολογίας',
+  'Γαλλικής Γλώσσας και Φιλολογίας',
+  'Γεωλογίας',
+  'Γεωπονίας',
+  'Δημοσιογραφίας και ΜΜΕ',
+  'Δημόσιας Διοίκησης',
+  'Διοίκησης Επιχειρήσεων',
+  'Εικαστικών και Εφαρμοσμένων Τεχνών',
+  'Ηλεκτρολόγων Μηχανικών και Μηχανικών Υπολογιστών',
+  'Ιατρικής',
+  'Ιστορίας και Αρχαιολογίας',
+  'Ιταλικής Γλώσσας και Φιλολογίας',
+  'Κτηνιατρικής',
+  'Μαθηματικού',
+  'Μηχανικών Χωροταξίας και Ανάπτυξης',
+  'Μηχανολόγων Μηχανικών',
+  'Μουσικών Σπουδών',
+  'Νομικής',
+  'Νοσηλευτικής',
+  'Ξένων Γλωσσών, Μετάφρασης και Διερμηνείας',
+  'Οικονομικών Επιστημών',
+  'Παιδαγωγικό Δημοτικής Εκπαίδευσης',
+  'Παιδαγωγικό Ειδικής Αγωγής',
+  'Παιδαγωγικό Νηπιαγωγών',
+  'Πολιτικών Επιστημών',
+  'Πολιτικών Μηχανικών',
+  'Πολιτισμού και Δημιουργικών Μέσων',
+  'Πληροφορικής',
+  'Προγραμμάτων Σπουδών Πολιτισμού',
+  'Προγραμμάτων Σπουδών Τουρισμού',
+  'Στατιστικής και Αναλογιστικών-Χρηματοοικονομικών Μαθηματικών',
+  'Σπουδών Νοτιοανατολικής Ευρώπης',
+  'Σπουδών Σλαβικών Γλωσσών και Φιλολογιών',
+  'Σχολή Θεολογίας',
+  'Σχολή Καλών Τεχνών',
+  'Τεχνολογίας Τροφίμων',
+  'Φαρμακευτικής',
+  'Φιλολογίας',
+  'Φιλοσοφίας και Παιδαγωγικής',
+  'Φυσικής',
+  'Χημείας',
+  'Ψυχολογίας'
+];
 List<String> filteredItems = [];
 TextEditingController searchController = TextEditingController();
 bool showSuggestions = false;
@@ -267,9 +313,11 @@ class _CreateSignUp extends State<CreateSignUp> {
   @override
   Widget build(BuildContext context) {
     return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: EdgeInsets.only(right: 30, top: 10),
+        SizedBox(height: 10,),
+        Center(
           child: Text(
             greek?"Δημιουργία λογαριασμού":"Create an account",
             style: TextStyle(
@@ -282,7 +330,7 @@ class _CreateSignUp extends State<CreateSignUp> {
         SizedBox(height: 40),
 
         Padding(
-          padding: EdgeInsets.only(right: greek?200: 250),
+          padding: EdgeInsets.only(left: 5),
           child: Text(
             greek?"Όνομα χρήστη":"Username",
             style: TextStyle(
@@ -315,7 +363,7 @@ class _CreateSignUp extends State<CreateSignUp> {
         SizedBox(height: 30),
 
         Padding(
-          padding: EdgeInsets.only(right: greek?150:250),
+          padding: EdgeInsets.only(left: 5),
           child: Text(
             greek?"Κωδικός πρόσβασης":"Password",
             style: TextStyle(
@@ -360,14 +408,30 @@ class _CreateSignUp extends State<CreateSignUp> {
         SizedBox(height: 30),
 
         Padding(
-          padding: EdgeInsets.only(right: greek?280: 260),
-          child:
-          Text(
-            greek?"Σχολή":"University",
-            style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold
-            ),
+          padding: EdgeInsets.only(left: 5), // το έφερα λίγο πιο μέσα
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+             Text(
+                  greek ? "Σχολή" : "University",
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
+              ),
+              SizedBox(width: 7),
+             Text(
+                  greek ? "(Προαιρετικό)" : "(Optional)",
+                  style: TextStyle(
+                    //fontSize: 16,
+                    fontStyle: FontStyle.italic,
+                    color: Colors.grey[600],
+                  ),
+                ),
+
+            ],
           ),
         ),
         SizedBox(height: 10),
@@ -657,7 +721,7 @@ void addInBase(BuildContext context, controller1, controller2, controller3) asyn
 
 
 
-  if(text1.isEmpty || text2.isEmpty || text3.isEmpty)
+  if(text1.isEmpty || text2.isEmpty)
   {
     // Show SnackBar with error message
     ScaffoldMessenger.of(context).showSnackBar(
