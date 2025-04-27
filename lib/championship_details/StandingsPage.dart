@@ -50,10 +50,7 @@ class StandingsPage1 extends State<StandingsPage> {
   }
 
   Widget buildGroupStandings(int group) {
-    final isDark = darkModeNotifier.value;
-    final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
-
+    // Φιλτράρισμα και ταξινόμηση ομάδων του ομίλου
     List<Team> groupTeams = teams
         .where((team) => team.group == group)
         .toList();
@@ -76,6 +73,11 @@ class StandingsPage1 extends State<StandingsPage> {
       List<Team> tiedTeams = groupTeams
           .where((t) => t.totalPoints == a.totalPoints)
           .toList();
+
+      if (!tiedTeams.any((t) => t.name == b.name)) {
+        // Αν το b δεν είναι καν στην ισοβαθμία, δεν έχει νόημα tie-breaker
+        return 0;
+      }
 
       // Αν η ισοβαθμία είναι πάνω από 2 ομάδες
       if (tiedTeams.length > 2) {
@@ -132,24 +134,31 @@ class StandingsPage1 extends State<StandingsPage> {
       // Τελευταίο κριτήριο: διαφορά τερμάτων
       return b.goalDifference.compareTo(a.goalDifference);
     });
+
+    // Προσθήκη των πρώτων 4 στην λίστα με τις topTeams
     topTeams.addAll(groupTeams.take(4));
 
-    final Color rowColor1 = isDark ? Color.fromARGB(255, 55, 55, 55) : Color.fromARGB(255, 235, 244, 255);
-    final Color rowColor2 = isDark ? Color.fromARGB(255, 45, 45, 45) : Colors.white;
-    final Color textColor = isDark ? Colors.white : Colors.black87;
+    final isDark = darkModeNotifier.value;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
+    // Εναλλασσόμενα χρώματα γραμμών
+    final Color rowColor1 = isDark ? Color(0xFF2D2D2D) : Color.fromARGB(255, 214, 230, 255);
+    final Color rowColor2 = isDark ? Color(0xFF1E1E1E) : Colors.white;
+    final Color textColor = isDark ? Colors.white : Colors.black;
     final Color headerTextColor = isDark ? Colors.white70 : Colors.black54;
 
     return Card(
+      color: isDark ? Color(0xFF1E1E1E) : Colors.white,
       margin: EdgeInsets.symmetric(
-        horizontal: screenWidth * 0.02,
-        vertical: screenHeight * 0.01
+          horizontal: screenWidth * 0.01,
+          vertical: screenHeight * 0.01
       ),
-      elevation: isDark ? 2 : 4,
-      color: isDark ? Color.fromARGB(255, 50, 50, 50) : Colors.white,
+      elevation: 4,
       child: Padding(
         padding: EdgeInsets.symmetric(
-          horizontal: screenWidth * 0.02,
-          vertical: screenHeight * 0.01
+            horizontal: screenWidth * 0.01,
+            vertical: screenHeight * 0.01
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -157,9 +166,9 @@ class StandingsPage1 extends State<StandingsPage> {
             Text(
               greek ? "Όμιλος $group" : "Group $group",
               style: TextStyle(
-                fontSize: screenWidth * 0.045,
-                fontWeight: FontWeight.bold,
-                color: textColor,
+                  fontSize: screenWidth * 0.045,
+                  fontWeight: FontWeight.bold,
+                  color: textColor
               ),
             ),
             SizedBox(height: screenHeight * 0.005),
@@ -168,6 +177,7 @@ class StandingsPage1 extends State<StandingsPage> {
                 // Calculate column widths based on available space
                 final availableWidth = constraints.maxWidth;
                 final positionWidth = availableWidth * 0.09;
+                final logoWidth = availableWidth * 0.06;
                 final teamWidth = availableWidth * 0.385;
                 final statsWidth = availableWidth * 0.085;
                 final pointsWidth = availableWidth * 0.12;
@@ -189,13 +199,13 @@ class StandingsPage1 extends State<StandingsPage> {
                     DataColumn(
                       label: Container(
                         width: positionWidth,
-                        alignment: Alignment.centerLeft,
+                        alignment: Alignment.center,
                         child: Text(
-                          "  #",
+                          "#",
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: headerTextColor,
-                            fontSize: screenWidth * 0.03,
+                            fontSize: screenWidth * 0.04,
                           ),
                         ),
                       ),
@@ -203,13 +213,13 @@ class StandingsPage1 extends State<StandingsPage> {
                     DataColumn(
                       label: Container(
                         width: teamWidth,
-                        alignment: Alignment.centerLeft,
+                        alignment: Alignment.center,
                         child: Text(
                           greek ? "Ομάδα" : "Team",
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: headerTextColor,
-                            fontSize: screenWidth * 0.03,
+                            fontSize: screenWidth * 0.034,
                           ),
                         ),
                       ),
@@ -223,7 +233,7 @@ class StandingsPage1 extends State<StandingsPage> {
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               color: headerTextColor,
-                              fontSize: screenWidth * 0.03,
+                              fontSize: screenWidth * 0.033,
                             ),
                           ),
                         ),
@@ -238,7 +248,7 @@ class StandingsPage1 extends State<StandingsPage> {
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               color: headerTextColor,
-                              fontSize: screenWidth * 0.03,
+                              fontSize: screenWidth * 0.032,
                             ),
                           ),
                         ),
@@ -253,7 +263,7 @@ class StandingsPage1 extends State<StandingsPage> {
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               color: headerTextColor,
-                              fontSize: screenWidth * 0.03,
+                              fontSize: screenWidth * 0.032,
                             ),
                           ),
                         ),
@@ -268,7 +278,7 @@ class StandingsPage1 extends State<StandingsPage> {
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               color: headerTextColor,
-                              fontSize: screenWidth * 0.03,
+                              fontSize: screenWidth * 0.032,
                             ),
                           ),
                         ),
@@ -277,14 +287,14 @@ class StandingsPage1 extends State<StandingsPage> {
                     DataColumn(
                       label: Container(
                         width: pointsWidth,
-                        alignment: Alignment.center,
-                        padding: EdgeInsets.only(right: screenWidth * 0.01),
-                        child: Text(
-                          greek ? "Πόντοι" : "Points",
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: headerTextColor,
-                            fontSize: screenWidth * 0.028,
+                        child: Center(
+                          child: Text(
+                            greek ? "Πόντοι" : "Points",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: headerTextColor,
+                              fontSize: screenWidth * 0.032,
+                            ),
                           ),
                         ),
                       ),
@@ -296,61 +306,61 @@ class StandingsPage1 extends State<StandingsPage> {
                     final isPromotionSpot = index < 4;
 
                     return DataRow(
-                      color: WidgetStateProperty.all(rowColor),
+                      color: MaterialStateProperty.all(rowColor),
                       cells: [
                         DataCell(
                           Container(
                             width: positionWidth,
-                            alignment: Alignment.centerLeft,
-                            padding: EdgeInsets.only(left: screenWidth * 0.01, right: screenWidth * 0.02),
+                            alignment: Alignment.center,
+                            padding: EdgeInsets.only(right: screenWidth * 0.01),
                             child: isPromotionSpot
                                 ? Container(
-                                    width: screenWidth * 0.055,
-                                    height: screenWidth * 0.055,
-                                    decoration: BoxDecoration(
-                                      color: isDark ? Colors.green.shade700 : Colors.green,
-                                      shape: BoxShape.circle,
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: isDark ? Colors.black26 : Colors.green.withOpacity(0.3),
-                                          blurRadius: 4,
-                                          offset: Offset(0, 2),
-                                        ),
-                                      ],
-                                    ),
-                                    child: Center(
-                                      child: Text(
-                                        (index + 1).toString(),
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: screenWidth * 0.03,
-                                        ),
-                                      ),
-                                    ),
-                                  )
-                                : Container(
-                                    width: screenWidth * 0.055,
-                                    height: screenWidth * 0.055,
-                                    decoration: BoxDecoration(
-                                      color: isDark ? Colors.grey.shade800 : Colors.grey.shade200,
-                                      shape: BoxShape.circle,
-                                      border: Border.all(
-                                        color: isDark ? Colors.grey.shade700 : Colors.grey.shade300,
-                                        width: 1,
-                                      ),
-                                    ),
-                                    child: Center(
-                                      child: Text(
-                                        (index + 1).toString(),
-                                        style: TextStyle(
-                                          color: isDark ? Colors.white70 : Colors.black54,
-                                          fontWeight: FontWeight.w500,
-                                          fontSize: screenWidth * 0.03,
-                                        ),
-                                      ),
-                                    ),
+                              width: screenWidth *  0.07,
+                              height: screenWidth * 0.07,
+                              decoration: BoxDecoration(
+                                color: isDark ? Colors.green.shade700 : Colors.green,
+                                shape: BoxShape.circle,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: isDark ? Colors.black26 : Colors.green.withOpacity(0.3),
+                                    blurRadius: 4,
+                                    offset: Offset(0, 2),
                                   ),
+                                ],
+                              ),
+                              child: Center(
+                                child: Text(
+                                  (index + 1).toString(),
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: screenWidth * 0.033,
+                                  ),
+                                ),
+                              ),
+                            )
+                                : Container(
+                              width: screenWidth *  0.07,
+                              height: screenWidth * 0.07,
+                              decoration: BoxDecoration(
+                                color: isDark ? Colors.grey.shade800 : Colors.grey.shade200,
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: isDark ? Colors.grey.shade700 : Colors.grey.shade300,
+                                  width: 1,
+                                ),
+                              ),
+                              child: Center(
+                                child: Text(
+                                  (index + 1).toString(),
+                                  style: TextStyle(
+                                    color: isDark ? Colors.white70 : Colors.black54,
+                                    fontWeight: FontWeight.w500,
+                                    fontSize: screenWidth * 0.033,
+                                  ),
+                                ),
+                              ),
+                            ),
                           ),
                         ),
                         DataCell(
@@ -371,7 +381,7 @@ class StandingsPage1 extends State<StandingsPage> {
                               child: Row(
                                 children: [
                                   Container(
-                                    width: screenWidth * 0.06,
+                                    width:  screenWidth * 0.06,
                                     height: screenWidth * 0.06,
                                     decoration: BoxDecoration(
                                       shape: BoxShape.circle,
@@ -393,8 +403,8 @@ class StandingsPage1 extends State<StandingsPage> {
                                     child: Text(
                                       team.name,
                                       style: TextStyle(
-                                        fontSize: screenWidth * 0.027,
-                                        fontWeight: FontWeight.bold,
+                                        fontSize: screenWidth * 0.029,
+                                        fontWeight: FontWeight.w600,
                                         color: textColor,
                                       ),
                                       softWrap: true,
@@ -408,13 +418,13 @@ class StandingsPage1 extends State<StandingsPage> {
                         ),
                         DataCell(
                           Container(
-                            width: statsWidth,
+                            //width: statsWidth,
                             child: Center(
                               child: Text(
                                 team.totalGames.toString(),
                                 style: TextStyle(
                                   color: textColor,
-                                  fontSize: screenWidth * 0.03,
+                                  fontSize: screenWidth * 0.034,
                                 ),
                               ),
                             ),
@@ -422,13 +432,13 @@ class StandingsPage1 extends State<StandingsPage> {
                         ),
                         DataCell(
                           Container(
-                            width: statsWidth,
+                            //width: statsWidth,
                             child: Center(
                               child: Text(
                                 team.wins.toString(),
                                 style: TextStyle(
                                   color: textColor,
-                                  fontSize: screenWidth * 0.03,
+                                  fontSize: screenWidth * 0.034,
                                 ),
                               ),
                             ),
@@ -436,13 +446,13 @@ class StandingsPage1 extends State<StandingsPage> {
                         ),
                         DataCell(
                           Container(
-                            width: statsWidth,
+                            //width: statsWidth,
                             child: Center(
                               child: Text(
                                 team.draws.toString(),
                                 style: TextStyle(
                                   color: textColor,
-                                  fontSize: screenWidth * 0.03,
+                                  fontSize: screenWidth * 0.034,
                                 ),
                               ),
                             ),
@@ -450,13 +460,13 @@ class StandingsPage1 extends State<StandingsPage> {
                         ),
                         DataCell(
                           Container(
-                            width: statsWidth,
+                            //width: statsWidth,
                             child: Center(
                               child: Text(
                                 team.losses.toString(),
                                 style: TextStyle(
                                   color: textColor,
-                                  fontSize: screenWidth * 0.03,
+                                  fontSize: screenWidth * 0.034,
                                 ),
                               ),
                             ),
@@ -464,15 +474,14 @@ class StandingsPage1 extends State<StandingsPage> {
                         ),
                         DataCell(
                           Container(
-                            width: pointsWidth,
-                            alignment: Alignment.center,
-                            padding: EdgeInsets.only(right: screenWidth * 0.01),
-                            child: Text(
-                              team.totalPoints.toString(),
-                              style: TextStyle(
-                                color: textColor,
-                                fontSize: screenWidth * 0.028,
-                                fontWeight: FontWeight.bold,
+                            //width: pointsWidth,
+                            child: Center(
+                              child: Text(
+                                team.totalPoints.toString(),
+                                style: TextStyle(
+                                  color: textColor,
+                                  fontSize: screenWidth * 0.034,
+                                ),
                               ),
                             ),
                           ),

@@ -29,10 +29,18 @@ class _StandingsOrKnockoutsChooserPageState extends State<StandingsOrKnockoutsCh
 
     return Column(
       children: [
+        // Row για τα κουμπιά πλοήγησης
         _NavigationButtons(onSectionChange: _changeSection),
-        (indexChoice==0)? StandingsPage(seasonYear) : (indexChoice==1)? KnockOutsPage():TopPlayersProvider()
+
+        // Εδώ επιλέγουμε ποιο περιεχόμενο να εμφανίσουμε ανάλογα με την επιλογή
+        indexChoice == 0
+              ? StandingsPage(seasonYear)
+              : (indexChoice == 1)
+              ? KnockOutsPage()
+              : TopPlayersProvider(),
       ],
     );
+
   }
 
 }
@@ -61,26 +69,34 @@ class _NavigationButtonsState extends State<_NavigationButtons> {
   //ΔΗΜΙΟΥΡΓΕΙ ΤΟΝ ΧΩΡΟ ΤΩΝ 3 ΚΟΥΜΠΙΩΝ
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color:darkModeNotifier.value?Color(0xFF121212): lightModeBackGround,
-      height: 65,
-      width: double.infinity,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          _buildTextButton(greek?"Βαθμολογία":"Standings", 0,),
-          SizedBox(width: 15),
-          _buildTextButton(greek?"Νοκ Άουτς":"Knock outs", 1),
-          SizedBox(width: 15),
-          _buildTextButton(greek?"Κορυφαίοι Παίχτες":"Best players", 2),
-        ],
-      ),
-    );
+      return Container(
+        color:darkModeNotifier.value?Color(0xFF121212): lightModeBackGround,
+        height: 65,
+        width: double.infinity,
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              SizedBox(width: 10),
+              _buildTextButton(greek?"Βαθμολογία":"Standings", 0),
+              SizedBox(width: 15),
+              _buildTextButton(greek?"Νοκ Άουτς":"Knock outs", 1),
+              SizedBox(width: 15),
+              _buildTextButton(greek?"Κορυφαίοι Παίχτες":"Best players", 2),
+            ],
+          ),
+        ),
+      );
   }
 
   //ΔΗΜΙΟΥΡΓΕΙ ΤΑ 3 ΚΟΥΜΠΙΑ(ΛΕΠΤΟΜΕΡΕΙΕΣ ΑΓΩΝΕΣ ΚΑΙ ΠΑΙΧΤΕΣ)
   Widget _buildTextButton(String text, int index) {
     bool isSelected = selectedIndex == index;
+
+    double screenWidth = MediaQuery.of(context).size.width;
+    double fontSize = screenWidth < 300 ? 15 : 17; // Μειώνει το μέγεθος της γραμματοσειράς για μικρότερες οθόνες
+
 
     return GestureDetector(
       onTap: () {
@@ -92,7 +108,7 @@ class _NavigationButtonsState extends State<_NavigationButtons> {
           Text(
             text,
             style: TextStyle(
-              fontSize: 17,
+              fontSize: fontSize,
               color: isSelected ?darkModeNotifier.value?Colors.blue: Color.fromARGB(255, 0, 35, 150) :darkModeNotifier.value?Colors.white: Colors.black87,
               fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
               fontFamily: "Arial"

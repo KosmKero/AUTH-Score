@@ -92,7 +92,8 @@ class Team {
         .collection('teams')
         .doc(name)
         .set({
-      'Wins': FieldValue.increment(1)
+      'Wins': FieldValue.increment(1),
+      'Matches': FieldValue.increment(1)
     }, SetOptions(merge: true));
 
     updateHistory("W");
@@ -104,7 +105,8 @@ class Team {
         .collection('teams')
         .doc(name)
         .set({
-      'Loses': FieldValue.increment(1)
+      'Loses': FieldValue.increment(1),
+      'Matches': FieldValue.increment(1)
     }, SetOptions(merge: true));
 
     updateHistory("L");
@@ -115,7 +117,8 @@ class Team {
         .collection('teams')
         .doc(name)
         .set({
-      'Draws': FieldValue.increment(1)
+      'Draws': FieldValue.increment(1),
+      'Matches': FieldValue.increment(1)
     }, SetOptions(merge: true));
 
     updateHistory("D");
@@ -126,7 +129,8 @@ class Team {
         .collection('teams')
         .doc(name)
         .set({
-      'Wins': FieldValue.increment(-1)
+      'Wins': FieldValue.increment(-1),
+      'Matches': FieldValue.increment(-1)
     }, SetOptions(merge: true));
     shiftRightAndClearLast();
   }
@@ -137,7 +141,8 @@ class Team {
         .collection('teams')
         .doc(name)
         .set({
-      'Loses': FieldValue.increment(-1)
+      'Loses': FieldValue.increment(-1),
+      'Matches': FieldValue.increment(-1)
     }, SetOptions(merge: true));
     shiftRightAndClearLast();
   }
@@ -147,7 +152,8 @@ class Team {
         .collection('teams')
         .doc(name)
         .set({
-      'Draws': FieldValue.increment(-1)
+      'Draws': FieldValue.increment(-1),
+      'Matches': FieldValue.increment(-1)
     }, SetOptions(merge: true));
     shiftRightAndClearLast();
   }
@@ -175,7 +181,7 @@ class Team {
     history.removeWhere((item) => item == "");
 
     // Αν έχει ήδη 5 αποτελέσματα, αφαίρεσε το πιο παλιό (πρώτο)
-    if (history.length >= 5) {
+    if (history.length >= 6) {
       history.removeAt(0);
     }
 

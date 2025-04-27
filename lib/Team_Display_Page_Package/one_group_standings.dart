@@ -149,9 +149,9 @@ class _OneGroupStandingsState extends State<OneGroupStandings> {
               builder: (context, constraints) {
                 // Calculate column widths based on available space
                 final availableWidth = constraints.maxWidth;
-                final positionWidth = availableWidth * 0.07;
+                final positionWidth = availableWidth * 0.09;
                 final logoWidth = availableWidth * 0.06;
-                final teamWidth = availableWidth * 0.38;
+                final teamWidth = availableWidth * 0.385;
                 final statsWidth = availableWidth * 0.085;
                 final pointsWidth = availableWidth * 0.12;
 
@@ -172,13 +172,13 @@ class _OneGroupStandingsState extends State<OneGroupStandings> {
                     DataColumn(
                       label: Container(
                         width: positionWidth,
-                        alignment: Alignment.centerLeft,
+                        alignment: Alignment.center,
                         child: Text(
-                          "  #",
+                          "#",
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: headerTextColor,
-                            fontSize: screenWidth * 0.03,
+                            fontSize: screenWidth * 0.04,
                           ),
                         ),
                       ),
@@ -186,13 +186,13 @@ class _OneGroupStandingsState extends State<OneGroupStandings> {
                     DataColumn(
                       label: Container(
                         width: teamWidth,
-                        alignment: Alignment.centerLeft,
+                        alignment: Alignment.center,
                         child: Text(
                           greek ? "Ομάδα" : "Team",
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: headerTextColor,
-                            fontSize: screenWidth * 0.03,
+                            fontSize: screenWidth * 0.034,
                           ),
                         ),
                       ),
@@ -206,7 +206,7 @@ class _OneGroupStandingsState extends State<OneGroupStandings> {
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               color: headerTextColor,
-                              fontSize: screenWidth * 0.03,
+                              fontSize: screenWidth * 0.033,
                             ),
                           ),
                         ),
@@ -221,7 +221,7 @@ class _OneGroupStandingsState extends State<OneGroupStandings> {
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               color: headerTextColor,
-                              fontSize: screenWidth * 0.03,
+                              fontSize: screenWidth * 0.032,
                             ),
                           ),
                         ),
@@ -236,7 +236,7 @@ class _OneGroupStandingsState extends State<OneGroupStandings> {
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               color: headerTextColor,
-                              fontSize: screenWidth * 0.03,
+                              fontSize: screenWidth * 0.032,
                             ),
                           ),
                         ),
@@ -251,7 +251,7 @@ class _OneGroupStandingsState extends State<OneGroupStandings> {
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               color: headerTextColor,
-                              fontSize: screenWidth * 0.03,
+                              fontSize: screenWidth * 0.032,
                             ),
                           ),
                         ),
@@ -266,7 +266,7 @@ class _OneGroupStandingsState extends State<OneGroupStandings> {
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               color: headerTextColor,
-                              fontSize: screenWidth * 0.03,
+                              fontSize: screenWidth * 0.032,
                             ),
                           ),
                         ),
@@ -284,12 +284,12 @@ class _OneGroupStandingsState extends State<OneGroupStandings> {
                         DataCell(
                           Container(
                             width: positionWidth,
-                            alignment: Alignment.centerLeft,
-                            padding: EdgeInsets.only(left: screenWidth * 0.01),
+                            alignment: Alignment.center,
+                            padding: EdgeInsets.only(right: screenWidth * 0.01),
                             child: isPromotionSpot
                                 ? Container(
-                                    width: screenWidth * 0.045,
-                                    height: screenWidth * 0.045,
+                                    width: screenWidth *  0.07,
+                                    height: screenWidth * 0.07,
                                     decoration: BoxDecoration(
                                       color: isDark ? Colors.green.shade700 : Colors.green,
                                       shape: BoxShape.circle,
@@ -307,14 +307,14 @@ class _OneGroupStandingsState extends State<OneGroupStandings> {
                                         style: TextStyle(
                                           color: Colors.white,
                                           fontWeight: FontWeight.bold,
-                                          fontSize: screenWidth * 0.025,
+                                          fontSize: screenWidth * 0.033,
                                         ),
                                       ),
                                     ),
                                   )
                                 : Container(
-                                    width: screenWidth * 0.045,
-                                    height: screenWidth * 0.045,
+                                    width: screenWidth *  0.07,
+                                    height: screenWidth * 0.07,
                                     decoration: BoxDecoration(
                                       color: isDark ? Colors.grey.shade800 : Colors.grey.shade200,
                                       shape: BoxShape.circle,
@@ -329,7 +329,7 @@ class _OneGroupStandingsState extends State<OneGroupStandings> {
                                         style: TextStyle(
                                           color: isDark ? Colors.white70 : Colors.black54,
                                           fontWeight: FontWeight.w500,
-                                          fontSize: screenWidth * 0.025,
+                                          fontSize: screenWidth * 0.033,
                                         ),
                                       ),
                                     ),
@@ -354,7 +354,7 @@ class _OneGroupStandingsState extends State<OneGroupStandings> {
                               child: Row(
                                 children: [
                                   Container(
-                                    width: screenWidth * 0.06,
+                                    width:  screenWidth * 0.06,
                                     height: screenWidth * 0.06,
                                     decoration: BoxDecoration(
                                       shape: BoxShape.circle,
@@ -376,8 +376,8 @@ class _OneGroupStandingsState extends State<OneGroupStandings> {
                                     child: Text(
                                       team.name,
                                       style: TextStyle(
-                                        fontSize: screenWidth * 0.027,
-                                        fontWeight: FontWeight.bold,
+                                        fontSize: screenWidth * 0.029,
+                                        fontWeight: FontWeight.w600,
                                         color: textColor,
                                       ),
                                       softWrap: true,
@@ -391,13 +391,13 @@ class _OneGroupStandingsState extends State<OneGroupStandings> {
                         ),
                         DataCell(
                           Container(
-                            width: statsWidth,
+                            //width: statsWidth,
                             child: Center(
                               child: Text(
                                 team.totalGames.toString(),
                                 style: TextStyle(
                                   color: textColor,
-                                  fontSize: screenWidth * 0.03,
+                                  fontSize: screenWidth * 0.034,
                                 ),
                               ),
                             ),
@@ -405,13 +405,13 @@ class _OneGroupStandingsState extends State<OneGroupStandings> {
                         ),
                         DataCell(
                           Container(
-                            width: statsWidth,
+                            //width: statsWidth,
                             child: Center(
                               child: Text(
                                 team.wins.toString(),
                                 style: TextStyle(
                                   color: textColor,
-                                  fontSize: screenWidth * 0.03,
+                                  fontSize: screenWidth * 0.034,
                                 ),
                               ),
                             ),
@@ -419,13 +419,13 @@ class _OneGroupStandingsState extends State<OneGroupStandings> {
                         ),
                         DataCell(
                           Container(
-                            width: statsWidth,
+                            //width: statsWidth,
                             child: Center(
                               child: Text(
                                 team.draws.toString(),
                                 style: TextStyle(
                                   color: textColor,
-                                  fontSize: screenWidth * 0.03,
+                                  fontSize: screenWidth * 0.034,
                                 ),
                               ),
                             ),
@@ -433,13 +433,13 @@ class _OneGroupStandingsState extends State<OneGroupStandings> {
                         ),
                         DataCell(
                           Container(
-                            width: statsWidth,
+                            //width: statsWidth,
                             child: Center(
                               child: Text(
                                 team.losses.toString(),
                                 style: TextStyle(
                                   color: textColor,
-                                  fontSize: screenWidth * 0.03,
+                                  fontSize: screenWidth * 0.034,
                                 ),
                               ),
                             ),
@@ -447,13 +447,13 @@ class _OneGroupStandingsState extends State<OneGroupStandings> {
                         ),
                         DataCell(
                           Container(
-                            width: pointsWidth,
+                            //width: pointsWidth,
                             child: Center(
                               child: Text(
                                 team.totalPoints.toString(),
                                 style: TextStyle(
                                   color: textColor,
-                                  fontSize: screenWidth * 0.03,
+                                  fontSize: screenWidth * 0.034,
                                 ),
                               ),
                             ),
