@@ -307,7 +307,7 @@ class MatchDetails extends ChangeNotifier {
   }
 
   String get dateString {
-    return "${_day.toString().padLeft(2, '0')}.${_month.toString().padLeft(2, '0')}.${_year.toString().substring(2,4)}";
+    return "${_day.toString().padLeft(2, '0')}.${_month.toString().padLeft(2, '0')}.${(_year % 100).toString().padLeft(2, '0')}";
   }
 
   Future<void> setScoreHome(int score) async {

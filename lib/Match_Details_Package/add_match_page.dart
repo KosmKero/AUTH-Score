@@ -180,7 +180,11 @@ class _AddMatchScreenState extends State<AddMatchScreen> {
                           labelStyle: TextStyle(
                               color: darkModeNotifier.value
                                   ? Colors.white
-                                  : Colors.grey[900])),
+                                  : Colors.grey[900]),
+                        errorStyle: TextStyle(
+                          color: Colors.redAccent,
+                          fontSize: 9, // Μικρότερο αν θες να μην τρώει πολύ χώρο
+                        ),),
                       keyboardType: TextInputType.number,
                       validator: (value) {
                         if (value == null || value.isEmpty) {
@@ -210,7 +214,11 @@ class _AddMatchScreenState extends State<AddMatchScreen> {
                           labelStyle: TextStyle(
                               color: darkModeNotifier.value
                                   ? Colors.white
-                                  : Colors.grey[900])),
+                                  : Colors.grey[900]),
+                        errorStyle: TextStyle(
+                          color: Colors.redAccent,
+                          fontSize: 9, // Μικρότερο αν θες να μην τρώει πολύ χώρο
+                        ),),
                       keyboardType: TextInputType.number,
                       validator: (value) {
                         if (value == null || value.isEmpty) {
@@ -240,14 +248,21 @@ class _AddMatchScreenState extends State<AddMatchScreen> {
                           labelStyle: TextStyle(
                               color: darkModeNotifier.value
                                   ? Colors.white
-                                  : Colors.grey[900])),
+                                  : Colors.grey[900]),
+                        errorStyle: TextStyle(
+                          color: Colors.redAccent,
+                          fontSize: 9, // Μικρότερο αν θες να μην τρώει πολύ χώρο
+                        ),),
                       keyboardType: TextInputType.number,
                       validator: (value) {
                         if (value == null || value.isEmpty) {
                           return 'Παρακαλώ εισάγετε έτος';
                         }
                         try {
-                          int.parse(value);
+                          int yearValue = int.parse(value);
+                          if (yearValue < DateTime.now().year ||yearValue > DateTime.now().year+1 ) {
+                            return 'Επιλέξτε έγκυρο έτος';
+                          }
                         } catch (e) {
                           return 'Παρακαλώ εισάγετε έγκυρο αριθμό';
                         }
@@ -327,7 +342,7 @@ class _AddMatchScreenState extends State<AddMatchScreen> {
                       return;
                     }
 
-                    /*
+
                     DateTime currentDate = DateTime.now();
                     DateTime matchDate = DateTime(year, month, day);
                     if (matchDate.isBefore(currentDate)) {
@@ -340,7 +355,6 @@ class _AddMatchScreenState extends State<AddMatchScreen> {
                       return;
                     }
 
-                     */
 
                     if (globalUser.controlTheseTeams(homeTeam!.name, awayTeam!.name)) {
                       TeamsHandle().addMatch(
@@ -363,6 +377,10 @@ class _AddMatchScreenState extends State<AddMatchScreen> {
                       });
 
                       Navigator.pop(context);
+                    }
+                    else{
+                      ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text("Πρέπει να ελέγχεις τουλάχιστον τη μία από τις δύο ομάδες!")));
                     }
                   }
                 },
