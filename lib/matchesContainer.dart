@@ -87,33 +87,11 @@ class matchesContainer extends StatelessWidget {
       if (isNewDate) {
         if (i != 0) widgets.add(SizedBox(height: 20));
 
-        // Δημιουργούμε ένα DateTime αντικείμενο
-        DateTime matchDate = DateTime(match.year, match.month, match.day);
-        DateTime now = DateTime.now();
-        DateTime today = DateTime(now.year, now.month, now.day);
-        DateTime yesterday = today.subtract(Duration(days: 1));
-        DateTime tomorrow = today.add(Duration(days: 1));
-
-        // Παίρνουμε την ημέρα της εβδομάδας σε ελληνικό κείμενο
-        String weekdayName;
-
-        if (matchDate == today) {
-          weekdayName = greek ? 'Σήμερα' : 'Today';
-        } else if (matchDate == yesterday) {
-          weekdayName = greek ? 'Χθες' : 'Yesterday';
-        } else if (matchDate == tomorrow) {
-          weekdayName = greek ? 'Αύριο' : 'Tomorrow';
-        } else {
-          weekdayName = greek
-              ? getGreekWeekday(matchDate.weekday)
-              : getEnglishWeekday(matchDate.weekday);
-        }
-
         widgets.add(
           Padding(
-            padding: const EdgeInsets.only(top: 10, bottom: 8),
+            padding: const EdgeInsets.only(top: 10, bottom: 8,left: 7),
             child: Text(
-              " $weekdayName ${match.day}/${match.month}/${match.year}",
+              "${match.day}/${match.month}/${match.year}",
               style: TextStyle(
                 fontSize: 14.5,
                 fontWeight: FontWeight.bold,
