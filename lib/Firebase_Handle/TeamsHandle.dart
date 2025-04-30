@@ -529,15 +529,16 @@ class TeamsHandle {
   }
 
 
-  Future<List<Team>> getAllFavouriteTeams(String name) async {
+  List<Team> getAllFavouriteTeams(String name) {
     List<Team> fTeams = [];
 
-    List<String> teamNames = await getAllFavouriteTeamsNames(globalUser.username);
+    List<String> teamNames = globalUser.favoriteList;
 
-    for (String teamName in teamNames) {
-      Team? fTeam = await getTeam(teamName);
-      if (fTeam != null) {
-        fTeams.add(fTeam);
+    for (Team team in teams) {
+      for (String teamName in teamNames) {
+        if (teamName == team.name) {
+          fTeams.add(team);
+        }
       }
     }
 

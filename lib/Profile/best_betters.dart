@@ -7,11 +7,12 @@ import 'package:untitled1/globals.dart';
 import '../ad_manager.dart';
 
 Future<List<Map<String, dynamic>>> getTopUsers() async {
-  // Query to get the top users ordered by accuracy
+  // Query to get the top users ordered by accuracy and then by totalVotes
   QuerySnapshot snapshot = await FirebaseFirestore.instance
       .collection('users')
-      .orderBy('predictions.accuracy', descending: true) // Sort by accuracy
-      .limit(20) // Limit to the top 20
+      .orderBy('predictions.accuracy', descending: true)
+      .orderBy('predictions.totalVotes', descending: true) // δεύτερη ταξινόμηση
+      .limit(20)
       .get();
 
   List<Map<String, dynamic>> topUsers = [];
@@ -19,17 +20,17 @@ Future<List<Map<String, dynamic>>> getTopUsers() async {
   for (var doc in snapshot.docs) {
     Map<String, dynamic> userData = doc.data() as Map<String, dynamic>;
     topUsers.add({
-      'uid': doc.id, // User's UID
+      'uid': doc.id,
       'username': userData['username'],
-      'accuracy': userData['predictions']['accuracy'], // User's accuracy
-      'correctVotes': userData['predictions']
-          ['correctVotes'], // Correct votes count
-      'totalVotes': userData['predictions']['totalVotes'], // Total votes count
+      'accuracy': userData['predictions']['accuracy'],
+      'correctVotes': userData['predictions']['correctVotes'],
+      'totalVotes': userData['predictions']['totalVotes'],
     });
   }
 
   return topUsers;
 }
+
 
 class TopUsersList extends StatefulWidget {
 

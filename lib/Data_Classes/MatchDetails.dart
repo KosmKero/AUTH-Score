@@ -252,7 +252,7 @@ class MatchDetails extends ChangeNotifier {
         .set({'hasMatchFinished': progress, 'Type': type},
             SetOptions(merge: true)); // ώστε να μη διαγράψει άλλα πεδία
 
-    String matchKey = '${homeTeam.name}${awayTeam.name}${dateString}';
+    String matchKey = '${homeTeam.nameEnglish}${awayTeam.nameEnglish}${dateString}';
 
     String correctChoice;
     (scoreHome>scoreAway) ? correctChoice="1": (scoreHome==scoreAway)? correctChoice="X": correctChoice="2";

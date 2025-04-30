@@ -51,7 +51,8 @@ class BettingResultUpdate {
             'correctVotes': correct,
             'totalVotes': total,
             'accuracy': accuracy,
-          }
+          },
+          'totalVotes': total
         }, SetOptions(merge: true));
       }
 
@@ -61,6 +62,7 @@ class BettingResultUpdate {
           .doc(matchKey)
           .set({
         'statsUpdated': true, // Προσθήκη του πεδίου που δηλώνει ότι τα στατιστικά έχουν ανανεωθεί
+        'TimeStamp': DateTime.now()
       }, SetOptions(merge: true));
 
       print("Stats updated for match $matchKey.");

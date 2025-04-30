@@ -293,4 +293,13 @@ class Team {
     }, SetOptions(merge: true));
   }
 
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is Team && other.name == name;
+  }
+
+  @override
+  int get hashCode => name.hashCode;
 }

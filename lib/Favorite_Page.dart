@@ -23,11 +23,13 @@ class _FavoriteContainerState extends State<FavoritePage> {
 
   Future<void> loadFavouriteTeams() async {
     TeamsHandle teamsHandle = TeamsHandle();
-    favouriteTeams = await teamsHandle.getAllFavouriteTeams(globalUser.username);
+    favouriteTeams = teamsHandle.getAllFavouriteTeams(globalUser.username);
 
     if (favouriteTeams.isNotEmpty) {
       selectedTeam = favouriteTeams[0];
       refreshList();
+    }else{
+      selectedTeam=null;
     }
 
     setState(() {}); // Για να ανανεώσει το UI με τα νέα δεδομένα
@@ -51,7 +53,7 @@ class _FavoriteContainerState extends State<FavoritePage> {
             flex: 1,
             child: favouriteTeams.isNotEmpty
                 ? DropdownButton<Team>(
-              value: selectedTeam,
+              value: favouriteTeams.contains(selectedTeam) ? selectedTeam : null,
               dropdownColor: darkModeNotifier.value? Color(0xFF1E1E1E): Colors.white, // Optional: dark dropdown
               style:  TextStyle(color: darkModeNotifier.value? Colors.white:Colors.black87), // Text color in dropdown
               items: favouriteTeams.map<DropdownMenuItem<Team>>((Team team) {

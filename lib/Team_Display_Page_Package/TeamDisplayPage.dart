@@ -182,7 +182,7 @@ class _isFavouriteState extends State<isFavourite> {
 
   Future<void> _checkIfFavourite() async {
     if (isLoggedIn) {
-      bool result = await teamsHandle.isFavouriteTeam(widget.team.name);
+      bool result = globalUser.favoriteList.contains(widget.team.name);//      await teamsHandle.isFavouriteTeam(widget.team.name);
       setState(() {
         isFavourite = result;
       });
@@ -194,24 +194,43 @@ class _isFavouriteState extends State<isFavourite> {
   Widget build(BuildContext context) {
     return IconButton(
       onPressed: () async {
-        if (isLoggedIn) {
-          if (isFavourite) {
-            await teamsHandle.removeFavouriteTeam(widget.team.name);
-            globalUser.removeFavoriteTeam(widget.team);
-
-          } else {
-            await teamsHandle.addFavouriteTeam(widget.team.name);
-            globalUser.addFavoriteTeam(widget.team);
-          }
-
-          setState(() {
-            isFavourite = !isFavourite;
-          });
-        }
-        else{
+        if (!isLoggedIn) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: greek? Text('Πρέπει να συνδεθείς για να έχεις αγαπημένες ομάδες!') : Text('You have to log in to have favourite teams!'),
+              content: greek
+                  ? Text('Πρέπει να συνδεθείς για να έχεις αγαπημένες ομάδες!')
+                  : Text('You have to log in to have favourite teams!'),
+              backgroundColor: Colors.red,
+              duration: Duration(seconds: 3),
+            ),
+          );
+          return;
+        }
+
+        // 1. Optimistic Update (άμεσο setState)
+        setState(() {
+          isFavourite = !isFavourite;
+        });
+
+        try {
+          if (isFavourite) {
+            await teamsHandle.addFavouriteTeam(widget.team.name);
+            globalUser.addFavoriteTeam(widget.team);
+          } else {
+            await teamsHandle.removeFavouriteTeam(widget.team.name);
+            globalUser.removeFavoriteTeam(widget.team);
+          }
+        } catch (e) {
+          // 2. Αν υπάρξει σφάλμα, κάνε revert το UI
+          setState(() {
+            isFavourite = !isFavourite; // γύρνα το πίσω
+          });
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: greek
+                  ? Text('Κάτι πήγε στραβά. Προσπάθησε ξανά.')
+                  : Text('Something went wrong. Please try again.'),
               backgroundColor: Colors.red,
               duration: Duration(seconds: 3),
             ),
@@ -220,7 +239,7 @@ class _isFavouriteState extends State<isFavourite> {
       },
       icon: Icon(
         isFavourite ? Icons.favorite : Icons.favorite_border,
-        color: isFavourite ? Colors.red : null,
+        color: isFavourite ? Colors.red : Colors.grey,
       ),
     );
   }
