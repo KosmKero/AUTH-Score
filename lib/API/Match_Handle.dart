@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 import '../Data_Classes/MatchDetails.dart';
 
 class MatchHandle {
@@ -15,13 +17,27 @@ class MatchHandle {
   void initializeMatces(List<List<MatchDetails>> matchList){
     matchesList=matchList;
   }
-  void matchFinished(MatchDetails match){
+  Future<void> matchFinished(MatchDetails match) async {
     matchesList[0].remove(match);
     matchesList[1].add(match);
+
+    await FirebaseFirestore.instance
+        .collection('matches')
+        .doc(match.matchDocId)
+        .set({'hasMatchFinished': true, 'Type': 'previous'},
+        SetOptions(merge: true)); // ώστε να μη διαγράψει άλλα πεδία
+
   }
-  void matchNotFinished(MatchDetails match){
+  Future<void> matchNotFinished(MatchDetails match) async {
     matchesList[1].remove(match);
     matchesList[0].add(match);
+
+    await FirebaseFirestore.instance
+        .collection('matches')
+        .doc(match.matchDocId)
+        .set({'hasMatchFinished': true, 'Type': "upcoming"},
+        SetOptions(merge: true)); // ώστε να μη διαγράψει άλλα πεδία
+
   }
 
   // Μέθοδοι για πρόσβαση στα δεδομένα

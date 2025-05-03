@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'dart:math';
 
 class BettingResultUpdate {
 
@@ -17,7 +18,7 @@ class BettingResultUpdate {
       final matchKey = matchDoc.id;  // Το matchKey είναι το ID του εγγράφου
       final matchData = matchDoc.data();
       final correctChoice = matchData['correctChoice'];
-      final userVotes = Map<String, dynamic>.from(matchData['userVotes']);
+      final userVotes = Map<String, dynamic>.from(matchData['userVotes'] ?? {});
 
       // Ενημέρωση των στατιστικών των χρηστών
       for (final entry in userVotes.entries) {
@@ -44,6 +45,7 @@ class BettingResultUpdate {
         total++;
 
         final accuracy = total > 0 ? (correct / total) * 100 : 0;
+        final score = total > 0 ? accuracy * log(total) / log(10) : 0;
 
         // Αποθήκευση των ενημερωμένων δεδομένων του χρήστη
         await userDocRef.set({
@@ -51,6 +53,7 @@ class BettingResultUpdate {
             'correctVotes': correct,
             'totalVotes': total,
             'accuracy': accuracy,
+            'score': score,
           },
           'totalVotes': total
         }, SetOptions(merge: true));
@@ -67,6 +70,40 @@ class BettingResultUpdate {
 
       print("Stats updated for match $matchKey.");
     }
+    updateLeaderboard();
   }
+
+  Future<void> updateLeaderboard() async {
+    final usersSnapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .orderBy('predictions.score', descending: true)
+        .limit(20)
+        .get();
+
+    final List<Map<String, dynamic>> topUsers = [];
+
+    for (final doc in usersSnapshot.docs) {
+      final data = doc.data();
+      final predictions = data['predictions'] ?? {};
+      topUsers.add({
+        'uid': doc.id,
+        'username': data['username'] ?? 'Unknown',
+        'accuracy': predictions['accuracy'] ?? 0,
+        'correctVotes': predictions['correctVotes'] ?? 0,
+        'totalVotes': predictions['totalVotes'] ?? 0,
+        'score': predictions['score'] ?? 0,
+      });
+    }
+
+    // Αποθήκευση της λίστας σε έγγραφο
+    await FirebaseFirestore.instance
+        .collection('leaderboard')
+        .doc('top20')
+        .set({
+      'updatedAt': DateTime.now(),
+      'users': topUsers,
+    });
+  }
+
 
 }

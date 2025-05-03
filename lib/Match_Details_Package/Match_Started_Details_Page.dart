@@ -4,11 +4,13 @@ import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:untitled1/Data_Classes/Player.dart';
 import 'package:untitled1/Firebase_Handle/user_handle_in_base.dart';
+import 'package:untitled1/Match_Details_Package/penalty_shootout_widget.dart';
 import 'package:untitled1/championship_details/StandingsPage.dart';
 import 'package:untitled1/globals.dart';
 import '../../Data_Classes/MatchDetails.dart';
 import 'package:provider/provider.dart';
 import '../API/user_handle.dart';
+import '../Data_Classes/Penaltys.dart';
 import '../Data_Classes/Team.dart';
 import '../Data_Classes/match_facts.dart';
 import '../Team_Display_Page_Package/one_group_standings.dart';
@@ -98,22 +100,6 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
                 padding: const EdgeInsets.all(5.0),
                 child: Column(
                   children: [
-                    // Row(
-                    //   children: [
-                    //     TextButton(onPressed:()
-                    //     {widget.match.homeScored("name");
-                    //     setState(() {});}, child: Text("patatohome")),
-                    //     TextButton(onPressed:()
-                    //     {widget.match.awayScored("name2");
-                    //     setState(() {});}, child: Text("patatoaway")),
-                    //     TextButton(onPressed:()
-                    //     {widget.match.secondHalfStarted();
-                    //     }, child: Text("2ohalf")),
-                    //     TextButton(onPressed:()
-                    //     {widget.match.matchFinished();
-                    //     setState(() {});}, child: Text("finished")),
-                    //   ],
-                    // ),
                     Center(
                         child: Text(
                           widget.match.matchweekInfo(),
@@ -136,7 +122,7 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
                         ),
                         Flexible(
                           fit: FlexFit.tight,
-                          child: widget.match.hasMatchFinished
+                          child: (((widget.match.hasMatchFinished && !widget.match.isExtraTimeTime) ||( widget.match.hasExtraTimeFinished && !widget.match.isPenaltyTime)) || widget.match.isShootoutOver)
                               ? _buildMatchFinishedScore()
                               : _buildMatchTimer(),
                         ),
@@ -172,8 +158,8 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
   Widget _buildMatchFinishedScore() {
     Color homeColor, awayColor;
 
-    (widget.match.scoreHome > widget.match.scoreAway) ? {homeColor = darkModeNotifier.value ? Colors.white : Colors.black, awayColor = Colors.grey}
-        : (widget.match.scoreHome < widget.match.scoreAway)
+    (widget.match.homeScore+widget.match.penaltyScoreHome > widget.match.awayScore+widget.match.penaltyScoreAway) ? {homeColor = darkModeNotifier.value ? Colors.white : Colors.black, awayColor = Colors.grey}
+        : (widget.match.homeScore+widget.match.penaltyScoreHome < widget.match.awayScore+widget.match.penaltyScoreAway)
             ? {homeColor = Colors.grey, awayColor = darkModeNotifier.value ? Colors.white : Colors.black}
             : {homeColor = Colors.blueGrey, awayColor = Colors.blueGrey};
 
@@ -190,7 +176,7 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text("${widget.match.scoreHome}",
+              Text("${widget.match.homeScore+widget.match.penaltyScoreHome}",
                   style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 25,
@@ -199,10 +185,10 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
                   style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 25,
-                      color: (widget.match.scoreHome != widget.match.scoreAway)
+                      color: (widget.match.homeScore != widget.match.awayScore)
                           ? Colors.grey
                           : Colors.blueGrey)),
-              Text("${widget.match.scoreAway}",
+              Text("${widget.match.awayScore+widget.match.penaltyScoreAway}",
                   style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 25,
@@ -228,26 +214,37 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
         int seconds = secondsElapsed % 60;
 
         return Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             SizedBox(height: 15),
             Text(
-              "${matchDetails.scoreHome}-${matchDetails.scoreAway}",
+              "${matchDetails.homeScore+matchDetails.penaltyScoreHome}-${matchDetails.awayScore+matchDetails.penaltyScoreAway}",
               style: const TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 25,
                   color: Colors.red),
             ),
+
+            (matchDetails.isPenaltyTime)?
+            Text(
+              'Πέναλτι',
+              style: const TextStyle(
+                  fontWeight: FontWeight.bold, fontSize: 15, color: Colors.red),
+              textAlign: TextAlign.center,
+            ):
             // Ελέγχουμε αν είναι το ημίχρονο ή όχι
-            !matchDetails.isHalfTime()
+            (!matchDetails.isHalfTime() && !matchDetails.isExtraTimeHalf() && !(matchDetails.hasMatchFinished && !matchDetails.hasExtraTimeStarted))
                 ? Text(
               '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}',
               style: const TextStyle(
                   fontWeight: FontWeight.bold, fontSize: 16, color: Colors.red),
             )
                 : Text(
-              'Ημίχρονο',
+          (matchDetails.hasMatchFinished && !matchDetails.hasExtraTimeStarted)? 'Αναμονή Παράτασης': matchDetails.isHalfTime() ? 'Ημίχρονο' : 'Ημίχρονο Παράτασης',
               style: const TextStyle(
                   fontWeight: FontWeight.bold, fontSize: 13, color: Colors.red),
+              textAlign: TextAlign.center,
             )
           ],
         );
@@ -256,37 +253,64 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
   }
 
 
-  Widget _buildMatchdetails() {
+  Widget _buildMatchDetails() {
     return Column(
       children: [
-        (widget.match.hasSecondHalfStarted || widget.match.hasMatchFinished)  ? _halfBuilder(2) : SizedBox.shrink(),
-        _halfBuilder(1), // Always display the first half
+        if (globalUser.controlTheseTeams(
+            widget.match.homeTeam.name,widget.match.awayTeam.name) && widget.match.isPenaltyTime && (DateTime.now().millisecondsSinceEpoch ~/ 1000<widget.match.startTimeInSeconds + 3*3600))
+          ElevatedButton(onPressed:() async {
+           await widget.match.penaltyShootout.removeLastPenalty(
+                widget.match.matchDocId);
+           setState(() {
+
+           });
+          }, child: Text('Διαγραφή τελευταίου πέναλτι')),
+
+        if (widget.match.isPenaltyTime)
+          ChangeNotifierProvider(
+            key: ValueKey(widget.match.matchDocId), // 👈 εξαναγκάζει ανανέωση
+            create: (_) => PenaltyShootoutManager(matchDocId: widget.match.matchDocId),
+            child: PenaltyShootoutPanel(
+              homeTeam: widget.match.homeTeam,
+              awayTeam: widget.match.awayTeam,
+            ),
+          ),
+
+        if (widget.match.isExtraTimeTime && widget.match.hasSecondHalfExtraTimeStarted)
+          _halfBuilder(4),
+        if (widget.match.isExtraTimeTime && widget.match.hasExtraTimeStarted)
+          _halfBuilder(3),
+        if (widget.match.hasSecondHalfStarted || widget.match.hasMatchFinished)
+          _halfBuilder(2),
+        _halfBuilder(1),
       ],
     );
   }
 
+
   Widget _halfBuilder(int half) {
+    int ha= (half % 2==0) ? 2 : 1;
     return Column(children: [
       Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Container(
             height: 1,
-            width: 100,
-            color: widget.match.hasMatchFinished
+            width: (half>2) ? 65 : 100,
+            color: (( widget.match.hasMatchFinished && !widget.match.isExtraTimeTime) || widget.match.hasExtraTimeFinished)
                 ? Colors.blueGrey
                 : Colors.redAccent,
           ),
           Text(
-            " $halfο ημίχρονο ",
+            " ${ha}ο ημίχρονο ${(half>2) ? 'παράτασης' : ""}",
             style: TextStyle(
-                color: widget.match.hasMatchFinished ?darkModeNotifier.value?Colors.white: Colors.black : Colors.redAccent),
+                color:(( widget.match.hasMatchFinished && !widget.match.isExtraTimeTime) || widget.match.hasExtraTimeFinished) ?darkModeNotifier.value?Colors.white: Colors.black : Colors.redAccent),
           ),
           Container(
 
             height: 1,
-            width: 100,
-            color: widget.match.hasMatchFinished
+            width: (half>2) ? 65 : 100,
+            color: (( widget.match.hasMatchFinished && !widget.match.isExtraTimeTime) || widget.match.hasExtraTimeFinished)
                 ? Colors.blueGrey
                 : Colors.redAccent,
           ),
@@ -317,7 +341,7 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
     goal.scorerName == "Άλλος" ?  goalScorer='Γκολ' : goalScorer = goal.scorerName;
 
     return InkWell(
-        onLongPress: (widget.match.hasMatchStarted && !widget.match.hasMatchFinished && globalUser.controlTheseTeams(
+        onLongPress: ((widget.match.hasMatchStarted && !widget.match.hasMatchFinished || (!widget.match.hasExtraTimeFinished && widget.match.isExtraTimeTime)) && globalUser.controlTheseTeams(
                     widget.match.homeTeam.name, widget.match.awayTeam.name) )
             ? () {
                 setState(() {
@@ -443,7 +467,7 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
   Widget _sectionChooser(int selectedIndex, MatchDetails match) {
     switch (selectedIndex) {
       case 0:
-        return _buildMatchdetails();
+        return _buildMatchDetails();
      // case 1:
      //   return Starting11Display(
      //     match: match,
@@ -453,7 +477,7 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
         int seasonYear = now.month > 8 ? now.year : now.year - 1;
         return OneGroupStandings(group: match.homeTeam.group, seasonYear: seasonYear,);
       default:
-        return _buildMatchdetails();
+        return _buildMatchDetails();
     }
   }
 
@@ -461,7 +485,33 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
     // Check if the user is logged in
 
     if (globalUser.controlTheseTeams(
-            widget.match.homeTeam.name, widget.match.awayTeam.name) && !widget.match.hasMatchFinished) {
+        widget.match.homeTeam.name, widget.match.awayTeam.name) && widget.match.hasExtraTimeFinished && !widget.match.isShootoutOver  && DateTime.now().millisecondsSinceEpoch ~/ 1000<widget.match.startTimeInSeconds + 10*3600 ) {
+      return Column(
+        children: [
+          SizedBox(height: 15,),
+          Text('Πέναλτι',style:TextStyle(color: darkModeNotifier.value?Colors.grey[300]: Colors.black)),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  IconButton(
+                    onPressed: () async {
+                      await widget.match.addPenalty(isScored: false, isHomeTeam: homeTeamScored);
+                    },
+                    icon: Icon(Icons.cancel,color: Colors.red,size: 30),
+                  ),
+                  IconButton(
+                    onPressed: () async {
+                      await widget.match.addPenalty(isScored: true, isHomeTeam: homeTeamScored);
+                    },
+                    icon: Icon(Icons.check_circle,color: Colors.green,size: 30,),
+                  ),
+                ],
+              ),
+        ],
+      );
+      }
+    else if (globalUser.controlTheseTeams(
+            widget.match.homeTeam.name, widget.match.awayTeam.name) && (!widget.match.hasMatchFinished || (widget.match.isExtraTimeTime && !widget.match.hasExtraTimeFinished)) ) {
       return GestureDetector(
         onTap: () {
           homeTeamScored
@@ -500,13 +550,13 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
 
   Widget _matchProgressAdmin() {
     //3 ωρες μετα το ματς δεν μπορεις να το κανεις κανσελ
-    if ((DateTime.now().millisecondsSinceEpoch ~/ 1000>widget.match.startTimeInSeconds + 3*3600 || DateTime.now().month>widget.match.month || DateTime.now().year>widget.match.year) && widget.match.hasMatchFinished){
+    if ((DateTime.now().millisecondsSinceEpoch ~/ 1000 > widget.match.startTimeInSeconds + 3*3600)){
       return SizedBox(
         height: 5,
       );
     }
     // Check if the user is logged in
-    if (widget.match.hasMatchFinished &&
+    if (widget.match.hasMatchFinished && (!widget.match.isExtraTimeTime || widget.match.hasExtraTimeFinished) &&
         (globalUser.controlTheseTeams(
                 widget.match.homeTeam.name, widget.match.awayTeam.name))) {
       return ElevatedButton(
@@ -523,7 +573,7 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
           setState(() {});
         },
         child: Text(
-          "Ματς δεν τελείωσε",
+          (!widget.match.hasExtraTimeFinished) ? "Ματς δεν τελείωσε" : 'Η παράταση δεν τελείωσε',
           style: TextStyle(color: Colors.white, fontSize: 9),
         ),
       );
@@ -532,6 +582,10 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
       MatchDetails match = widget.match;
       String progress = " ";
       String cancelProgress = " ";
+      match.hasSecondHalfExtraTimeStarted ? (progress = "Τέλος Παράτασης", cancelProgress = "Ημίχρονο Παράτασης") :
+      match.hasFirstHalfExtraTimeFinished ? (progress = "Εκκίνηση 2ου Ημιχρόνου Παράτασης", cancelProgress = "1ο Ημίχρονο παράτασης"):
+      match.hasExtraTimeStarted ? (progress = "Ημίχρονο Παράτασης", cancelProgress = "Η παράταση δεν ξεκίνησε"):
+      match.hasMatchFinished ? (progress = "Εκκίνηση Παράτασης", cancelProgress = "Ο αγώνας δεν τελείωσε"):
       match.hasSecondHalfStarted
           ? (progress = "Τέλος Αγώνα", cancelProgress = "Ημίχρονο")
           : match.hasFirstHalfFinished
@@ -605,7 +659,8 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
 
   TextEditingController _controller = TextEditingController();
   void _showInputDialogForGoal(
-      BuildContext context, Team team, bool homeTeamScored) {
+      BuildContext context, Team team, bool homeTeamScored)
+  {
     String? goalScorer;
     showDialog(
         context: context,
@@ -696,7 +751,7 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
 
   Widget _cardAdmin(bool homeTeamCard) {
     if (globalUser.controlTheseTeams(
-            widget.match.homeTeam.name, widget.match.awayTeam.name) && !widget.match.hasMatchFinished) {
+            widget.match.homeTeam.name, widget.match.awayTeam.name) && (!widget.match.hasMatchFinished || (widget.match.isExtraTimeTime && !widget.match.hasExtraTimeFinished)) && !widget.match.isExtraTimeHalf()) {
       return TextButton(
           onPressed: () {
             homeTeamCard
@@ -727,7 +782,8 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
   }
 
   void _showInputDialogCard(
-      BuildContext context, Team team, bool homeTeamCard) {
+      BuildContext context, Team team, bool homeTeamCard)
+  {
     String? goalScorer;
     bool isYellow = true;
     showDialog(

@@ -7,28 +7,28 @@ import 'package:untitled1/globals.dart';
 import '../ad_manager.dart';
 
 Future<List<Map<String, dynamic>>> getTopUsers() async {
-  // Query to get the top users ordered by accuracy and then by totalVotes
-  QuerySnapshot snapshot = await FirebaseFirestore.instance
-      .collection('users')
-      .orderBy('predictions.accuracy', descending: true)
-      .orderBy('predictions.totalVotes', descending: true) // δεύτερη ταξινόμηση
-      .limit(20)
+  // Λήψη του leaderboard από το συγκεκριμένο έγγραφο
+  DocumentSnapshot snapshot = await FirebaseFirestore.instance
+      .collection('leaderboard')
+      .doc('top20')
       .get();
 
-  List<Map<String, dynamic>> topUsers = [];
-
-  for (var doc in snapshot.docs) {
-    Map<String, dynamic> userData = doc.data() as Map<String, dynamic>;
-    topUsers.add({
-      'uid': doc.id,
-      'username': userData['username'],
-      'accuracy': userData['predictions']['accuracy'],
-      'correctVotes': userData['predictions']['correctVotes'],
-      'totalVotes': userData['predictions']['totalVotes'],
-    });
+  if (!snapshot.exists || snapshot.data() == null) {
+    return [];
   }
 
-  return topUsers;
+  final data = snapshot.data() as Map<String, dynamic>;
+  final List<dynamic> users = data['users'] ?? [];
+
+  // Μετατροπή σε σωστό format
+  return users.map<Map<String, dynamic>>((user) => {
+    'uid': user['uid'],
+    'username': user['username'] ?? 'Unknown',
+    'accuracy': user['accuracy'],
+    'correctVotes': user['correctVotes'],
+    'totalVotes': user['totalVotes'],
+    'score': user['score'],
+  }).toList();
 }
 
 
@@ -101,6 +101,8 @@ class _TopUsersListState extends State<TopUsersList> {
                 final accuracy = predictions['accuracy'] ?? 0.0;
                 final correct = predictions['correctVotes'] ?? 0;
                 final total = predictions['totalVotes'] ?? 0;
+                final score1 = predictions['score'] ?? 0;
+                final score = score1.round();
 
                 return Card(
                   margin: EdgeInsets.all(10),
@@ -115,14 +117,18 @@ class _TopUsersListState extends State<TopUsersList> {
                       child: Icon(Icons.person, color: Colors.white),
                     ),
                     title: Text('Your Stats',
-                        style: TextStyle(color: darkModeNotifier.value ? Colors.white: Color(0xFF1E1E1E ) ,fontWeight: FontWeight.bold)),
+                        style: TextStyle(color: darkModeNotifier.value ? Colors.white: Color(0xFF1E1E1E ) ,fontWeight: FontWeight.bold,fontSize: 17)),
                     subtitle: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        Text(
+                            'Score: $score',
+                            style: TextStyle(color: darkModeNotifier.value ? Colors.white: Color(0xFF1E1E1E ),fontSize: 15 ,)),
                         Text('Accuracy: ${accuracy.toStringAsFixed(2)}%',
                             style: TextStyle(color: Colors.green)),
                         Text('Correct Votes: $correct / $total',
                             style: TextStyle(color: darkModeNotifier.value ? Colors.white: Color(0xFF1E1E1E ) )),
+
                       ],
                     ),
                     trailing: Icon(Icons.star, color: Colors.yellow[700]),
@@ -156,7 +162,6 @@ class _TopUsersListState extends State<TopUsersList> {
                 }
 
                 final topUsers = snapshot.data!;
-                final currentUserUid = FirebaseAuth.instance.currentUser?.uid;
 
                 return ListView.builder(
                   padding: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
@@ -179,16 +184,20 @@ class _TopUsersListState extends State<TopUsersList> {
                                   fontWeight: FontWeight.bold)),
                         ),
                         title: Text('${user['username']}',
-                            style: TextStyle(color: darkModeNotifier.value ? Colors.white: Color(0xFF1E1E1E ) ,fontWeight: FontWeight.bold)),
+                            style: TextStyle(color: darkModeNotifier.value ? Colors.white: Color(0xFF1E1E1E ) ,fontWeight: FontWeight.bold,fontSize: 17)),
                         subtitle: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            Text(
+                                'Score: ${(user['score']).round()}',
+                                style: TextStyle(color: darkModeNotifier.value ? Colors.white: Color(0xFF1E1E1E ), fontSize: 15)),
                             Text(
                                 'Accuracy: ${user['accuracy'].toStringAsFixed(2)}%',
                                 style: TextStyle(color: Colors.green)),
                             Text(
                                 'Correct Votes: ${user['correctVotes']} / ${user['totalVotes']}',
                                 style: TextStyle(color: darkModeNotifier.value ? Colors.white: Color(0xFF1E1E1E ) ,)),
+
                           ],
                         ),
                         trailing: Icon(Icons.star, color: Colors.yellow[700]),

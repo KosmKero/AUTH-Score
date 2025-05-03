@@ -238,19 +238,19 @@ class eachMatchContainerView extends StatelessWidget {
                     ? Column(
                         children: [
                           Text(
-                            match.scoreHome.toString(),
+                           ( match.homeScore+match.penaltyScoreHome).toString(),
                             style: TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
                                 fontFamily: 'Arial',
-                                color: match.hasMatchFinished ? match.scoreHome > match.scoreAway ?darkModeNotifier.value?Colors.white: Colors.black:Colors.grey : Colors.red),
+                                color: !(!match.hasMatchFinished || (match.isExtraTimeTime && !match.hasExtraTimeFinished)|| (match.isPenaltyTime && !match.isShootoutOver))? match.scoreHome > match.scoreAway ?darkModeNotifier.value?Colors.white: Colors.black:Colors.grey : Colors.red),
                           ),
                           Text(
-                            match.scoreAway.toString(),
+                            (match.awayScore+match.penaltyScoreAway).toString(),
                             style: TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
-                                color: match.hasMatchFinished ?match.scoreAway>match.scoreHome?darkModeNotifier.value?Colors.white: Colors.black:Colors.grey : Colors.red),
+                                color: !(!match.hasMatchFinished || (match.isExtraTimeTime && !match.hasExtraTimeFinished) || (match.isPenaltyTime && !match.isShootoutOver)) ?match.scoreAway>match.scoreHome?darkModeNotifier.value?Colors.white: Colors.black:Colors.grey : Colors.red),
                           ),
                         ],
                       )
@@ -290,13 +290,13 @@ class _MatchContainerTimeState extends State<MatchContainerTime>
 
     widget.match.addListener(_onMatchUpdated);
 
-    if (widget.match.hasMatchStarted && !widget.match.hasMatchFinished) {
+    if (widget.match.hasMatchStarted && (!widget.match.hasMatchFinished || (widget.match.isExtraTimeTime && !widget.match.hasExtraTimeFinished))) {
       _startTimer();
     }
   }
 
   void _onMatchUpdated() {
-    if (widget.match.hasMatchStarted && _timer == null && !widget.match.hasMatchFinished) {
+    if (widget.match.hasMatchStarted && _timer == null && (!widget.match.hasMatchFinished || (widget.match.isExtraTimeTime && !widget.match.hasExtraTimeFinished))) {
       _startTimer();
     }
   }
@@ -317,7 +317,7 @@ class _MatchContainerTimeState extends State<MatchContainerTime>
       oldWidget.match.removeListener(_onMatchUpdated);
       widget.match.addListener(_onMatchUpdated);
 
-      if (widget.match.hasMatchStarted && !widget.match.hasMatchFinished) {
+      if (widget.match.hasMatchStarted && (!widget.match.hasMatchFinished || (widget.match.isExtraTimeTime && !widget.match.hasExtraTimeFinished))) {
         _startTimer();
       }
     }
@@ -329,7 +329,7 @@ class _MatchContainerTimeState extends State<MatchContainerTime>
 
     if (state == AppLifecycleState.resumed &&
         widget.match.hasMatchStarted &&
-        !widget.match.hasMatchFinished) {
+        (!widget.match.hasMatchFinished || (widget.match.isExtraTimeTime && !widget.match.hasExtraTimeFinished))) {
       _startTimer();
     }
   }
@@ -354,41 +354,68 @@ class _MatchContainerTimeState extends State<MatchContainerTime>
   }
 
   Color get _timeColor =>
-      widget.match.hasMatchFinished ? Colors.black : Colors.red;
+      (!widget.match.hasMatchFinished || (widget.match.isExtraTimeTime && !widget.match.hasExtraTimeFinished)) ? Colors.red : Colors.black;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Text(
-          widget.match.timeString,
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: darkModeNotifier.value ? Colors.white : Colors.black87,
-          ),
-        ),
-        if (widget.match.isHalfTime())
-          const Text(
-            "Ημίχρονο",
+    return SizedBox(
+      width: 55,
+      child: Column(
+        children: [
+          Text(
+            widget.match.timeString,
             style: TextStyle(
-              color: Colors.red,
-              fontSize: 9,
+              fontSize: 16,
               fontWeight: FontWeight.bold,
+              color: darkModeNotifier.value ? Colors.white : Colors.black87,
             ),
-          )
-        else if (widget.match.hasMatchFinished)
-          const SizedBox.shrink()
-        else if (widget.match.hasMatchStarted)
-            Text(
-              '${(_secondsElapsed ~/ 60).toString().padLeft(2, '0')}:${(_secondsElapsed % 60).toString().padLeft(2, '0')}',
+          ),
+          if (widget.match.isHalfTime())
+            const Text(
+              "Ημίχρονο",
               style: TextStyle(
+                color: Colors.red,
+                fontSize: 9,
                 fontWeight: FontWeight.bold,
-                fontSize: 12,
-                color: _timeColor,
               ),
-            ),
-      ],
+            )
+          else if ((widget.match.hasMatchFinished && (!widget.match.isExtraTimeTime || widget.match.hasExtraTimeFinished)))
+            const SizedBox.shrink()
+          else if (widget.match.isExtraTimeTime && widget.match.isExtraTimeHalf())
+            const Text(
+              "Ημίχρονο Παράτασης",
+              style: TextStyle(
+                color: Colors.red,
+                fontSize: 9,
+                fontWeight: FontWeight.bold,
+              ),
+              softWrap: true,
+              overflow: TextOverflow.visible,
+              textAlign: TextAlign.center,
+            )
+          else if (widget.match.isExtraTimeTime && widget.match.hasMatchFinished && !widget.match.hasExtraTimeStarted)
+              const Text(
+                "Αναμονή Παράτασης",
+                style: TextStyle(
+                  color: Colors.red,
+                  fontSize: 9,
+                  fontWeight: FontWeight.bold,
+                ),
+                softWrap: true,
+                overflow: TextOverflow.visible,
+                textAlign: TextAlign.center,
+              )
+          else if (widget.match.hasMatchStarted)
+              Text(
+                '${(_secondsElapsed ~/ 60).toString().padLeft(2, '0')}:${(_secondsElapsed % 60).toString().padLeft(2, '0')}',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12,
+                  color: _timeColor,
+                ),
+              ),
+        ],
+      ),
     );
   }
 }

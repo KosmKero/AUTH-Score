@@ -143,7 +143,15 @@ class TeamsHandle {
           "hasSecondHalfStarted": false,
           "hasFirstHalfFinished":false,
           'startTime': timestamp,
-          "notified":false
+          "notified":false,
+          'hasExtraTimeFinished':false,
+          'hasSecondHalfExtraTimeStarted': false,
+          'hasFirstHalfExtraTimeFinished':false,
+          'hasExtraTimeStarted':false,
+          'GoalHomeExtraTime':0,
+          'GoalAwayExtraTime':0,
+          'penalties' : []
+
         });
     }
     catch (e)
@@ -263,7 +271,14 @@ class TeamsHandle {
           hasMatchFinished: data["hasMatchFinished"] ?? false,
           hasSecondHalfStarted: data["hasSecondHalfStarted"] ?? false,
           hasFirstHalfFinished: data["hasFirstHalfFinished"] ?? false,
-          timeStarted: data["TimeStarted"] ?? DateTime.now().millisecondsSinceEpoch,
+          timeStarted: data["TimeStarted"] ?? 0,
+          hasFirstHalfExtraTimeFinished: data['hasFirstHalfExtraTimeFinished'] ?? false,
+          hasExtraTimeFinished: data['hasExtraTimeFinished'] ?? false,
+          hasExtraTimeStarted: data['hasExtraTimeStarted'] ?? false,
+          hasSecondHalfExtraTimeStarted: data['hasSecondHalfExtraTimeStarted'] ?? false,
+          scoreAwayExtraTime: data['GoalAwayExtraTime'] ?? 0,
+          scoreHomeExtraTime: data['GoalHomeExtraTime'] ?? 0,
+          penalties: data['penalties'] ?? []
 
         );
         if (!match.isGroupPhase){
@@ -365,10 +380,11 @@ class TeamsHandle {
       Team team = groupTeams[i];
       int position = i + 1; // Η θέση ξεκινά από 1
       team.setPosition(position); // Αν υπάρχει μεταβλητή θέσης στο μοντέλο
+
       await FirebaseFirestore.instance
           .collection('teams')
           .doc(team.name)
-          .update({'position': position});
+          .set({'position': position}, SetOptions(merge: true));
     }
 
 
@@ -401,6 +417,7 @@ class TeamsHandle {
           print("⚠️ Skipping match due to missing team data: $homeTeamName vs $awayTeamName");
           return null;
         }
+        print(data['GoalAwayExtraTime'].toString);
 
         return MatchDetails(
           homeTeam: homeTeam,
@@ -412,15 +429,24 @@ class TeamsHandle {
           year: data["Year"] ?? 0,
           isGroupPhase: data["IsGroupPhase"] ?? false,
           game: data["Game"] ?? 0,
-          scoreHome: data["GoalHome"] ?? -1,
-          scoreAway: data["GoalAway"] ?? -1,
+          scoreHome: data["GoalHome"] ?? 0,
+          scoreAway: data["GoalAway"] ?? 0,
           hasMatchFinished: data["hasMatchFinished"] ?? false,
           hasSecondHalfStarted: data["hasSecondHalfStarted"] ?? false,
           hasFirstHalfFinished: data["hasFirstHalfFinished"] ?? false,
           timeStarted: data["TimeStarted"] ?? DateTime.now().millisecondsSinceEpoch,
+          hasFirstHalfExtraTimeFinished: data['hasFirstHalfExtraTimeFinished'] ?? false,
+          hasExtraTimeFinished: data['hasExtraTimeFinished'] ?? false,
+          hasExtraTimeStarted: data['hasExtraTimeStarted'] ?? false,
+          hasSecondHalfExtraTimeStarted: data['hasSecondHalfExtraTimeStarted'] ?? false,
+          scoreAwayExtraTime: data['GoalAwayExtraTime'] ?? 0,
+          scoreHomeExtraTime: data['GoalHomeExtraTime'] ?? 0,
+          penalties: data['penalties'] ?? []
+
 
         );
       }).toList();
+
 
       // Εκτελούνται όλες παράλληλα
       var completedMatches = await Future.wait(matchFutures);
