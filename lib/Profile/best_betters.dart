@@ -117,7 +117,7 @@ class _TopUsersListState extends State<TopUsersList> {
                       child: Icon(Icons.person, color: Colors.white),
                     ),
                     title: Text('Your Stats',
-                        style: TextStyle(color: darkModeNotifier.value ? Colors.white: Color(0xFF1E1E1E ) ,fontWeight: FontWeight.bold,fontSize: 17)),
+                        style: TextStyle(color: darkModeNotifier.value ? Colors.white: Color(0xFF1E1E1E ) ,fontWeight: FontWeight.bold,fontSize: 16)),
                     subtitle: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -184,7 +184,7 @@ class _TopUsersListState extends State<TopUsersList> {
                                   fontWeight: FontWeight.bold)),
                         ),
                         title: Text('${user['username']}',
-                            style: TextStyle(color: darkModeNotifier.value ? Colors.white: Color(0xFF1E1E1E ) ,fontWeight: FontWeight.bold,fontSize: 17)),
+                            style: TextStyle(color: darkModeNotifier.value ? Colors.white: Color(0xFF1E1E1E ) ,fontWeight: FontWeight.bold,fontSize: 16)),
                         subtitle: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [

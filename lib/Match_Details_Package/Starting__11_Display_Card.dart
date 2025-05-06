@@ -62,7 +62,7 @@ class _Starting11DisplayState extends State<Starting11Display> {
               child: Stack(
                 children: [
                   Positioned.fill(
-                    child: Image.asset("fotos/γηπεδο.png", fit: BoxFit.cover),
+                    //child: Image.asset("fotos/γηπεδο.png", fit: BoxFit.cover),
                   ),
                   Column(
                    // crossAxisAlignment: CrossAxisAlignment.center,

@@ -283,9 +283,6 @@ bool get isShootoutOver {
   return false;
 }
 
-void penaltyRemoved(){
-
-}
 
 
 bool isHalfTime() {
@@ -446,7 +443,13 @@ bool isHalfTime() {
       int half;
       (!isExtraTimeTime)? (!_hasSecondHalfStarted) ? half = 0 : half = 1 : (!_hasFirstHalfExtraTimeFinished) ? half = 2 : half = 3;
 
-      _scoreHome++;
+
+      if (isExtraTimeTime){
+        _scoreHomeExtraTime++;
+      }else {
+        _scoreHome++;
+      }
+
       homeScoredBase();
 
       Goal goal = Goal(
@@ -524,7 +527,7 @@ bool isHalfTime() {
     }
   }
 
-  //--oxi etoimo
+  //etoimo
   void matchProgressed() {
     if (isExtraTimeTime) {
       if (_hasSecondHalfExtraTimeStarted) {
@@ -731,7 +734,7 @@ bool isHalfTime() {
 
   //ετοιμο
   Future<void> cancelGoal(Goal goal1) async {
-    if ((!hasMatchFinished || (isExtraTimeTime && !hasExtraTimeFinished)) && globalUser.controlTheseTeams(homeTeam.name, awayTeam.name)) {
+    if ( globalUser.controlTheseTeams(homeTeam.name, awayTeam.name)) {  //μικροτερο απο 3 ωρες
       if (_matchFacts.containsKey(goal1.half)) {
         _matchFacts[goal1.half]!
             .removeWhere((goal) => goal is Goal && goal == goal1);
@@ -768,6 +771,87 @@ bool isHalfTime() {
       }
     }
   }
+
+
+Future<void> editGoal(Goal oldGoal, Goal newGoal) async {
+  if (startTimeInSeconds > DateTime.now().millisecondsSinceEpoch ~/ 1000 - 10800 && globalUser.controlTheseTeams(homeTeam.name, awayTeam.name)) {
+    if (_matchFacts.containsKey(oldGoal.half)) {
+
+    cancelGoal(oldGoal);
+
+
+    if (!newGoal.isHomeTeam) {
+          if (isExtraTimeTime) {
+            _scoreAwayExtraTime++;
+            awayScoredBase();
+          } else {
+            _scoreAway++;
+            awayScoredBase();
+          }
+        }
+    else{
+      if (isExtraTimeTime) {
+        _scoreHomeExtraTime++;
+        homeScoredBase();
+      } else {
+        _scoreHome++;
+        homeScoredBase();
+      }
+    }
+
+    _matchFacts[newGoal.half]?.add(newGoal);
+
+    if (newGoal.name!='Άλλος') {
+      for (Player player in awayTeam.players) {
+        if ("${player.name.substring(0, 1)}. ${player.surname}" == newGoal.name) {
+          TopPlayersHandle().playerScored(player);
+          break;
+        }
+      }
+    }
+
+    MatchFactsStorageHelper().addMatchFact(
+        matchDoc:
+        FirebaseFirestore.instance.collection('matches').doc(matchDocId),
+        half: newGoal.half,
+        factMap: newGoal.toMap());
+
+    notifyListeners();
+    }
+  }
+}
+
+Future<void> editCard(CardP oldCard, CardP newCard) async {
+  if (startTimeInSeconds > DateTime.now().millisecondsSinceEpoch ~/ 1000 - 10800 && globalUser.controlTheseTeams(homeTeam.name, awayTeam.name)) {
+    if (_matchFacts.containsKey(oldCard.half)) {
+      // 1. Διαγραφή της παλιάς κάρτας
+      _matchFacts[oldCard.half]!
+          .removeWhere((card) => card is CardP && card == oldCard);
+
+      // 2. Ενημέρωση του σκορ ή άλλων στατιστικών αν χρειάζεται
+      // Εδώ δεν αλλάζει σκορ, αλλά μπορείς να ενημερώσεις άλλες πληροφορίες, αν απαιτείται.
+
+      // 3. Διαγραφή της παλιάς κάρτας από τη βάση δεδομένων
+      await MatchFactsStorageHelper().deleteMatchFact(
+        matchDoc: FirebaseFirestore.instance.collection('matches').doc(matchDocId),
+        half: oldCard.half,
+        factMap: oldCard.toMap(),
+      );
+
+      // 4. Προσθήκη της νέας κάρτας στη βάση δεδομένων
+      await MatchFactsStorageHelper().addMatchFact(
+        matchDoc: FirebaseFirestore.instance.collection('matches').doc(matchDocId),
+        half: newCard.half,
+        factMap: newCard.toMap(),
+      );
+
+      // 5. Ενημέρωση του UI
+      notifyListeners();
+    }
+  }
+}
+
+
 
 Future<void> addPenalty({
   required bool isScored,

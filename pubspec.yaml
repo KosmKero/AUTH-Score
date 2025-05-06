@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.0.2+5
+version: 1.0.2+6
 
 environment:
   sdk: ^3.6.1
@@ -44,14 +44,13 @@ dependencies:
   dropdown_search: ^5.0.6
 
   provider: ^6.1.2
-  firebase: ^9.0.3
-  messaging: ^0.3.1
   flutter_launcher_icons: ^0.14.3
 
 flutter_launcher_icons:
   android: true
   ios: true
   image_path: "AUTHScorelogo/AUTH_Score_logo11.png"
+  remove_alpha_ios: true
 
 
 dev_dependencies:
@@ -117,31 +116,28 @@ flutter:
     - fotos/default_image.jpg
     - fotos/user.jpg
     - fotos/ghhpedo.png
-    - fotos/γηπεδο.png
     - fotos/default_team_logo.png
 
-    - logos/ΤΟΠΟΓΡΑΦΙΑ.png
-    - logos/ΠΟΛΙΤΙΚΩΝ ΜΗΧΑΝ..png
-    - logos/ΠΟΛΙΤΙΚΩΝ ΕΠΙΣΤΗΜ..png
-    - logos/ΣΣΑΣ.png
-    - logos/ΧΗΜΙΚΟ.png
-    - logos/ΚΤΗΝΙΑΤΡΙΚΗ.png
-    - logos/ΠΛΗΡΟΦΟΡΙΚΗ.png
-    - logos/ΤΕΦΑΑ.png
-    - logos/ΝΟΜΙΚΗ.png
-    - logos/ΦΑΡΜΑΚΕΥΤΙΚΗ.png
-    - logos/ΧΗΜ. ΜΗΧΑΝΙΚΩΝ.png
-    - logos/ΗΜΜΥ 1.png
-    - logos/ΙΑΤΡΙΚΗ.png
+    - logos/TOPOGRAFOI.png
+    - logos/POLITIKONMHXANIKON.png
+    - logos/POLITIKONEPISTHMON.png
+    - logos/SSAS.png
+    - logos/XHMIKO.png
+    - logos/KTHNIATRIKH.png
+    - logos/PLHROFORIKH.png
+    - logos/TEFAA.png
+    - logos/NOMIKI.png
+    - logos/FARMAKEYTIKH.png
+    - logos/XHMIKONMHXANIKON.png
+    - logos/HMMY1.png
+    - logos/IATRIKH.png
 
-
-
-    - logos/ΜΑΘΗΜΑΤΙΚΟ.png
-    - logos/ΟΙΚΟΝΟΜΙΚΟ.png
-    - logos/ΨΥΧΟΛΟΓΙΑ.png
-    - logos/ΟΔΟΝΤΙΑΤΡΙΚΗ.png
-    - logos/ΗΜΜΥ 2.png
-    - logos/ΓΕΩΠΟΝΙΑ.png
+    - logos/MATHIMATIKO.png
+    - logos/OIKONOMIKO.png
+    - logos/PSYXOLOGIA.png
+    - logos/ODONTIATRIKH.png
+    - logos/HMMY2.png
+    - logos/GEOPONIA.png
 
 
 

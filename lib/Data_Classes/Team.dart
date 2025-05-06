@@ -231,8 +231,8 @@ class Team {
   Future<void> loadTeamImage() async {
     try {
       // Προσπάθεια να φορτωθεί το αρχείο
-      await rootBundle.load('logos/$name.png');
-      _image= Image.asset('logos/$name.png');
+      await rootBundle.load('logos/$nameEnglish.png');
+      _image= Image.asset('logos/$nameEnglish.png');
     } catch (e) {
       // Αν δεν υπάρχει, χρησιμοποίησε fallback
       _image= Image.asset('fotos/default_team_logo.png');

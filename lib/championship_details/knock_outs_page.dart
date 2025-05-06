@@ -248,8 +248,8 @@ class _knockOutMatchUpState extends State<knockOutMatchUpView> {
                         )
                     ),
                     //if (match.hasMatchStarted)
-                    (match!=null && match!.hasMatchStarted)? Text(match!.scoreHome.toString(),
-                        style: TextStyle(fontSize:  17,color: (match!.hasMatchFinished)? Colors.black : Colors.red )) : SizedBox.shrink()
+                    (match!=null && match.hasMatchStarted)? Text((match.homeScore+match.penaltyScoreHome).toString(),
+                        style: TextStyle(fontSize:  17,color: (match.hasMatchFinished)? darkModeNotifier.value? Colors.white : Colors.black : Colors.red )) : SizedBox.shrink()
                   ],
                 ),
                 SizedBox(
@@ -259,17 +259,17 @@ class _knockOutMatchUpState extends State<knockOutMatchUpView> {
                   SizedBox(
                       height: 25 ,
                       width:  45 ,
-                      child: (match!=null) ? match!.awayTeam.image: Image.asset('fotos/default_team_logo.png')),
+                      child: (match!=null) ? match.awayTeam.image: Image.asset('fotos/default_team_logo.png')),
                   Text(
-                    (match!=null) ? match!.awayTeam.initials : "N/A",
+                    (match!=null) ? match.awayTeam.initials : "N/A",
                     style: TextStyle(fontSize: 13, color: darkModeNotifier.value? Colors.white:Colors.black),
                   ),
                   //if (match.hasMatchStarted) Text(match.scoreAway.toString())
-                (match!=null && match!.hasMatchStarted)? Text(match!.scoreAway.toString(), style: TextStyle(fontSize:  17, color: (match!.hasMatchFinished)? Colors.black : Colors.red )) : SizedBox.shrink()
+                (match!=null && match.hasMatchStarted)? Text((match.awayScore+match.penaltyScoreAway).toString(), style: TextStyle(fontSize:  17, color: (match.hasMatchFinished)? darkModeNotifier.value? Colors.white : Colors.black : Colors.red )) : SizedBox.shrink()
                 ])
               ],
             ),
-              (match==null) ? SizedBox(height:30,child: Center(child: Text("-"),)) : ( !match!.hasMatchStarted) ? SizedBox(height:27,child: Center(child: Text(match!.dateString,style:TextStyle( color: darkModeNotifier.value? Colors.white:Colors.black) ))) : SizedBox.shrink()
+              (match==null) ? SizedBox(height:27,child: Center(child: Text("-"),)) : ( !match.hasMatchStarted) ? SizedBox(height:27,child: Center(child: Text(match.dateString,style:TextStyle( color: darkModeNotifier.value? Colors.white:Colors.black) ))) : SizedBox.shrink()
           ],
         ),
       ),

@@ -359,7 +359,7 @@ class _MatchContainerTimeState extends State<MatchContainerTime>
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 55,
+      width: 48.5,
       child: Column(
         children: [
           Text(

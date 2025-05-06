@@ -1,6 +1,8 @@
+import 'dart:math';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'dart:math';
+
 
 class BettingResultUpdate {
 
@@ -45,7 +47,7 @@ class BettingResultUpdate {
         total++;
 
         final accuracy = total > 0 ? (correct / total) * 100 : 0;
-        final score = total > 0 ? accuracy * log(total) / log(10) : 0;
+        final score = total > 0 ? accuracy * (1 - exp(-0.06 * log(total + 1)))*100 : 0;
 
         // Αποθήκευση των ενημερωμένων δεδομένων του χρήστη
         await userDocRef.set({
@@ -104,6 +106,7 @@ class BettingResultUpdate {
       'users': topUsers,
     });
   }
+
 
 
 }

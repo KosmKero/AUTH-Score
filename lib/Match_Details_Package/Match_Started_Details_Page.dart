@@ -18,6 +18,7 @@ import 'Match_Not_Started/Match_Not_Started_Details_Page.dart';
 import 'Starting__11_Display_Card.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import '../../ad_manager.dart';
+import 'match_fact_edit.dart';
 
 class matchStartedPage extends StatelessWidget {
   final MatchDetails match;
@@ -327,28 +328,40 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
             padding: const EdgeInsets.all(2.0),
             child: (widget.match.matchFact[half - 1]![reversedIndex] is Goal)
                 ? buildGoalIndicator(
-                    widget.match.matchFact[half - 1]![reversedIndex] as Goal)
+                    widget.match.matchFact[half - 1]![reversedIndex] as Goal,widget.match)
                 : buildCardIndicator(
-                    widget.match.matchFact[half - 1]![reversedIndex] as CardP),
+                    widget.match.matchFact[half - 1]![reversedIndex] as CardP,widget.match),
           );
         },
       ),
     ]);
   }
 
-  Widget buildGoalIndicator(Goal goal) {
+  Widget buildGoalIndicator(Goal goal,MatchDetails match) {
     String goalScorer;
     goal.scorerName == "Άλλος" ?  goalScorer='Γκολ' : goalScorer = goal.scorerName;
 
     return InkWell(
-        onLongPress: ((widget.match.hasMatchStarted && !widget.match.hasMatchFinished || (!widget.match.hasExtraTimeFinished && widget.match.isExtraTimeTime)) && globalUser.controlTheseTeams(
-                    widget.match.homeTeam.name, widget.match.awayTeam.name) )
-            ? () {
-                setState(() {
-                  _cancelGoalDialog(context, goal);
-                });
-              }
-            : null,
+        onLongPress:() {
+          ((widget.match.hasMatchStarted && !widget.match.hasMatchFinished ||
+              (!widget.match.hasExtraTimeFinished &&
+                  widget.match.isExtraTimeTime)) &&
+              globalUser.controlTheseTeams(
+                  widget.match.homeTeam.name, widget.match.awayTeam.name))
+              ?
+          showModalBottomSheet(
+            context: context,
+            isScrollControlled: true,
+            builder: (_) =>
+                EditMatchFactModal(
+                  fact: goal, // ή card
+                  //onSave: (updatedFact) {
+                  //  // πχ. setState ή ενημέρωση σε provider / db
+                  //},
+                  match:match,
+                ),
+          ) : null;
+        },
         child: Row(
           mainAxisAlignment:
               goal.isHomeTeam ? MainAxisAlignment.start : MainAxisAlignment.end,
@@ -389,7 +402,7 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
         ));
   }
 
-  Widget buildCardIndicator(CardP card) {
+  Widget buildCardIndicator(CardP card,MatchDetails match) {
     Color color;
     card.isYellow ? color = Colors.yellow : color = Colors.red;
 
