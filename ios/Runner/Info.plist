@@ -13,7 +13,7 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>untitled1</string>
+	<string>AUTH Score</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>GADApplicationIdentifier</key>
@@ -54,5 +54,20 @@
     </array>
     <key>FirebaseAppDelegateProxyEnabled</key>
     <true/>
+    <key>NSAppTransportSecurity</key>
+    <dict>
+        <key>NSAllowsArbitraryLoads</key>
+        <true/>
+    </dict>
+    <key>NSCameraUsageDescription</key>
+    <string>This app needs camera access to scan QR codes</string>
+    <key>NSPhotoLibraryUsageDescription</key>
+    <string>This app needs photos access to get profile pictures</string>
+    <key>NSMicrophoneUsageDescription</key>
+    <string>This app needs microphone access for voice features</string>
+    <key>NSLocationWhenInUseUsageDescription</key>
+    <string>This app needs access to location when open to show nearby places</string>
+    <key>NSLocationAlwaysUsageDescription</key>
+    <string>This app needs access to location when in the background to show nearby places</string>
 </dict>
 </plist>
