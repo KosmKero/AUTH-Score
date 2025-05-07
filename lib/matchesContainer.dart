@@ -354,7 +354,7 @@ class _MatchContainerTimeState extends State<MatchContainerTime>
   }
 
   Color get _timeColor =>
-      (!widget.match.hasMatchFinished || (widget.match.isExtraTimeTime && !widget.match.hasExtraTimeFinished)) ? Colors.red : Colors.black;
+     ( (!widget.match.hasMatchFinished || (widget.match.isExtraTimeTime && !widget.match.hasExtraTimeFinished))) ? Colors.red : Colors.black;
 
   @override
   Widget build(BuildContext context) {

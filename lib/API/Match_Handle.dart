@@ -29,15 +29,16 @@ class MatchHandle {
 
   }
   Future<void> matchNotFinished(MatchDetails match) async {
-    matchesList[1].remove(match);
-    matchesList[0].add(match);
+    if (matchesList[1].contains(match)) {
+      matchesList[1].remove(match);
+      matchesList[0].add(match);
 
-    await FirebaseFirestore.instance
-        .collection('matches')
-        .doc(match.matchDocId)
-        .set({'hasMatchFinished': true, 'Type': "upcoming"},
-        SetOptions(merge: true)); // ώστε να μη διαγράψει άλλα πεδία
-
+      await FirebaseFirestore.instance
+          .collection('matches')
+          .doc(match.matchDocId)
+          .set({'hasMatchFinished': true, 'Type': "upcoming"},
+              SetOptions(merge: true)); // ώστε να μη διαγράψει άλλα πεδία
+    }
   }
 
   // Μέθοδοι για πρόσβαση στα δεδομένα

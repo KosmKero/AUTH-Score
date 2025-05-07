@@ -16,14 +16,21 @@ import 'match_facts.dart';
 class MatchDetails extends ChangeNotifier {
   //με το _ γινεται private
 
-late  PenaltyShootout penaltyShootout;
+  late PenaltyShootout penaltyShootout;
 
   ValueNotifier<bool> _notify = ValueNotifier<bool>(false);
   bool _hasMatchStarted = false;
   bool _hasMatchFinished = false,
       _hasSecondHalfStarted = false,
       _hasFirstHalfFinished = false;
-  late int _scoreHome, _scoreAway, _day, _month, _year, _time, _scoreHomeExtraTime,_scoreAwayExtraTime;
+  late int _scoreHome,
+      _scoreAway,
+      _day,
+      _month,
+      _year,
+      _time,
+      _scoreHomeExtraTime,
+      _scoreAwayExtraTime;
   late Team _homeTeam, _awayTeam;
   late int _startTimeInSeconds;
   late bool
@@ -31,8 +38,12 @@ late  PenaltyShootout penaltyShootout;
   late int
       _game; //αν ειμαστε σε ομιλους δειχνει την αγωνιστικη, αλλιως δειχνει τη φαση των νοκα ουτς (16 , 8 ,4 η τελικός)
 
-  late bool _hasFirstHalfExtraTimeFinished,_hasExtraTimeFinished,_hasExtraTimeStarted,_hasSecondHalfExtraTimeStarted;
+  late bool _hasFirstHalfExtraTimeFinished,
+      _hasExtraTimeFinished,
+      _hasExtraTimeStarted,
+      _hasSecondHalfExtraTimeStarted;
 
+  late bool penaltyOver;
   late DocumentSnapshot _data;
 
   String selectedFormationHome = "4-3-3"; // Προεπιλεγμένο σύστημα
@@ -40,7 +51,7 @@ late  PenaltyShootout penaltyShootout;
   //final Map<int,List<Goal>> _goalsList={0:[],1:[]};
   //final Map<int, List<CardP>> _cardList = {0:[],1:[]};
 
-  late Map<int, List<MatchFact>> _matchFacts = {0: [], 1: [],2:[],3:[]};
+  late Map<int, List<MatchFact>> _matchFacts = {0: [], 1: [], 2: [], 3: []};
   StreamSubscription<DocumentSnapshot>? _matchSubscription;
 
   //Μαπ που θα δειχνει ποιοι παιχτες επιλέχθηκαν απο τον αντμιν για την αρχικη ενδεκαδα,
@@ -48,9 +59,8 @@ late  PenaltyShootout penaltyShootout;
   Map<Player, bool> playersSelectedHome = {};
   Map<Player, bool> playersSelectedAway = {};
 
-  Map<Player?,int> players11Home = {};
-  Map<Player?,int> players11Away = {};
-
+  Map<Player?, int> players11Home = {};
+  Map<Player?, int> players11Away = {};
 
   MatchDetails(
       {required Team homeTeam,
@@ -74,35 +84,35 @@ late  PenaltyShootout penaltyShootout;
       required hasSecondHalfExtraTimeStarted,
       required scoreAwayExtraTime,
       required scoreHomeExtraTime,
-        required penalties
-     // required this.selectedFormationHome,
-     // required this.selectedFormationAway,
-     // required Map<String,int> playersI11Home,
-     // required Map<String,int> playersI11Away,
-     // required Map<String,bool> selectedHome,
-     // required Map<String,bool> selectedAway
-       })
-  {
+      required penalties
+      // required this.selectedFormationHome,
+      // required this.selectedFormationAway,
+      // required Map<String,int> playersI11Home,
+      // required Map<String,int> playersI11Away,
+      // required Map<String,bool> selectedHome,
+      // required Map<String,bool> selectedAway
+      }) {
     _homeTeam = homeTeam;
     _awayTeam = awayTeam;
     _hasMatchStarted = hasMatchStarted;
     _hasMatchFinished = hasMatchFinished;
     _hasSecondHalfStarted = hasSecondHalfStarted;
     _hasFirstHalfFinished = hasFirstHalfFinished;
-    penaltyShootout=PenaltyShootout([]);
+    penaltyShootout = PenaltyShootout([]);
 
     _hasFirstHalfExtraTimeFinished = hasFirstHalfExtraTimeFinished;
     _hasExtraTimeFinished = hasExtraTimeFinished;
     _hasExtraTimeStarted = hasExtraTimeStarted;
     _hasSecondHalfExtraTimeStarted = hasSecondHalfExtraTimeStarted;
 
-    _scoreAwayExtraTime=scoreAwayExtraTime;
-    _scoreHomeExtraTime=scoreHomeExtraTime;
+    _scoreAwayExtraTime = scoreAwayExtraTime;
+    _scoreHomeExtraTime = scoreHomeExtraTime;
+
 
     if (hasMatchFinished) {
       _hasSecondHalfStarted = true;
       _hasFirstHalfFinished = true;
-      _hasMatchStarted=true;
+      _hasMatchStarted = true;
     }
 
     _time = time;
@@ -163,54 +173,59 @@ late  PenaltyShootout penaltyShootout;
 
      */
 
-
     loadMatchFactsFromBase();
 
-    _notify =  ValueNotifier<bool>((globalUser.matchKeys[matchKey] ??
+
+    if (_hasExtraTimeFinished) {
+      loadPenaltys();
+    }
+    penaltyOver=isShootoutOver;
+
+    _notify = ValueNotifier<bool>((globalUser.matchKeys[matchKey] ??
         (globalUser.favoriteList.contains(homeTeam.name) ||
             globalUser.favoriteList.contains(awayTeam.name))));
-
 
     _startListeningForUpdates();
   }
 
   factory MatchDetails.fromFirestore(DocumentSnapshot data) {
-
-
     List<List<Player?>> players11 = [[], []];
 
     return MatchDetails(
-      homeTeam: data["Hometeam"] ?? "",
-      awayTeam: data["Awayteam"] ?? "",
-      hasMatchStarted: data['HasMatchStarted'] ?? false,
-      time: data["Time"] ?? 0,
-      day: data["Day"] ?? 0,
-      month: data["Month"] ?? 0,
-      year: data["Year"] ?? 0,
-      isGroupPhase: data["IsGroupPhase"] ?? false,
-      game: data["Game"] ?? 0,
-      scoreHome: data["GoalHome"] ?? -1,
-      scoreAway: data["GoalAway"] ?? -1,
-      hasMatchFinished: data["hasMatchFinished"],
-      hasSecondHalfStarted: data["hasSecondHalfStarted"],
-      hasFirstHalfFinished: data["hasFirstHalfFinished"],
-      timeStarted: data["TimeStarted"] ?? DateTime.now().millisecondsSinceEpoch,
-      hasFirstHalfExtraTimeFinished: data['hasFirstHalfExtraTimeFinished'] ?? false,
-      hasExtraTimeFinished: data['hasExtraTimeFinished'] ?? false,
-      hasExtraTimeStarted: data['hasExtraTimeStarted'] ?? false,
-      hasSecondHalfExtraTimeStarted: data['hasSecondHalfExtraTimeStarted'] ?? false,
-      scoreAwayExtraTime: data['scoreAwayExtraTime'] ?? 0,
-      scoreHomeExtraTime: data['scoreHomeExtraTime'] ?? 0,
-      penalties: data['penalties'] ?? []
+        homeTeam: data["Hometeam"] ?? "",
+        awayTeam: data["Awayteam"] ?? "",
+        hasMatchStarted: data['HasMatchStarted'] ?? false,
+        time: data["Time"] ?? 0,
+        day: data["Day"] ?? 0,
+        month: data["Month"] ?? 0,
+        year: data["Year"] ?? 0,
+        isGroupPhase: data["IsGroupPhase"] ?? false,
+        game: data["Game"] ?? 0,
+        scoreHome: data["GoalHome"] ?? -1,
+        scoreAway: data["GoalAway"] ?? -1,
+        hasMatchFinished: data["hasMatchFinished"],
+        hasSecondHalfStarted: data["hasSecondHalfStarted"],
+        hasFirstHalfFinished: data["hasFirstHalfFinished"],
+        timeStarted:
+            data["TimeStarted"] ?? DateTime.now().millisecondsSinceEpoch,
+        hasFirstHalfExtraTimeFinished:
+            data['hasFirstHalfExtraTimeFinished'] ?? false,
+        hasExtraTimeFinished: data['hasExtraTimeFinished'] ?? false,
+        hasExtraTimeStarted: data['hasExtraTimeStarted'] ?? false,
+        hasSecondHalfExtraTimeStarted:
+            data['hasSecondHalfExtraTimeStarted'] ?? false,
+        scoreAwayExtraTime: data['scoreAwayExtraTime'] ?? 0,
+        scoreHomeExtraTime: data['scoreHomeExtraTime'] ?? 0,
+        penalties: data['penalties'] ?? []
 
-      //selectedFormationHome: data["selectedFormationHome"] ?? "4-3-3",
-      //selectedFormationAway: data["selectedFormationAway"] ?? "4-3-3",
-      //playersI11Home: Map<String, int>.from(data["playersI11Home"] ?? {}), //φορτωνουμε μαπ με αρχικη ενδεκαδα (ονομα παιχτη, θεση)
-      //playersI11Away: Map<String, int>.from(data["playersI11Away"] ?? {}), //φορτωνουμε μαπ με αρχικη ενδεκαδα (ονομα παιχτη, θεση)
-      //selectedHome: Map<String, bool>.from(data["selectedHome"] ?? {}), //φορτωνουμε μαπ με επιλεγμενους παιχτες (ονομα παιχτη, αν ειναι επιλεγμενους)
-      //selectedAway: Map<String, bool>.from(data["selectedAway"] ?? {}), //φορτωνουμε μαπ με επιλεγμενους παιχτες (ονομα παιχτη, αν ειναι επιλεγμενους)
+        //selectedFormationHome: data["selectedFormationHome"] ?? "4-3-3",
+        //selectedFormationAway: data["selectedFormationAway"] ?? "4-3-3",
+        //playersI11Home: Map<String, int>.from(data["playersI11Home"] ?? {}), //φορτωνουμε μαπ με αρχικη ενδεκαδα (ονομα παιχτη, θεση)
+        //playersI11Away: Map<String, int>.from(data["playersI11Away"] ?? {}), //φορτωνουμε μαπ με αρχικη ενδεκαδα (ονομα παιχτη, θεση)
+        //selectedHome: Map<String, bool>.from(data["selectedHome"] ?? {}), //φορτωνουμε μαπ με επιλεγμενους παιχτες (ονομα παιχτη, αν ειναι επιλεγμενους)
+        //selectedAway: Map<String, bool>.from(data["selectedAway"] ?? {}), //φορτωνουμε μαπ με επιλεγμενους παιχτες (ονομα παιχτη, αν ειναι επιλεγμενους)
 
-    );
+        );
   }
 
   Team get homeTeam => _homeTeam;
@@ -226,99 +241,94 @@ late  PenaltyShootout penaltyShootout;
   int get month => _month;
   int get year => _year;
   int get startTimeInSeconds => _startTimeInSeconds;
-  bool get isGroupPhase=> _isGroupPhase;
+  bool get isGroupPhase => _isGroupPhase;
   int get game => _game;
   ValueNotifier<bool> get notify => _notify;
 
-  String get matchKey => '${homeTeam.nameEnglish}$day$month$year$game${awayTeam.nameEnglish}';
+  String get matchKey =>
+      '${homeTeam.nameEnglish}$day$month$year$game${awayTeam.nameEnglish}';
 
-  bool get hasFirstHalfExtraTimeFinished=>_hasFirstHalfExtraTimeFinished;
-  bool get hasExtraTimeFinished=>_hasExtraTimeFinished;
-  bool get hasExtraTimeStarted=>_hasExtraTimeStarted;
-  bool get hasSecondHalfExtraTimeStarted=>_hasSecondHalfExtraTimeStarted;
+  bool get hasFirstHalfExtraTimeFinished => _hasFirstHalfExtraTimeFinished;
+  bool get hasExtraTimeFinished => _hasExtraTimeFinished;
+  bool get hasExtraTimeStarted => _hasExtraTimeStarted;
+  bool get hasSecondHalfExtraTimeStarted => _hasSecondHalfExtraTimeStarted;
 
-  int get homeScore => _scoreHome+ _scoreHomeExtraTime ;
+  int get homeScore => _scoreHome + _scoreHomeExtraTime;
   int get awayScore => _scoreAway + _scoreAwayExtraTime;
 
+  int get penaltyScoreHome => penaltyShootout.homeScore;
+  int get penaltyScoreAway => penaltyShootout.awayScore;
 
-int get penaltyScoreHome =>penaltyShootout.homeScore;
-int get penaltyScoreAway =>penaltyShootout.awayScore;
+  bool get isPenaltyTime => _hasExtraTimeFinished && (homeScore == awayScore);
 
-  bool get isPenaltyTime => _hasExtraTimeFinished && (homeScore==awayScore);
+  bool get isShootoutOver {
+    final homePenalties =
+        penaltyShootout.penalties.where((p) => p.isHomeTeam).toList();
+    final awayPenalties =
+        penaltyShootout.penalties.where((p) => !p.isHomeTeam).toList();
 
-bool get isShootoutOver {
-  final homePenalties = penaltyShootout.penalties.where((p) => p.isHomeTeam).toList();
-  final awayPenalties = penaltyShootout.penalties.where((p) => !p.isHomeTeam).toList();
+    final int homeScore = homePenalties.where((p) => p.isScored).length;
+    final int awayScore = awayPenalties.where((p) => p.isScored).length;
 
-  final int homeScore = homePenalties.where((p) => p.isScored).length;
-  final int awayScore = awayPenalties.where((p) => p.isScored).length;
+    final int homeShots = homePenalties.length;
+    final int awayShots = awayPenalties.length;
 
-  final int homeShots = homePenalties.length;
-  final int awayShots = awayPenalties.length;
+    // 1. Πριν τα 5 πέναλτι, έλεγχος αν υπάρχει μη αναστρέψιμη διαφορά
+    if (homeShots < 5 || awayShots < 5) {
+      final remainingHome = 5 - homeShots;
+      final remainingAway = 5 - awayShots;
 
-  // 1. Πριν τα 5 πέναλτι, έλεγχος αν υπάρχει μη αναστρέψιμη διαφορά
-  if (homeShots < 5 || awayShots < 5) {
-    final remainingHome = 5 - homeShots;
-    final remainingAway = 5 - awayShots;
+      if (homeScore > awayScore + remainingAway) return true;
+      if (awayScore > homeScore + remainingHome) return true;
 
-    if (homeScore > awayScore + remainingAway) return true;
-    if (awayScore > homeScore + remainingHome) return true;
+      return false;
+    }
+
+    // 2. Αν συμπληρώθηκαν τα 5: αν έχουμε νικητή
+    if (homeShots == 5 && awayShots == 5 && homeScore != awayScore) {
+      return true;
+    }
+
+    // 3. Ξαφνικός θάνατος (sudden death)
+    if (homeShots > 5 && awayShots > 5) {
+      // πάντα ίσος αριθμός εκτελέσεων για να συνεχιστεί
+      if (homeShots == awayShots && homeScore != awayScore) {
+        return true;
+      }
+    }
 
     return false;
   }
 
-  // 2. Αν συμπληρώθηκαν τα 5: αν έχουμε νικητή
-  if (homeShots == 5 && awayShots == 5 && homeScore != awayScore) {
-    return true;
+  Future<void> loadPenaltys() async {
+    penaltyShootout = await PenaltyShootout.loadFromFirestore(matchKey);
   }
 
-  // 3. Ξαφνικός θάνατος (sudden death)
-  if (homeShots > 5 && awayShots > 5) {
-    // πάντα ίσος αριθμός εκτελέσεων για να συνεχιστεί
-    if (homeShots == awayShots && homeScore != awayScore) {
-      return true;
-    }
+  bool isHalfTime() {
+    return (hasFirstHalfFinished && !hasSecondHalfStarted);
   }
 
-  return false;
-}
-
-
-
-bool isHalfTime() {
-   return (hasFirstHalfFinished && !hasSecondHalfStarted);
-  }
-  bool isExtraTimeHalf(){
+  bool isExtraTimeHalf() {
     return (hasFirstHalfExtraTimeFinished && !hasSecondHalfExtraTimeStarted);
   }
 
   //Συναρτησεις για αποθηκευση δεδομενων στη βαση
   //progress αν ειναι τρου προχωραει το ματς αλλιως κανει κανσελ
 
-  Future<void> progressS(String ofWhat,bool progress) async {
-    await FirebaseFirestore.instance
-        .collection('matches')
-        .doc(matchDocId)
-        .set({
-       ofWhat: progress,
+  Future<void> progressS(String ofWhat, bool progress) async {
+    await FirebaseFirestore.instance.collection('matches').doc(matchDocId).set({
+      ofWhat: progress,
     }, SetOptions(merge: true)); // ώστε να μη διαγράψει άλλα πεδία
   }
 
   Future<void> updateTime(int time1) async {
-    await FirebaseFirestore.instance
-        .collection('matches')
-        .doc(matchDocId)
-        .set({
-      'TimeStarted': time1
-    }, SetOptions(merge: true)); // ώστε να μη διαγράψει άλλα πεδία
+    await FirebaseFirestore.instance.collection('matches').doc(matchDocId).set(
+        {'TimeStarted': time1},
+        SetOptions(merge: true)); // ώστε να μη διαγράψει άλλα πεδία
   }
 
-
   Future<void> matchStartedBase(bool progress) async {
-    await FirebaseFirestore.instance
-        .collection('matches')
-        .doc(matchDocId)
-        .set({
+    await FirebaseFirestore.instance.collection('matches').doc(matchDocId).set({
       'HasMatchStarted': progress,
       'TimeStarted': DateTime.now().millisecondsSinceEpoch ~/ 1000,
       'GoalAway': 0,
@@ -327,67 +337,54 @@ bool isHalfTime() {
   }
 
   Future<void> firstHalfFinishedBase(bool progress) async {
-    await FirebaseFirestore.instance
-        .collection('matches')
-        .doc(matchDocId)
-        .set({
+    await FirebaseFirestore.instance.collection('matches').doc(matchDocId).set({
       'hasFirstHalfFinished': progress,
     }, SetOptions(merge: true)); // ώστε να μη διαγράψει άλλα πεδία
   }
 
   Future<void> secondHalfStartedBase(bool progress) async {
-    await FirebaseFirestore.instance
-        .collection('matches')
-        .doc(matchDocId)
-        .set({
+    await FirebaseFirestore.instance.collection('matches').doc(matchDocId).set({
       'hasSecondHalfStarted': progress,
       'TimeStarted': DateTime.now().millisecondsSinceEpoch ~/ 1000 - 45 * 60
     }, SetOptions(merge: true)); // ώστε να μη διαγράψει άλλα πεδία
   }
 
   Future<void> matchFinishedBase(bool progress) async {
+    String type = progress ? "previous" : "upcoming";
 
-
-      String type = progress ? "previous" : "upcoming";
-
-      await FirebaseFirestore.instance
-          .collection('matches')
-          .doc(matchDocId)
-          .set({'hasMatchFinished': progress},
-              SetOptions(merge: true)); // ώστε να μη διαγράψει άλλα πεδία
-    String matchKey = '${homeTeam.nameEnglish}${awayTeam.nameEnglish}${dateString}';
+    await FirebaseFirestore.instance.collection('matches').doc(matchDocId).set(
+        {'hasMatchFinished': progress},
+        SetOptions(merge: true)); // ώστε να μη διαγράψει άλλα πεδία
+    String matchKey =
+        '${homeTeam.nameEnglish}${awayTeam.nameEnglish}${dateString}';
 
     String correctChoice;
-    (scoreHome>scoreAway) ? correctChoice="1": (scoreHome==scoreAway)? correctChoice="X": correctChoice="2";
+    (scoreHome > scoreAway)
+        ? correctChoice = "1"
+        : (scoreHome == scoreAway)
+            ? correctChoice = "X"
+            : correctChoice = "2";
 
-    await FirebaseFirestore.instance
-        .collection('votes')
-        .doc(matchKey)
-        .set({'hasMatchFinished': progress,
-              'correctChoice': correctChoice,
-              'statsUpdated': false},
-        SetOptions(merge: true)); // ώστε να μη διαγράψει άλλα πεδία
+    await FirebaseFirestore.instance.collection('votes').doc(matchKey).set({
+      'hasMatchFinished': progress,
+      'correctChoice': correctChoice,
+      'statsUpdated': false
+    }, SetOptions(merge: true)); // ώστε να μη διαγράψει άλλα πεδία
   }
 
   Future<void> homeScoredBase() async {
     String goal;
-    isExtraTimeTime? goal=   'GoalHomeExtraTime' : goal='GoalHome';
-    await FirebaseFirestore.instance
-        .collection('matches')
-        .doc(matchDocId)
-        .set({
+    isExtraTimeTime ? goal = 'GoalHomeExtraTime' : goal = 'GoalHome';
+    await FirebaseFirestore.instance.collection('matches').doc(matchDocId).set({
       goal: FieldValue.increment(1),
     }, SetOptions(merge: true)); // ώστε να μη διαγράψει άλλα πεδία
   }
 
   Future<void> awayScoredBase() async {
     String goal;
-    isExtraTimeTime? goal=   'GoalAwayExtraTime' : goal='GoalAway';
-    await FirebaseFirestore.instance
-        .collection('matches')
-        .doc(matchDocId)
-        .set({
-       goal: FieldValue.increment(1),
+    isExtraTimeTime ? goal = 'GoalAwayExtraTime' : goal = 'GoalAway';
+    await FirebaseFirestore.instance.collection('matches').doc(matchDocId).set({
+      goal: FieldValue.increment(1),
     }, SetOptions(merge: true)); // ώστε να μη διαγράψει άλλα πεδία
   }
 
@@ -439,14 +436,20 @@ bool isHalfTime() {
 
   //ετοιμο
   Future<void> homeScored(String name, bool hasName) async {
-    if (hasMatchStarted && globalUser.controlTheseTeams(homeTeam.name, awayTeam.name)) {
+    if (hasMatchStarted &&
+        globalUser.controlTheseTeams(homeTeam.name, awayTeam.name)) {
       int half;
-      (!isExtraTimeTime)? (!_hasSecondHalfStarted) ? half = 0 : half = 1 : (!_hasFirstHalfExtraTimeFinished) ? half = 2 : half = 3;
+      (!isExtraTimeTime)
+          ? (!_hasSecondHalfStarted)
+              ? half = 0
+              : half = 1
+          : (!_hasFirstHalfExtraTimeFinished)
+              ? half = 2
+              : half = 3;
 
-
-      if (isExtraTimeTime){
+      if (isExtraTimeTime) {
         _scoreHomeExtraTime++;
-      }else {
+      } else {
         _scoreHome++;
       }
 
@@ -485,14 +488,17 @@ bool isHalfTime() {
 
   //ετοιμο
   void awayScored(String name, bool hasName) {
-    if (hasMatchStarted && globalUser.controlTheseTeams(homeTeam.name, awayTeam.name)) {
+    if (hasMatchStarted &&
+        globalUser.controlTheseTeams(homeTeam.name, awayTeam.name)) {
       int half;
-      (!isExtraTimeTime)? ((!_hasSecondHalfStarted) ? half = 0 : half = 1) : ((!_hasFirstHalfExtraTimeFinished) ? half = 2 : half = 3);
+      (!isExtraTimeTime)
+          ? ((!_hasSecondHalfStarted) ? half = 0 : half = 1)
+          : ((!_hasFirstHalfExtraTimeFinished) ? half = 2 : half = 3);
 
-      if (isExtraTimeTime){
+      if (isExtraTimeTime) {
         _scoreAwayExtraTime++;
         awayScoredBase();
-      }else {
+      } else {
         _scoreAway++;
         awayScoredBase();
       }
@@ -531,27 +537,26 @@ bool isHalfTime() {
   void matchProgressed() {
     if (isExtraTimeTime) {
       if (_hasSecondHalfExtraTimeStarted) {
-        _hasExtraTimeFinished=true;
+        _hasExtraTimeFinished = true;
         progressS('hasExtraTimeFinished', true);
         if (!isPenaltyTime) {
           MatchHandle().matchFinished(this);
         }
         notifyListeners();
-
       } else if (_hasFirstHalfExtraTimeFinished) {
-        _hasSecondHalfExtraTimeStarted=true;
+        _hasSecondHalfExtraTimeStarted = true;
         progressS('hasSecondHalfExtraTimeStarted', true);
         _startTimeInSeconds =
             DateTime.now().millisecondsSinceEpoch ~/ 1000 - 105 * 60;
         updateTime(_startTimeInSeconds);
         notifyListeners();
       } else if (_hasExtraTimeStarted) {
-        _hasFirstHalfExtraTimeFinished=true;
+        _hasFirstHalfExtraTimeFinished = true;
         progressS('hasFirstHalfExtraTimeFinished', true);
 
         notifyListeners();
       } else if (_hasMatchFinished) {
-        _hasExtraTimeStarted=true;
+        _hasExtraTimeStarted = true;
         progressS('hasExtraTimeStarted', true);
         _startTimeInSeconds =
             DateTime.now().millisecondsSinceEpoch ~/ 1000 - 90 * 60;
@@ -561,9 +566,10 @@ bool isHalfTime() {
       return;
     }
     if (_hasSecondHalfStarted) {
-
       _hasMatchFinished = true;
-      matchFinishedBase(true,);
+      matchFinishedBase(
+        true,
+      );
 
       if (!isExtraTimeTime) {
         updateStandings(true);
@@ -606,47 +612,42 @@ bool isHalfTime() {
           awayTeam.reduceWins();
         }
       }
-        TeamsHandle().sortTeams(homeTeam.group);
+      TeamsHandle().sortTeams(homeTeam.group);
     }
   }
 
-
-  bool get isExtraTimeTime{
-    return hasMatchFinished && scoreAway==scoreHome && !isGroupPhase;
+  bool get isExtraTimeTime {
+    return hasMatchFinished && scoreAway == scoreHome && !isGroupPhase;
   }
- //_hasExtraTimeFinished=false;
- //progressS('hasExtraTimeFinished', false);
-
+  //_hasExtraTimeFinished=false;
+  //progressS('hasExtraTimeFinished', false);
 
   //--oxi etoimo
   void matchCancelProgressed() {
     if (_hasExtraTimeFinished &&
         (DateTime.now().millisecondsSinceEpoch ~/ 1000) - startTimeInSeconds <
-            3* 3600){
+            3 * 3600) {
       if (!isPenaltyTime) {
         MatchHandle().matchNotFinished(this);
       }
-      _hasExtraTimeFinished=false;
+      _hasExtraTimeFinished = false;
       progressS('hasExtraTimeFinished', false);
       notifyListeners();
       return;
-    }
-    else if (isExtraTimeTime) {
+    } else if (isExtraTimeTime) {
       if (_hasSecondHalfExtraTimeStarted) {
-          _hasSecondHalfExtraTimeStarted=false;
-          progressS('hasSecondHalfExtraTimeStarted', false);
-          notifyListeners();
-
+        _hasSecondHalfExtraTimeStarted = false;
+        progressS('hasSecondHalfExtraTimeStarted', false);
+        notifyListeners();
       } else if (_hasFirstHalfExtraTimeFinished) {
-          _hasFirstHalfExtraTimeFinished=false;
-          progressS('hasFirstHalfExtraTimeFinished', false);
-          notifyListeners();
+        _hasFirstHalfExtraTimeFinished = false;
+        progressS('hasFirstHalfExtraTimeFinished', false);
+        notifyListeners();
       } else if (_hasExtraTimeStarted) {
-          _hasExtraTimeStarted=false;
-          progressS('hasExtraTimeStarted', false);
-          notifyListeners();
-      }
-      else{
+        _hasExtraTimeStarted = false;
+        progressS('hasExtraTimeStarted', false);
+        notifyListeners();
+      } else {
         _hasMatchFinished = false;
         matchFinishedBase(false);
         notifyListeners();
@@ -656,8 +657,7 @@ bool isHalfTime() {
 
     if (_hasMatchFinished &&
         (DateTime.now().millisecondsSinceEpoch ~/ 1000) - startTimeInSeconds <
-           3* 3600) {
-
+            3 * 3600) {
       if (!isExtraTimeTime) {
         MatchHandle().matchNotFinished(this);
         updateStandings(false);
@@ -680,29 +680,28 @@ bool isHalfTime() {
 
   String matchweekInfo() {
     String info;
-    if (_isGroupPhase){
-      greek?info = "Φάση ομίλων" : info = "Group Stage";
-    }
-   else{
-     if (game==2){
-       greek ? info='Τελικός' : info='Final';
-     }
-     if (game==4) {
-       info = greek ? 'Ημιτελικός' : 'SemiFinal';
-     }
-     else{
-       greek? info = "Φάση των $_game: Νοκ Άουτ":info = "Stage $_game: Round of 16";
-     }
+    if (_isGroupPhase) {
+      greek ? info = "Φάση ομίλων" : info = "Group Stage";
+    } else {
+      if (game == 2) {
+        greek ? info = 'Τελικός' : info = 'Final';
+      }
+      if (game == 4) {
+        info = greek ? 'Ημιτελικός' : 'SemiFinal';
+      } else {
+        greek
+            ? info = "Φάση των $_game: Νοκ Άουτ"
+            : info = "Stage $_game: Round of 16";
+      }
     }
     return info;
   }
 
   //ετοιμο
-  Future<void> playerGotCard(
-      String name, Team team, bool isYellow, int? minute, bool isHomeTeam) async
-  {
-    if ((!hasMatchFinished ||(isExtraTimeTime && !_hasExtraTimeFinished)) && globalUser.controlTheseTeams(homeTeam.name, awayTeam.name)) {
-
+  Future<void> playerGotCard(String name, Team team, bool isYellow, int? minute,
+      bool isHomeTeam) async {
+    if ((!hasMatchFinished || (isExtraTimeTime && !_hasExtraTimeFinished)) &&
+        globalUser.controlTheseTeams(homeTeam.name, awayTeam.name)) {
       for (Player player in team.players) {
         if ("${player.name.substring(0, 1)}. ${player.surname}" == name) {
           isYellow ? await player.gotYellowCard() : await player.gotRedCard();
@@ -710,7 +709,11 @@ bool isHalfTime() {
         }
       }
       int half;
-      (!isExtraTimeTime)? ((!_hasSecondHalfStarted) ? half = 0 : half = 1) : (hasSecondHalfExtraTimeStarted)? half=3 : half=2;
+      (!isExtraTimeTime)
+          ? ((!_hasSecondHalfStarted) ? half = 0 : half = 1)
+          : (hasSecondHalfExtraTimeStarted)
+              ? half = 3
+              : half = 2;
 
       CardP card = CardP(
           playerName: name,
@@ -734,14 +737,17 @@ bool isHalfTime() {
 
   //ετοιμο
   Future<void> cancelGoal(Goal goal1) async {
-    if ( globalUser.controlTheseTeams(homeTeam.name, awayTeam.name)) {  //μικροτερο απο 3 ωρες
+    if (globalUser.controlTheseTeams(homeTeam.name, awayTeam.name)) {
+      //μικροτερο απο 3 ωρες
       if (_matchFacts.containsKey(goal1.half)) {
         _matchFacts[goal1.half]!
             .removeWhere((goal) => goal is Goal && goal == goal1);
 
-        goal1.half<2?
-        (goal1.isHomeTeam ? _scoreHome-- : _scoreAway--):
-        (goal1.isHomeTeam ? _scoreHomeExtraTime-- : _scoreAwayExtraTime--);
+        goal1.half < 2
+            ? (goal1.isHomeTeam ? _scoreHome-- : _scoreAway--)
+            : (goal1.isHomeTeam
+                ? _scoreHomeExtraTime--
+                : _scoreAwayExtraTime--);
         for (Player player in goal1.team.players) {
           if ("${player.name[0]}. ${player.surname}" == goal1.scorerName) {
             TopPlayersHandle().goalCancelled(player);
@@ -757,9 +763,13 @@ bool isHalfTime() {
             factMap: goal1.toMap());
 
         String type;
-        goal1.half<2?
-        (goal1.isHomeTeam) ? (type = 'GoalHome') : (type = 'GoalAway'):
-        (goal1.isHomeTeam) ? (type = 'GoalHomeExtraTime') : (type = 'GoalAwayExtraTime');
+        goal1.half < 2
+            ? (goal1.isHomeTeam)
+                ? (type = 'GoalHome')
+                : (type = 'GoalAway')
+            : (goal1.isHomeTeam)
+                ? (type = 'GoalHomeExtraTime')
+                : (type = 'GoalAwayExtraTime');
         await FirebaseFirestore.instance
             .collection('matches')
             .doc(matchDocId)
@@ -772,15 +782,14 @@ bool isHalfTime() {
     }
   }
 
+  Future<void> editGoal(Goal oldGoal, Goal newGoal) async {
+    if (startTimeInSeconds >
+            DateTime.now().millisecondsSinceEpoch ~/ 1000 - 10800 &&
+        globalUser.controlTheseTeams(homeTeam.name, awayTeam.name)) {
+      if (_matchFacts.containsKey(oldGoal.half)) {
+        cancelGoal(oldGoal);
 
-Future<void> editGoal(Goal oldGoal, Goal newGoal) async {
-  if (startTimeInSeconds > DateTime.now().millisecondsSinceEpoch ~/ 1000 - 10800 && globalUser.controlTheseTeams(homeTeam.name, awayTeam.name)) {
-    if (_matchFacts.containsKey(oldGoal.half)) {
-
-    cancelGoal(oldGoal);
-
-
-    if (!newGoal.isHomeTeam) {
+        if (!newGoal.isHomeTeam) {
           if (isExtraTimeTime) {
             _scoreAwayExtraTime++;
             awayScoredBase();
@@ -788,94 +797,114 @@ Future<void> editGoal(Goal oldGoal, Goal newGoal) async {
             _scoreAway++;
             awayScoredBase();
           }
+        } else {
+          if (isExtraTimeTime) {
+            _scoreHomeExtraTime++;
+            homeScoredBase();
+          } else {
+            _scoreHome++;
+            homeScoredBase();
+          }
         }
-    else{
-      if (isExtraTimeTime) {
-        _scoreHomeExtraTime++;
-        homeScoredBase();
-      } else {
-        _scoreHome++;
-        homeScoredBase();
+
+        _matchFacts[newGoal.half]?.add(newGoal);
+
+        if (newGoal.name != 'Άλλος') {
+          for (Player player in awayTeam.players) {
+            if ("${player.name.substring(0, 1)}. ${player.surname}" ==
+                newGoal.name) {
+              TopPlayersHandle().playerScored(player);
+              break;
+            }
+          }
+        }
+
+        MatchFactsStorageHelper().addMatchFact(
+            matchDoc: FirebaseFirestore.instance
+                .collection('matches')
+                .doc(matchDocId),
+            half: newGoal.half,
+            factMap: newGoal.toMap());
+
+        notifyListeners();
       }
     }
+  }
 
-    _matchFacts[newGoal.half]?.add(newGoal);
+  Future<void> editCard(CardP oldCard, CardP newCard) async {
+    if (startTimeInSeconds >
+            DateTime.now().millisecondsSinceEpoch ~/ 1000 - 10800 &&
+        globalUser.controlTheseTeams(homeTeam.name, awayTeam.name)) {
+      if (_matchFacts.containsKey(oldCard.half)) {
+        // 1. Διαγραφή της παλιάς κάρτας
+        _matchFacts[oldCard.half]!
+            .removeWhere((card) => card is CardP && card == oldCard);
 
-    if (newGoal.name!='Άλλος') {
-      for (Player player in awayTeam.players) {
-        if ("${player.name.substring(0, 1)}. ${player.surname}" == newGoal.name) {
-          TopPlayersHandle().playerScored(player);
-          break;
-        }
+        // 2. Ενημέρωση του σκορ ή άλλων στατιστικών αν χρειάζεται
+        // Εδώ δεν αλλάζει σκορ, αλλά μπορείς να ενημερώσεις άλλες πληροφορίες, αν απαιτείται.
+
+        // 3. Διαγραφή της παλιάς κάρτας από τη βάση δεδομένων
+        await MatchFactsStorageHelper().deleteMatchFact(
+          matchDoc:
+              FirebaseFirestore.instance.collection('matches').doc(matchDocId),
+          half: oldCard.half,
+          factMap: oldCard.toMap(),
+        );
+
+        // 4. Προσθήκη της νέας κάρτας στη βάση δεδομένων
+        await MatchFactsStorageHelper().addMatchFact(
+          matchDoc:
+              FirebaseFirestore.instance.collection('matches').doc(matchDocId),
+          half: newCard.half,
+          factMap: newCard.toMap(),
+        );
+
+        // 5. Ενημέρωση του UI
+        notifyListeners();
       }
     }
+  }
 
-    MatchFactsStorageHelper().addMatchFact(
-        matchDoc:
-        FirebaseFirestore.instance.collection('matches').doc(matchDocId),
-        half: newGoal.half,
-        factMap: newGoal.toMap());
+  Future<void> addPenalty({
+    required bool isScored,
+    required bool isHomeTeam,
+  }) async {
+    final penalty = Penalty(
+      isScored: isScored,
+      isHomeTeam: isHomeTeam,
+    );
 
+    await penaltyShootout.addPenalty(penalty, matchDocId);
+
+    if (isShootoutOver) {
+      MatchHandle().matchFinished(this);
+      await FirebaseFirestore.instance.collection('matches').doc(matchDocId).set({
+        'shootoutOver': true,
+      }, SetOptions(merge: true));
+
+    }
     notifyListeners();
+  }
+
+  Future<void> cancelPenalty() async {
+
+
+    await penaltyShootout.removeLastPenalty(matchKey);
+
+    if (!isShootoutOver) {
+      MatchHandle().matchNotFinished(this);
+      await FirebaseFirestore.instance.collection('matches').doc(matchDocId).set({
+        'shootoutOver': false,
+      }, SetOptions(merge: true));
+
     }
+    notifyListeners();
   }
-}
-
-Future<void> editCard(CardP oldCard, CardP newCard) async {
-  if (startTimeInSeconds > DateTime.now().millisecondsSinceEpoch ~/ 1000 - 10800 && globalUser.controlTheseTeams(homeTeam.name, awayTeam.name)) {
-    if (_matchFacts.containsKey(oldCard.half)) {
-      // 1. Διαγραφή της παλιάς κάρτας
-      _matchFacts[oldCard.half]!
-          .removeWhere((card) => card is CardP && card == oldCard);
-
-      // 2. Ενημέρωση του σκορ ή άλλων στατιστικών αν χρειάζεται
-      // Εδώ δεν αλλάζει σκορ, αλλά μπορείς να ενημερώσεις άλλες πληροφορίες, αν απαιτείται.
-
-      // 3. Διαγραφή της παλιάς κάρτας από τη βάση δεδομένων
-      await MatchFactsStorageHelper().deleteMatchFact(
-        matchDoc: FirebaseFirestore.instance.collection('matches').doc(matchDocId),
-        half: oldCard.half,
-        factMap: oldCard.toMap(),
-      );
-
-      // 4. Προσθήκη της νέας κάρτας στη βάση δεδομένων
-      await MatchFactsStorageHelper().addMatchFact(
-        matchDoc: FirebaseFirestore.instance.collection('matches').doc(matchDocId),
-        half: newCard.half,
-        factMap: newCard.toMap(),
-      );
-
-      // 5. Ενημέρωση του UI
-      notifyListeners();
-    }
-  }
-}
-
-
-
-Future<void> addPenalty({
-  required bool isScored,
-  required bool isHomeTeam,
-}) async {
-  final penalty = Penalty(
-    isScored: isScored,
-    isHomeTeam: isHomeTeam,
-  );
-
-  await penaltyShootout.addPenalty(penalty, matchDocId);
-
-
-  if (!isShootoutOver) {
-    MatchHandle().matchFinished(this);
-  }
-  notifyListeners();
-}
-
-
 
 //ετοιμο
   void cancelCard(CardP card1) {
-    if ((!hasMatchFinished || (isExtraTimeTime && !hasExtraTimeFinished)) && globalUser.controlTheseTeams(homeTeam.name, awayTeam.name)) {
+    if ((!hasMatchFinished || (isExtraTimeTime && !hasExtraTimeFinished)) &&
+        globalUser.controlTheseTeams(homeTeam.name, awayTeam.name)) {
       if (_matchFacts.containsKey(card1.half)) {
         _matchFacts[card1.half]!
             .removeWhere((card) => card is CardP && card == card1);
@@ -908,7 +937,6 @@ Future<void> addPenalty({
   }
 
   void _startListeningForUpdates() {
-
     _matchSubscription = FirebaseFirestore.instance
         .collection('matches')
         .doc(matchDocId)
@@ -940,6 +968,26 @@ Future<void> addPenalty({
         changed = true;
       }
 
+      if (_hasExtraTimeStarted != (data['hasExtraTimeStarted'] ?? false)) {
+        _hasExtraTimeStarted = data['hasExtraTimeStarted'] ?? false;
+        changed = true;
+      }
+
+      if (_hasFirstHalfExtraTimeFinished != (data['hasFirstHalfExtraTimeFinished'] ?? false)) {
+        _hasFirstHalfExtraTimeFinished     = data['hasFirstHalfExtraTimeFinished'] ?? false;
+        changed = true;
+      }
+
+      if (_hasSecondHalfExtraTimeStarted != (data['hasSecondHalfExtraTimeStarted'] ?? false)) {
+        _hasSecondHalfExtraTimeStarted = data['hasSecondHalfExtraTimeStarted'] ?? false;
+        changed = true;
+      }
+
+      if (_hasExtraTimeFinished != (data['hasExtraTimeFinished'] ?? false)) {
+        _hasExtraTimeFinished = data['hasExtraTimeFinished'] ?? false;
+        changed = true;
+      }
+
       if (_scoreHome != (data['GoalHome'] ?? 0)) {
         _scoreHome = data['GoalHome'] ?? 0;
         changed = true;
@@ -952,6 +1000,11 @@ Future<void> addPenalty({
 
       if (_startTimeInSeconds != (data['TimeStarted'] ?? 0)) {
         _startTimeInSeconds = data['TimeStarted'] ?? 0;
+        changed = true;
+      }
+
+      if (data.containsKey('shootoutOver') && penaltyOver != (data['shootoutOver'] ?? false)) {
+        penaltyOver = data['shootoutOver'] ?? false;
         changed = true;
       }
 
@@ -970,9 +1023,9 @@ Future<void> addPenalty({
 
   String get matchDocId {
     return homeTeam.nameEnglish +
-        day.toString() +
-        month.toString() +
-        year.toString() +
+        _day.toString() +
+        _month.toString() +
+        _year.toString() +
         _game.toString() +
         awayTeam.nameEnglish;
   }
@@ -983,13 +1036,10 @@ Future<void> addPenalty({
     super.dispose();
   }
 
-  void enableNotify(bool notify){
-    _notify.value=notify;
+  void enableNotify(bool notify) {
+    _notify.value = notify;
   }
-
 }
-
-
 
 class MatchFactsStorageHelper {
   // Μετατρέπει το Map<int, List<MatchFact>> σε Map<String, dynamic> για Firestore
@@ -1087,20 +1137,20 @@ class MatchFactsStorageHelper {
     }
   }
 
- //Future<void> addPenalty({
- //  required DocumentReference matchDoc,
- //}) async {
- //   await MatchFactsStorageHelper().addPenalty(
- //     matchDoc:
- //         FirebaseFirestore.instance.collection('matches').doc(matchDocId),
- //     penaltyMap: {
- //       'playerId': player.id,
- //       'isScored': isScored,
- //       'isHomeTeam': isHomeTeam,
- //       'timestamp': Timestamp.now(),
- //     },
- //   );
- // }
+  //Future<void> addPenalty({
+  //  required DocumentReference matchDoc,
+  //}) async {
+  //   await MatchFactsStorageHelper().addPenalty(
+  //     matchDoc:
+  //         FirebaseFirestore.instance.collection('matches').doc(matchDocId),
+  //     penaltyMap: {
+  //       'playerId': player.id,
+  //       'isScored': isScored,
+  //       'isHomeTeam': isHomeTeam,
+  //       'timestamp': Timestamp.now(),
+  //     },
+  //   );
+  // }
 
   static Future<PenaltyShootout> loadFromFirestore(String matchDocId) async {
     final snapshot = await FirebaseFirestore.instance
@@ -1120,5 +1170,4 @@ class MatchFactsStorageHelper {
 
     return PenaltyShootout(penalties);
   }
-
 }

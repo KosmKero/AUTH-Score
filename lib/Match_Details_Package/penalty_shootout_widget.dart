@@ -81,12 +81,13 @@ class PenaltyShootoutPanel extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 SizedBox(
-                  width: 100,
+                  width: 120,
                   child: Text(
                     homeTeam.name,
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14,color: darkModeNotifier.value?Colors.white:Colors.black),  // Μικρότερο μέγεθος
                   ),
                 ),
+                SizedBox(width: 8,),
                 Expanded(
                   child: Wrap(
                     spacing: 8,
@@ -107,12 +108,13 @@ class PenaltyShootoutPanel extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 SizedBox(
-                  width: 100,
+                  width: 120,
                   child: Text(
                     awayTeam.name,
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14,color: darkModeNotifier.value?Colors.white:Colors.black),  // Μικρότερο μέγεθος
                   ),
                 ),
+                SizedBox(width: 8,),
                 Expanded(
                   child: Wrap(
                     spacing: 8,

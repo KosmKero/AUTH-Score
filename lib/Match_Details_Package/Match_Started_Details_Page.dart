@@ -260,8 +260,7 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
         if (globalUser.controlTheseTeams(
             widget.match.homeTeam.name,widget.match.awayTeam.name) && widget.match.isPenaltyTime && (DateTime.now().millisecondsSinceEpoch ~/ 1000<widget.match.startTimeInSeconds + 3*3600))
           ElevatedButton(onPressed:() async {
-           await widget.match.penaltyShootout.removeLastPenalty(
-                widget.match.matchDocId);
+           await widget.match.cancelPenalty();
            setState(() {
 
            });

@@ -150,7 +150,8 @@ class TeamsHandle {
           'hasExtraTimeStarted':false,
           'GoalHomeExtraTime':0,
           'GoalAwayExtraTime':0,
-          'penalties' : []
+          'penalties' : [],
+          'shootoutOver':false
 
         });
     }
