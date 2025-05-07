@@ -69,5 +69,8 @@
     <string>This app needs access to location when open to show nearby places</string>
     <key>NSLocationAlwaysUsageDescription</key>
     <string>This app needs access to location when in the background to show nearby places</string>
+    <key>NSUserTrackingUsageDescription</key>
+    <string>Η εφαρμογή χρησιμοποιεί αυτό το αναγνωριστικό για να προβάλλει σχετικές διαφημίσεις.</string>
+
 </dict>
 </plist>

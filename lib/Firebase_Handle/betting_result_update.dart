@@ -47,7 +47,13 @@ class BettingResultUpdate {
         total++;
 
         final accuracy = total > 0 ? (correct / total) * 100 : 0;
-        final score = total > 0 ? accuracy * (1 - exp(-0.06 * log(total + 1)))*100 : 0;
+        final normalizedAccuracy = accuracy / 100;
+        final cappedTotal = total.clamp(0, 50);
+        final confidence = 1 - exp(-0.1 * cappedTotal);
+        final dynamicWeight = pow(confidence, 2);
+        final score = (normalizedAccuracy * (1 - dynamicWeight) + confidence * dynamicWeight) * 100;
+
+        //final score = total > 0 ? accuracy * (1 - exp(-0.06 * log(total + 1)))*100 : 0;
 
         // Αποθήκευση των ενημερωμένων δεδομένων του χρήστη
         await userDocRef.set({
@@ -106,6 +112,46 @@ class BettingResultUpdate {
       'users': topUsers,
     });
   }
+
+  Future<void> recalculateAllScores() async {
+    final usersSnapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .get();
+
+    for (final userDoc in usersSnapshot.docs) {
+
+      int correct = 0;
+      int total = 0;
+
+      if (userDoc.exists && userDoc.data()['predictions'] != null) {
+        final predData = userDoc.data()['predictions'];
+        correct = predData['correctVotes'] ?? 0;
+        total = predData['totalVotes'] ?? 0;
+      }
+      final accuracy = total > 0 ? (correct / total) * 100 : 0.0;
+      final normalizedAccuracy = accuracy / 100;
+
+      //final normalizedAccuracy = accuracy / 100;
+      final cappedTotal = total.clamp(0, 50);
+      final confidence = 1 - exp(-0.1 * cappedTotal);
+      final score = normalizedAccuracy * confidence * 100;
+
+
+      await userDoc.reference.set({
+        'predictions': {
+          'accuracy': accuracy,
+          'score': score,
+        }
+      }, SetOptions(merge: true));
+    }
+    updateLeaderboard();
+
+
+    print('✅ Όλα τα scores επανυπολογίστηκαν.');
+  }
+
+
+
 
 
 

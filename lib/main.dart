@@ -19,6 +19,7 @@ import 'package:untitled1/championship_details/sector_chooser.dart';
 import 'API/NotificationService.dart';
 import 'Data_Classes/AppUser.dart';
 import 'Favorite_Page.dart';
+import 'Firebase_Handle/betting_result_update.dart';
 import 'HomePage.dart';
 import 'Data_Classes/Player.dart';
 import 'Profile/Profile_Page.dart';
@@ -45,6 +46,7 @@ void main() async {
 
 
   try {
+
     await Firebase.initializeApp();
     User? user = FirebaseAuth.instance.currentUser;
     if(user!=null) {
@@ -104,6 +106,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
       _loadLanguage();
 
     initia();
+    BettingResultUpdate().recalculateAllScores();
 
   }
 
