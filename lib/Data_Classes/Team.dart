@@ -86,75 +86,81 @@ class Team {
     }
   }
 
-  Future<void> increaseWins() async {
-    _wins++;
-    await FirebaseFirestore.instance
-        .collection('teams')
-        .doc(name)
-        .set({
-      'Wins': FieldValue.increment(1),
-      'Matches': FieldValue.increment(1)
-    }, SetOptions(merge: true));
-
+  Future<void> increaseWins(bool isGroupPhase) async {
+    if (isGroupPhase) {
+      _wins++;
+      await FirebaseFirestore.instance
+          .collection('teams')
+          .doc(name)
+          .set({
+        'Wins': FieldValue.increment(1),
+        'Matches': FieldValue.increment(1)
+      }, SetOptions(merge: true));
+    }
     updateHistory("W");
   }
 
-  Future<void> increaseLoses() async {
-    _losses++;
-    await FirebaseFirestore.instance
-        .collection('teams')
-        .doc(name)
-        .set({
-      'Loses': FieldValue.increment(1),
-      'Matches': FieldValue.increment(1)
-    }, SetOptions(merge: true));
-
+  Future<void> increaseLoses(bool isGroupPhase) async {
+    if (isGroupPhase) {
+      _losses++;
+      await FirebaseFirestore.instance
+          .collection('teams')
+          .doc(name)
+          .set({
+        'Loses': FieldValue.increment(1),
+        'Matches': FieldValue.increment(1)
+      }, SetOptions(merge: true));
+    }
     updateHistory("L");
   }
-  Future<void> increaseDraws() async {
-    _draws++;
-    await FirebaseFirestore.instance
-        .collection('teams')
-        .doc(name)
-        .set({
-      'Draws': FieldValue.increment(1),
-      'Matches': FieldValue.increment(1)
-    }, SetOptions(merge: true));
-
+  Future<void> increaseDraws(bool isGroupPhase) async {
+    if (isGroupPhase) {
+      _draws++;
+      await FirebaseFirestore.instance.collection('teams').doc(name).set({
+        'Draws': FieldValue.increment(1),
+        'Matches': FieldValue.increment(1)
+      }, SetOptions(merge: true));
+    }
     updateHistory("D");
   }
-  Future<void> reduceWins() async {
-    _wins--;
-    await FirebaseFirestore.instance
-        .collection('teams')
-        .doc(name)
-        .set({
-      'Wins': FieldValue.increment(-1),
-      'Matches': FieldValue.increment(-1)
-    }, SetOptions(merge: true));
+  Future<void> reduceWins(bool isGroupPhase) async {
+    if (isGroupPhase) {
+      _wins--;
+      await FirebaseFirestore.instance
+          .collection('teams')
+          .doc(name)
+          .set({
+        'Wins': FieldValue.increment(-1),
+        'Matches': FieldValue.increment(-1)
+      }, SetOptions(merge: true));
+    }
     shiftRightAndClearLast();
   }
 
-  Future<void> reduceLoses() async {
-    _losses--;
-    await FirebaseFirestore.instance
-        .collection('teams')
-        .doc(name)
-        .set({
-      'Loses': FieldValue.increment(-1),
-      'Matches': FieldValue.increment(-1)
-    }, SetOptions(merge: true));
+  Future<void> reduceLoses(bool isGroupPhase) async {
+    if (isGroupPhase) {
+      _losses--;
+      await FirebaseFirestore.instance
+          .collection('teams')
+          .doc(name)
+          .set({
+        'Loses': FieldValue.increment(-1),
+        'Matches': FieldValue.increment(-1)
+      }, SetOptions(merge: true));
+    }
     shiftRightAndClearLast();
   }
-  Future<void> reduceDraws() async {
-    _draws--;
-    await FirebaseFirestore.instance
-        .collection('teams')
-        .doc(name)
-        .set({
-      'Draws': FieldValue.increment(-1),
-      'Matches': FieldValue.increment(-1)
-    }, SetOptions(merge: true));
+  Future<void> reduceDraws(bool isGroupPhase) async {
+    if (isGroupPhase) {
+      _draws--;
+      await FirebaseFirestore.instance
+          .collection('teams')
+          .doc(name)
+          .set({
+        'Draws': FieldValue.increment(-1),
+        'Matches': FieldValue.increment(-1)
+      }, SetOptions(merge: true));
+    }
     shiftRightAndClearLast();
   }
   bool changeFavourite(){

@@ -533,6 +533,10 @@ class MatchDetails extends ChangeNotifier {
     }
   }
 
+  bool get hasMatchEndedFinal{
+    return (((_hasMatchFinished && !isExtraTimeTime) || (hasExtraTimeFinished && !isPenaltyTime)) || isShootoutOver );
+  }
+
   //etoimo
   void matchProgressed() {
     if (isExtraTimeTime) {
@@ -572,9 +576,9 @@ class MatchDetails extends ChangeNotifier {
       );
 
       if (!isExtraTimeTime) {
-        updateStandings(true);
         MatchHandle().matchFinished(this);
       }
+      updateStandings(true);
       notifyListeners();
     } else if (_hasFirstHalfFinished) {
       _hasSecondHalfStarted = true;
@@ -588,32 +592,33 @@ class MatchDetails extends ChangeNotifier {
   }
 
   void updateStandings(bool progress) {
-    if (isGroupPhase) {
+
       if (progress) {
         if (scoreHome == scoreAway) {
-          homeTeam.increaseDraws();
-          awayTeam.increaseDraws();
+          homeTeam.increaseDraws(isGroupPhase);
+          awayTeam.increaseDraws(isGroupPhase);
         } else if (scoreHome > scoreAway) {
-          homeTeam.increaseWins();
-          awayTeam.increaseLoses();
+          homeTeam.increaseWins(isGroupPhase);
+          awayTeam.increaseLoses(isGroupPhase);
         } else {
-          homeTeam.increaseLoses();
-          awayTeam.increaseWins();
+          homeTeam.increaseLoses(isGroupPhase);
+          awayTeam.increaseWins(isGroupPhase);
         }
       } else {
         if (scoreHome == scoreAway) {
-          homeTeam.reduceDraws();
-          awayTeam.reduceDraws();
+          homeTeam.reduceDraws(isGroupPhase);
+          awayTeam.reduceDraws(isGroupPhase);
         } else if (scoreHome > scoreAway) {
-          homeTeam.reduceWins();
-          awayTeam.reduceLoses();
+          homeTeam.reduceWins(isGroupPhase);
+          awayTeam.reduceLoses(isGroupPhase);
         } else {
-          homeTeam.reduceLoses();
-          awayTeam.reduceWins();
+          homeTeam.reduceLoses(isGroupPhase);
+          awayTeam.reduceWins(isGroupPhase);
         }
-      }
-      TeamsHandle().sortTeams(homeTeam.group);
     }
+      if (isGroupPhase) {
+        TeamsHandle().sortTeams(homeTeam.group);
+      }
   }
 
   bool get isExtraTimeTime {
@@ -660,8 +665,9 @@ class MatchDetails extends ChangeNotifier {
             3 * 3600) {
       if (!isExtraTimeTime) {
         MatchHandle().matchNotFinished(this);
-        updateStandings(false);
       }
+      updateStandings(false);
+
       _hasMatchFinished = false;
       matchFinishedBase(false);
       notifyListeners();

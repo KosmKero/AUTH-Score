@@ -73,7 +73,6 @@ class matchesContainer extends StatelessWidget {
     }
   }
 
-
   List<Widget> _buildMatchList(List<MatchDetails> matches) {
     List<Widget> widgets = [];
     for (int i = 0; i < matches.length; i++) {
@@ -89,7 +88,7 @@ class matchesContainer extends StatelessWidget {
 
         widgets.add(
           Padding(
-            padding: const EdgeInsets.only(top: 10, bottom: 8,left: 7),
+            padding: const EdgeInsets.only(top: 10, bottom: 8, left: 7),
             child: Text(
               "${match.day}/${match.month}/${match.year}",
               style: TextStyle(
@@ -103,8 +102,6 @@ class matchesContainer extends StatelessWidget {
           ),
         );
       }
-
-
 
       widgets.add(eachMatchContainer(match));
     }
@@ -183,7 +180,12 @@ class eachMatchContainerView extends StatelessWidget {
               children: [
                 MatchContainerTime(match: match),
                 SizedBox(width: 15),
-                Container(height: 50, width: 1.5, color:darkModeNotifier.value==true? Colors.white : Colors.black),
+                Container(
+                    height: 50,
+                    width: 1.5,
+                    color: darkModeNotifier.value == true
+                        ? Colors.white
+                        : Colors.black),
                 SizedBox(width: 15),
                 Expanded(
                   flex: 3,
@@ -198,16 +200,20 @@ class eachMatchContainerView extends StatelessWidget {
                               height: 25,
                               width: 25,
                               child: match.homeTeam.image),
-                          Text(
+                          Expanded(
+                              child: Text(
                             " ${match.homeTeam.name}",
+                            overflow: TextOverflow.ellipsis,
                             style: TextStyle(
-                                fontSize: match.homeTeam.name.length < 15 ? 15 : 15,
+                              fontSize: 14,
                               fontWeight: FontWeight.w600,
-                                color: darkModeNotifier.value==true ? Colors.white : lightModeText,
-                                fontFamily: 'Arial',
-                                letterSpacing: 0.3
+                              color: darkModeNotifier.value == true
+                                  ? Colors.white
+                                  : lightModeText,
+                              fontFamily: 'Arial',
+                              letterSpacing: 0.3,
                             ),
-                          )
+                          ))
                         ],
                       ),
                       SizedBox(height: 2),
@@ -218,16 +224,20 @@ class eachMatchContainerView extends StatelessWidget {
                               height: 25,
                               width: 25,
                               child: match.awayTeam.image),
-                          Text(
+                          Expanded(
+                              child: Text(
                             " ${match.awayTeam.name}",
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
                             style: TextStyle(
-                                fontSize: match.awayTeam.name.length < 15 ? 15 : 15,
+                                fontSize: 14,
                                 fontWeight: FontWeight.w600,
-                                color: darkModeNotifier.value ? Colors.white : lightModeText,
+                                color: darkModeNotifier.value
+                                    ? Colors.white
+                                    : lightModeText,
                                 fontFamily: 'Arial',
-                                letterSpacing: 0.3
-                            ),
-                          ),
+                                letterSpacing: 0.3),
+                          )),
                         ],
                       ),
                     ],
@@ -238,19 +248,41 @@ class eachMatchContainerView extends StatelessWidget {
                     ? Column(
                         children: [
                           Text(
-                           ( match.homeScore+match.penaltyScoreHome).toString(),
+                            (match.homeScore + match.penaltyScoreHome)
+                                .toString(),
                             style: TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
                                 fontFamily: 'Arial',
-                                color: !(!match.hasMatchFinished || (match.isExtraTimeTime && !match.hasExtraTimeFinished)|| (match.isPenaltyTime && !match.isShootoutOver))? match.scoreHome > match.scoreAway ?darkModeNotifier.value?Colors.white: Colors.black:Colors.grey : Colors.red),
+                                color: !(!match.hasMatchFinished ||
+                                        (match.isExtraTimeTime &&
+                                            !match.hasExtraTimeFinished) ||
+                                        (match.isPenaltyTime &&
+                                            !match.isShootoutOver))
+                                    ? match.scoreHome > match.scoreAway
+                                        ? darkModeNotifier.value
+                                            ? Colors.white
+                                            : Colors.black
+                                        : Colors.grey
+                                    : Colors.red),
                           ),
                           Text(
-                            (match.awayScore+match.penaltyScoreAway).toString(),
+                            (match.awayScore + match.penaltyScoreAway)
+                                .toString(),
                             style: TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
-                                color: !(!match.hasMatchFinished || (match.isExtraTimeTime && !match.hasExtraTimeFinished) || (match.isPenaltyTime && !match.isShootoutOver)) ?match.scoreAway>match.scoreHome?darkModeNotifier.value?Colors.white: Colors.black:Colors.grey : Colors.red),
+                                color: !(!match.hasMatchFinished ||
+                                        (match.isExtraTimeTime &&
+                                            !match.hasExtraTimeFinished) ||
+                                        (match.isPenaltyTime &&
+                                            !match.isShootoutOver))
+                                    ? match.scoreAway > match.scoreHome
+                                        ? darkModeNotifier.value
+                                            ? Colors.white
+                                            : Colors.black
+                                        : Colors.grey
+                                    : Colors.red),
                           ),
                         ],
                       )
@@ -290,13 +322,20 @@ class _MatchContainerTimeState extends State<MatchContainerTime>
 
     widget.match.addListener(_onMatchUpdated);
 
-    if (widget.match.hasMatchStarted && (!widget.match.hasMatchFinished || (widget.match.isExtraTimeTime && !widget.match.hasExtraTimeFinished))) {
+    if (widget.match.hasMatchStarted &&
+        (!widget.match.hasMatchFinished ||
+            (widget.match.isExtraTimeTime &&
+                !widget.match.hasExtraTimeFinished))) {
       _startTimer();
     }
   }
 
   void _onMatchUpdated() {
-    if (widget.match.hasMatchStarted && _timer == null && (!widget.match.hasMatchFinished || (widget.match.isExtraTimeTime && !widget.match.hasExtraTimeFinished))) {
+    if (widget.match.hasMatchStarted &&
+        _timer == null &&
+        (!widget.match.hasMatchFinished ||
+            (widget.match.isExtraTimeTime &&
+                !widget.match.hasExtraTimeFinished))) {
       _startTimer();
     }
   }
@@ -317,7 +356,10 @@ class _MatchContainerTimeState extends State<MatchContainerTime>
       oldWidget.match.removeListener(_onMatchUpdated);
       widget.match.addListener(_onMatchUpdated);
 
-      if (widget.match.hasMatchStarted && (!widget.match.hasMatchFinished || (widget.match.isExtraTimeTime && !widget.match.hasExtraTimeFinished))) {
+      if (widget.match.hasMatchStarted &&
+          (!widget.match.hasMatchFinished ||
+              (widget.match.isExtraTimeTime &&
+                  !widget.match.hasExtraTimeFinished))) {
         _startTimer();
       }
     }
@@ -329,7 +371,9 @@ class _MatchContainerTimeState extends State<MatchContainerTime>
 
     if (state == AppLifecycleState.resumed &&
         widget.match.hasMatchStarted &&
-        (!widget.match.hasMatchFinished || (widget.match.isExtraTimeTime && !widget.match.hasExtraTimeFinished))) {
+        (!widget.match.hasMatchFinished ||
+            (widget.match.isExtraTimeTime &&
+                !widget.match.hasExtraTimeFinished))) {
       _startTimer();
     }
   }
@@ -353,8 +397,10 @@ class _MatchContainerTimeState extends State<MatchContainerTime>
     });
   }
 
-  Color get _timeColor =>
-     ( (!widget.match.hasMatchFinished || (widget.match.isExtraTimeTime && !widget.match.hasExtraTimeFinished))) ? Colors.red : Colors.black;
+  Color get _timeColor => ((!widget.match.hasMatchFinished ||
+          (widget.match.isExtraTimeTime && !widget.match.hasExtraTimeFinished)))
+      ? Colors.red
+      : Colors.black;
 
   @override
   Widget build(BuildContext context) {
@@ -362,14 +408,16 @@ class _MatchContainerTimeState extends State<MatchContainerTime>
       width: 48.5,
       child: Column(
         children: [
+          (!widget.match.hasMatchStarted || widget.match.hasMatchEndedFinal) ?
           Text(
-            widget.match.timeString,
+             widget.match.timeString,
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
               color: darkModeNotifier.value ? Colors.white : Colors.black87,
             ),
-          ),
+          )
+              : SizedBox.shrink(),
           if (widget.match.isHalfTime())
             const Text(
               "Ημίχρονο",
@@ -379,9 +427,12 @@ class _MatchContainerTimeState extends State<MatchContainerTime>
                 fontWeight: FontWeight.bold,
               ),
             )
-          else if ((widget.match.hasMatchFinished && (!widget.match.isExtraTimeTime || widget.match.hasExtraTimeFinished)))
+          else if ((widget.match.hasMatchFinished &&
+              (!widget.match.isExtraTimeTime ||
+                  widget.match.hasExtraTimeFinished)))
             const SizedBox.shrink()
-          else if (widget.match.isExtraTimeTime && widget.match.isExtraTimeHalf())
+          else if (widget.match.isExtraTimeTime &&
+              widget.match.isExtraTimeHalf())
             const Text(
               "Ημίχρονο Παράτασης",
               style: TextStyle(
@@ -393,33 +444,34 @@ class _MatchContainerTimeState extends State<MatchContainerTime>
               overflow: TextOverflow.visible,
               textAlign: TextAlign.center,
             )
-          else if (widget.match.isExtraTimeTime && widget.match.hasMatchFinished && !widget.match.hasExtraTimeStarted)
-              const Text(
-                "Αναμονή Παράτασης",
-                style: TextStyle(
-                  color: Colors.red,
-                  fontSize: 9,
-                  fontWeight: FontWeight.bold,
-                ),
-                softWrap: true,
-                overflow: TextOverflow.visible,
-                textAlign: TextAlign.center,
-              )
-          else if (widget.match.hasMatchStarted)
-              Text(
-                '${(_secondsElapsed ~/ 60).toString().padLeft(2, '0')}:${(_secondsElapsed % 60).toString().padLeft(2, '0')}',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 12,
-                  color: _timeColor,
-                ),
+          else if (widget.match.isExtraTimeTime &&
+              widget.match.hasMatchFinished &&
+              !widget.match.hasExtraTimeStarted)
+            const Text(
+              "Αναμονή Παράτασης",
+              style: TextStyle(
+                color: Colors.red,
+                fontSize: 9,
+                fontWeight: FontWeight.bold,
               ),
+              softWrap: true,
+              overflow: TextOverflow.visible,
+              textAlign: TextAlign.center,
+            )
+          else if (widget.match.hasMatchStarted)
+            Text(
+              '${(_secondsElapsed ~/ 60).toString().padLeft(2, '0')}:${(_secondsElapsed % 60).toString().padLeft(2, '0')}',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 12,
+                color: _timeColor,
+              ),
+            ),
         ],
       ),
     );
   }
 }
-
 
 //ΦΤΙΑΧΝΕΙ ΤΗΝ NOTIFICATION ICON ΤΟΥ MATCH
 class MatchNotificationIcon extends StatefulWidget {
@@ -435,7 +487,6 @@ class MatchNotificationIcon extends StatefulWidget {
 }
 
 class _MatchNotificationIconState extends State<MatchNotificationIcon> {
-
   @override
   void initState() {
     super.initState();
@@ -472,18 +523,17 @@ class _MatchNotificationIconState extends State<MatchNotificationIcon> {
           await UserHandleBase().addNotifyMatch(widget.match);
         }
       }
-    }
-    else{
+    } else {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text(greek? "Πρέπει να συνδεθείς για να έχεις ειδοποιήσεις." : "Please log in to receive notifications."),
+        content: Text(greek
+            ? "Πρέπει να συνδεθείς για να έχεις ειδοποιήσεις."
+            : "Please log in to receive notifications."),
         duration: Duration(seconds: 2),
-       // behavior: SnackBarBehavior.floating,
+        // behavior: SnackBarBehavior.floating,
         backgroundColor: Colors.redAccent.withOpacity(0.9),
       ));
     }
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -493,13 +543,15 @@ class _MatchNotificationIconState extends State<MatchNotificationIcon> {
         return IconButton(
           icon: Icon(
             value ? Icons.notifications_active : Icons.notifications_off,
-            color: value ? (darkModeNotifier.value ? Colors.amber : Colors.blue) : Colors.grey,
+            color: value
+                ? (darkModeNotifier.value ? Colors.amber : Colors.blue)
+                : Colors.grey,
           ),
-          tooltip: value ? "Απενεργοποίηση ειδοποίησης" : "Ενεργοποίηση ειδοποίησης",
+          tooltip:
+              value ? "Απενεργοποίηση ειδοποίησης" : "Ενεργοποίηση ειδοποίησης",
           onPressed: toggleNotification,
         );
       },
     );
   }
-
 }
