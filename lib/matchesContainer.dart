@@ -501,7 +501,7 @@ class _MatchNotificationIconState extends State<MatchNotificationIcon> {
       // Προαιρετικά ενημερωτικό μήνυμα
       if (newValue) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('Reminder set for ${widget.match}'),
+          content: (!greek) ? Text('Reminder set for ${widget.match.homeTeam.nameEnglish}-${widget.match.awayTeam.nameEnglish}') : Text('Θα λάβετε ειδοποίηση για το ματς ${widget.match.homeTeam.name}-${widget.match.awayTeam.name}'),
           duration: Duration(seconds: 2),
         ));
       }
