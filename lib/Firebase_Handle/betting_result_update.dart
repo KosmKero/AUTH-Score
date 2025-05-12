@@ -46,12 +46,13 @@ class BettingResultUpdate {
         }
         total++;
 
-        final accuracy = total > 0 ? (correct / total) * 100 : 0;
+        final accuracy = total > 0 ? (correct / total) * 100 : 0.0;
         final normalizedAccuracy = accuracy / 100;
+
+        //final normalizedAccuracy = accuracy / 100;
         final cappedTotal = total.clamp(0, 50);
         final confidence = 1 - exp(-0.1 * cappedTotal);
-        final dynamicWeight = pow(confidence, 2);
-        final score = (normalizedAccuracy * (1 - dynamicWeight) + confidence * dynamicWeight) * 100;
+        final score = normalizedAccuracy * confidence * 100;
 
         //final score = total > 0 ? accuracy * (1 - exp(-0.06 * log(total + 1)))*100 : 0;
 
