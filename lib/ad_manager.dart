@@ -6,11 +6,11 @@ class AdManager {
   // === Ad Unit IDs ===
   static final String bannerAdUnitId = Platform.isAndroid
       ? 'ca-app-pub-1918416043234880/741460649' //ca-app-pub-1918416043234880/7414606492  == ΤΟ ΔΙΚΟ ΜΑΣ   ca-app-pub-3940256099942544/6300978111 == ΤΟ ΤΕΣΤΙΝΚ
-      : 'ca-app-pub-xxx/ios-banner-id';
+      : 'ca-app-pub-1918416043234880/8698889690';
 
   static final String nativeAdUnitId = Platform.isAndroid
       ? 'ca-app-pub-1918416043234880/5443049271'
-      : 'ca-app-pub-xxx/ios-native-id';
+      : 'ca-app-pub-1918416043234880/8698889690';
 
   // === Banner Ad ===
   static BannerAd createBannerAd({Function(bool)? onStatusChanged}) {

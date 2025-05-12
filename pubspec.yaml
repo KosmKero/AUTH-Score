@@ -45,6 +45,7 @@ dependencies:
 
   provider: ^6.1.2
   flutter_launcher_icons: ^0.14.3
+  css_colors: ^1.1.7
 
 flutter_launcher_icons:
   android: true
