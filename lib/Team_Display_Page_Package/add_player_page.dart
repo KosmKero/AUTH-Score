@@ -57,7 +57,7 @@ class _AddPlayerScreenState extends State<AddPlayerScreen> {
 
     int pos = (position == 'Τερματοφύλακας') ? 0 : (position == 'Αμυντικός') ? 1 : (position == 'Μέσος') ? 2 : 3;
 
-    final newPlayer = Player(name, surname, pos, 0, number, 20, widget.team.name, 0, 0);
+    final newPlayer = Player(name, surname, pos, 0, number, 20, widget.team.name, 0, 0,widget.team.nameEnglish);
     widget.onPlayerAdded(newPlayer);  // Καλούμε το callback για την προσθήκη του παίκτη
     Navigator.pop(context, newPlayer);  // Επιστροφή στην προηγούμενη οθόνη
   }

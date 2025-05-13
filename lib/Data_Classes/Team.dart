@@ -86,6 +86,42 @@ class Team {
     }
   }
 
+  Future<void> updatePlayer(Player oldPlayer, Player newPlayer) async {
+    if (!globalUser.controlTheseTeams(name, null)) return;
+    final oldKey = '${oldPlayer.name}${oldPlayer.number}';
+    final newKey = '${newPlayer.name}${newPlayer.number}';
+
+    if (oldKey != newKey) {
+      // Μετακίνησε/μετονόμασε τον παίχτη: διαγραφή παλιού κλειδιού + προσθήκη νέου
+      await FirebaseFirestore.instance
+          .collection('teams') // π.χ. "teams"
+          .doc(name)
+          .update({
+        'Players.${oldPlayer.name}${oldPlayer.number}': FieldValue.delete(),
+      });
+
+      await FirebaseFirestore.instance
+          .collection('teams')
+          .doc(newPlayer.teamName)
+          .set({
+        'Players': newPlayer.toMap(),
+      }, SetOptions(merge: true));
+    }
+  else {
+    await FirebaseFirestore.instance
+        .collection('teams')
+        .doc(newPlayer.teamName)
+        .set({
+      'Players': newPlayer.toMap(),
+    }, SetOptions(merge: true));
+  }
+
+    // Ενημέρωσε και την τοπική λίστα
+    _players.remove(oldPlayer);
+    _players.add(newPlayer);
+  }
+
+
   Future<void> increaseWins(bool isGroupPhase) async {
     if (isGroupPhase) {
       _wins++;

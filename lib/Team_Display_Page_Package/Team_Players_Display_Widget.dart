@@ -114,8 +114,8 @@ class _TeamPlayersDisplayWidgetState extends State<TeamPlayersDisplayWidget> {
 
   Widget playerName(Player player) {
     return GestureDetector(
-      onDoubleTap: (globalUser.controlTheseTeams(widget.team.name,null)) ?  ()  async {
-        final confirm = await Navigator.push(
+      onDoubleTap: (globalUser.controlTheseTeams(widget.team.name,null)) ?  () async {
+        final updatedPlayer = await Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => PlayerEditPage(
@@ -124,13 +124,25 @@ class _TeamPlayersDisplayWidgetState extends State<TeamPlayersDisplayWidget> {
             ),
           ),
         );
+        if (updatedPlayer is bool && updatedPlayer==true){
+          setState(() {
+            final index = widget.team.players.indexWhere((p) => p.name == player.name && p.number==player.number);
+            if (index != -1) {
+              widget.team.players.removeAt(index);
+            }
+          });
+        } else if (updatedPlayer != null && updatedPlayer is Player) {
+          setState(() {
+           //Βρες τη θέση του παλιού παίκτη και αντικατάστησέ τον
+           final index = widget.team.players.indexWhere((p) => p.name == player.name && p.number==player.number);
+           if (index != -1) {
+             widget.team.players[index] = updatedPlayer;
+           }
 
-        if (confirm == true) {
-          widget.team.deletePlayer(player);
-
-          setState(() {});
+          });
         }
       } : null,
+
       child: Column(
         children: [
           Row(children: [

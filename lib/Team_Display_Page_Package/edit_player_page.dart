@@ -57,23 +57,17 @@ class _PlayerEditPageState extends State<PlayerEditPage> {
 
   void _saveForm() {
     if (_formKey.currentState!.validate()) {
-      // Εδώ μπορείς να στείλεις τις νέες τιμές σε provider, backend κλπ
 
-
-      Player newPlayer = Player(_nameController.text, _surnameController.text, int.parse(_positionController.text), int.parse(_goalsController.text), int.parse(_numberController.text), 22, widget.player.teamName, int.parse(_yellowController.text), int.parse(_redController.text));
+      Player newPlayer = Player(_nameController.text, _surnameController.text, int.parse(_positionController.text), int.parse(_goalsController.text), int.parse(_numberController.text), 22, widget.player.teamName, int.parse(_yellowController.text), int.parse(_redController.text),widget.player.teamNameEnglish);
 
       setState(() {
-        widget.team.deletePlayer(widget.player);
-        widget.team.addPlayer(newPlayer);  // Προσθέτουμε τον νέο παίκτη στην ομάδα
+        widget.team.updatePlayer(widget.player, newPlayer);
       });
-
-
-
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Saved successfully')),
       );
-      Navigator.pop(context, true);
+      Navigator.pop(context, newPlayer);
     }
   }
 

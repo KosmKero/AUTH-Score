@@ -81,7 +81,7 @@ class _NavigationButtonsState extends State<_NavigationButtons> {
               SizedBox(width: 10),
               _buildTextButton(greek?"Βαθμολογία":"Standings", 0),
               SizedBox(width: 15),
-              _buildTextButton(greek?"Νοκ Άουτς":"Knock outs", 1),
+              _buildTextButton(greek?"Νοκ Άουτ":"Knock out", 1),
               SizedBox(width: 15),
               _buildTextButton(greek?"Κορυφαίοι Παίχτες":"Best players", 2),
             ],

@@ -77,6 +77,7 @@ class TeamsHandle {
                   playerData['TeamName'] ?? "",
                   playerData['numOfYellowCards'] ?? 0,
                   playerData['numOfRedCards'] ?? 0,
+                  playerData["teamNameEnglish"] ?? ""
                 ));
               });
             }
@@ -205,6 +206,7 @@ class TeamsHandle {
           playerData['TeamName'] ?? "Unknown",
           playerData['numOfYellowCards'] ?? 0,
           playerData['numOfRedCards'] ?? 0,
+          playerData["teamNameEnglish"] ?? ""
         );
       }).toList();
 

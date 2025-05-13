@@ -146,7 +146,7 @@ class _TopPlayersView extends State<TopPlayersPage> {
   }
 
   Future<Widget> playerCard(Player player, int i) async {
-    Image image = await loadTeamImage(player.teamName);
+    Image image = await loadTeamImage(player.teamNameEnglish);
 
     return Padding(
       padding: EdgeInsets.all(12),
