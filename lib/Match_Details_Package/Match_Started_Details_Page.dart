@@ -342,9 +342,8 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
 
     return InkWell(
         onLongPress:() {
-          ((widget.match.hasMatchStarted && !widget.match.hasMatchFinished ||
-              (!widget.match.hasExtraTimeFinished &&
-                  widget.match.isExtraTimeTime)) &&
+          ((!widget.match.hasMatchEndedFinal || widget.match.startTimeInSeconds >
+              DateTime.now().millisecondsSinceEpoch ~/ 1000 - 110800) &&
               globalUser.controlTheseTeams(
                   widget.match.homeTeam.name, widget.match.awayTeam.name))
               ?

@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:untitled1/globals.dart';
+
+import '../ad_manager.dart';
 
 class FeedbackPage extends StatefulWidget {
   @override
@@ -61,6 +64,28 @@ class _FeedbackPageState extends State<FeedbackPage> {
     setState(() {
       _isSending = false;
     });
+  }
+
+
+  BannerAd? _bannerAd;
+
+  bool _isBannerAdReady = false;
+
+  void initState() {
+    super.initState();
+    _bannerAd = AdManager.createBannerAd(
+      onStatusChanged: (status) {
+        setState(() {
+          _isBannerAdReady = status;
+        });
+      },
+    )..load();
+  }
+
+  @override
+  void dispose() {
+    _bannerAd?.dispose();
+    super.dispose();
   }
 
   @override
@@ -128,6 +153,17 @@ class _FeedbackPageState extends State<FeedbackPage> {
             ),
           ],
         ),
+      ),
+      bottomNavigationBar: Column(
+        mainAxisSize: MainAxisSize.min, // Για να μην γεμίζει όλη την οθόνη
+        children: [
+          if (_isBannerAdReady && _bannerAd != null)
+            SizedBox(
+              width: _bannerAd!.size.width.toDouble(),
+              height: _bannerAd!.size.height.toDouble(),
+              child: AdWidget(ad: _bannerAd!),
+            ),
+        ],
       ),
     );
   }

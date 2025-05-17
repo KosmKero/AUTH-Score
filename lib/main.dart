@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:untitled1/API/Match_Handle.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:untitled1/API/top_players_handle.dart';
@@ -20,6 +21,7 @@ import 'API/NotificationService.dart';
 import 'Data_Classes/AppUser.dart';
 import 'Favorite_Page.dart';
 import 'Firebase_Handle/betting_result_update.dart';
+import 'Firebase_Handle/update_statistics.dart';
 import 'HomePage.dart';
 import 'Data_Classes/Player.dart';
 import 'Profile/Profile_Page.dart';
@@ -43,7 +45,7 @@ Future<void> loadUser(User user) async{
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
+  await MobileAds.instance.initialize();
 
   try {
 
@@ -107,6 +109,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
 
     initia();
   //  BettingResultUpdate().recalculateAllScores();
+
 
   }
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:untitled1/Profile/admin/see_feedback.dart';
+import 'package:untitled1/Profile/admin/user_statistics.dart';
 import 'admins_handle.dart';
 import 'request_approval_or_disapproval.dart';
 import 'package:untitled1/globals.dart';
@@ -42,7 +43,8 @@ class _RequestApprovalScreenState extends State<RequestApprovalScreen> {
                 ? Expanded(child: RequestHandlePage())
                 : selectedIndex == 1
                 ? AdminListWidget()
-                : Expanded(child: FeedbackViewPage()),
+                : selectedIndex == 2? Expanded(child: FeedbackViewPage())
+          : SchoolStatsPage(),
 
         ],
       ),
@@ -67,17 +69,24 @@ class _NavigationButtons extends StatelessWidget {
     return SizedBox(
       height: 65,
       width: double.infinity,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          _buildTextButton("See Requests", 0, textColor),
-          SizedBox(width: 10),
-          _buildTextButton("See Admins", 1, textColor),
-          SizedBox(width: 10),
-          _buildTextButton("See Feedback", 2, textColor),
-        ],
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: [
+            const SizedBox(width: 10),
+            _buildTextButton("See Requests", 0, textColor),
+            const SizedBox(width: 10),
+            _buildTextButton("See Admins", 1, textColor),
+            const SizedBox(width: 10),
+            _buildTextButton("See Feedback", 2, textColor),
+            const SizedBox(width: 10),
+            _buildTextButton("User Stats", 3, textColor),
+            const SizedBox(width: 10),
+          ],
+        ),
       ),
     );
+
   }
 
   Widget _buildTextButton(String text, int index, Color textColor) {

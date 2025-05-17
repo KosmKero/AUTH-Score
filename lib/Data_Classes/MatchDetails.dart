@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:untitled1/API/Match_Handle.dart';
 import 'package:untitled1/API/top_players_handle.dart';
 import 'package:untitled1/Data_Classes/Player.dart';
@@ -350,11 +350,11 @@ class MatchDetails extends ChangeNotifier {
   }
 
   Future<void> matchFinishedBase(bool progress) async {
-    String type = progress ? "previous" : "upcoming";
+    //String type = progress ? "previous" : "upcoming";
 
     await FirebaseFirestore.instance.collection('matches').doc(matchDocId).set(
         {'hasMatchFinished': progress},
-        SetOptions(merge: true)); // ώστε να μη διαγράψει άλλα πεδία
+        SetOptions(merge: true)); // ώστε να μη διαγράψει άλλα πεδία // τελειωσε το ματς
     String matchKey =
         '${homeTeam.nameEnglish}${awayTeam.nameEnglish}${dateString}';
 
@@ -365,7 +365,7 @@ class MatchDetails extends ChangeNotifier {
             ? correctChoice = "X"
             : correctChoice = "2";
 
-    await FirebaseFirestore.instance.collection('votes').doc(matchKey).set({
+    await FirebaseFirestore.instance.collection('votes').doc(matchKey).set({  // ανανεωση του ματς στο στοιχημα
       'hasMatchFinished': progress,
       'correctChoice': correctChoice,
       'statsUpdated': false
@@ -457,8 +457,8 @@ class MatchDetails extends ChangeNotifier {
 
       Goal goal = Goal(
           scorerName: name,
-          homeScore: scoreHome,
-          awayScore: scoreAway,
+          homeScore: homeScore,
+          awayScore: awayScore,
           minute: DateTime.now().millisecondsSinceEpoch ~/ 1000 -
               startTimeInSeconds,
           isHomeTeam: true,
@@ -571,9 +571,7 @@ class MatchDetails extends ChangeNotifier {
     }
     if (_hasSecondHalfStarted) {
       _hasMatchFinished = true;
-      matchFinishedBase(
-        true,
-      );
+      matchFinishedBase(true,);
 
       if (!isExtraTimeTime) {
         MatchHandle().matchFinished(this);
@@ -1017,14 +1015,26 @@ class MatchDetails extends ChangeNotifier {
       // Update match facts only if present
       if (data.containsKey('facts')) {
         final factsMap = Map<String, dynamic>.from(data['facts']);
-        final decodedFacts =
-            await MatchFactsStorageHelper.decodeMatchFacts(factsMap);
-        _matchFacts = decodedFacts;
-        changed = true;
+        final decodedFacts = await MatchFactsStorageHelper.decodeMatchFacts(factsMap);
+
+        if (!mapEquals(_matchFacts, decodedFacts)) {
+          _matchFacts = decodedFacts;
+          changed = true;
+        }
       }
 
+
       if (changed) notifyListeners();
+
+
+      if (hasMatchEndedFinal) {
+        stopListening();
+      }
     });
+  }
+  void stopListening() {
+    _matchSubscription?.cancel();
+    _matchSubscription = null;
   }
 
   String get matchDocId {
