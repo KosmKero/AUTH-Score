@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 
 import '../Data_Classes/Player.dart';
 import '../Data_Classes/Team.dart';
+import '../Firebase_Handle/firebase_screen_stats_helper.dart';
 import '../globals.dart';
 
 class AddPlayerScreen extends StatefulWidget {
@@ -64,6 +65,9 @@ class _AddPlayerScreenState extends State<AddPlayerScreen> {
 
   @override
   Widget build(BuildContext context) {
+    logScreenViewSta(screenName: 'Add player',screenClass: 'Add player page');
+
+
     return Scaffold(
       backgroundColor: darkModeNotifier.value?Color(0xFF121212):Colors.white,
       appBar: AppBar(

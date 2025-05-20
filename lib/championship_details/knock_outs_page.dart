@@ -41,14 +41,14 @@ class KnockOutsPage extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment
                       .start, // Στοιχίστε τα στοιχεία στην αρχή
                   children: [
-                    SizedBox(height: 45), Container(width: 20, height: 2, color: !darkModeNotifier.value?Colors.black: Colors.grey[400]),
-                    SizedBox(height: 86), Container(width: 20, height: 2, color: !darkModeNotifier.value?Colors.black:Colors.grey[400]),
-                    SizedBox(height: 86), Container(width: 20, height: 2, color: !darkModeNotifier.value?Colors.black:Colors.grey[400]),
-                    SizedBox(height: 86), Container(width: 20, height: 2, color: !darkModeNotifier.value?Colors.black:Colors.grey[400]),
-                    SizedBox(height: 86), Container(width: 20, height: 2, color: !darkModeNotifier.value?Colors.black:Colors.grey[400]),
-                    SizedBox(height: 86), Container(width: 20, height: 2, color: !darkModeNotifier.value?Colors.black:Colors.grey[400]),
-                    SizedBox(height: 86), Container(width: 20, height: 2, color: !darkModeNotifier.value?Colors.black:Colors.grey[400]),
-                    SizedBox(height: 86), Container(width: 20, height: 2, color: !darkModeNotifier.value?Colors.black:Colors.grey[400]),
+                    SizedBox(height: 45),   Container(width: 20, height: 2, color: !darkModeNotifier.value?Colors.black: Colors.grey[400]),
+                    SizedBox(height: 90.4), Container(width: 20, height: 2, color: !darkModeNotifier.value?Colors.black: Colors.grey[400]),
+                    SizedBox(height: 90.4), Container(width: 20, height: 2, color: !darkModeNotifier.value?Colors.black: Colors.grey[400]),
+                    SizedBox(height: 90.4), Container(width: 20, height: 2, color: !darkModeNotifier.value?Colors.black: Colors.grey[400]),
+                    SizedBox(height: 90.4), Container(width: 20, height: 2, color: !darkModeNotifier.value?Colors.black: Colors.grey[400]),
+                    SizedBox(height: 90.4), Container(width: 20, height: 2, color: !darkModeNotifier.value?Colors.black: Colors.grey[400]),
+                    SizedBox(height: 90.4), Container(width: 20, height: 2, color: !darkModeNotifier.value?Colors.black: Colors.grey[400]),
+                    SizedBox(height: 90.4), Container(width: 20, height: 2, color: !darkModeNotifier.value?Colors.black: Colors.grey[400]),
                   ],
                 ),
                 Column(
@@ -56,27 +56,19 @@ class KnockOutsPage extends StatelessWidget {
                     SizedBox(
                       height: 45,
                     ),
-                    Container(width: 2, height: 90, color: !darkModeNotifier.value?Colors.black:Colors.grey[400]),
-                    SizedBox(height: 86),
-                    Container(width: 2, height: 90, color: !darkModeNotifier.value?Colors.black:Colors.grey[400]),
-                    SizedBox(height: 86),
-                    Container(width: 2, height: 90, color:!darkModeNotifier.value?Colors.black: Colors.grey[400]),
-                    SizedBox(height: 86),
-                    Container(width: 2, height: 90, color:!darkModeNotifier.value?Colors.black: Colors.grey[400]),
+                    Container(width: 2, height: 94.3, color: !darkModeNotifier.value?Colors.black:Colors.grey[400]), SizedBox(height: 90.4),
+                    Container(width: 2, height: 94.3, color: !darkModeNotifier.value?Colors.black:Colors.grey[400]), SizedBox(height: 90.4),
+                    Container(width: 2, height: 94.3, color:!darkModeNotifier.value?Colors.black: Colors.grey[400]), SizedBox(height: 90.4),
+                    Container(width: 2, height: 94.3, color:!darkModeNotifier.value?Colors.black: Colors.grey[400]),
                     //SizedBox(height: 86),
                   ],
                 ),
                 Column(
                   children: [
-                    SizedBox(
-                      height: 86,
-                    ),
-                    Container(width: 20, height: 2, color: !darkModeNotifier.value?Colors.black:Colors.grey[400]),
-                    SizedBox(height: 176),
-                    Container(width: 20, height: 2, color:!darkModeNotifier.value?Colors.black: Colors.grey[400]),
-                    SizedBox(height: 176),
-                    Container(width: 20, height: 2, color: !darkModeNotifier.value?Colors.black:Colors.grey[400]),
-                    SizedBox(height: 176),
+                    SizedBox(height: 89),
+                    Container(width: 20, height: 2, color: !darkModeNotifier.value?Colors.black:Colors.grey[400]), SizedBox(height: 183),
+                    Container(width: 20, height: 2, color:!darkModeNotifier.value?Colors.black: Colors.grey[400]), SizedBox(height: 183),
+                    Container(width: 20, height: 2, color: !darkModeNotifier.value?Colors.black:Colors.grey[400]), SizedBox(height: 183),
                     Container(width: 20, height: 2, color:!darkModeNotifier.value?Colors.black: Colors.grey[400]),
                     //SizedBox(height: 176),
                   ],
@@ -94,14 +86,11 @@ class KnockOutsPage extends StatelessWidget {
                 Column(
                   children: [
                     SizedBox(
-                      height: 86,
+                      height: 89,
                     ),
-                    Container(width: 10, height: 2, color: !darkModeNotifier.value?Colors.black:Colors.grey[400]),
-                    SizedBox(height: 176),
-                    Container(width: 10, height: 2, color: !darkModeNotifier.value?Colors.black:Colors.grey[400]),
-                    SizedBox(height: 176),
-                    Container(width: 10, height: 2, color: !darkModeNotifier.value?Colors.black:Colors.grey[400]),
-                    SizedBox(height: 176),
+                    Container(width: 10, height: 2, color: !darkModeNotifier.value?Colors.black:Colors.grey[400]),SizedBox(height: 183),
+                    Container(width: 10, height: 2, color: !darkModeNotifier.value?Colors.black:Colors.grey[400]),SizedBox(height: 183),
+                    Container(width: 10, height: 2, color: !darkModeNotifier.value?Colors.black:Colors.grey[400]),SizedBox(height: 183),
                     Container(width: 10, height: 2, color: !darkModeNotifier.value?Colors.black:Colors.grey[400]),
                     //SizedBox(height: 176),
                   ],
@@ -109,11 +98,10 @@ class KnockOutsPage extends StatelessWidget {
                 Column(
                   children: [
                     SizedBox(
-                      height: 86,
+                      height: 89,
                     ),
-                    Container(width: 2, height: 180, color:!darkModeNotifier.value?Colors.black: Colors.grey[400]),
-                    SizedBox(height: 176),
-                    Container(width: 2, height: 180, color:!darkModeNotifier.value?Colors.black: Colors.grey[400]),
+                    Container(width: 2, height: 187, color:!darkModeNotifier.value?Colors.black: Colors.grey[400]),SizedBox(height: 183),
+                    Container(width: 2, height: 187, color:!darkModeNotifier.value?Colors.black: Colors.grey[400]),
                     //SizedBox(height: 86),
                   ],
                 ),
@@ -122,8 +110,7 @@ class KnockOutsPage extends StatelessWidget {
                     SizedBox(
                       height: 176,
                     ),
-                    Container(width: 30, height: 2, color:!darkModeNotifier.value?Colors.black: Colors.grey[400]),
-                    SizedBox(height: 264 + 89),
+                    Container(width: 30, height: 2, color:!darkModeNotifier.value?Colors.black: Colors.grey[400]),SizedBox(height: 275 + 89),
                     Container(width: 30, height: 2, color: !darkModeNotifier.value?Colors.black:Colors.grey[400]),
                     //SizedBox(height: 86),
                   ],
@@ -170,7 +157,7 @@ class KnockOutsPage extends StatelessWidget {
                 Column(
                   children: [
                     SizedBox(
-                      height: 317,
+                      height: 313,
                     ),
                     knockOutMatchUp(match: playOffMatches[14])
                   ],
@@ -226,51 +213,93 @@ class _knockOutMatchUpState extends State<knockOutMatchUpView> {
           Navigator.push(
               context,
               MaterialPageRoute(
-                  builder: (context) => matchDetailsPage(match!)));
+                  builder: (context) => matchDetailsPage(match)));
         }
       },
       child: Card(
+        
         color:darkModeNotifier.value?Colors.grey[800]:Colors.white,
-        child: Column(
-          children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Column(
+        child: Padding(
+          padding: const EdgeInsets.all(3.0),
+          child: Column(
+            children: [
+              IntrinsicHeight(
+                child: Row(
+                  //crossAxisAlignment: CrossAxisAlignment.stretch, // απαραίτητο!
                   children: [
-                    SizedBox(
-                        height: 25 ,
-                        width:  45 ,
-                        child: (match!=null) ? match!.homeTeam.image : Image.asset('fotos/default_team_logo.png')),
-                    Text((match!=null) ? match!.homeTeam.initials : "N/A",
-                        style: TextStyle(fontSize: 13,
-                          color: darkModeNotifier.value? Colors.white:Colors.black
-                        )
+                    Column(
+                      children: [
+                        SizedBox(
+                            height: 25,
+                            width: 45,
+                            child: (match != null)
+                                ? match.homeTeam.image
+                                : Image.asset('fotos/default_team_logo.png')),
+                        Text(
+                          (match != null) ? match.homeTeam.initials : "N/A",
+                          style: TextStyle(
+                              fontSize: 13,
+                              color: darkModeNotifier.value ? Colors.white : Colors.black),
+                        ),
+                        if (match != null && match.hasMatchStarted)
+                          Text(
+                            (match.homeScore + match.penaltyScoreHome).toString(),
+                            style: TextStyle(
+                              fontSize: 17,
+                              color: (match.hasMatchFinished)
+                                  ? (darkModeNotifier.value ? Colors.white : Colors.black)
+                                  : Colors.red,
+                            ),
+                          ),
+                      ],
                     ),
-                    //if (match.hasMatchStarted)
-                    (match!=null && match.hasMatchStarted)? Text((match.homeScore+match.penaltyScoreHome).toString(),
-                        style: TextStyle(fontSize:  17,color: (match.hasMatchFinished)? darkModeNotifier.value? Colors.white : Colors.black : Colors.red )) : SizedBox.shrink()
+                    // η παύλα στο κέντρο:
+                    Padding(
+                      padding: EdgeInsets.only(left: 3.0,right: 3.0,top: (match == null || !(match.hasMatchEndedFinal)) ? 25 : 0),
+                      child: Center(
+                        child: Text(
+                          "vs",
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: darkModeNotifier.value ? Colors.white70 : Colors.black54,
+                          ),
+                        ),
+                      ),
+                    ),
+                    Column(
+                      children: [
+                        SizedBox(
+                            height: 25,
+                            width: 45,
+                            child: (match != null)
+                                ? match.awayTeam.image
+                                : Image.asset('fotos/default_team_logo.png')),
+                        Text(
+                          (match != null) ? match.awayTeam.initials : "N/A",
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: darkModeNotifier.value ? Colors.white : Colors.black,
+                          ),
+                        ),
+                        if (match != null && match.hasMatchStarted)
+                          Text(
+                            (match.awayScore + match.penaltyScoreAway).toString(),
+                            style: TextStyle(
+                              fontSize: 17,
+                              color: (match.hasMatchFinished)
+                                  ? (darkModeNotifier.value ? Colors.white : Colors.black)
+                                  : Colors.red,
+                            ),
+                          ),
+                      ],
+                    ),
                   ],
                 ),
-                SizedBox(
-                  width: 5,
-                ),
-                Column(children: [
-                  SizedBox(
-                      height: 25 ,
-                      width:  45 ,
-                      child: (match!=null) ? match.awayTeam.image: Image.asset('fotos/default_team_logo.png')),
-                  Text(
-                    (match!=null) ? match.awayTeam.initials : "N/A",
-                    style: TextStyle(fontSize: 13, color: darkModeNotifier.value? Colors.white:Colors.black),
-                  ),
-                  //if (match.hasMatchStarted) Text(match.scoreAway.toString())
-                (match!=null && match.hasMatchStarted)? Text((match.awayScore+match.penaltyScoreAway).toString(), style: TextStyle(fontSize:  17, color: (match.hasMatchFinished)? darkModeNotifier.value? Colors.white : Colors.black : Colors.red )) : SizedBox.shrink()
-                ])
-              ],
-            ),
+              ),
+
               (match==null) ? SizedBox(height:27,child: Center(child: Text("-"),)) : ( !match.hasMatchStarted) ? SizedBox(height:27,child: Center(child: Text(match.dateString,style:TextStyle( color: darkModeNotifier.value? Colors.white:Colors.black) ))) : SizedBox.shrink()
-          ],
+            ],
+          ),
         ),
       ),
     );

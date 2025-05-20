@@ -4,6 +4,7 @@ import 'package:untitled1/Data_Classes/MatchDetails.dart';
 import 'package:untitled1/API/Match_Handle.dart';
 
 
+import '../Firebase_Handle/firebase_screen_stats_helper.dart';
 import '../matchesContainer.dart';
 
 
@@ -25,6 +26,9 @@ class _TeamMatchesWidgetState extends State<TeamMatchesWidget> {
   List<MatchDetails> matchList=[];
   @override
   Widget build(BuildContext context) {
+    logScreenViewSta(screenName: 'Team matches',screenClass: 'Team matches page');
+
+
     return Expanded(child: matchesContainer(
       matches: matchList ,
       type:2

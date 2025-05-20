@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:untitled1/Team_Display_Page_Package/edit_team_page.dart';
 import 'package:untitled1/Team_Display_Page_Package/one_group_standings.dart';
 import '../Data_Classes/Team.dart';
+import '../Firebase_Handle/firebase_screen_stats_helper.dart';
 import '../Match_Details_Package/Match_Not_Started/DetailsMatchNotStarted.dart';
 import '../championship_details/StandingsPage.dart';
 import '../globals.dart';
@@ -19,6 +20,9 @@ class TeamDetailsWidget extends StatefulWidget {
 class _TeamDetailsWidgetState extends State<TeamDetailsWidget> {
   @override
   Widget build(BuildContext context) {
+    logScreenViewSta(screenName: 'Team arxiki',screenClass: 'Team arxiki page');
+
+
     return Expanded(
         child: SingleChildScrollView(
           child: Column(

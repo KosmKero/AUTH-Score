@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../Data_Classes/Player.dart';
 import '../Data_Classes/Team.dart';
+import '../Firebase_Handle/firebase_screen_stats_helper.dart';
 import '../globals.dart';
 import 'add_player_page.dart';
 import 'edit_player_page.dart';
@@ -27,6 +28,9 @@ class _TeamPlayersDisplayWidgetState extends State<TeamPlayersDisplayWidget> {
 
   @override
   Widget build(BuildContext context) {
+    logScreenViewSta(screenName: 'Team players',screenClass: 'Team players page');
+
+
     return Expanded(
       child: SingleChildScrollView(
         scrollDirection: Axis.vertical,

@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:untitled1/globals.dart';
 
+import '../Firebase_Handle/firebase_screen_stats_helper.dart';
 import '../ad_manager.dart';
 
 class AdminRequestScreen extends StatefulWidget {
@@ -85,6 +86,8 @@ class _AdminRequestScreenState extends State<AdminRequestScreen> {
 
   @override
   Widget build(BuildContext context) {
+    logScreenViewSta(screenName: 'Admin request page',screenClass: 'Admin request page');
+
     return Scaffold(
       appBar: AppBar(title: Text('Request Admin Role')),
       body: Padding(

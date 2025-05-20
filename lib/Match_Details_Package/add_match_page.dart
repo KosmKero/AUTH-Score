@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../Data_Classes/Team.dart';
 import '../Firebase_Handle/TeamsHandle.dart';
+import '../Firebase_Handle/firebase_screen_stats_helper.dart';
 import '../globals.dart';
 
 class AddMatchScreen extends StatefulWidget {
@@ -26,7 +27,10 @@ class _AddMatchScreenState extends State<AddMatchScreen> {
 
   @override
   Widget build(BuildContext context) {
+    logScreenViewSta(screenName: 'Add Match Page',screenClass: 'Add Match Page');
+
     return Scaffold(
+
       backgroundColor:
       darkModeNotifier.value ? Color(0xFF1E1E1E) : Colors.white,
       appBar: AppBar(

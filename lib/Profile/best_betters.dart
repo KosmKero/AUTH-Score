@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:untitled1/globals.dart';
 
+import '../Firebase_Handle/firebase_screen_stats_helper.dart';
 import '../ad_manager.dart';
 
 Future<List<Map<String, dynamic>>> getTopUsers() async {
@@ -63,6 +64,7 @@ class _TopUsersListState extends State<TopUsersList> {
 
   @override
   Widget build(BuildContext context) {
+    logScreenViewSta(screenName: 'Top 20 betters',screenClass: 'Top 20 betters');
     return Scaffold(
       backgroundColor:
           darkModeNotifier.value ? Color(0xFF121212) : lightModeBackGround,

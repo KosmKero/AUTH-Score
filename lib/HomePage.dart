@@ -1,12 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'package:untitled1/TopScorersContainer.dart';
 import 'package:untitled1/matchesContainer.dart';
 import 'package:untitled1/API/Match_Handle.dart';
 import 'package:untitled1/Match_Details_Package/add_match_page.dart';
-import 'package:untitled1/Scorer.dart';
 import 'package:untitled1/ad_manager.dart';
+import 'Firebase_Handle/firebase_screen_stats_helper.dart';
 import 'globals.dart';
 
 class HomePage extends StatefulWidget {
@@ -19,15 +18,6 @@ class _HomePageState extends State<HomePage> {
 
   BannerAd? _bannerAd;
   bool _isBannerAdReady = false;
-
-  List<Scorer> topScorers = [
-    Scorer("paulos", 30, "c"),
-    Scorer("lito", 15, "c"),
-    Scorer("billy", 13, "csd"),
-    Scorer("glaros", 10, "c"),
-    Scorer("paulito", 10, "c"),
-    Scorer("lama", 15, "csd"),
-  ];
 
   void changeMatches() {
     setState(() {
@@ -59,6 +49,8 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    logScreenViewSta(screenName: 'Home page',screenClass: 'Home class');
+
     return Column(
       children: [
         // === Banner Ad ===

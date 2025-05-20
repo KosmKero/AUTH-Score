@@ -10,6 +10,7 @@ import 'package:untitled1/Profile/feedback_page.dart';
 import 'package:untitled1/globals.dart';
 import '../Data_Classes/AppUser.dart';
 import '../Firebase_Handle/betting_result_update.dart';
+import '../Firebase_Handle/firebase_screen_stats_helper.dart';
 import 'LogInScreen.dart';
 import 'admin/requests_and_admins_page.dart';
 import 'best_betters.dart';
@@ -62,6 +63,8 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
+    logScreenViewSta(screenName: 'Profile page',screenClass: 'Profile page');
+
     return ValueListenableBuilder<bool>(
       valueListenable: darkModeNotifier,
       builder: (context, darkModeOn, _) {
@@ -229,21 +232,27 @@ class _ProfilePageState extends State<ProfilePage> {
                             color: darkModeOn ? Colors.white : Colors.blue,
                           ),
                           title: TextButton(
-                            onPressed: () {
-                              setState(() {
-                                if (!isLoggedIn) {
-                                  Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) =>
-                                              LogInScreen(user: widget.user)));
-                                } else {
-                                  isLoggedIn = false;
-                                  globalUser =
-                                      AppUser(" ", " ", [], [], "user", {},"");
-                                  signOutUser();
+                            onPressed: () async {
+                              if (!isLoggedIn) {
+                                final result = await Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => LogInScreen(user: widget.user),
+                                  ),
+                                );
+
+                                if (result == true) {
+                                  setState(() {
+                                    isLoggedIn = true;
+                                  });
                                 }
-                              });
+                              } else {
+                                setState(() {
+                                  isLoggedIn = false;
+                                  globalUser = AppUser(" ", " ", [], [], "user", {}, "");
+                                  signOutUser();
+                                });
+                              }
                             },
                             child: Text(
                               isLoggedIn
@@ -503,17 +512,33 @@ class _ProfilePageState extends State<ProfilePage> {
                             },
                             child: Align(
                               alignment: Alignment.centerLeft,
-                              child: Text(
-                                greek ? "Αποστολή feedback" : "Send feedback",
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                  color: darkModeOn ? Colors.white : Colors.blue[900],
-                                ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    greek ? "Αποστολή feedback" : "Send feedback",
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                      color: darkModeOn ? Colors.white : Colors.blue[900],
+                                    ),
+                                  ),
+                                  SizedBox(height: 4),
+                                  Text(
+                                    greek
+                                        ? "Έχετε πρόταση βελτίωσης; Στείλτε μας ανατροφοδότηση."
+                                        : "For any suggestions for improvement, send us your feedback.",
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      color: darkModeOn ? Colors.white70 : Colors.black54,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ),
                         ),
+
                       ],
                     ),
                   ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../Data_Classes/Player.dart';
 import '../Data_Classes/Team.dart';
+import '../Firebase_Handle/firebase_screen_stats_helper.dart';
 
 class PlayerEditPage extends StatefulWidget {
   final Player player;
@@ -58,7 +59,7 @@ class _PlayerEditPageState extends State<PlayerEditPage> {
   void _saveForm() {
     if (_formKey.currentState!.validate()) {
 
-      Player newPlayer = Player(_nameController.text, _surnameController.text, int.parse(_positionController.text), int.parse(_goalsController.text), int.parse(_numberController.text), 22, widget.player.teamName, int.parse(_yellowController.text), int.parse(_redController.text),widget.player.teamNameEnglish);
+      Player newPlayer = Player(_nameController.text, _surnameController.text, int.parse(_positionController.text), int.parse(_goalsController.text), int.parse(_numberController.text), 22, widget.player.teamName, int.parse(_yellowController.text), int.parse(_redController.text),widget.team.nameEnglish);
 
       setState(() {
         widget.team.updatePlayer(widget.player, newPlayer);
@@ -86,6 +87,9 @@ class _PlayerEditPageState extends State<PlayerEditPage> {
 
   @override
   Widget build(BuildContext context) {
+    logScreenViewSta(screenName: 'Edit player',screenClass: 'Edit player page');
+
+
     return Scaffold(
       appBar: AppBar(title: Text('Edit Player'),actions: [IconButton(
         icon: Icon(Icons.delete),

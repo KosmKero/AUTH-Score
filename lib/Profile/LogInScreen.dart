@@ -5,6 +5,7 @@ import 'package:untitled1/Data_Classes/Team.dart';
 import 'package:untitled1/Firebase_Handle/user_handle_in_base.dart';
 import 'package:untitled1/globals.dart';
 import '../Data_Classes/AppUser.dart';
+import '../Firebase_Handle/firebase_screen_stats_helper.dart';
 import '../main.dart';
 
 
@@ -94,6 +95,7 @@ class _LogInScreen extends State<LogInScreen> {
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       appBar: CreateAppBar(
           signIn: signIn,
@@ -156,6 +158,8 @@ class _CreateSignIn extends State<CreateSignIn> {
 
   @override
   Widget build(BuildContext context) {
+    logScreenViewSta(screenName: 'Sign in page',screenClass: 'Sign in page');
+
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -317,6 +321,8 @@ class _CreateSignUp extends State<CreateSignUp> {
 
   @override
   Widget build(BuildContext context) {
+    logScreenViewSta(screenName: 'Sign up page',screenClass: 'Sign up page');
+
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -724,7 +730,7 @@ void checkBase(BuildContext context,emailText,passwordText) async
       try
       {
         greek = await getValue(globalUser.username,"Language");
-        navigatorKey.currentState?.pushReplacementNamed('/home');
+        Navigator.pop(context, true); // Ενημερώνει ότι έγινε επιτυχές login
 
       } catch (navError) {
         print('🚨 Navigation Error: $navError');
@@ -794,7 +800,7 @@ void addInBase(BuildContext context,TextEditingController  emailText,TextEditing
 
     username = email;
     print("Data successfully added!");
-    navigatorKey.currentState?.pushReplacementNamed('/home');
+    Navigator.pop(context, true); // Ενημερώνει ότι έγινε επιτυχές login
 
   }
 }

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:untitled1/globals.dart';
 import '../Data_Classes/AppUser.dart';
+import '../Firebase_Handle/firebase_screen_stats_helper.dart';
 import '../Firebase_Handle/user_handle_in_base.dart';
 import '../ad_manager.dart';
 import '../main.dart';
@@ -49,6 +50,8 @@ class _ChangeUserName extends State<ChangeUserName>
   @override
   Widget build(BuildContext context)
   {
+    logScreenViewSta(screenName: 'Change username page',screenClass: 'Change username page');
+
     return Scaffold(
       appBar: CreateAppBar(),
       body: SingleChildScrollView(

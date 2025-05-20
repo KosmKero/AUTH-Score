@@ -3,6 +3,7 @@ import 'package:untitled1/API/Match_Handle.dart';
 import 'Data_Classes/MatchDetails.dart';
 import 'Data_Classes/Player.dart';
 import 'Data_Classes/Team.dart';
+import 'Firebase_Handle/firebase_screen_stats_helper.dart';
 import 'Team_Display_Page_Package/TeamDisplayPage.dart';
 import 'globals.dart';
 import 'main.dart';
@@ -28,6 +29,8 @@ class _SearchPageState extends State<SearchPage> {
 
   @override
   Widget build(BuildContext context) {
+    logScreenViewSta(screenName: 'Search page',screenClass: 'Search page');
+
     return Scaffold(
       backgroundColor: darkModeNotifier.value? Color(0xFF121212):  lightModeBackGround,
       appBar: AppBar(

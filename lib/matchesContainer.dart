@@ -259,7 +259,7 @@ class eachMatchContainerView extends StatelessWidget {
                                             !match.hasExtraTimeFinished) ||
                                         (match.isPenaltyTime &&
                                             !match.isShootoutOver))
-                                    ? match.scoreHome > match.scoreAway
+                                    ? match.homeScore > match.awayScore
                                         ? darkModeNotifier.value
                                             ? Colors.white
                                             : Colors.black
@@ -277,7 +277,7 @@ class eachMatchContainerView extends StatelessWidget {
                                             !match.hasExtraTimeFinished) ||
                                         (match.isPenaltyTime &&
                                             !match.isShootoutOver))
-                                    ? match.scoreAway > match.scoreHome
+                                    ? match.awayScore > match.homeScore
                                         ? darkModeNotifier.value
                                             ? Colors.white
                                             : Colors.black
@@ -408,15 +408,16 @@ class _MatchContainerTimeState extends State<MatchContainerTime>
       width: 48.5,
       child: Column(
         children: [
-          (!widget.match.hasMatchStarted || widget.match.hasMatchEndedFinal) ?
-          Text(
-             widget.match.timeString,
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: darkModeNotifier.value ? Colors.white : Colors.black87,
-            ),
-          )
+          (!widget.match.hasMatchStarted || widget.match.hasMatchEndedFinal)
+              ? Text(
+                  widget.match.timeString,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color:
+                        darkModeNotifier.value ? Colors.white : Colors.black87,
+                  ),
+                )
               : SizedBox.shrink(),
           if (widget.match.isHalfTime())
             const Text(
@@ -501,7 +502,11 @@ class _MatchNotificationIconState extends State<MatchNotificationIcon> {
       // Προαιρετικά ενημερωτικό μήνυμα
       if (newValue) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: (!greek) ? Text('Reminder set for ${widget.match.homeTeam.nameEnglish}-${widget.match.awayTeam.nameEnglish}') : Text('Θα λάβετε ειδοποίηση για το ματς ${widget.match.homeTeam.name}-${widget.match.awayTeam.name}'),
+          content: (!greek)
+              ? Text(
+                  'Reminder set for ${widget.match.homeTeam.nameEnglish}-${widget.match.awayTeam.nameEnglish}')
+              : Text(
+                  'Θα λάβετε ειδοποίηση για το ματς ${widget.match.homeTeam.name}-${widget.match.awayTeam.name}'),
           duration: Duration(seconds: 2),
         ));
       }

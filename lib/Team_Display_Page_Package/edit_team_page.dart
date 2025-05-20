@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:untitled1/globals.dart';
 
 import '../Data_Classes/Team.dart';
+import '../Firebase_Handle/firebase_screen_stats_helper.dart';
 
 class TeamEditPage extends StatefulWidget {
   TeamEditPage(this.team);
@@ -42,6 +43,9 @@ class _TeamEditPageState extends State<TeamEditPage> {
 
   @override
   Widget build(BuildContext context) {
+    logScreenViewSta(screenName: 'Edit Team ',screenClass: 'Edit Team page');
+
+
     return Scaffold(
       appBar: AppBar(title: Text('Επεξεργασία Ομάδας')),
       body: Padding(

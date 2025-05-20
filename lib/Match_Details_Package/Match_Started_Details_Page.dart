@@ -13,6 +13,7 @@ import '../API/user_handle.dart';
 import '../Data_Classes/Penaltys.dart';
 import '../Data_Classes/Team.dart';
 import '../Data_Classes/match_facts.dart';
+import '../Firebase_Handle/firebase_screen_stats_helper.dart';
 import '../Team_Display_Page_Package/one_group_standings.dart';
 import 'Match_Not_Started/Match_Not_Started_Details_Page.dart';
 import 'Starting__11_Display_Card.dart';
@@ -89,6 +90,14 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.match.hasMatchEndedFinal) {
+      logScreenViewSta(screenName: 'Match ended page',screenClass: 'Match ended page');
+    }
+    else{
+      logScreenViewSta(screenName: 'Match started page',screenClass: 'Match started page');
+    }
+
+
     return Container(
       //color: Colors.blueGrey,
       child: SingleChildScrollView(

@@ -10,6 +10,7 @@ import 'package:untitled1/main.dart';
 
 import '../Data_Classes/Player.dart';
 import '../Data_Classes/Team.dart';
+import '../Firebase_Handle/firebase_screen_stats_helper.dart';
 
 class TeamDisplayPage extends StatefulWidget{
 
@@ -31,8 +32,10 @@ class _TeamDisplayPageState extends State<TeamDisplayPage> {
 
   @override
   Widget build(BuildContext context) {
-    return
-      Scaffold( //ΑΦΟΡΑ ΤΟ ΟΝΟΜΑ ΠΑΝΩ ΣΤΗΝ ΣΕΛΙΔΑ
+    logScreenViewSta(screenName: 'Team page',screenClass: 'Team page');
+
+
+    return Scaffold( //ΑΦΟΡΑ ΤΟ ΟΝΟΜΑ ΠΑΝΩ ΣΤΗΝ ΣΕΛΙΔΑ
         appBar: AppBar(
             backgroundColor:darkModeNotifier.value? Color(0xFF121212): const Color.fromARGB(250, 46, 90, 136),
             iconTheme: IconThemeData(color: Colors.white),
@@ -257,7 +260,10 @@ Widget _sectionChooser(int selectedIndex, Team team) {
     case 2:
       return TeamPlayersDisplayWidget(team: team);
     case 3:
-      return TopPlayersPage(team.players);
+      return TopPlayersPage(
+        List.from(team.players)..sort((a, b) => b.goals.compareTo(a.goals)),
+      );
+
     default:
       return TeamDetailsWidget(team: team);
   }

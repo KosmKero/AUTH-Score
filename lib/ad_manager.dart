@@ -5,11 +5,11 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 class AdManager {
   // === Ad Unit IDs ===
   static final String bannerAdUnitId = Platform.isAndroid
-      ?'ca-app-pub-1918416043234880/7414606492' //ca-app-pub-1918416043234880/7414606492  == ΤΟ ΔΙΚΟ ΜΑΣ   ca-app-pub-3940256099942544/6300978111 == ΤΟ ΤΕΣΤΙΝΚ
+      ?'ca-app-pub-1918416043234880/2473426532' //ca-app-pub-1918416043234880/2473426532  == ΤΟ ΔΙΚΟ ΜΑΣ   ca-app-pub-3940256099942544/6300978111 == ΤΟ ΤΕΣΤΙΝΚ
       : 'ca-app-pub-1918416043234880/8698889690';
 
   static final String nativeAdUnitId = Platform.isAndroid
-      ? 'ca-app-pub-1918416043234880/5443049271'
+      ? 'ca-app-pub-1918416043234880/7386007711'
       : 'ca-app-pub-1918416043234880/8698889690';
 
   // === Banner Ad ===

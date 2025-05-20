@@ -4,6 +4,7 @@ import 'package:untitled1/Data_Classes/MatchDetails.dart';
 import 'package:untitled1/Firebase_Handle/TeamsHandle.dart';
 
 import '../Data_Classes/Team.dart';
+import '../Firebase_Handle/firebase_screen_stats_helper.dart';
 import '../globals.dart';
 import '../main.dart';
 
@@ -105,6 +106,8 @@ class _MatchEditPageState extends State<MatchEditPage> {
 
   @override
   Widget build(BuildContext context) {
+    logScreenViewSta(screenName: 'Match edit page',screenClass: 'Match edit page');
+
     return Scaffold(
       backgroundColor: darkModeNotifier.value? Color(0xFF121212) : Colors.white,
       appBar: AppBar(

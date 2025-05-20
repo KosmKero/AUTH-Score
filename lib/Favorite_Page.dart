@@ -4,6 +4,7 @@ import 'package:untitled1/Firebase_Handle/TeamsHandle.dart';
 import 'package:untitled1/main.dart';
 import 'Data_Classes/MatchDetails.dart';
 import 'Data_Classes/Team.dart';
+import 'Firebase_Handle/firebase_screen_stats_helper.dart';
 import 'globals.dart';
 import 'matchesContainer.dart';
 
@@ -45,6 +46,8 @@ class _FavoriteContainerState extends State<FavoritePage> {
 
   @override
   Widget build(BuildContext context) {
+    logScreenViewSta(screenName: 'Favorite teams page',screenClass: 'Favorite teams page');
+
     return Scaffold(
       backgroundColor: darkModeNotifier.value? Color(0xFF121212):  lightModeBackGround, // Dark mode background
       body: Column(

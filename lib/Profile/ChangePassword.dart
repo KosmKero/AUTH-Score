@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:untitled1/globals.dart';
 import '../Data_Classes/AppUser.dart';
+import '../Firebase_Handle/firebase_screen_stats_helper.dart';
 import '../ad_manager.dart';
 import '../main.dart';
 
@@ -49,8 +50,9 @@ class _ChangePassword extends State<ChangePassword>
   }
 
   @override
-  Widget build(BuildContext context)
-  {
+  Widget build(BuildContext context){
+    logScreenViewSta(screenName: 'Change password page',screenClass: 'Change password page');
+
     return Scaffold(
         appBar: CreateAppBar(),
         body: SingleChildScrollView(
