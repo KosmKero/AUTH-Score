@@ -5,11 +5,13 @@ import 'package:untitled1/main.dart';
 
 import '../Data_Classes/MatchDetails.dart';
 import '../Data_Classes/Team.dart';
+import '../Firebase_Handle/firebase_screen_stats_helper.dart';
 import '../globals.dart';
 
 class StandingsPage extends StatefulWidget {
-  StandingsPage(this.seasonYear);
+  StandingsPage(this.seasonYear, this.teamsList);
   int seasonYear;
+  List<Team> teamsList;
   @override
   State<StandingsPage> createState() => StandingsPage1();
 }
@@ -17,6 +19,9 @@ class StandingsPage extends StatefulWidget {
 class StandingsPage1 extends State<StandingsPage> {
   @override
   Widget build(BuildContext context) {
+    logScreenViewSta(screenName: 'Standings Page',screenClass: 'Standings Page');
+
+
     final isDark = darkModeNotifier.value;
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
@@ -25,19 +30,20 @@ class StandingsPage1 extends State<StandingsPage> {
       child: Container(
         color: isDark ? Color(0xFF121212) : lightModeBackGround,
         child: Column(children: [
-          SizedBox(height: screenHeight * 0.01),
-          Text(greek?"Βαθμολογικός Πίνακας":"Standings Table",
-              style: TextStyle(
-                  fontSize: screenWidth * 0.06,
-                  fontWeight: FontWeight.bold,
-                  color: isDark ? Colors.white : Colors.white,
-                  fontFamily: 'Arial',
-              )),
-          SizedBox(height: screenHeight * 0.01),
+
           Expanded(
               child: SingleChildScrollView(
                   child: Column(
                     children: [
+                      SizedBox(height: screenHeight * 0.01),
+                      Text(greek?"Βαθμολογικός Πίνακας":"Standings Table",
+                          style: TextStyle(
+                            fontSize: screenWidth * 0.06,
+                            fontWeight: FontWeight.bold,
+                            color: isDark ? Colors.white : Colors.white,
+                            fontFamily: 'Arial',
+                          )),
+                      SizedBox(height: screenHeight * 0.01),
                       buildGroupStandings(1),
                       buildGroupStandings(2),
                       buildGroupStandings(3),
@@ -51,7 +57,7 @@ class StandingsPage1 extends State<StandingsPage> {
 
   Widget buildGroupStandings(int group) {
     // Φιλτράρισμα και ταξινόμηση ομάδων του ομίλου
-    List<Team> groupTeams = teams
+    List<Team> groupTeams = widget.teamsList
         .where((team) => team.group == group)
         .toList();
 
@@ -212,10 +218,10 @@ class StandingsPage1 extends State<StandingsPage> {
                     ),
                     DataColumn(
                       label: Container(
-                        width: teamWidth,
-                        alignment: Alignment.center,
+                        //width: teamWidth,
+                        alignment: Alignment.centerLeft,
                         child: Text(
-                          greek ? "Ομάδα" : "Team",
+                          greek ? "  Ομάδα" : "  Team",
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: headerTextColor,
@@ -380,23 +386,10 @@ class StandingsPage1 extends State<StandingsPage> {
                               },
                               child: Row(
                                 children: [
-                                  Container(
+                                  SizedBox(
                                     width:  screenWidth * 0.06,
                                     height: screenWidth * 0.06,
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color: isDark ? Colors.grey.shade800 : Colors.white,
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: isDark ? Colors.black26 : Colors.grey.withOpacity(0.2),
-                                          blurRadius: 4,
-                                          offset: Offset(0, 2),
-                                        ),
-                                      ],
-                                    ),
-                                    child: ClipOval(
-                                      child: team.image,
-                                    ),
+                                    child:  team.image,
                                   ),
                                   SizedBox(width: screenWidth * 0.02),
                                   Flexible(

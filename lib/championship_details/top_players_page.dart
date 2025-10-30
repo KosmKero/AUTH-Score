@@ -7,6 +7,7 @@ import 'package:untitled1/Match_Details_Package/Match_Not_Started/DetailsMatchNo
 import 'package:untitled1/main.dart';
 
 import '../Data_Classes/Player.dart';
+import '../Firebase_Handle/firebase_screen_stats_helper.dart';
 import '../globals.dart';
 
 class TopPlayersProvider extends StatelessWidget {
@@ -14,6 +15,9 @@ class TopPlayersProvider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    logScreenViewSta(screenName: 'Top Players Page',screenClass: 'Top Players Page');
+
+
     return ChangeNotifierProvider(
       create: (_) => TopPlayersHandle(),
       child: Consumer<TopPlayersHandle>(

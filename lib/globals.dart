@@ -21,17 +21,21 @@ List<Team> topTeams = [];
 
 List<Team> teams = [];
 
+int thisYearNow=2026;
+
 Map<int, MatchDetails> playOffMatches = {};
 
+// 🌞 Light Mode
+Color lightModeBackGround = const Color(0xFF97B4C3);   // απαλή μπλε-γκρι βάση
+Color lightModeContainer = const Color(0xFFF7F7F7);    // σχεδόν λευκό για κάρτες/κουτιά
+Color lightModeText = const Color(0xFF14131D);         // σκούρο για καθαρή αντίθεση
 
-Color lightModeBackGround =Color.fromARGB(255, 151, 180, 195);    //Color.fromARGB(255, 125, 163, 181);
-Color lightModeContainer = Color.fromARGB(255, 245, 245, 245);
-Color lightModeText = Color.fromARGB(255, 20, 13, 29);
+// 🌙 Dark Mode
+Color darkModeBackGround = const Color(0xFF1E1E1E);    // πιο βαθύ γκρι/μαύρο
+Color darkModeWidgets = const Color(0xFF2C2C2C);       // γκρι για κουτιά
+Color darkModeMatches = const Color(0xFF2C2C2C);       // ίδιο για ομοιομορφία
+Color darkModeText = const Color(0xFFB0BEC5);          // απαλό γκρι-γαλάζιο (blueGrey 200 περίπου)
 
-Color darkModeBackGround = Color.fromARGB(250, 50, 50, 50);
-Color darkModeWidgets = Colors.grey[800]!;
-Color darkModeMatches = Colors.grey[800]!;
-Color darkModeText = Colors.blueGrey;
 
 
 

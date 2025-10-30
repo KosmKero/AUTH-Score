@@ -248,8 +248,7 @@ class eachMatchContainerView extends StatelessWidget {
                     ? Column(
                         children: [
                           Text(
-                            (match.homeScore + match.penaltyScoreHome)
-                                .toString(),
+                            (match.homeScore).toString(),
                             style: TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
@@ -267,8 +266,7 @@ class eachMatchContainerView extends StatelessWidget {
                                     : Colors.red),
                           ),
                           Text(
-                            (match.awayScore + match.penaltyScoreAway)
-                                .toString(),
+                            (match.awayScore).toString(),
                             style: TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
@@ -287,6 +285,44 @@ class eachMatchContainerView extends StatelessWidget {
                         ],
                       )
                     : SizedBox.shrink(),
+                (match.isPenaltyTime)
+                    ? Padding(
+                        padding: const EdgeInsets.only(left: 5.0),
+                        child: Column(
+                          children: [
+                            Text(
+                              ('(${match.penaltyScoreHome})').toString(),
+                              style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  fontFamily: 'Arial',
+                                  color: (match.hasMatchEndedFinal)
+                                      ? match.penaltyScoreHome >
+                                              match.penaltyScoreAway
+                                          ? darkModeNotifier.value
+                                              ? Colors.white
+                                              : Colors.black
+                                          : Colors.grey
+                                      : Colors.red),
+                            ),
+                            Text(
+                              ('(${match.penaltyScoreAway})').toString(),
+                              style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: (match.hasMatchEndedFinal)
+                                      ? match.penaltyScoreAway >
+                                              match.penaltyScoreHome
+                                          ? darkModeNotifier.value
+                                              ? Colors.white
+                                              : Colors.black
+                                          : Colors.grey
+                                      : Colors.red),
+                            ),
+                          ],
+                        ),
+                      )
+                    : SizedBox.shrink(),
                 Padding(
                   padding: EdgeInsetsDirectional.only(start: 5, end: 0),
                   child: MatchNotificationIcon(
@@ -303,9 +339,7 @@ class eachMatchContainerView extends StatelessWidget {
 //ΦΤΙΑΧΝΕΙ ΤΗΝ ΩΡΑ ΤΟΥ MATCH
 class MatchContainerTime extends StatefulWidget {
   final MatchDetails match;
-
   const MatchContainerTime({super.key, required this.match});
-
   @override
   State<MatchContainerTime> createState() => _MatchContainerTimeState();
 }
@@ -314,14 +348,11 @@ class _MatchContainerTimeState extends State<MatchContainerTime>
     with WidgetsBindingObserver {
   int _secondsElapsed = 0;
   Timer? _timer;
-
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-
     widget.match.addListener(_onMatchUpdated);
-
     if (widget.match.hasMatchStarted &&
         (!widget.match.hasMatchFinished ||
             (widget.match.isExtraTimeTime &&
@@ -332,12 +363,15 @@ class _MatchContainerTimeState extends State<MatchContainerTime>
 
   void _onMatchUpdated() {
     if (widget.match.hasMatchStarted &&
-        _timer == null &&
         (!widget.match.hasMatchFinished ||
             (widget.match.isExtraTimeTime &&
                 !widget.match.hasExtraTimeFinished))) {
-      _startTimer();
+      _startTimer(); // πάντα ξαναξεκινάει με βάση το νέο startTimeInSeconds
+    } else {
+      _timer?.cancel();
+      _timer = null;
     }
+
   }
 
   @override
@@ -351,11 +385,9 @@ class _MatchContainerTimeState extends State<MatchContainerTime>
   @override
   void didUpdateWidget(MatchContainerTime oldWidget) {
     super.didUpdateWidget(oldWidget);
-
     if (oldWidget.match != widget.match) {
       oldWidget.match.removeListener(_onMatchUpdated);
       widget.match.addListener(_onMatchUpdated);
-
       if (widget.match.hasMatchStarted &&
           (!widget.match.hasMatchFinished ||
               (widget.match.isExtraTimeTime &&
@@ -368,7 +400,6 @@ class _MatchContainerTimeState extends State<MatchContainerTime>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
-
     if (state == AppLifecycleState.resumed &&
         widget.match.hasMatchStarted &&
         (!widget.match.hasMatchFinished ||
@@ -380,12 +411,9 @@ class _MatchContainerTimeState extends State<MatchContainerTime>
 
   void _startTimer() {
     _timer?.cancel(); // cancel previous timer if any
-
     _secondsElapsed = (DateTime.now().millisecondsSinceEpoch ~/ 1000) -
         widget.match.startTimeInSeconds;
-
     print("object");
-
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (!mounted) {
         _timer?.cancel();
@@ -401,7 +429,6 @@ class _MatchContainerTimeState extends State<MatchContainerTime>
           (widget.match.isExtraTimeTime && !widget.match.hasExtraTimeFinished)))
       ? Colors.red
       : Colors.black;
-
   @override
   Widget build(BuildContext context) {
     return SizedBox(

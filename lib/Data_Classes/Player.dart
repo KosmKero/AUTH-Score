@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 
+import '../globals.dart';
 import 'Team.dart';
 
 class Player extends ChangeNotifier{
@@ -32,7 +33,7 @@ class Player extends ChangeNotifier{
     _goals++;
 
     await FirebaseFirestore.instance
-        .collection('teams')
+        .collection('year').doc(thisYearNow.toString()).collection('teams')
         .doc(teamName)
         .set({
       'Players': toMap(),
@@ -43,7 +44,7 @@ class Player extends ChangeNotifier{
     if (_goals > 0) _goals--;
 
     await FirebaseFirestore.instance
-        .collection('teams')
+        .collection('year').doc(thisYearNow.toString()).collection('teams')
         .doc(teamName)
         .set({
       'Players': toMap(),
@@ -54,7 +55,7 @@ class Player extends ChangeNotifier{
     _numOfYellowCards++;
 
     await FirebaseFirestore.instance
-        .collection('teams')
+        .collection('year').doc(thisYearNow.toString()).collection('teams')
         .doc(teamName)
         .set({
       'Players': toMap(),
@@ -64,7 +65,7 @@ class Player extends ChangeNotifier{
     _numOfRedCards++;
 
     await FirebaseFirestore.instance
-        .collection('teams')
+        .collection('year').doc(thisYearNow.toString()).collection('teams')
         .doc(teamName)
         .set({
       'Players': toMap(),
@@ -75,7 +76,7 @@ class Player extends ChangeNotifier{
     _numOfYellowCards--;
 
     await FirebaseFirestore.instance
-        .collection('teams')
+        .collection('year').doc(thisYearNow.toString()).collection('teams')
         .doc(teamName)
         .set({
       'Players': toMap(),
@@ -87,7 +88,7 @@ class Player extends ChangeNotifier{
     _numOfRedCards--;
 
     await FirebaseFirestore.instance
-        .collection('teams')
+        .collection('year').doc(thisYearNow.toString()).collection('teams')
         .doc(teamName)
         .set({
       'Players': toMap(),

@@ -160,6 +160,24 @@ class _BettingChooserState extends State<BettingChooser> {
         FirebaseAuth.instance.currentUser!.uid: choice,
       }
     }, SetOptions(merge: true));
+
+    await FirebaseFirestore.instance.collection('bets').doc('${FirebaseAuth.instance.currentUser!.uid}_${widget.matchKey}').set({
+      'userId': FirebaseAuth.instance.currentUser!.uid,
+      'matchId': widget.matchKey,
+      'choice': choice,
+      'status': 'pending',
+      'createdAt': FieldValue.serverTimestamp(),
+
+      'matchInfo': {
+        'Hometeam': match.homeTeam.name,
+        'Awayteam':match.awayTeam.name,
+        'homeTeamEnglish': match.homeTeam.nameEnglish,
+        'awayTeamEnglish': match.awayTeam.nameEnglish,
+        'startTime': match.matchDateTime
+      }
+    });
+
+
   }
 
   Future<String?> getUserVoteFromMatch({required MatchDetails match}) async {

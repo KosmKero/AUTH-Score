@@ -65,7 +65,7 @@ class Team {
       _players.add(player);
 
       await FirebaseFirestore.instance
-          .collection('teams')
+          .collection('year').doc(thisYearNow.toString()).collection('teams')
           .doc(player.teamName)
           .set({
         'Players': player.toMap(),
@@ -78,7 +78,7 @@ class Team {
       _players.remove(player);
 
       await FirebaseFirestore.instance
-          .collection('teams') // π.χ. "teams"
+          .collection('year').doc(thisYearNow.toString()).collection('teams') // π.χ. "teams"
           .doc(name)
           .update({
         'Players.${player.name}${player.number}': FieldValue.delete(),
@@ -94,14 +94,14 @@ class Team {
     if (oldKey != newKey) {
       // Μετακίνησε/μετονόμασε τον παίχτη: διαγραφή παλιού κλειδιού + προσθήκη νέου
       await FirebaseFirestore.instance
-          .collection('teams') // π.χ. "teams"
+          .collection('year').doc(thisYearNow.toString()).collection('teams') // π.χ. "teams"
           .doc(name)
           .update({
         'Players.${oldPlayer.name}${oldPlayer.number}': FieldValue.delete(),
       });
 
       await FirebaseFirestore.instance
-          .collection('teams')
+          .collection('year').doc(thisYearNow.toString()).collection('teams')
           .doc(newPlayer.teamName)
           .set({
         'Players': newPlayer.toMap(),
@@ -109,7 +109,7 @@ class Team {
     }
   else {
     await FirebaseFirestore.instance
-        .collection('teams')
+        .collection('year').doc(thisYearNow.toString()).collection('teams')
         .doc(newPlayer.teamName)
         .set({
       'Players': newPlayer.toMap(),
@@ -126,7 +126,7 @@ class Team {
     if (isGroupPhase) {
       _wins++;
       await FirebaseFirestore.instance
-          .collection('teams')
+          .collection('year').doc(thisYearNow.toString()).collection('teams')
           .doc(name)
           .set({
         'Wins': FieldValue.increment(1),
@@ -140,7 +140,7 @@ class Team {
     if (isGroupPhase) {
       _losses++;
       await FirebaseFirestore.instance
-          .collection('teams')
+          .collection('year').doc(thisYearNow.toString()).collection('teams')
           .doc(name)
           .set({
         'Loses': FieldValue.increment(1),
@@ -152,7 +152,7 @@ class Team {
   Future<void> increaseDraws(bool isGroupPhase) async {
     if (isGroupPhase) {
       _draws++;
-      await FirebaseFirestore.instance.collection('teams').doc(name).set({
+      await FirebaseFirestore.instance.collection('year').doc(thisYearNow.toString()).collection('teams').doc(name).set({
         'Draws': FieldValue.increment(1),
         'Matches': FieldValue.increment(1)
       }, SetOptions(merge: true));
@@ -163,7 +163,7 @@ class Team {
     if (isGroupPhase) {
       _wins--;
       await FirebaseFirestore.instance
-          .collection('teams')
+          .collection('year').doc(thisYearNow.toString()).collection('teams')
           .doc(name)
           .set({
         'Wins': FieldValue.increment(-1),
@@ -177,7 +177,7 @@ class Team {
     if (isGroupPhase) {
       _losses--;
       await FirebaseFirestore.instance
-          .collection('teams')
+          .collection('year').doc(thisYearNow.toString()).collection('teams')
           .doc(name)
           .set({
         'Loses': FieldValue.increment(-1),
@@ -190,7 +190,7 @@ class Team {
     if (isGroupPhase) {
       _draws--;
       await FirebaseFirestore.instance
-          .collection('teams')
+          .collection('year').doc(thisYearNow.toString()).collection('teams')
           .doc(name)
           .set({
         'Draws': FieldValue.increment(-1),
@@ -199,6 +199,7 @@ class Team {
     }
     shiftRightAndClearLast();
   }
+
   bool changeFavourite(){
     _isFavourite=!_isFavourite;
     return _isFavourite;
@@ -212,7 +213,7 @@ class Team {
       throw Exception("Invalid result: must be W, D, or L");
     }
 
-    final userRef = FirebaseFirestore.instance.collection('teams').doc(name);
+    final userRef = FirebaseFirestore.instance.collection('year').doc(thisYearNow.toString()).collection('teams').doc(name);
     final snapshot = await userRef.get();
 
     if (!snapshot.exists) return;
@@ -236,28 +237,31 @@ class Team {
 
 
   Future<void> shiftRightAndClearLast() async {
-    final userRef = FirebaseFirestore.instance.collection('teams').doc(name);
-    final snapshot = await userRef.get();
+    final userRef = FirebaseFirestore.instance
+        .collection('year')
+        .doc(thisYearNow.toString())
+        .collection('teams')
+        .doc(name);
 
+    final snapshot = await userRef.get();
     if (!snapshot.exists) return;
 
-    List<dynamic> history = snapshot.data()?['LastFive'] ?? [];
+    List<String> history = List<String>.from(snapshot.data()?['LastFive'] ?? []);
 
-    // Βεβαιώνεσαι ότι ο πίνακας έχει 6 θέσεις
+    // Γεμίζουμε μέχρι 6 θέσεις
     while (history.length < 6) {
-      history.insert(0, "");  // Βάζει το "" στην αρχή της λίστας
+      history.add("");
     }
 
-    // Κάνουμε shift προς τα δεξιά από το τέλος μέχρι τη θέση 1
-    for (int i = history.length - 1; i > 0; i--) {
-      history[i] = history[i - 1];
+    // Shift: βάζουμε κενό στην αρχή, μετακινούμε όλα, κόβουμε το τελευταίο
+    history.insert(0, "");
+    if (history.length > 6) {
+      history.removeLast();
     }
-
-    // Καθαρίζουμε τη θέση 0
-    history[0] = "";
 
     await userRef.update({'LastFive': history});
   }
+
 
 
   void setCoachName(String name){
@@ -284,7 +288,7 @@ class Team {
   Future<void> increaseGoalsFor() async {
     _goalsFor++;
     await FirebaseFirestore.instance
-        .collection('teams')
+        .collection('year').doc(thisYearNow.toString()).collection('teams')
         .doc(name)
         .set({
       'goalsFor': FieldValue.increment(1)
@@ -295,7 +299,7 @@ class Team {
     if (_goalsFor > 0) {
       _goalsFor--;
       await FirebaseFirestore.instance
-          .collection('teams')
+          .collection('year').doc(thisYearNow.toString()).collection('teams')
           .doc(name)
           .set({
         'goalsFor': FieldValue.increment(-1)
@@ -306,7 +310,7 @@ class Team {
   Future<void> increaseGoalsAgainst() async {
     _goalsAgainst++;
     await FirebaseFirestore.instance
-        .collection('teams')
+        .collection('year').doc(thisYearNow.toString()).collection('teams')
         .doc(name)
         .set({
       'goalsAgainst': FieldValue.increment(1)
@@ -317,7 +321,7 @@ class Team {
     if (_goalsAgainst > 0) {
       _goalsAgainst--;
       await FirebaseFirestore.instance
-          .collection('teams')
+          .collection('year').doc(thisYearNow.toString()).collection('teams')
           .doc(name)
           .set({
         'goalsAgainst': FieldValue.increment(-1)
@@ -328,7 +332,7 @@ class Team {
   Future<void> increaseMatches() async {
     _matches++;
     await FirebaseFirestore.instance
-        .collection('teams')
+        .collection('year').doc(thisYearNow.toString()).collection('teams')
         .doc(name)
         .set({
       'Matches': FieldValue.increment(1)

@@ -22,7 +22,7 @@ class DetailsMatchNotStarted extends StatelessWidget {
           Padding(
             padding: EdgeInsets.only(right: 10),
             child:Text(
-              greek?'Ποιός Θα κερδίσει?🏆':"Who will win?🏆",
+              greek?'Ποιoς Θα κερδίσει;':"Who will win?",
               style: TextStyle(
                   fontSize: 19,
                   fontWeight: FontWeight.bold,
@@ -36,11 +36,13 @@ class DetailsMatchNotStarted extends StatelessWidget {
           SizedBox(
             height: 70,
           ),
-          Text(
-            greek?'Αποτελέσματα τελευταίων 5 αγωνιστικών:':"Result of the last 5 games:",
-            style: TextStyle(
-              fontSize: 18,
-              fontFamily: "Arial", color: darkModeNotifier.value?Colors.white:Colors.black
+          Center(
+            child: Text(
+              greek?'Αποτελέσματα τελευταίων αγωνιστικών:':"Result of the last games:",
+              style: TextStyle(
+                fontSize: 18,
+                fontFamily: "Arial", color: darkModeNotifier.value?Colors.white:Colors.black
+              ),
             ),
           ),
           SizedBox(
@@ -112,35 +114,46 @@ class TeamFormWidget extends StatelessWidget {
           final displayResults = results.length == 6 ? results.sublist(1) : results;
 
           return Padding(
-            padding: EdgeInsets.only(left: 0, top: 10),
+            padding: EdgeInsets.only(left: 0, top: 5),
             child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 // Team Name
-                Container(
-                  width: teamNameWidth,
-                  alignment: Alignment.centerLeft,
-                  child: TextButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => TeamDisplayPage(team)),
-                      );
-                    },
-                    child: Text(
-                      team.name,
-                      style: TextStyle(
-                        fontSize: screenWidth * 0.036, // Responsive font size
-                        fontWeight: FontWeight.w600,
-                        color: darkModeNotifier.value?Colors.white:Colors.black,
-                        letterSpacing: 1.3,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
+                InkWell(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => TeamDisplayPage(team)),
+                    );
+                  },
+                  child: Row(
+                    children: [
+                      SizedBox(width: 10,),
+                      SizedBox(
+                          height: 25,
+                          width: 25,
+                          child: team.image),
+                      SizedBox(width: 5,),
+                      Container(
+                        //width: teamNameWidth,
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                            team.name,
+                            style: TextStyle(
+                              fontSize: screenWidth * 0.036, // Responsive font size
+                              fontWeight: FontWeight.w600,
+                              color: darkModeNotifier.value?Colors.white:Colors.black,
+                              letterSpacing: 1.3,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                    ],
                   ),
                 ),
                 Container(
-                  width: resultsWidth,
+                  //width: resultsWidth,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: displayResults.map((result) => Padding(

@@ -50,7 +50,7 @@ class _AdminRequestScreenState extends State<AdminRequestScreen> {
     FirebaseFirestore firestore = FirebaseFirestore.instance;
 
     // Ανάκτηση όλων των εγγράφων από τη συλλογή "teams"
-    QuerySnapshot querySnapshot = await firestore.collection("teams").get();
+    QuerySnapshot querySnapshot = await firestore.collection("year").doc(thisYearNow.toString()).collection("teams").get();
 
 
 

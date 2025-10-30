@@ -1,32 +1,25 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:untitled1/API/Match_Handle.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:untitled1/API/top_players_handle.dart';
-import 'package:untitled1/API/user_handle.dart';
 import 'package:untitled1/Data_Classes/Team.dart';
-import 'package:untitled1/Data_Classes/AppUser.dart';
 import 'package:untitled1/Firebase_Handle/FireBaseMessage.dart';
 import 'package:untitled1/Firebase_Handle/TeamsHandle.dart';
 import 'package:untitled1/Firebase_Handle/user_handle_in_base.dart';
-import 'package:untitled1/championship_details/knock_outs_page.dart';
 import 'package:untitled1/championship_details/sector_chooser.dart';
 import 'API/NotificationService.dart';
-import 'Data_Classes/AppUser.dart';
+import 'API/TeamHandle.dart';
 import 'Favorite_Page.dart';
-import 'Firebase_Handle/betting_result_update.dart';
-import 'Firebase_Handle/update_statistics.dart';
+import 'Firebase_Handle/firebase_screen_stats_helper.dart';
 import 'HomePage.dart';
 import 'Data_Classes/Player.dart';
 import 'Profile/Profile_Page.dart';
 import 'Search_Page.dart';
-import 'championship_details/StandingsPage.dart';
 import 'Data_Classes/MatchDetails.dart';
 import 'globals.dart';
 
@@ -43,13 +36,27 @@ Future<void> loadUser(User user) async{
    userHandle.getUser(user);
 }
 
+
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await MobileAds.instance.initialize();
+  //await Hive.initFlutter();
+
+ //Hive.registerAdapter(MatchModelAdapter());
+ //Hive.registerAdapter(GoalAdapter());
+ //Hive.registerAdapter(PenaltyAdapter());
+
+ //await Hive.openBox<MatchModel>('matches');
+
+
 
   try {
 
     await Firebase.initializeApp();
+    //await MatchHandle.migrateMatches();
+    //await MatchHandle.migrateTeams();
+    //await MatchHandle().resetPlayerData("2026");
     User? user = FirebaseAuth.instance.currentUser;
     if(user!=null) {
       loadUser(user);
@@ -74,6 +81,9 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    logScreenViewSta(screenName: 'Opened',screenClass: 'Opened');
+
+
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       navigatorKey: navigatorKey,
@@ -98,14 +108,15 @@ class _LoadingScreenState extends State<LoadingScreen> {
   bool _isLoading = true;
   String _loadingMessage = "Initializing...";
   bool _hasError = false;
-  String _errorMessage = "";
+  final String _errorMessage = "";
 
   @override
   void initState() {
     super.initState();
     _loadData();
-    if(isLoggedIn)
+    if(isLoggedIn) {
       _loadLanguage();
+    }
 
     initia();
   //  BettingResultUpdate().recalculateAllScores();
@@ -124,6 +135,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
       setState(() {
         _loadingMessage = "Loading teams...";
       });
+      await loadYear();
       await loadTeams();
 
       setState(() {
@@ -253,6 +265,13 @@ Future<void> loadTeams() async {
   TeamsHandle teamsHandle = TeamsHandle();
   teams = await teamsHandle.getAllTeams();
 
+/*
+  TeamHandle().addTeam('ΤΕΦΑΑ ΣΕΡΡΩΝ', "TEFAA SERRES", "PHED SER");
+  TeamHandle().addTeam('ΔΑΣΟΛΟΓΙΑ', "DASOLOGIA", "FOR");
+  TeamHandle().addTeam('ΠΟΛΙΤΙΚΟΙ ΜΗΧΑΝΙΚΟΙ 2', "CIVIL ENGINEERS 2", "CIVIL II");
+  TeamHandle().addTeam("ΕΡΑΣΜΟΥΣ", "ERASMUS", "ERASMUS");
+  TeamHandle().addTeam("ΓΕΩΛΟΓΙΑ", "GEOLOGY", "GEO");
+*/
   /*
   teamsHandle.addMatch("ΗΜΜΥ 2","ΟΙΚΟΝΟΜΙΚΟ",17,2, 2025, 2, true, true, 1510, "previous",0,11);
   teamsHandle.addMatch("ΤΕΦΑΑ","ΦΥΣΙΚΟ",18, 2, 2025, 2, true, true, 1510, "previous",10,0);
@@ -268,6 +287,17 @@ Future<void> loadTeams() async {
    */
 
 
+}
+Future<void> loadYear() async {
+  final doc = await FirebaseFirestore.instance
+      .collection('ThisYear')
+      .doc('2026')
+      .get();
+
+  final data = doc.data();
+  if (data != null && data.containsKey('year')) {
+    thisYearNow = data['year'] as int;
+  }
 }
 
 // Original matches loading function
@@ -339,29 +369,42 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       valueListenable: darkModeNotifier,
       builder: (context, isDarkMode, _) {
         return AppBar(
-          title: Text(
-            "AUTH Score",
-            style: TextStyle(
-              fontSize: 26,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
+          title: Row(
+            children: [
+              Text(
+                "AUTH Score",
+                style: TextStyle(
+                  fontSize: 26,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+
+            ],
           ),
+
           backgroundColor: isDarkMode
               ? const Color(0xFF121212)
               : const Color.fromARGB(250, 46, 90, 136),
           actions: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 5),
-              child: IconButton(
-                icon: const Icon(Icons.search, color: Colors.white),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => SearchPage()),
-                  );
-                },
-              ),
+
+            Row(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 5),
+                  child: IconButton(
+                    icon: const Icon(Icons.search, color: Colors.white),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => SearchPage()),
+                      );
+                    },
+                  ),
+                ),
+                //NotificationsForAllChampionship()
+
+              ],
             ),
           ],
         );
@@ -372,6 +415,37 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 }
+
+
+class NotificationsForAllChampionship extends StatefulWidget {
+  const NotificationsForAllChampionship({super.key});
+
+  @override
+  State<NotificationsForAllChampionship> createState() => _NotificationsForAllChampionshipState();
+}
+
+class _NotificationsForAllChampionshipState extends State<NotificationsForAllChampionship> {
+  bool active= false;
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      onPressed: () {
+        setState(() {
+          active = !active;
+        });
+        // εδώ μπορείς να βάλεις και FirebaseMessaging.subscribeToTopic / unsubscribe
+      },
+      icon: Icon(
+        active
+            ? Icons.notifications_active
+            : Icons.notifications_none,
+        color: Colors.white,
+      ),
+    );
+  }
+}
+
+
 
 
 // ------------------------ BOTTOM NAVIGATION ------------------------
@@ -393,6 +467,7 @@ class CustomBottomNavigationBar extends StatelessWidget {
         BottomNavigationBarItem(icon: const Icon(Icons.emoji_events), label: greek ? "Πρωτάθλημα" : "Championship"),
         BottomNavigationBarItem(icon: Icon(Icons.favorite), label: greek ? "Αγαπημένα" : "Favorite"),
         BottomNavigationBarItem(icon: Icon(Icons.person), label: greek ? "Προφίλ" : "Profile"),
+        //BottomNavigationBarItem(icon: Icon(Icons.local_offer), label: greek? 'Φανέλες' : 'Merch')
       ],
       currentIndex: currentIndex,
       selectedItemColor: Colors.blue,

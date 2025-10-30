@@ -1,11 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 
-class Penalty {
+import '../globals.dart';
+
+class PenaltyShoot {
   final bool isScored;
   final bool isHomeTeam;
 
-  Penalty({required this.isScored, required this.isHomeTeam});
+  PenaltyShoot({required this.isScored, required this.isHomeTeam});
 
   Map<String, dynamic> toMap() => {
     'isScored': isScored,
@@ -13,7 +15,7 @@ class Penalty {
     'timestamp': DateTime.now().toIso8601String(),
   };
 
-  factory Penalty.fromMap(Map<String, dynamic> map) => Penalty(
+  factory PenaltyShoot.fromMap(Map<String, dynamic> map) => PenaltyShoot(
     isScored: map['isScored'] ?? false,
     isHomeTeam: map['isHomeTeam'] ?? true,
   );
@@ -23,26 +25,31 @@ class Penalty {
 class PenaltyShootout extends ChangeNotifier{
   PenaltyShootout(this.penalties);
 
-  List<Penalty> penalties;
+  List<PenaltyShoot> penalties;
 
-  Future<void> addPenalty(Penalty penalty, String matchDocId) async {
+  Future<void> addPenalty(PenaltyShoot penalty, String matchDocId) async {
     penalties.add(penalty);
     await savePenalty(matchDocId, penalty);
     notifyListeners();
   }
 
 
-  Future<void> savePenalty(String matchDocId, Penalty penalty) async {
-    final matchDoc = FirebaseFirestore.instance.collection('matches').doc(matchDocId);
+  Future<void> savePenalty(String matchDocId, PenaltyShoot penalty) async {
+    final matchDoc = FirebaseFirestore.instance.collection('year').doc(thisYearNow.toString()).collection("matches").doc(matchDocId);
 
     await matchDoc.update({
       'penalties': FieldValue.arrayUnion([penalty.toMap()])
     });
   }
 
-  static Future<PenaltyShootout> loadFromFirestore(String matchDocId) async {
+  static Future<PenaltyShootout> loadFromFirestore(String matchDocId, int year, int month) async {
+    int yuse =year;
+    if (month>9 ){
+      yuse = year+1;
+    }
+
     final docSnapshot = await FirebaseFirestore.instance
-        .collection('matches')
+        .collection('year').doc(yuse.toString()).collection("matches")
         .doc(matchDocId)
         .get();
 
@@ -52,14 +59,14 @@ class PenaltyShootout extends ChangeNotifier{
     final List<dynamic> rawPenalties = data['penalties'] ?? [];
 
     final penalties = rawPenalties.map((p) {
-      return Penalty.fromMap(Map<String, dynamic>.from(p));
+      return PenaltyShoot.fromMap(Map<String, dynamic>.from(p));
     }).toList();
 
     return PenaltyShootout(penalties);
   }
 
   Future<void> removeLastPenalty(String matchDocId) async {
-    final docRef = FirebaseFirestore.instance.collection('matches').doc(matchDocId);
+    final docRef = FirebaseFirestore.instance.collection('year').doc(thisYearNow.toString()).collection("matches").doc(matchDocId);
     final snapshot = await docRef.get();
 
     final data = snapshot.data();
@@ -75,17 +82,21 @@ class PenaltyShootout extends ChangeNotifier{
 
     // 🔁 Ενημέρωση και της τοπικής λίστας
     penalties = rawPenalties.map((p) {
-      return Penalty.fromMap(Map<String, dynamic>.from(p));
+      return PenaltyShoot.fromMap(Map<String, dynamic>.from(p));
     }).toList();
 
     notifyListeners();
   }
 
 
-  int get homeScore =>
-      penalties.where((p) => p.isScored && p.isHomeTeam).length;
+  int get homeScore {
+    if (penalties.isEmpty) return 0;
+    return penalties.fold<int>(0, (sum, p) => sum + ((p.isScored && p.isHomeTeam) ? 1 : 0));
+  }
 
+  int get awayScore {
+    if (penalties.isEmpty) return 0;
+    return penalties.fold<int>(0, (sum, p) => sum + ((p.isScored && !p.isHomeTeam) ? 1 : 0));
+  }
 
-  int get awayScore =>
-      penalties.where((p) => p.isScored && !p.isHomeTeam).length;
 }

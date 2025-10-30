@@ -13,7 +13,7 @@ import '../Firebase_Handle/betting_result_update.dart';
 import '../Firebase_Handle/firebase_screen_stats_helper.dart';
 import 'LogInScreen.dart';
 import 'admin/requests_and_admins_page.dart';
-import 'best_betters.dart';
+import 'bets/choosePage.dart';
 
 Future<void> signOutUser() async {
   await FirebaseAuth.instance.signOut();
@@ -126,7 +126,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     child: ListTile(
                       dense: true,
                       leading: Icon(
-                        Icons.leaderboard_rounded,
+                        Icons.online_prediction,
                         color: darkModeOn ? Colors.white : Colors.blue,
                       ),
                       title: TextButton(
@@ -134,11 +134,11 @@ class _ProfilePageState extends State<ProfilePage> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => TopUsersList()),
+                                  builder: (context) => TopUsersAndHistory()),
                             );
                           },
                           child: Text(
-                            "Top 20 Tipsters",
+                            greek ? "Προβλέψεις" : 'Predictions',
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.w500,

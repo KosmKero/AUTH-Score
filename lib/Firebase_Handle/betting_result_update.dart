@@ -1,85 +1,91 @@
 import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-
 
 class BettingResultUpdate {
 
-
   Future<void> checkAndUpdateStats() async {
-    // Λήψη όλων των αγώνων που έχουν περάσει και δεν έχουν ελεγχθεί ακόμα
-    final currentDate = DateTime.now();
     final matchesSnapshot = await FirebaseFirestore.instance
         .collection('votes')
         .where('hasMatchFinished', isEqualTo: true)
-        .where('statsUpdated', isEqualTo: false)  // Ματς που δεν έχουν ενημερωθεί
+        .where('statsUpdated', isEqualTo: false)
         .get();
 
     for (final matchDoc in matchesSnapshot.docs) {
-      final matchKey = matchDoc.id;  // Το matchKey είναι το ID του εγγράφου
+      final matchKey = matchDoc.id;
       final matchData = matchDoc.data();
       final correctChoice = matchData['correctChoice'];
       final userVotes = Map<String, dynamic>.from(matchData['userVotes'] ?? {});
 
-      // Ενημέρωση των στατιστικών των χρηστών
+      // Batch για users
+      WriteBatch batch = FirebaseFirestore.instance.batch();
+
       for (final entry in userVotes.entries) {
         final String uid = entry.key;
         final String choice = entry.value;
 
-        // Λήψη των δεδομένων του χρήστη
-        final userDocRef = FirebaseFirestore.instance.collection('users').doc(uid);
-        final userDoc = await userDocRef.get();
+        final userRef = FirebaseFirestore.instance.collection('users').doc(uid);
 
-        int correct = 0;
-        int total = 0;
-
+        // Παίρνουμε προηγούμενα στατιστικά
+        final userDoc = await userRef.get();
+        int correct = 0, total = 0;
         if (userDoc.exists && userDoc.data()?['predictions'] != null) {
-          final predData = userDoc.data()!['predictions'];
-          correct = predData['correctVotes'] ?? 0;
-          total = predData['totalVotes'] ?? 0;
+          final pred = userDoc.data()!['predictions'];
+          correct = pred['correctVotes'] ?? 0;
+          total = pred['totalVotes'] ?? 0;
         }
 
-        // Ενημέρωση των στατιστικών
-        if (choice == correctChoice) {
-          correct++;
-        }
+        // Ενημέρωση στατιστικών
+        if (choice == correctChoice) correct++;
         total++;
 
         final accuracy = total > 0 ? (correct / total) * 100 : 0.0;
         final normalizedAccuracy = accuracy / 100;
-
-        //final normalizedAccuracy = accuracy / 100;
         final cappedTotal = total.clamp(0, 50);
         final confidence = 1 - exp(-0.1 * cappedTotal);
         final score = normalizedAccuracy * confidence * 100;
 
-        //final score = total > 0 ? accuracy * (1 - exp(-0.06 * log(total + 1)))*100 : 0;
-
-        // Αποθήκευση των ενημερωμένων δεδομένων του χρήστη
-        await userDocRef.set({
+        // Batch update στο user
+        batch.set(userRef, {
           'predictions': {
             'correctVotes': correct,
             'totalVotes': total,
             'accuracy': accuracy,
             'score': score,
           },
-          'totalVotes': total
+          'totalVotes': total,
         }, SetOptions(merge: true));
+
+        // Δημιουργία / ενημέρωση bet
+        final betRef = FirebaseFirestore.instance
+            .collection('bets')
+            .doc('${uid}_$matchKey');
+
+        batch.set(betRef, {
+          'status': choice == correctChoice ? 'won' : 'lost',
+          'matchInfo': {
+            'GoalHome': matchData['GoalHome'],
+            'GoalAway': matchData['GoalAway'],
+          }
+        }, SetOptions(merge: true));
+
+
       }
 
-      // Ενημέρωση του match ότι τα στατιστικά έχουν ανανεωθεί
-      await FirebaseFirestore.instance
-          .collection('votes')
-          .doc(matchKey)
-          .set({
-        'statsUpdated': true, // Προσθήκη του πεδίου που δηλώνει ότι τα στατιστικά έχουν ανανεωθεί
-        'TimeStamp': DateTime.now()
+      // Commit batch
+      await batch.commit();
+
+      // Ενημέρωση match ότι έχει ενημερωθεί
+      await FirebaseFirestore.instance.collection('votes').doc(matchKey).set({
+        'statsUpdated': true,
+        'TimeStamp': DateTime.now(),
       }, SetOptions(merge: true));
 
-      print("Stats updated for match $matchKey.");
+      print("Stats and bets updated for match $matchKey.");
     }
-    updateLeaderboard();
+
+    // Ενημέρωση leaderboard
+    await updateLeaderboard();
   }
 
   Future<void> updateLeaderboard() async {
@@ -89,71 +95,22 @@ class BettingResultUpdate {
         .limit(20)
         .get();
 
-    final List<Map<String, dynamic>> topUsers = [];
-
-    for (final doc in usersSnapshot.docs) {
+    final topUsers = usersSnapshot.docs.map((doc) {
       final data = doc.data();
-      final predictions = data['predictions'] ?? {};
-      topUsers.add({
+      final pred = data['predictions'] ?? {};
+      return {
         'uid': doc.id,
         'username': data['username'] ?? 'Unknown',
-        'accuracy': predictions['accuracy'] ?? 0,
-        'correctVotes': predictions['correctVotes'] ?? 0,
-        'totalVotes': predictions['totalVotes'] ?? 0,
-        'score': predictions['score'] ?? 0,
-      });
-    }
+        'accuracy': pred['accuracy'] ?? 0,
+        'correctVotes': pred['correctVotes'] ?? 0,
+        'totalVotes': pred['totalVotes'] ?? 0,
+        'score': pred['score'] ?? 0,
+      };
+    }).toList();
 
-    // Αποθήκευση της λίστας σε έγγραφο
-    await FirebaseFirestore.instance
-        .collection('leaderboard')
-        .doc('top20')
-        .set({
+    await FirebaseFirestore.instance.collection('leaderboard').doc('top20').set({
       'updatedAt': DateTime.now(),
       'users': topUsers,
     });
   }
-
-  Future<void> recalculateAllScores() async {
-    final usersSnapshot = await FirebaseFirestore.instance
-        .collection('users')
-        .get();
-
-    for (final userDoc in usersSnapshot.docs) {
-
-      int correct = 0;
-      int total = 0;
-
-      if (userDoc.exists && userDoc.data()['predictions'] != null) {
-        final predData = userDoc.data()['predictions'];
-        correct = predData['correctVotes'] ?? 0;
-        total = predData['totalVotes'] ?? 0;
-      }
-      final accuracy = total > 0 ? (correct / total) * 100 : 0.0;
-      final normalizedAccuracy = accuracy / 100;
-
-      //final normalizedAccuracy = accuracy / 100;
-      final cappedTotal = total.clamp(0, 50);
-      final confidence = 1 - exp(-0.1 * cappedTotal);
-      final score = normalizedAccuracy * confidence * 100;
-
-
-      await userDoc.reference.set({
-        'predictions': {
-          'accuracy': accuracy,
-          'score': score,
-        }
-      }, SetOptions(merge: true));
-    }
-    updateLeaderboard();
-
-
-    print('✅ Όλα τα scores επανυπολογίστηκαν.');
-  }
-
-
-
-
-
-
 }

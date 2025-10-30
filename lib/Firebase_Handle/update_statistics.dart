@@ -50,7 +50,7 @@ List<String> allItems = [
 
 ];
 
-Future<void> updateStatistics() async {
+Future<void> updateSchoolStatistics() async {
   final firestore = FirebaseFirestore.instance;
 
   // Αρχικοποίηση map με 0 για κάθε σχολή
@@ -64,22 +64,83 @@ Future<void> updateStatistics() async {
   for (var doc in snapshot.docs) {
     final university = doc['University'];
 
-    if (university != null && university.toString().trim().isNotEmpty) {
+    if (university != null) {
       if (counts.containsKey(university)) {
         counts[university] = counts[university]! + 1;
       } else {
         counts['Άλλο'] = counts['Άλλο']! + 1;
       }
-      totalUsers++;
+
     }
+    totalUsers++;
   }
 
   // Αφαίρεση σχολών με 0 αν δεν τις θέλεις στο τελικό document
   counts.removeWhere((key, value) => value == 0);
 
   // Αποθήκευση στο Firestore
-  await firestore.collection('schoolStats').doc('summary').set({
+  await firestore.collection('userStats').doc('schoolStats').set({
     'totalUsers': totalUsers,
     'schools': counts,
   });
 }
+
+Future<void> updateFavoriteTeamsStatistics() async {
+  final firestore = FirebaseFirestore.instance;
+
+  Map<String, int> teamCounts = {};
+  int totalUsers = 0;
+
+  final snapshot = await firestore.collection('users').get();
+
+  for (var doc in snapshot.docs) {
+    final data = doc.data();
+    final favTeams = data['Favourite Teams'];
+
+    if (favTeams != null && favTeams is List && favTeams.isNotEmpty) {
+      for (var team in favTeams) {
+        if (team is String && team.trim().isNotEmpty) {
+          teamCounts[team] = (teamCounts[team] ?? 0) + 1;
+        }
+      }
+      totalUsers++; // Αν θεωρείς ότι μετράμε χρήστες που έχουν έστω 1 ομάδα
+    }
+  }
+
+  // Αφαίρεση ομάδων με 0 εμφανίσεις αν χρειάζεται (σπάνιο εδώ)
+  teamCounts.removeWhere((key, value) => value == 0);
+
+  await firestore.collection('userStats').doc('favoriteTeamsStat').set({
+    'totalUsers': totalUsers,
+    'teams': teamCounts,
+  });
+}
+
+Future<void> updateDarkModeStatistics() async {
+  final usersCollection = FirebaseFirestore.instance.collection('users');
+  final snapshot = await usersCollection.get();
+
+  int darkCount = 0;
+  int lightCount = 0;
+
+  for (var doc in snapshot.docs) {
+    final data = doc.data();
+    if (data.containsKey('darkMode')) {
+      final isDark = data['darkMode'] == true;
+      if (isDark) {
+        darkCount++;
+      } else {
+        lightCount++;
+      }
+    }
+  }
+
+  final totalUsers = darkCount + lightCount;
+
+  await FirebaseFirestore.instance.collection('userStats').doc('darkModeStats').set({
+    'totalUsers': totalUsers,
+    'darkMode': darkCount,
+    'lightMode': lightCount,
+  });
+}
+

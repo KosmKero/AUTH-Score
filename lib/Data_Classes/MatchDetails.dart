@@ -9,6 +9,7 @@ import 'package:untitled1/Data_Classes/Player.dart';
 import 'package:untitled1/Firebase_Handle/TeamsHandle.dart';
 
 import '../globals.dart';
+import '../globals.dart' as global;
 import 'Penaltys.dart';
 import 'Team.dart';
 import 'match_facts.dart';
@@ -30,7 +31,8 @@ class MatchDetails extends ChangeNotifier {
       _year,
       _time,
       _scoreHomeExtraTime,
-      _scoreAwayExtraTime;
+      _scoreAwayExtraTime,
+      _slot; //δειχνει σε ποιο μπρακετ θα ειναι το ματς
   late Team _homeTeam, _awayTeam;
   late int _startTimeInSeconds;
   late bool
@@ -62,6 +64,15 @@ class MatchDetails extends ChangeNotifier {
   Map<Player?, int> players11Home = {};
   Map<Player?, int> players11Away = {};
 
+
+  late int hour = _time ~/ 100;
+
+  late int minute = time % 100;
+
+  // Δημιουργία DateTime
+  late DateTime matchDateTime = DateTime(year, month, day, hour, minute);
+
+
   MatchDetails(
       {required Team homeTeam,
       required Team awayTeam,
@@ -84,7 +95,8 @@ class MatchDetails extends ChangeNotifier {
       required hasSecondHalfExtraTimeStarted,
       required scoreAwayExtraTime,
       required scoreHomeExtraTime,
-      required penalties
+      required penalties,
+      required slot
       // required this.selectedFormationHome,
       // required this.selectedFormationAway,
       // required Map<String,int> playersI11Home,
@@ -180,6 +192,8 @@ class MatchDetails extends ChangeNotifier {
       loadPenaltys();
     }
     penaltyOver=isShootoutOver;
+    _slot = slot;
+
 
     _notify = ValueNotifier<bool>((globalUser.matchKeys[matchKey] ??
         (globalUser.favoriteList.contains(homeTeam.name) ||
@@ -216,14 +230,17 @@ class MatchDetails extends ChangeNotifier {
             data['hasSecondHalfExtraTimeStarted'] ?? false,
         scoreAwayExtraTime: data['scoreAwayExtraTime'] ?? 0,
         scoreHomeExtraTime: data['scoreHomeExtraTime'] ?? 0,
-        penalties: data['penalties'] ?? []
+        penalties: (data['penalties'] as List<dynamic>? ?? [])
+            .map((p) => PenaltyShoot.fromMap(Map<String, dynamic>.from(p)))
+            .toList(),
+        slot: data["slot"]
 
         //selectedFormationHome: data["selectedFormationHome"] ?? "4-3-3",
         //selectedFormationAway: data["selectedFormationAway"] ?? "4-3-3",
         //playersI11Home: Map<String, int>.from(data["playersI11Home"] ?? {}), //φορτωνουμε μαπ με αρχικη ενδεκαδα (ονομα παιχτη, θεση)
         //playersI11Away: Map<String, int>.from(data["playersI11Away"] ?? {}), //φορτωνουμε μαπ με αρχικη ενδεκαδα (ονομα παιχτη, θεση)
-        //selectedHome: Map<String, bool>.from(data["selectedHome"] ?? {}), //φορτωνουμε μαπ με επιλεγμενους παιχτες (ονομα παιχτη, αν ειναι επιλεγμενους)
-        //selectedAway: Map<String, bool>.from(data["selectedAway"] ?? {}), //φορτωνουμε μαπ με επιλεγμενους παιχτες (ονομα παιχτη, αν ειναι επιλεγμενους)
+        //selectedHome: Map<String, bool>.from(data["selectedHome"] ?? {}),    //φορτωνουμε μαπ με επιλεγμενους παιχτες (ονομα παιχτη, αν ειναι επιλεγμενους)
+        //selectedAway: Map<String, bool>.from(data["selectedAway"] ?? {}),    //φορτωνουμε μαπ με επιλεγμενους παιχτες (ονομα παιχτη, αν ειναι επιλεγμενους)
 
         );
   }
@@ -243,6 +260,7 @@ class MatchDetails extends ChangeNotifier {
   int get startTimeInSeconds => _startTimeInSeconds;
   bool get isGroupPhase => _isGroupPhase;
   int get game => _game;
+  int get slot => _slot;
   ValueNotifier<bool> get notify => _notify;
 
   String get matchKey =>
@@ -259,7 +277,12 @@ class MatchDetails extends ChangeNotifier {
   int get penaltyScoreHome => penaltyShootout.homeScore;
   int get penaltyScoreAway => penaltyShootout.awayScore;
 
+
+
   bool get isPenaltyTime => _hasExtraTimeFinished && (homeScore == awayScore);
+
+
+
 
   bool get isShootoutOver {
     final homePenalties =
@@ -272,6 +295,7 @@ class MatchDetails extends ChangeNotifier {
 
     final int homeShots = homePenalties.length;
     final int awayShots = awayPenalties.length;
+
 
     // 1. Πριν τα 5 πέναλτι, έλεγχος αν υπάρχει μη αναστρέψιμη διαφορά
     if (homeShots < 5 || awayShots < 5) {
@@ -301,7 +325,8 @@ class MatchDetails extends ChangeNotifier {
   }
 
   Future<void> loadPenaltys() async {
-    penaltyShootout = await PenaltyShootout.loadFromFirestore(matchKey);
+    penaltyShootout = await PenaltyShootout.loadFromFirestore(matchKey, _year, _month);
+    notifyListeners();
   }
 
   bool isHalfTime() {
@@ -316,19 +341,19 @@ class MatchDetails extends ChangeNotifier {
   //progress αν ειναι τρου προχωραει το ματς αλλιως κανει κανσελ
 
   Future<void> progressS(String ofWhat, bool progress) async {
-    await FirebaseFirestore.instance.collection('matches').doc(matchDocId).set({
+    await FirebaseFirestore.instance.collection('year').doc(global.thisYearNow.toString()).collection("matches").doc(matchDocId).set({
       ofWhat: progress,
     }, SetOptions(merge: true)); // ώστε να μη διαγράψει άλλα πεδία
   }
 
   Future<void> updateTime(int time1) async {
-    await FirebaseFirestore.instance.collection('matches').doc(matchDocId).set(
+    await FirebaseFirestore.instance.collection('year').doc(global.thisYearNow.toString()).collection("matches").doc(matchDocId).set(
         {'TimeStarted': time1},
         SetOptions(merge: true)); // ώστε να μη διαγράψει άλλα πεδία
   }
 
   Future<void> matchStartedBase(bool progress) async {
-    await FirebaseFirestore.instance.collection('matches').doc(matchDocId).set({
+    await FirebaseFirestore.instance.collection('year').doc(global.thisYearNow.toString()).collection("matches").doc(matchDocId).set({
       'HasMatchStarted': progress,
       'TimeStarted': DateTime.now().millisecondsSinceEpoch ~/ 1000,
       'GoalAway': 0,
@@ -337,13 +362,13 @@ class MatchDetails extends ChangeNotifier {
   }
 
   Future<void> firstHalfFinishedBase(bool progress) async {
-    await FirebaseFirestore.instance.collection('matches').doc(matchDocId).set({
+    await FirebaseFirestore.instance.collection('year').doc(global.thisYearNow.toString()).collection("matches").doc(matchDocId).set({
       'hasFirstHalfFinished': progress,
     }, SetOptions(merge: true)); // ώστε να μη διαγράψει άλλα πεδία
   }
 
   Future<void> secondHalfStartedBase(bool progress) async {
-    await FirebaseFirestore.instance.collection('matches').doc(matchDocId).set({
+    await FirebaseFirestore.instance.collection('year').doc(global.thisYearNow.toString()).collection("matches").doc(matchDocId).set({
       'hasSecondHalfStarted': progress,
       'TimeStarted': DateTime.now().millisecondsSinceEpoch ~/ 1000 - 45 * 60
     }, SetOptions(merge: true)); // ώστε να μη διαγράψει άλλα πεδία
@@ -352,7 +377,7 @@ class MatchDetails extends ChangeNotifier {
   Future<void> matchFinishedBase(bool progress) async {
     //String type = progress ? "previous" : "upcoming";
 
-    await FirebaseFirestore.instance.collection('matches').doc(matchDocId).set(
+    await FirebaseFirestore.instance.collection('year').doc(global.thisYearNow.toString()).collection("matches").doc(matchDocId).set(
         {'hasMatchFinished': progress},
         SetOptions(merge: true)); // ώστε να μη διαγράψει άλλα πεδία // τελειωσε το ματς
     String matchKey =
@@ -368,14 +393,16 @@ class MatchDetails extends ChangeNotifier {
     await FirebaseFirestore.instance.collection('votes').doc(matchKey).set({  // ανανεωση του ματς στο στοιχημα
       'hasMatchFinished': progress,
       'correctChoice': correctChoice,
-      'statsUpdated': false
+      'statsUpdated': false,
+      'GoalHome': scoreHome,
+      'GoalAway': awayScore
     }, SetOptions(merge: true)); // ώστε να μη διαγράψει άλλα πεδία
   }
 
   Future<void> homeScoredBase() async {
     String goal;
     isExtraTimeTime ? goal = 'GoalHomeExtraTime' : goal = 'GoalHome';
-    await FirebaseFirestore.instance.collection('matches').doc(matchDocId).set({
+    await FirebaseFirestore.instance.collection('year').doc(global.thisYearNow.toString()).collection("matches").doc(matchDocId).set({
       goal: FieldValue.increment(1),
     }, SetOptions(merge: true)); // ώστε να μη διαγράψει άλλα πεδία
   }
@@ -383,14 +410,19 @@ class MatchDetails extends ChangeNotifier {
   Future<void> awayScoredBase() async {
     String goal;
     isExtraTimeTime ? goal = 'GoalAwayExtraTime' : goal = 'GoalAway';
-    await FirebaseFirestore.instance.collection('matches').doc(matchDocId).set({
+    await FirebaseFirestore.instance.collection('year').doc(global.thisYearNow.toString()).collection("matches").doc(matchDocId).set({
       goal: FieldValue.increment(1),
     }, SetOptions(merge: true)); // ώστε να μη διαγράψει άλλα πεδία
   }
 
   Future<void> loadMatchFactsFromBase() async {
+    int yuse =year;
+    if (month>9 ){
+      yuse = year+1;
+    }
+
     final docSnapshot = await FirebaseFirestore.instance
-        .collection('matches')
+        .collection('year').doc(yuse.toString()).collection("matches")
         .doc(matchDocId)
         .get();
 
@@ -478,7 +510,7 @@ class MatchDetails extends ChangeNotifier {
 
       MatchFactsStorageHelper().addMatchFact(
           matchDoc:
-              FirebaseFirestore.instance.collection('matches').doc(matchDocId),
+              FirebaseFirestore.instance.collection('year').doc(global.thisYearNow.toString()).collection("matches").doc(matchDocId),
           half: half,
           factMap: goal.toMap());
 
@@ -525,13 +557,14 @@ class MatchDetails extends ChangeNotifier {
 
       MatchFactsStorageHelper().addMatchFact(
           matchDoc:
-              FirebaseFirestore.instance.collection('matches').doc(matchDocId),
+              FirebaseFirestore.instance.collection('year').doc(global.thisYearNow.toString()).collection("matches").doc(matchDocId),
           half: half,
           factMap: goal.toMap());
 
       notifyListeners();
     }
   }
+
 
   bool get hasMatchEndedFinal{
     return (((_hasMatchFinished && !isExtraTimeTime) || (hasExtraTimeFinished && !isPenaltyTime)) || isShootoutOver );
@@ -653,6 +686,8 @@ class MatchDetails extends ChangeNotifier {
       } else {
         _hasMatchFinished = false;
         matchFinishedBase(false);
+        updateStandings(false);
+
         notifyListeners();
       }
       return;
@@ -687,10 +722,10 @@ class MatchDetails extends ChangeNotifier {
     if (_isGroupPhase) {
       greek ? info = "Φάση ομίλων" : info = "Group Stage";
     } else {
-      if (game == 2) {
+      if (_game == 2) {
         greek ? info = 'Τελικός' : info = 'Final';
       }
-      if (game == 4) {
+      else if (_game == 4) {
         info = greek ? 'Ημιτελικός' : 'SemiFinal';
       } else {
         greek
@@ -732,7 +767,7 @@ class MatchDetails extends ChangeNotifier {
       _matchFacts[half]?.add(card);
       await MatchFactsStorageHelper().addMatchFact(
           matchDoc:
-              FirebaseFirestore.instance.collection('matches').doc(matchDocId),
+              FirebaseFirestore.instance.collection('year').doc(global.thisYearNow.toString()).collection("matches").doc(matchDocId),
           half: half,
           factMap: card.toMap());
       notifyListeners();
@@ -761,7 +796,7 @@ class MatchDetails extends ChangeNotifier {
 
         await MatchFactsStorageHelper().deleteMatchFact(
             matchDoc: FirebaseFirestore.instance
-                .collection('matches')
+                .collection('year').doc(global.thisYearNow.toString()).collection("matches")
                 .doc(matchDocId),
             half: goal1.half,
             factMap: goal1.toMap());
@@ -775,7 +810,7 @@ class MatchDetails extends ChangeNotifier {
                 ? (type = 'GoalHomeExtraTime')
                 : (type = 'GoalAwayExtraTime');
         await FirebaseFirestore.instance
-            .collection('matches')
+            .collection('year').doc(global.thisYearNow.toString()).collection("matches")
             .doc(matchDocId)
             .set({
           type: FieldValue.increment(-1),
@@ -825,7 +860,7 @@ class MatchDetails extends ChangeNotifier {
 
         MatchFactsStorageHelper().addMatchFact(
             matchDoc: FirebaseFirestore.instance
-                .collection('matches')
+                .collection('year').doc(global.thisYearNow.toString()).collection("matches")
                 .doc(matchDocId),
             half: newGoal.half,
             factMap: newGoal.toMap());
@@ -850,7 +885,7 @@ class MatchDetails extends ChangeNotifier {
         // 3. Διαγραφή της παλιάς κάρτας από τη βάση δεδομένων
         await MatchFactsStorageHelper().deleteMatchFact(
           matchDoc:
-              FirebaseFirestore.instance.collection('matches').doc(matchDocId),
+              FirebaseFirestore.instance.collection('year').doc(global.thisYearNow.toString()).collection("matches").doc(matchDocId),
           half: oldCard.half,
           factMap: oldCard.toMap(),
         );
@@ -858,7 +893,7 @@ class MatchDetails extends ChangeNotifier {
         // 4. Προσθήκη της νέας κάρτας στη βάση δεδομένων
         await MatchFactsStorageHelper().addMatchFact(
           matchDoc:
-              FirebaseFirestore.instance.collection('matches').doc(matchDocId),
+              FirebaseFirestore.instance.collection('year').doc(global.thisYearNow.toString()).collection("matches").doc(matchDocId),
           half: newCard.half,
           factMap: newCard.toMap(),
         );
@@ -873,7 +908,7 @@ class MatchDetails extends ChangeNotifier {
     required bool isScored,
     required bool isHomeTeam,
   }) async {
-    final penalty = Penalty(
+    final penalty = PenaltyShoot(
       isScored: isScored,
       isHomeTeam: isHomeTeam,
     );
@@ -882,7 +917,7 @@ class MatchDetails extends ChangeNotifier {
 
     if (isShootoutOver) {
       MatchHandle().matchFinished(this);
-      await FirebaseFirestore.instance.collection('matches').doc(matchDocId).set({
+      await FirebaseFirestore.instance.collection('year').doc(global.thisYearNow.toString()).collection("matches").doc(matchDocId).set({
         'shootoutOver': true,
       }, SetOptions(merge: true));
 
@@ -897,7 +932,7 @@ class MatchDetails extends ChangeNotifier {
 
     if (!isShootoutOver) {
       MatchHandle().matchNotFinished(this);
-      await FirebaseFirestore.instance.collection('matches').doc(matchDocId).set({
+      await FirebaseFirestore.instance.collection('year').doc(global.thisYearNow.toString()).collection("matches").doc(matchDocId).set({
         'shootoutOver': false,
       }, SetOptions(merge: true));
 
@@ -923,7 +958,7 @@ class MatchDetails extends ChangeNotifier {
 
         MatchFactsStorageHelper().deleteMatchFact(
             matchDoc: FirebaseFirestore.instance
-                .collection('matches')
+                .collection('year').doc(global.thisYearNow.toString()).collection("matches")
                 .doc(matchDocId),
             half: card1.half,
             factMap: card1.toMap());
@@ -942,7 +977,7 @@ class MatchDetails extends ChangeNotifier {
 
   void _startListeningForUpdates() {
     _matchSubscription = FirebaseFirestore.instance
-        .collection('matches')
+        .collection('year').doc(global.thisYearNow.toString()).collection("matches")
         .doc(matchDocId)
         .snapshots()
         .listen((snapshot) async {
@@ -1170,7 +1205,7 @@ class MatchFactsStorageHelper {
 
   static Future<PenaltyShootout> loadFromFirestore(String matchDocId) async {
     final snapshot = await FirebaseFirestore.instance
-        .collection('matches')
+        .collection('year').doc(thisYearNow.toString()).collection("matches")
         .doc(matchDocId)
         .collection('penalties')
         .orderBy('timestamp')
@@ -1178,7 +1213,7 @@ class MatchFactsStorageHelper {
 
     final penalties = snapshot.docs.map((doc) {
       final data = doc.data();
-      return Penalty(
+      return PenaltyShoot(
         isScored: data['isScored'],
         isHomeTeam: data['isHomeTeam'],
       );

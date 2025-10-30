@@ -136,12 +136,15 @@ class _OneGroupStandingsState extends State<OneGroupStandings> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              greek ? "Όμιλος $group" : "Group $group",
-              style: TextStyle(
-                fontSize: screenWidth * 0.045,
-                fontWeight: FontWeight.bold,
-                color: textColor
+            Padding(
+              padding: const EdgeInsets.only(left: 10.0),
+              child: Text(
+                greek ? "Όμιλος $group" : "Group $group",
+                style: TextStyle(
+                  fontSize: screenWidth * 0.045,
+                  fontWeight: FontWeight.bold,
+                  color: textColor
+                ),
               ),
             ),
             SizedBox(height: screenHeight * 0.005),

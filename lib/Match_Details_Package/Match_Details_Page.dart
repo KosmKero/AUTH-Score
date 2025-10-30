@@ -7,6 +7,7 @@ import 'package:untitled1/Match_Details_Package/Match_Started_Details_Page.dart'
 import '../Data_Classes/MatchDetails.dart';
 import '../ad_manager.dart';
 import '../globals.dart';
+import 'bracketEditPage.dart';
 import 'match_edit_page.dart';
 
 class matchDetailsPage extends StatelessWidget {
@@ -84,37 +85,55 @@ class _matchDetailsPageViewState extends State<_matchDetailsPageView> {
                 return Text('Σφάλμα: ${snapshot.error}');
               }
               if (snapshot.hasData && snapshot.data == true) {
-                return IconButton(
-                  onPressed: () async {
-                    bool? confirmed = await showDialog<bool>(
-                      context: context,
-                      builder: (context) => AlertDialog(
-                        title: Text('Επιβεβαίωση'),
-                        content: Text('Είσαι σίγουρος ότι θέλεις να επεξεργαστείς τον αγώνα;'),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.pop(context, false),
-                            child: Text('Ακύρωση'),
+                return Row(
+                  children: [
+                    IconButton(
+                      onPressed: () async {
+                        await showDialog(
+                          context: context,
+                          builder: (context) => SlotPickerDialog(
+                            match: match,
+                            phase: match.game,
+                            maxSlots: (match.game / 2).toInt(),
                           ),
-                          TextButton(
-                            onPressed: () => Navigator.pop(context, true),
-                            child: Text('Ναι'),
+                        );
+                      },
+                      icon: Icon(Icons.edit_road),
+                    ),
+
+                    IconButton(
+                      onPressed: () async {
+                        bool? confirmed = await showDialog<bool>(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: Text('Επιβεβαίωση'),
+                            content: Text('Είσαι σίγουρος ότι θέλεις να διαγράψεις τον αγώνα;'),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(context, false),
+                                child: Text('Ακύρωση'),
+                              ),
+                              TextButton(
+                                onPressed: () => Navigator.pop(context, true),
+                                child: Text('Ναι'),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
-                    );
+                        );
 
-                    if (confirmed == true) {
-                      if (await globalUser.isSuperUser()) {
-                        await TeamsHandle().deleteMatch(match);
+                        if (confirmed == true) {
+                          if (await globalUser.isSuperUser()) {
+                            await TeamsHandle().deleteMatch(match);
 
 
-                        Navigator.of(context).pushNamedAndRemoveUntil('/home', (route) => false);
+                            Navigator.of(context).pushNamedAndRemoveUntil('/home', (route) => false);
 
-                      }
-                    }
-                  },
-                  icon: Icon(Icons.delete),
+                          }
+                        }
+                      },
+                      icon: Icon(Icons.delete),
+                    ),
+                  ],
                 );
               } else {
                 return SizedBox(); // Αν δεν είναι super user

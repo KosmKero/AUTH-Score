@@ -1,3 +1,4 @@
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:untitled1/Firebase_Handle/TeamsHandle.dart';
@@ -33,6 +34,12 @@ class _TeamDisplayPageState extends State<TeamDisplayPage> {
   @override
   Widget build(BuildContext context) {
     logScreenViewSta(screenName: 'Team page',screenClass: 'Team page');
+    FirebaseAnalytics.instance.logEvent(
+      name: 'team clicked',
+      parameters: {
+        'team name': widget.team.nameEnglish,
+      },
+    );
 
 
     return Scaffold( //ΑΦΟΡΑ ΤΟ ΟΝΟΜΑ ΠΑΝΩ ΣΤΗΝ ΣΕΛΙΔΑ

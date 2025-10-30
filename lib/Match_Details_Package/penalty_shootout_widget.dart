@@ -13,22 +13,28 @@ class PenaltyShootoutManager extends ChangeNotifier {
   final String matchDocId;
   PenaltyShootout _shootout = PenaltyShootout([]);
   late final StreamSubscription _subscription;
-
-  PenaltyShootoutManager({required this.matchDocId}) {
+  final int year, month;
+  PenaltyShootoutManager({required this.matchDocId, required this.year,required this.month,  }) {
     _startListeningForUpdates();
   }
 
   PenaltyShootout get shootout => _shootout;
 
   void _startListeningForUpdates() {
+    int yuse =year;
+    if (month>8 ){
+      yuse = year+1;
+    }
+
+
     _subscription = FirebaseFirestore.instance
-        .collection('matches')
+        .collection("year").doc(yuse.toString()).collection('matches')
         .doc(matchDocId)
         .snapshots()
         .listen((snapshot) {
       final data = snapshot.data();
       final penalties = (data?['penalties'] as List<dynamic>?)
-          ?.map((p) => Penalty.fromMap(Map<String, dynamic>.from(p)))
+          ?.map((p) => PenaltyShoot.fromMap(Map<String, dynamic>.from(p)))
           .toList() ?? [];
 
       _shootout = PenaltyShootout(penalties);

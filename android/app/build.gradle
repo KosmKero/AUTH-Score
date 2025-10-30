@@ -37,11 +37,14 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.authteam.authscore"
-        minSdk = 23
-        targetSdk = 34
-        versionCode = flutter.versionCode?.toInteger() ?: 2
-        versionName = flutter.versionName ?: "1.0.1"
+        applicationId "com.authteam.authscore"
+        minSdkVersion 23
+        //noinspection EditedTargetSdkVersion
+        targetSdkVersion 35
+        versionCode 1
+        versionName "1.0"
+        versionCode  flutter.versionCode?.toInteger() ?: 2
+        versionName  flutter.versionName ?: "1.0.1"
         multiDexEnabled true
     }
 

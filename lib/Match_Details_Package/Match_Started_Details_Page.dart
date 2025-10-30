@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:dropdown_search/dropdown_search.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:untitled1/Data_Classes/Player.dart';
 import 'package:untitled1/Firebase_Handle/user_handle_in_base.dart';
@@ -92,9 +93,27 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
   Widget build(BuildContext context) {
     if (widget.match.hasMatchEndedFinal) {
       logScreenViewSta(screenName: 'Match ended page',screenClass: 'Match ended page');
+
+      FirebaseAnalytics.instance.logEvent(
+        name: 'Match Ended Clicked',
+        parameters: {
+          'match_id': '${widget.match.homeTeam.nameEnglish} ${widget.match.timeString} ${widget.match.awayTeam.nameEnglish}',
+          'home_team': widget.match.homeTeam.nameEnglish,
+          'away_team': widget.match.awayTeam.nameEnglish,
+        },
+      );
     }
     else{
       logScreenViewSta(screenName: 'Match started page',screenClass: 'Match started page');
+
+      FirebaseAnalytics.instance.logEvent(
+        name: 'Match Started Clicked',
+        parameters: {
+          'match_id': '${widget.match.homeTeam.nameEnglish} ${widget.match.timeString} ${widget.match.awayTeam.nameEnglish}',
+          'home_team': widget.match.homeTeam.nameEnglish,
+          'away_team': widget.match.awayTeam.nameEnglish,
+        },
+      );
     }
 
 
@@ -278,7 +297,7 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
         if (widget.match.isPenaltyTime)
           ChangeNotifierProvider(
             key: ValueKey(widget.match.matchDocId), // 👈 εξαναγκάζει ανανέωση
-            create: (_) => PenaltyShootoutManager(matchDocId: widget.match.matchDocId),
+            create: (_) => PenaltyShootoutManager(matchDocId: widget.match.matchDocId, year: widget.match.year, month: widget.match.month),
             child: PenaltyShootoutPanel(
               homeTeam: widget.match.homeTeam,
               awayTeam: widget.match.awayTeam,
@@ -505,7 +524,7 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
     // Check if the user is logged in
 
     if (globalUser.controlTheseTeams(
-        widget.match.homeTeam.name, widget.match.awayTeam.name) && widget.match.hasExtraTimeFinished && !widget.match.isShootoutOver  && DateTime.now().millisecondsSinceEpoch ~/ 1000<widget.match.startTimeInSeconds + 10*3600 ) {
+        widget.match.homeTeam.name, widget.match.awayTeam.name) && widget.match.hasExtraTimeFinished && widget.match.isPenaltyTime && !widget.match.isShootoutOver  && DateTime.now().millisecondsSinceEpoch ~/ 1000<widget.match.startTimeInSeconds + 10*3600 ) {
       return Column(
         children: [
           SizedBox(height: 15,),

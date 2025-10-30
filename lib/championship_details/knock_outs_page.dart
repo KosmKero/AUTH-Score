@@ -1,15 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:untitled1/API/Match_Handle.dart';
-import 'package:untitled1/globals.dart';
 import '../Data_Classes/MatchDetails.dart';
+import '../Firebase_Handle/firebase_screen_stats_helper.dart';
 import '../Match_Details_Package/Match_Details_Page.dart';
+import '../globals.dart';
 
-class KnockOutsPage extends StatelessWidget {
-  const KnockOutsPage({super.key});
+class KnockOutsPage extends StatefulWidget {
+  KnockOutsPage({super.key, required this.playOffMatches} );
+  Map<int, MatchDetails> playOffMatches;
+  @override
+  State<KnockOutsPage> createState() => _KnockOutsPageState();
+}
 
+class _KnockOutsPageState extends State<KnockOutsPage> {
   @override
   Widget build(BuildContext context) {
+    logScreenViewSta(screenName: 'Knock Outs Page',screenClass: 'Knock Outs Page');
+
+
     return Expanded(
       child: SingleChildScrollView(
 
@@ -32,7 +41,7 @@ class KnockOutsPage extends StatelessWidget {
                     8,
                         (index) => Padding(
                       padding: EdgeInsets.symmetric(vertical: 5),
-                      child: knockOutMatchUp(match: playOffMatches[index]), // Παράδειγμα δεδομένων
+                      child: knockOutMatchUp(match: widget.playOffMatches[index]), // Παράδειγμα δεδομένων
                     ),
                   ),
                 ),
@@ -79,7 +88,7 @@ class KnockOutsPage extends StatelessWidget {
                         (index) => Padding(
                       padding: EdgeInsets.symmetric(vertical: 50),
                       child: knockOutMatchUp(match:
-                      playOffMatches[index+8]), // Παράδειγμα δεδομένων
+                      widget.playOffMatches[index+8]), // Παράδειγμα δεδομένων
                     ),
                   ),
                 ),
@@ -121,7 +130,7 @@ class KnockOutsPage extends StatelessWidget {
                         (index) => Padding(
                       padding: EdgeInsets.symmetric(vertical: 138),
                       child: knockOutMatchUp(match:
-                      playOffMatches[index+12]), // Παράδειγμα δεδομένων
+                      widget.playOffMatches[index+12]), // Παράδειγμα δεδομένων
                     ),
                   ),
                 ),
@@ -159,7 +168,7 @@ class KnockOutsPage extends StatelessWidget {
                     SizedBox(
                       height: 313,
                     ),
-                    knockOutMatchUp(match: playOffMatches[14])
+                    knockOutMatchUp(match: widget.playOffMatches[14])
                   ],
                 ),
               ],
@@ -169,9 +178,6 @@ class KnockOutsPage extends StatelessWidget {
       ),
     );
   }
-
-
-
 }
 
 class knockOutMatchUp extends StatelessWidget {
@@ -241,21 +247,38 @@ class _knockOutMatchUpState extends State<knockOutMatchUpView> {
                               fontSize: 13,
                               color: darkModeNotifier.value ? Colors.white : Colors.black),
                         ),
-                        if (match != null && match.hasMatchStarted)
-                          Text(
-                            (match.homeScore + match.penaltyScoreHome).toString(),
-                            style: TextStyle(
-                              fontSize: 17,
-                              color: (match.hasMatchFinished)
-                                  ? (darkModeNotifier.value ? Colors.white : Colors.black)
-                                  : Colors.red,
-                            ),
-                          ),
+                        Row(
+                          children: [
+                            if (match != null && match.hasMatchStarted)
+                              Text(
+                                (match.homeScore).toString(),
+                                style: TextStyle(
+                                  fontSize: 17,
+                                  color: (match.hasMatchFinished)
+                                      ? (darkModeNotifier.value ? Colors.white : Colors.black)
+                                      : Colors.red,
+                                ),
+                              ),
+                            if (match != null && match.isPenaltyTime)
+                              Padding(
+                                padding: const EdgeInsets.only(left: 5.0),
+                                child: Text(
+                                  ('(${match.penaltyScoreHome})').toString(),
+                                  style: TextStyle(
+                                    fontSize: 17,
+                                    color: (match.hasMatchEndedFinal)
+                                        ? (darkModeNotifier.value ? Colors.white : Colors.black)
+                                        : Colors.red,
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
                       ],
                     ),
                     // η παύλα στο κέντρο:
                     Padding(
-                      padding: EdgeInsets.only(left: 3.0,right: 3.0,top: (match == null || !(match.hasMatchEndedFinal)) ? 25 : 0),
+                      padding: EdgeInsets.only(left: 3.0,right: 3.0,top: (match == null || !(match.hasMatchStarted)) ? 23.5 : 0),
                       child: Center(
                         child: Text(
                           "vs",
@@ -281,15 +304,33 @@ class _knockOutMatchUpState extends State<knockOutMatchUpView> {
                             color: darkModeNotifier.value ? Colors.white : Colors.black,
                           ),
                         ),
-                        if (match != null && match.hasMatchStarted)
-                          Text(
-                            (match.awayScore + match.penaltyScoreAway).toString(),
-                            style: TextStyle(
-                              fontSize: 17,
-                              color: (match.hasMatchFinished)
-                                  ? (darkModeNotifier.value ? Colors.white : Colors.black)
-                                  : Colors.red,
-                            ),
+
+                          Row(
+                            children: [
+                              if (match != null && match.hasMatchStarted)
+                              Text(
+                                (match.awayScore).toString(),
+                                style: TextStyle(
+                                  fontSize: 17,
+                                  color: (match.hasMatchFinished)
+                                      ? (darkModeNotifier.value ? Colors.white : Colors.black)
+                                      : Colors.red,
+                                ),
+                              ),
+                              if (match != null && match.isPenaltyTime)
+                                Padding(
+                                  padding: const EdgeInsets.only(left: 5.0),
+                                  child: Text(
+                                    ('(${match.penaltyScoreAway})').toString(),
+                                    style: TextStyle(
+                                      fontSize: 17,
+                                      color: (match.hasMatchEndedFinal)
+                                          ? (darkModeNotifier.value ? Colors.white : Colors.black)
+                                          : Colors.red,
+                                    ),
+                                  ),
+                                ),
+                            ],
                           ),
                       ],
                     ),

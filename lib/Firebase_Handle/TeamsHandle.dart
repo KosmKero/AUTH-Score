@@ -2,17 +2,19 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:untitled1/Data_Classes/MatchDetails.dart';
-
+import '../Data_Classes/Penaltys.dart';
+import '../API/hiveOfflineSave.dart';
 import '../Data_Classes/Player.dart';
 import '../Data_Classes/Team.dart';
 import '../globals.dart';
+import '../globals.dart' as global;
 
 class TeamsHandle {
 
 
   Future<void> addNewTeam(Team team) async {
     await FirebaseFirestore.instance
-        .collection('teams')
+        .collection('year').doc(thisYearNow.toString()).collection("teams")
         .doc(team.name)
         .set({
       'Name': team.name,
@@ -41,7 +43,7 @@ class TeamsHandle {
     List<Team> allTeams = [];
 
     try {
-      var teamsDoc = await FirebaseFirestore.instance.collection('teams').get();
+      var teamsDoc = await FirebaseFirestore.instance.collection('year').doc(thisYearNow.toString()).collection("teams").get();
 
       if (teamsDoc.docs.isNotEmpty) {
         for (var team in teamsDoc.docs) {
@@ -58,7 +60,7 @@ class TeamsHandle {
             int titles = team.get("Titles") ?? 0;
             String coach = team.get("Coach") ?? "";
             int position = team.get("position") ?? 0;
-            String initianls = team.get("initials");
+            String initials = team.get("initials");
 
             // Convert the raw player data from Firestore into Player objects
             List<Player> players = [];
@@ -95,7 +97,81 @@ class TeamsHandle {
                 titles,
                 coach,
                 position,
-                initianls,
+                initials,
+                players
+            ));
+          } catch (e) {
+            print("Error processing team document: ${team.id}, Error: $e");
+            // Continue to the next document instead of failing the entire operation
+          }
+        }
+      }
+    } catch (e) {
+      print("Error fetching teams: $e");
+    }
+
+    return allTeams;
+  }
+
+  Future<List<Team>> getAllTeamsByYear(int year) async {
+    List<Team> allTeams = [];
+
+    try {
+      var teamsDoc = await FirebaseFirestore.instance.collection('year').doc(year.toString()).collection("teams").get();
+
+      if (teamsDoc.docs.isNotEmpty) {
+        for (var team in teamsDoc.docs) {
+          try {
+            // Safely get values with null checking
+            String name = team.get("Name") ?? "";
+            String nameE = team.get('NameEnglish') ?? "";
+            int matches = team.get("Matches") ?? 0;
+            int wins = team.get("Wins") ?? 0;
+            int losses = team.get("Loses") ?? 0;  // Note: "Loses" vs "Losses"
+            int draws = team.get("Draws") ?? 0;
+            int group = team.get("Group") ?? 0;
+            int foundationYear = team.get("Foundation Year") ?? 0;
+            int titles = team.get("Titles") ?? 0;
+            String coach = team.get("Coach") ?? "";
+            int position = team.get("position") ?? 0;
+            String initials = team.get("initials");
+
+            // Convert the raw player data from Firestore into Player objects
+            List<Player> players = [];
+
+            if (team.get("Players") != null) {
+              Map<String, dynamic> playersData = team.get("Players") as Map<String, dynamic>;
+
+              playersData.forEach((name, playerData) {
+                players.add(Player(
+                    playerData["Name"] ?? "",
+                    playerData['Surname'] ?? "",
+                    playerData['Position'] ?? 0,
+                    playerData['Goals'] ?? 0,
+                    playerData['Number'] ?? 0,
+                    playerData['Age'] ?? 0,
+                    playerData['TeamName'] ?? "",
+                    playerData['numOfYellowCards'] ?? 0,
+                    playerData['numOfRedCards'] ?? 0,
+                    playerData["teamNameEnglish"] ?? ""
+                ));
+              });
+            }
+
+            // Now create the Team with the properly converted Player list
+            allTeams.add(Team(
+                name,
+                nameE,
+                matches,
+                wins,
+                losses,
+                draws,
+                group,
+                foundationYear,
+                titles,
+                coach,
+                position,
+                initials,
                 players
             ));
           } catch (e) {
@@ -123,7 +199,7 @@ class TeamsHandle {
 
 
         await FirebaseFirestore.instance
-            .collection('matches')
+            .collection("year").doc(global.thisYearNow.toString()).collection("matches")
             .doc(home.nameEnglish+day.toString()+month.toString()+year.toString()+game.toString()+away.nameEnglish) // Improved unique ID
             .set({
           'Awayteam': away.name,
@@ -152,7 +228,8 @@ class TeamsHandle {
           'GoalHomeExtraTime':0,
           'GoalAwayExtraTime':0,
           'penalties' : [],
-          'shootoutOver':false
+          'shootoutOver':false,
+          "slot":0
 
         });
     }
@@ -166,7 +243,7 @@ class TeamsHandle {
   Future<void> deleteMatch(MatchDetails match) async {
     try {
       await FirebaseFirestore.instance
-          .collection("matches")
+          .collection("year").doc(thisYearNow.toString()).collection("matches")
           .doc(match.matchKey)
           .delete();
       navigatorKey.currentState?.pushReplacementNamed('/home');
@@ -177,10 +254,10 @@ class TeamsHandle {
   }
 
 
-  Future<Team?> getTeam(String name) async {
+  Future<Team?> getTeam2(String name) async {
     try {
       QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-          .collection('teams')
+          .collection('year').doc(thisYearNow.toString()).collection("teams")
           .where("Name", isEqualTo: name)
           .get();
 
@@ -231,13 +308,34 @@ class TeamsHandle {
     }
   }
 
+  Team? getTeam(String name) {
+    try {
+      return teams.firstWhere(
+            (team) => team.name == name,
+      );
+    } catch (e) {
+      print("Error getting team: $e");
+      return null;
+    }
+  }
+
+  Team? getTeamFromList(String name,List<Team> teamList ) {
+    try {
+      return teamList.firstWhere(
+            (team) => team.name == name,
+      );
+    } catch (e) {
+      print("Error getting team: $e");
+      return null;
+    }
+  }
 
   Future<List<MatchDetails>> getMatches(String type) async {
     List<MatchDetails> matches = [];
 
     try {
       var matchDocs = await FirebaseFirestore.instance
-          .collection('matches')
+          .collection('year').doc(thisYearNow.toString()).collection("matches")
           .where("Type", isEqualTo: type)
           .get();
 
@@ -281,80 +379,18 @@ class TeamsHandle {
           hasSecondHalfExtraTimeStarted: data['hasSecondHalfExtraTimeStarted'] ?? false,
           scoreAwayExtraTime: data['GoalAwayExtraTime'] ?? 0,
           scoreHomeExtraTime: data['GoalHomeExtraTime'] ?? 0,
-          penalties: data['penalties'] ?? []
+            penalties: (data['penalties'] as List<dynamic>? ?? [])
+                .map((p) => PenaltyShoot.fromMap(Map<String, dynamic>.from(p)))
+                .toList(),
+          slot: data["slot"] ?? 0
 
         );
         if (!match.isGroupPhase){
 
-          int group1,group2,pos1,pos2;
-         if (match.homeTeam.group>match.awayTeam.group){
-           group1=match.awayTeam.group;
-           group2=match.homeTeam.group;
+         int g= match.game;
+         int slot = (g==16) ? 0 : (g==8) ? 8 : (g==4) ? 12 : 14;
 
-           pos1=match.awayTeam.position;
-           pos2=match.homeTeam.position;
-         }
-         else{
-           group2=match.awayTeam.group;
-           group1=match.homeTeam.group;
-
-           pos2=match.awayTeam.position;
-           pos1=match.homeTeam.position;
-         }
-
-         //φαση των 16
-          if (group1==1 && pos1==1 && group2==2 && match.game==16) {
-            playOffMatches[0] = match;
-          }
-          else if (group1==1 && pos1==4 && group2==2 && match.game==16) {
-            playOffMatches[2] = match;
-          }
-          else if (group1==1 && pos1==2 && group2==2 && match.game==16) {
-            playOffMatches[4] = match;
-          }
-          else if (group1==1 && pos1==3 && group2==2 && match.game==16) {
-            playOffMatches[6] = match;
-          }
-          else if (group1==3 && pos1==1 && group2==4 && match.game==16) {
-            playOffMatches[7] = match;
-          }
-          else if (group1==3 && pos1==4 && group2==4 && match.game==16) {
-            playOffMatches[5] = match;
-          }
-          else if (group1==3 && pos1==2 && group2==4 && match.game==16) {
-            playOffMatches[3] = match;
-          }
-          else if (group1==3 && pos1==3 && group2==4 && match.game==16) {
-            playOffMatches[1] = match;
-          }
-
-          //φαση των 8
-          else if (((group1==1 && pos1==1) || (group1==2 && pos1==4)) &&  (group2==3 || group2==4) && match.game==8) {
-            playOffMatches[8] = match;
-          }
-          else if ((group1 == 1 && pos1 == 4 || group1 == 2 && pos1 == 1) && (group2 == 3 || group2 == 4) && match.game == 8) {
-            playOffMatches[9] = match;
-          }
-
-          else if ((group1 == 1 && pos1 == 2 || group1 == 2 && pos1 == 3) && (group2 == 3 || group2 == 4) && match.game == 8) {
-            playOffMatches[10] = match;
-          }
-          else if ((group1 == 1 && pos1 == 3 || group1 == 2 && pos1 == 2) && (group2 == 3 || group2 == 4) && match.game == 8) {
-            playOffMatches[11] = match;
-          }
-
-          //ημιτελικοι
-          else if (((group1 == 1 && pos1 == 1) || (group1 == 2 && pos1 == 4) || (group1 == 3 && pos1 == 3) || (group1 == 4 && pos1 == 2)) && match.game == 4) {
-            playOffMatches[12] = match;
-          }
-          else if (match.game == 4) {
-            playOffMatches[13] = match;
-          }
-
-          //Τελικός
-          else if (match.game==2) {
-            playOffMatches[14] = match;
-          }
+          playOffMatches[slot+ match.slot] = match;
 
         }
 
@@ -394,19 +430,21 @@ class TeamsHandle {
   }
 
 
-  Future<List<MatchDetails>> getPlatOffMatches() async {
+  Future<Map<int,MatchDetails>> getPlayOffMatches(int yearo) async {
     List<MatchDetails> matches = [];
 
     try {
       var matchDocs = await FirebaseFirestore.instance
-          .collection('matches')
+          .collection('year').doc(yearo.toString()).collection("matches")
           .where("IsGroupPhase", isEqualTo: false)
           .get();
 
       if (matchDocs.docs.isEmpty) {
         print("⚠️ No matches found for type playoffs.");
-        return matches;
+        return {};
       }
+
+      playOffMatches={};
 
       // Χρησιμοποιούμε Future.wait για να κάνουμε τις κλήσεις παράλληλα
       List<Future<MatchDetails?>> matchFutures = matchDocs.docs.map((matchDoc) async {
@@ -417,37 +455,49 @@ class TeamsHandle {
         Team? awayTeam = await getTeam(awayTeamName);
 
         if (homeTeam == null || awayTeam == null) {
-          print("⚠️ Skipping match due to missing team data: $homeTeamName vs $awayTeamName");
+          print(
+              "⚠️ Skipping match due to missing team data: $homeTeamName vs $awayTeamName");
           return null;
         }
-        print(data['GoalAwayExtraTime'].toString);
+        if (data["IsGroupPhase"] == false) {
+          MatchDetails match = MatchDetails(
+            homeTeam: homeTeam,
+            awayTeam: awayTeam,
+            hasMatchStarted: data['HasMatchStarted'] ?? false,
+            time: data["Time"] ?? 0,
+            day: data["Day"] ?? 0,
+            month: data["Month"] ?? 0,
+            year: data["Year"] ?? 0,
+            isGroupPhase: data["IsGroupPhase"] ?? false,
+            game: data["Game"] ?? 0,
+            scoreHome: data["GoalHome"] ?? -1,
+            scoreAway: data["GoalAway"] ?? -1,
+            hasMatchFinished: data["hasMatchFinished"] ?? false,
+            hasSecondHalfStarted: data["hasSecondHalfStarted"] ?? false,
+            hasFirstHalfFinished: data["hasFirstHalfFinished"] ?? false,
+            timeStarted: data["TimeStarted"] ?? 0,
+            hasFirstHalfExtraTimeFinished:
+            data['hasFirstHalfExtraTimeFinished'] ?? false,
+            hasExtraTimeFinished: data['hasExtraTimeFinished'] ?? false,
+            hasExtraTimeStarted: data['hasExtraTimeStarted'] ?? false,
+            hasSecondHalfExtraTimeStarted:
+            data['hasSecondHalfExtraTimeStarted'] ?? false,
+            scoreAwayExtraTime: data['GoalAwayExtraTime'] ?? 0,
+            scoreHomeExtraTime: data['GoalHomeExtraTime'] ?? 0,
+            penalties: (data['penalties'] as List<dynamic>? ?? [])
+                .map((p) => PenaltyShoot.fromMap(Map<String, dynamic>.from(p)))
+                .toList(),
+            slot: data["slot"] ?? 0,
+          );
 
-        return MatchDetails(
-          homeTeam: homeTeam,
-          awayTeam: awayTeam,
-          hasMatchStarted: data['HasMatchStarted'] ?? false,
-          time: data["Time"] ?? 0,
-          day: data["Day"] ?? 0,
-          month: data["Month"] ?? 0,
-          year: data["Year"] ?? 0,
-          isGroupPhase: data["IsGroupPhase"] ?? false,
-          game: data["Game"] ?? 0,
-          scoreHome: data["GoalHome"] ?? 0,
-          scoreAway: data["GoalAway"] ?? 0,
-          hasMatchFinished: data["hasMatchFinished"] ?? false,
-          hasSecondHalfStarted: data["hasSecondHalfStarted"] ?? false,
-          hasFirstHalfFinished: data["hasFirstHalfFinished"] ?? false,
-          timeStarted: data["TimeStarted"] ?? DateTime.now().millisecondsSinceEpoch,
-          hasFirstHalfExtraTimeFinished: data['hasFirstHalfExtraTimeFinished'] ?? false,
-          hasExtraTimeFinished: data['hasExtraTimeFinished'] ?? false,
-          hasExtraTimeStarted: data['hasExtraTimeStarted'] ?? false,
-          hasSecondHalfExtraTimeStarted: data['hasSecondHalfExtraTimeStarted'] ?? false,
-          scoreAwayExtraTime: data['GoalAwayExtraTime'] ?? 0,
-          scoreHomeExtraTime: data['GoalHomeExtraTime'] ?? 0,
-          penalties: data['penalties'] ?? []
+          int g= match.game;
+          int slot = (g==16) ? 0 : (g==8) ? 8 : (g==4) ? 12 : 14;
+
+          playOffMatches[slot+ match.slot] = match;
 
 
-        );
+        return match;
+      }
       }).toList();
 
 
@@ -462,7 +512,7 @@ class TeamsHandle {
       print("❌ Error fetching matches of type playoffs: $e");
     }
 
-    return matches;
+    return playOffMatches;
   }
 
 
@@ -579,7 +629,7 @@ class TeamsHandle {
   Future<List<String>> getPreviousResults(String name) async
   {
     final querySnapshot = await FirebaseFirestore.instance
-        .collection("teams")
+        .collection('year').doc(thisYearNow.toString()).collection("teams")
         .where("Name", isEqualTo: name)
         .get();
     
@@ -613,7 +663,7 @@ class TeamsHandle {
 
   Future<void> addAllValues(String home,String away,String selection) async{
     final querySnapshot = await FirebaseFirestore.instance
-        .collection("matches")
+        .collection('year').doc(thisYearNow.toString()).collection("matches")
         .where("Hometeam", isEqualTo: home)
         .where("Awayteam", isEqualTo: away)
         .get();

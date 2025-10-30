@@ -1,47 +1,40 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:untitled1/globals.dart';
-
-import '../Firebase_Handle/firebase_screen_stats_helper.dart';
-import '../ad_manager.dart';
+import '../../Firebase_Handle/firebase_screen_stats_helper.dart';
+import '../../ad_manager.dart';
 
 Future<List<Map<String, dynamic>>> getTopUsers() async {
-  // Λήψη του leaderboard από το συγκεκριμένο έγγραφο
   DocumentSnapshot snapshot = await FirebaseFirestore.instance
       .collection('leaderboard')
       .doc('top20')
       .get();
-
   if (!snapshot.exists || snapshot.data() == null) {
     return [];
   }
-
   final data = snapshot.data() as Map<String, dynamic>;
   final List<dynamic> users = data['users'] ?? [];
-
-  // Μετατροπή σε σωστό format
-  return users.map<Map<String, dynamic>>((user) => {
+  return users
+      .map<Map<String, dynamic>>((user) => {
     'uid': user['uid'],
     'username': user['username'] ?? 'Unknown',
     'accuracy': user['accuracy'],
     'correctVotes': user['correctVotes'],
     'totalVotes': user['totalVotes'],
     'score': user['score'],
-  }).toList();
+  })
+      .toList();
 }
 
-
 class TopUsersList extends StatefulWidget {
-
   @override
   State<TopUsersList> createState() => _TopUsersListState();
 }
 
 class _TopUsersListState extends State<TopUsersList> {
   BannerAd? _bannerAd;
-
   bool _isBannerAdReady = false;
 
   @override
@@ -64,21 +57,18 @@ class _TopUsersListState extends State<TopUsersList> {
 
   @override
   Widget build(BuildContext context) {
-    logScreenViewSta(screenName: 'Top 20 betters',screenClass: 'Top 20 betters');
+    logScreenViewSta(screenName: 'Top 20 betters', screenClass: 'Top 20 betters');
+
+    final isDark = darkModeNotifier.value;
+    final backgroundColor = isDark ? darkModeBackGround : lightModeBackGround;
+    final cardColor = isDark ? darkModeWidgets : lightModeContainer;
+    final textColor = isDark ? Colors.grey[200]! : lightModeText;
+    final secondaryTextColor = isDark ? darkModeText : Colors.grey[700]!;
+
     return Scaffold(
-      backgroundColor:
-          darkModeNotifier.value ? Color(0xFF121212) : lightModeBackGround,
-      appBar: AppBar(
-          title: Text("Top 20 tipsters", style: TextStyle(color: Colors.white)),
-          backgroundColor: darkModeNotifier.value
-              ? const Color(0xFF121212)
-              : const Color.fromARGB(250, 46, 90, 136),
-          iconTheme: IconThemeData(
-            color: Colors.white,
-          )),
+      backgroundColor: backgroundColor,
       body: Column(
         children: [
-          // FutureBuilder για τον current user (αν είναι συνδεδεμένος)
           if (FirebaseAuth.instance.currentUser != null)
             FutureBuilder<DocumentSnapshot>(
               future: FirebaseFirestore.instance
@@ -89,15 +79,12 @@ class _TopUsersListState extends State<TopUsersList> {
                 if (userSnapshot.connectionState == ConnectionState.waiting) {
                   return Center(child: CircularProgressIndicator());
                 }
-
                 if (userSnapshot.hasError) {
                   return Center(child: Text('Error fetching user data'));
                 }
-
                 if (!userSnapshot.hasData || !userSnapshot.data!.exists) {
                   return Center(child: Text('User data not found'));
                 }
-
                 final data = userSnapshot.data!.data() as Map<String, dynamic>;
                 final predictions = data['predictions'] ?? {};
                 final accuracy = predictions['accuracy'] ?? 0.0;
@@ -112,25 +99,31 @@ class _TopUsersListState extends State<TopUsersList> {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(15),
                   ),
-                  color: darkModeNotifier.value ? Color(0xFF1E1E1E ) : Colors.white,
+                  color: cardColor,
                   child: ListTile(
                     leading: CircleAvatar(
                       backgroundColor: Colors.blueAccent,
                       child: Icon(Icons.person, color: Colors.white),
                     ),
-                    title: Text('Your Stats',
-                        style: TextStyle(color: darkModeNotifier.value ? Colors.white: Color(0xFF1E1E1E ) ,fontWeight: FontWeight.bold,fontSize: 16)),
+                    title: Text(
+                      'Your Stats',
+                      style: TextStyle(
+                        color: textColor,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
                     subtitle: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        Text('Score: $score',
+                            style: TextStyle(color: textColor, fontSize: 15)),
                         Text(
-                            'Score: $score',
-                            style: TextStyle(color: darkModeNotifier.value ? Colors.white: Color(0xFF1E1E1E ),fontSize: 15 ,)),
-                        Text('Accuracy: ${accuracy.toStringAsFixed(2)}%',
-                            style: TextStyle(color: Colors.green)),
+                          'Accuracy: ${accuracy.toStringAsFixed(2)}%',
+                          style: TextStyle(color: Colors.green),
+                        ),
                         Text('Correct Votes: $correct / $total',
-                            style: TextStyle(color: darkModeNotifier.value ? Colors.white: Color(0xFF1E1E1E ) )),
-
+                            style: TextStyle(color: secondaryTextColor)),
                       ],
                     ),
                     trailing: Icon(Icons.star, color: Colors.yellow[700]),
@@ -138,15 +131,11 @@ class _TopUsersListState extends State<TopUsersList> {
                 );
               },
             ),
-
           if (FirebaseAuth.instance.currentUser != null)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 15.0),
-              child: Divider(
-                color: !darkModeNotifier.value ? Color(0xFF1E1E1E ) : Colors.grey,
-              ),
+              child: Divider(color: isDark ? Colors.grey : lightModeContainer),
             ),
-          // FutureBuilder για τη λίστα με τους top users
           Expanded(
             child: FutureBuilder<List<Map<String, dynamic>>>(
               future: getTopUsers(),
@@ -154,17 +143,13 @@ class _TopUsersListState extends State<TopUsersList> {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return Center(child: CircularProgressIndicator());
                 }
-
                 if (snapshot.hasError) {
                   return Center(child: Text('Error: ${snapshot.error}'));
                 }
-
                 if (!snapshot.hasData || snapshot.data!.isEmpty) {
                   return Center(child: Text('No top users found.'));
                 }
-
                 final topUsers = snapshot.data!;
-
                 return ListView.builder(
                   padding: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
                   itemCount: topUsers.length,
@@ -176,30 +161,41 @@ class _TopUsersListState extends State<TopUsersList> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(15),
                       ),
-                      color: darkModeNotifier.value ? Color(0xFF1E1E1E ) : Colors.white,
+                      color: cardColor,
                       child: ListTile(
                         leading: CircleAvatar(
                           backgroundColor: Colors.blueAccent,
-                          child: Text('${index + 1}',
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold)),
+                          child: Text(
+                            '${index + 1}',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ),
-                        title: Text('${user['username']}',
-                            style: TextStyle(color: darkModeNotifier.value ? Colors.white: Color(0xFF1E1E1E ) ,fontWeight: FontWeight.bold,fontSize: 16)),
+                        title: Text(
+                          '${user['username']}',
+                          style: TextStyle(
+                            color: textColor,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
                         subtitle: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                                'Score: ${(user['score']).round()}',
-                                style: TextStyle(color: darkModeNotifier.value ? Colors.white: Color(0xFF1E1E1E ), fontSize: 15)),
+                              'Score: ${(user['score']).round()}',
+                              style: TextStyle(color: textColor, fontSize: 15),
+                            ),
                             Text(
-                                'Accuracy: ${user['accuracy'].toStringAsFixed(2)}%',
-                                style: TextStyle(color: Colors.green)),
+                              'Accuracy: ${user['accuracy'].toStringAsFixed(2)}%',
+                              style: TextStyle(color: Colors.green),
+                            ),
                             Text(
-                                'Correct Votes: ${user['correctVotes']} / ${user['totalVotes']}',
-                                style: TextStyle(color: darkModeNotifier.value ? Colors.white: Color(0xFF1E1E1E ) ,)),
-
+                              'Correct Votes: ${user['correctVotes']} / ${user['totalVotes']}',
+                              style: TextStyle(color: secondaryTextColor),
+                            ),
                           ],
                         ),
                         trailing: Icon(Icons.star, color: Colors.yellow[700]),
@@ -213,7 +209,7 @@ class _TopUsersListState extends State<TopUsersList> {
         ],
       ),
       bottomNavigationBar: Column(
-        mainAxisSize: MainAxisSize.min, // Για να μην γεμίζει όλη την οθόνη
+        mainAxisSize: MainAxisSize.min,
         children: [
           if (_isBannerAdReady && _bannerAd != null)
             SizedBox(
