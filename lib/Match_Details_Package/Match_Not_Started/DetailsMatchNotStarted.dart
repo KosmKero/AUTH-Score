@@ -98,8 +98,6 @@ class TeamFormWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-    final teamNameWidth = screenWidth * 0.45; // 40% of screen width for team name
-    final resultsWidth = screenWidth * 0.46; // 50% of screen width for results
 
     return FutureBuilder<List<String>>(
       future: getFinalFive(team.name),
