@@ -119,37 +119,39 @@ class TeamFormWidget extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 // Team Name
-                InkWell(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => TeamDisplayPage(team)),
-                    );
-                  },
-                  child: Row(
-                    children: [
-                      SizedBox(width: 10,),
-                      SizedBox(
-                          height: 25,
-                          width: 25,
-                          child: team.image),
-                      SizedBox(width: 5,),
-                      Container(
-                        //width: teamNameWidth,
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                            team.name,
-                            style: TextStyle(
-                              fontSize: screenWidth * 0.036, // Responsive font size
-                              fontWeight: FontWeight.w600,
-                              color: darkModeNotifier.value?Colors.white:Colors.black,
-                              letterSpacing: 1.3,
+                Expanded(
+                  child: InkWell(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => TeamDisplayPage(team)),
+                      );
+                    },
+                    child: Row(
+                      children: [
+                        SizedBox(width: 10,),
+                        SizedBox(
+                            height: 25,
+                            width: 25,
+                            child: team.image),
+                        SizedBox(width: 5,),
+                        Flexible(
+                          //width: teamNameWidth,
+                         // alignment: Alignment.centerLeft,
+                          child: Text(
+                              team.name,
+                              style: TextStyle(
+                                fontSize: screenWidth * 0.036, // Responsive font size
+                                fontWeight: FontWeight.w600,
+                                color: darkModeNotifier.value?Colors.white:Colors.black,
+                                letterSpacing: 1.3,
+                              ),
+                              overflow: TextOverflow.ellipsis,
                             ),
-                            overflow: TextOverflow.ellipsis,
                           ),
-                        ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
                 Container(
