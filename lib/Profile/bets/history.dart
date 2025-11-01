@@ -185,25 +185,38 @@ class BetCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                Text(
-                  homeTeam,
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: textColor,
+                Flexible(
+                  child: Text(
+                    homeTeam,
+                    textAlign: TextAlign.center,
+                    softWrap: true,
+                    overflow: TextOverflow.visible,
+                    maxLines: 2,
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: textColor,
+                    ),
                   ),
                 ),
                 Text("vs", style: TextStyle(fontSize: 16, color: textColor)),
-                Text(
-                  awayTeam,
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: textColor,
+                Flexible(
+                  child: Text(
+                    awayTeam,
+                    textAlign: TextAlign.center,
+                    softWrap: true,
+                    overflow: TextOverflow.visible,
+                    maxLines: 2,
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: textColor,
+                    ),
                   ),
                 ),
               ],
             ),
+
             const SizedBox(height: 8),
 
             // Ημερομηνία
