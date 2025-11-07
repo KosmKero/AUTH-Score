@@ -57,16 +57,7 @@
         <key>NSAllowsArbitraryLoads</key>
         <true/>
     </dict>
-    <key>NSCameraUsageDescription</key>
-    <string>This app needs camera access to scan QR codes</string>
-    <key>NSPhotoLibraryUsageDescription</key>
-    <string>This app needs photos access to get profile pictures</string>
-    <key>NSMicrophoneUsageDescription</key>
-    <string>This app needs microphone access for voice features</string>
-    <key>NSLocationWhenInUseUsageDescription</key>
-    <string>This app needs access to location when open to show nearby places</string>
-    <key>NSLocationAlwaysUsageDescription</key>
-    <string>This app needs access to location when in the background to show nearby places</string>
+
     <key>NSUserTrackingUsageDescription</key>
     <string>Η εφαρμογή χρησιμοποιεί αυτό το αναγνωριστικό για να προβάλλει σχετικές διαφημίσεις.</string>
 

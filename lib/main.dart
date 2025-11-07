@@ -21,6 +21,7 @@ import 'Data_Classes/Player.dart';
 import 'Profile/Profile_Page.dart';
 import 'Search_Page.dart';
 import 'Data_Classes/MatchDetails.dart';
+import 'ad_manager.dart';
 import 'globals.dart';
 
 
@@ -58,6 +59,9 @@ void main() async {
     //await MatchHandle.migrateTeams();
     //await MatchHandle().resetPlayerData("2026");
     User? user = FirebaseAuth.instance.currentUser;
+
+    await initTracking();
+
     if(user!=null) {
       loadUser(user);
     }
@@ -486,6 +490,8 @@ Widget _buildBody(int selectedIndex) {
       return StandingsOrKnockoutsChooserPage();
     case 2:
       return FavoritePage();
+
+
     case 3:
       return ProfilePage(user: globalUser);
     default:
