@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:untitled1/Firebase_Handle/TeamsHandle.dart';
@@ -9,8 +10,11 @@ import 'package:untitled1/Profile/admin_request_screen.dart';
 import 'package:untitled1/Profile/feedback_page.dart';
 import 'package:untitled1/globals.dart';
 import '../Data_Classes/AppUser.dart';
+import '../Data_Classes/basketball/basketMatch.dart';
 import '../Firebase_Handle/betting_result_update.dart';
 import '../Firebase_Handle/firebase_screen_stats_helper.dart';
+import '../basketMatches/basket_match_details.dart';
+import '../main.dart';
 import 'LogInScreen.dart';
 import 'admin/requests_and_admins_page.dart';
 import 'bets/choosePage.dart';
@@ -63,7 +67,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
-    logScreenViewSta(screenName: 'Profile page',screenClass: 'Profile page');
+    logScreenViewSta(screenName: 'Profile page', screenClass: 'Profile page');
 
     return ValueListenableBuilder<bool>(
       valueListenable: darkModeNotifier,
@@ -237,7 +241,8 @@ class _ProfilePageState extends State<ProfilePage> {
                                 final result = await Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => LogInScreen(user: widget.user),
+                                    builder: (context) =>
+                                        LogInScreen(user: widget.user),
                                   ),
                                 );
 
@@ -249,7 +254,8 @@ class _ProfilePageState extends State<ProfilePage> {
                               } else {
                                 setState(() {
                                   isLoggedIn = false;
-                                  globalUser = AppUser(" ", " ", [], [], "user", {}, "");
+                                  globalUser =
+                                      AppUser(" ", " ", [], [], "user", {}, "");
                                   signOutUser();
                                 });
                               }
@@ -431,7 +437,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                 ),
                                 SizedBox(width: 10),
                                 Text(
-                                  greek? "Σκοτεινή Λειτουργία":"Dark mode",
+                                  greek ? "Σκοτεινή Λειτουργία" : "Dark mode",
                                   style: TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.w600,
@@ -474,7 +480,9 @@ class _ProfilePageState extends State<ProfilePage> {
                             color: darkModeOn ? Colors.white : Colors.blue,
                           ),
                           title: Text(
-                            greek ? "Επικοινωνία για προβλήματα" : "Communication for problems",
+                            greek
+                                ? "Επικοινωνία για προβλήματα"
+                                : "Communication for problems",
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.w600,
@@ -487,13 +495,15 @@ class _ProfilePageState extends State<ProfilePage> {
                           dense: true,
                           leading: Icon(
                             Icons.email,
-                            color: darkModeOn ? Colors.white70 : Colors.blue[700],
+                            color:
+                                darkModeOn ? Colors.white70 : Colors.blue[700],
                           ),
                           title: Text(
                             "authscore@gmail.com",
                             style: TextStyle(
                               fontSize: 16,
-                              color: darkModeOn ? Colors.white70 : Colors.black87,
+                              color:
+                                  darkModeOn ? Colors.white70 : Colors.black87,
                             ),
                           ),
                         ),
@@ -507,7 +517,8 @@ class _ProfilePageState extends State<ProfilePage> {
                             onPressed: () {
                               Navigator.push(
                                 context,
-                                MaterialPageRoute(builder: (context) => FeedbackPage()),
+                                MaterialPageRoute(
+                                    builder: (context) => FeedbackPage()),
                               );
                             },
                             child: Align(
@@ -516,11 +527,15 @@ class _ProfilePageState extends State<ProfilePage> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    greek ? "Αποστολή feedback" : "Send feedback",
+                                    greek
+                                        ? "Αποστολή feedback"
+                                        : "Send feedback",
                                     style: TextStyle(
                                       fontSize: 16,
                                       fontWeight: FontWeight.w600,
-                                      color: darkModeOn ? Colors.white : Colors.blue[900],
+                                      color: darkModeOn
+                                          ? Colors.white
+                                          : Colors.blue[900],
                                     ),
                                   ),
                                   SizedBox(height: 4),
@@ -530,7 +545,9 @@ class _ProfilePageState extends State<ProfilePage> {
                                         : "For any suggestions for improvement, send us your feedback.",
                                     style: TextStyle(
                                       fontSize: 13,
-                                      color: darkModeOn ? Colors.white70 : Colors.black54,
+                                      color: darkModeOn
+                                          ? Colors.white70
+                                          : Colors.black54,
                                     ),
                                   ),
                                 ],
@@ -538,11 +555,9 @@ class _ProfilePageState extends State<ProfilePage> {
                             ),
                           ),
                         ),
-
                       ],
                     ),
                   ),
-
                   FutureBuilder<bool>(
                     future: _isSuperAdminFuture,
                     builder: (context, snapshot) {
@@ -640,7 +655,62 @@ class _ProfilePageState extends State<ProfilePage> {
                         return SizedBox.shrink();
                       }
                     },
-                  )
+                  ),
+                  if (isLoggedIn)
+                  Container(
+                    margin: const EdgeInsets.symmetric(
+                        vertical: 15, horizontal: 20),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: darkModeOn
+                          ? Colors.red.shade700
+                          : Colors.red, // darker red in dark mode
+                      borderRadius: BorderRadius.circular(15),
+                      boxShadow: [
+                        BoxShadow(
+                          color: darkModeOn
+                              ? Colors.black.withOpacity(0.4)
+                              : Colors.grey.withOpacity(0.3),
+                          blurRadius: 10,
+                          offset: const Offset(0, 5),
+                        ),
+                      ],
+                    ),
+                    child: ListTile(
+                      dense: true,
+                      visualDensity: const VisualDensity(vertical: -3),
+                      leading: Icon(
+                        Icons.delete,
+                        color: darkModeOn ? Colors.white : Colors.white,
+                      ),
+                      title: TextButton(
+                        style: TextButton.styleFrom(
+                          padding: EdgeInsets.zero,
+                          minimumSize: const Size(0, 30),
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        ),
+                        onPressed: () async {
+                          bool isDeleted = await _deleteAccount(context);
+                          if (isDeleted) {
+                            setState(() {
+                              isLoggedIn = false;
+                              globalUser =
+                                  AppUser(" ", " ", [], [], "user", {}, "");
+                            });
+                          }
+                        },
+                        child: Text(
+                          greek ? "Διαγραφή λογαριασμού" : 'Delete account',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                            color: darkModeOn ? Colors.white : Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ],
@@ -648,6 +718,140 @@ class _ProfilePageState extends State<ProfilePage> {
         );
       },
     );
+  }
+}
+
+Future<bool> _deleteAccount(BuildContext context) async {
+  bool darkModeOn = darkModeNotifier.value;
+  final user = FirebaseAuth.instance.currentUser;
+  if (user == null) return false;
+
+  final userDoc =
+      await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
+
+  final username =
+      userDoc.data()?['username'] ?? ''; // <-- Το username από Firestore
+  if (username.isEmpty) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(greek
+          ? 'Δεν βρέθηκε όνομα χρήστη στο προφίλ.'
+          : 'Username not found in profile.'),
+    ));
+    return false;
+  }
+
+  final TextEditingController inputController = TextEditingController();
+
+  // 1️⃣ Δείχνουμε dialog για να γράψει το username
+  final confirm = await showDialog<bool>(
+    context: context,
+    builder: (context) => AlertDialog(
+      backgroundColor: darkModeOn ? Colors.grey[900] : Colors.white,
+      title: Text(
+        greek ? 'Επιβεβαίωση διαγραφής' : 'Confirm deletion',
+        style: TextStyle(color: darkModeOn ? Colors.white : Colors.black),
+      ),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            greek
+                ? 'Για να διαγράψεις τον λογαριασμό σου, γράψε το username σου παρακάτω.\nΑυτή η ενέργεια δεν είναι αναστρέψιμη.'
+                : 'To delete your account, please type your username below.\nThis action cannot be undone.',
+            style:
+                TextStyle(color: darkModeOn ? Colors.white70 : Colors.black87),
+          ),
+          const SizedBox(height: 15),
+          TextField(
+            controller: inputController,
+            style: TextStyle(color: darkModeOn ? Colors.white : Colors.black),
+            decoration: InputDecoration(
+              hintText: greek ? 'Γράψε το username σου' : 'Enter your username',
+              hintStyle: TextStyle(
+                  color: darkModeOn ? Colors.white54 : Colors.black45),
+              enabledBorder: OutlineInputBorder(
+                borderSide: BorderSide(
+                    color: darkModeOn ? Colors.white38 : Colors.black26),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderSide:
+                    BorderSide(color: darkModeOn ? Colors.white : Colors.black),
+              ),
+            ),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context, false),
+          child: Text(
+            greek ? 'Άκυρο' : 'Cancel',
+            style: const TextStyle(color: Colors.grey),
+          ),
+        ),
+        TextButton(
+          onPressed: () {
+            if (inputController.text.trim() == username.trim()) {
+              Navigator.pop(context, true);
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(greek
+                      ? 'Λάθος username. Δεν έγινε διαγραφή.'
+                      : 'Incorrect username. Deletion cancelled.'),
+                ),
+              );
+            }
+          },
+          child: Text(
+            greek ? 'Διαγραφή' : 'Delete',
+            style: const TextStyle(color: Colors.red),
+          ),
+        ),
+      ],
+    ),
+  );
+
+  if (confirm != true) return false;
+
+  // 2️⃣ Αν το username ήταν σωστό — προχωράμε στη διαγραφή
+  try {
+    await FirebaseFirestore.instance.collection('users').doc(user.uid).delete();
+    await user.delete();
+    await FirebaseAuth.instance.signOut();
+
+    if (!context.mounted) return false;
+
+    // Κλείσε τυχόν ανοιχτά dialogs πριν το SnackBar
+    Navigator.of(context, rootNavigator: true)
+        .popUntil((route) => route.isFirst);
+
+    // Δείξε πρώτα το snackbar
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          greek
+              ? 'Ο λογαριασμός διαγράφηκε επιτυχώς.'
+              : 'Account deleted successfully.',
+        ),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+
+    isLoggedIn = false;
+    globalUser = AppUser(" ", " ", [], [], "user", {}, "");
+
+    return true;
+    if (!context.mounted) return false;
+  } catch (e) {
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(greek ? 'Σφάλμα: $e' : 'Error: $e'),
+        ),
+      );
+    }
+    return false;
   }
 }
 
