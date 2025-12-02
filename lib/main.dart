@@ -194,7 +194,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Text(
-          "AUTH Score",
+          "UniScore",
           style: TextStyle(
             fontSize: 30,
             fontWeight: FontWeight.bold,
