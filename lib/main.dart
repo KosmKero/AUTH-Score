@@ -376,7 +376,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
           title: Row(
             children: [
               Text(
-                "AUTH Score",
+                "UniScore",
                 style: TextStyle(
                   fontSize: 26,
                   fontWeight: FontWeight.bold,
