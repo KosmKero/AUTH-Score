@@ -849,14 +849,17 @@ class MatchDetails extends ChangeNotifier {
         _matchFacts[newGoal.half]?.add(newGoal);
 
         if (newGoal.name != 'Άλλος') {
-          for (Player player in awayTeam.players) {
-            if ("${player.name.substring(0, 1)}. ${player.surname}" ==
-                newGoal.name) {
+          final teamPlayers =
+          newGoal.isHomeTeam ? homeTeam.players : awayTeam.players;
+
+          for (Player player in teamPlayers) {
+            if ("${player.name[0]}. ${player.surname}" == newGoal.name) {
               TopPlayersHandle().playerScored(player);
               break;
             }
           }
         }
+
 
         MatchFactsStorageHelper().addMatchFact(
             matchDoc: FirebaseFirestore.instance

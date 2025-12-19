@@ -140,7 +140,8 @@ class BetCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final matchInfo = bet['matchInfo'] as Map<String, dynamic>;
     final DateTime startTime = (matchInfo['startTime'] as Timestamp).toDate();
-    final status = bet['status'] as String;
+    final status = (bet['status'] ?? 'pending') as String;
+
 
     String choice = bet['choice'] == '1'
         ? matchInfo['Hometeam'] ?? ""
@@ -152,19 +153,46 @@ class BetCard extends StatelessWidget {
     Color statusColor;
     String statusText;
 
+    // COLORS
+    const Color wonLight = Color(0xFF2E7D32);
+    const Color wonDark  = Color(0xFF66BB6A);
+
+    const Color lostLight = Color(0xFFC62828);
+    const Color lostDark  = Color(0xFFEF5350);
+
+    const Color cancelledLight = Color(0xFF616161); // grey 700
+    const Color cancelledDark  = Color(0xFFBDBDBD); // grey 400
+
+
+
+
+    const Color pendingLight = Color(0xFFF57C00);
+    const Color pendingDark  = Color(0xFFFFB74D);
+
+// LOGIC
+    final isDark = darkModeNotifier.value;
+
     switch (status) {
       case 'won':
-        statusColor = Colors.green;
+        statusColor = isDark ? wonDark : wonLight;
         statusText = "ΚΕΡΔΙΣΜΕΝΟ 🎉";
         break;
+
       case 'lost':
-        statusColor = Colors.red;
+        statusColor = isDark ? lostDark : lostLight;
         statusText = "ΧΑΜΕΝΟ ❌";
         break;
+
+      case 'cancelled':
+        statusColor = isDark ? cancelledDark : cancelledLight;
+        statusText = "ΑΚΥΡΩΘΗΚΕ 🚫";
+        break;
+
       default:
-        statusColor = Colors.orange;
-        statusText = "Εκκρεμεί ⏳";
+        statusColor = isDark ? pendingDark : pendingLight;
+        statusText = "ΕΚΚΡΕΜΕΙ ⏳";
     }
+
 
     final homeTeam = matchInfo['Hometeam'] ?? "";
     final awayTeam = matchInfo['Awayteam'] ?? "";
@@ -226,44 +254,62 @@ class BetCard extends StatelessWidget {
             ),
 
             // Επιλογή χρήστη + σκορ
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  "Η επιλογή σου: $choice",
-                  style: TextStyle(fontSize: 16, color: textColor),
-                ),
-
-                if (homeScore != null &&
-                    awayScore != null &&
-                    (status == "won" || status == "lost"))
-                  Container(
-                    margin: const EdgeInsets.only(top: 6.0),
-                    padding:
-                    const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
-                    decoration: BoxDecoration(
-                      color: darkModeNotifier.value
-                          ? Colors.black38
-                          : Color.fromARGB(60, 40, 90, 95),
-
-
-                        borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Text(
-                      "Σκορ $homeScore - $awayScore",
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: darkModeNotifier.value
-                            ? Colors.white
-                            : Colors.black,
-                        fontWeight: FontWeight.w500,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: RichText(
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  text: TextSpan(
+                    children: [
+                      TextSpan(
+                        text: "Η επιλογή σου: ",
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: textColor.withOpacity(0.7),
+                        ),
                       ),
+                      TextSpan(
+                        text: choice,
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: textColor,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+
+              if (homeScore != null &&
+                  awayScore != null &&
+                  (status == "won" || status == "lost"))
+                Container(
+                  margin: const EdgeInsets.only(left: 8, top: 6),
+                  padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
+                  decoration: BoxDecoration(
+                    color: darkModeNotifier.value
+                        ? Colors.black38
+                        : const Color.fromARGB(60, 40, 90, 95),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Text(
+                    "Σκορ $homeScore - $awayScore",
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: darkModeNotifier.value ? Colors.white : Colors.black,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
-              ],
-            ),
+                ),
+            ],
+          ),
 
-            const SizedBox(height: 8),
+
+          const SizedBox(height: 8),
 
             // Κατάσταση
             Container(

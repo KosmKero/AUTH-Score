@@ -14,7 +14,12 @@ class BettingResultUpdate {
     for (final matchDoc in matchesSnapshot.docs) {
       final matchKey = matchDoc.id;
       final matchData = matchDoc.data();
-      final correctChoice = matchData['correctChoice'];
+      final bool isCancelled = matchData['cancelled'] == true; //ελγχουμε πρωτα αν ακυρωθηκε το ματς
+
+
+      final String? correctChoice =
+      isCancelled ? null : matchData['correctChoice'] as String?;
+
       final userVotes = Map<String, dynamic>.from(matchData['userVotes'] ?? {});
 
       // Batch για users
@@ -25,6 +30,23 @@ class BettingResultUpdate {
         final String choice = entry.value;
 
         final userRef = FirebaseFirestore.instance.collection('users').doc(uid);
+        // Δημιουργία / ενημέρωση bet
+        final betRef = FirebaseFirestore.instance
+            .collection('bets')
+            .doc('${uid}_$matchKey');
+
+
+        if (isCancelled) {                         // κωδικας για οταν ακυρωνεται το ματς
+          batch.set(betRef, {                     //
+            'status': 'cancelled',                 //
+            'matchInfo': {                         //
+              'GoalHome': matchData['GoalHome'],   //
+              'GoalAway': matchData['GoalAway'],   //
+            }                                      //
+          }, SetOptions(merge: true));             //
+                                                   //
+          continue; // Δεν πειράζουμε user stats   //
+        }
 
         // Παίρνουμε προηγούμενα στατιστικά
         final userDoc = await userRef.get();
@@ -56,10 +78,7 @@ class BettingResultUpdate {
           'totalVotes': total,
         }, SetOptions(merge: true));
 
-        // Δημιουργία / ενημέρωση bet
-        final betRef = FirebaseFirestore.instance
-            .collection('bets')
-            .doc('${uid}_$matchKey');
+
 
         batch.set(betRef, {
           'status': choice == correctChoice ? 'won' : 'lost',

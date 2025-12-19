@@ -8,13 +8,13 @@ import 'package:untitled1/globals.dart';
 
 import 'basketPlayer.dart';
 
-class Team {
+class basketTeam {
   late List<BasketPlayer> _players;
   List<String> last5Results = ["W", "W", "L", "W", "W"];
 
   late final Image _image;
   // Constructor with optional values
-  Team(
+  basketTeam(
       this.name,
       this._nameEnglish,
       this._matches,
@@ -26,13 +26,15 @@ class Team {
       this._coach,
       this._position,
       this._initials,
+      this.secondCoachName,
+      this.coachName,
       [List<BasketPlayer>? players]) {
     _players = players ?? []; // Initialize players list if null
 
     loadTeamImage();
   }
 
-  final String _initials;
+  final String _initials, coachName,secondCoachName;
   int? _foundationYear;
   final String name, _nameEnglish;
   String _coach;
@@ -236,14 +238,14 @@ class Team {
   }
 
   Future<void> loadTeamImage() async {
-    try {
-      // Προσπάθεια να φορτωθεί το αρχείο
-      await rootBundle.load('logos/$nameEnglish.png');
-      _image = Image.asset('logos/$nameEnglish.png');
-    } catch (e) {
+   //try {
+   //  // Προσπάθεια να φορτωθεί το αρχείο
+   //  await rootBundle.load('logos/$nameEnglish.png');
+   //  _image = Image.asset('logos/$nameEnglish.png');
+   //} catch (e) {
       // Αν δεν υπάρχει, χρησιμοποίησε fallback
       _image = Image.asset('fotos/default_team_logo.png');
-    }
+   // }
   }
 
   Future<void> increasePointsFor(int points) async {
@@ -283,7 +285,7 @@ class Team {
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
-    return other is Team && other.name == name;
+    return other is basketTeam && other.name == name;
   }
 
   @override

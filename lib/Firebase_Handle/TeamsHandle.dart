@@ -246,6 +246,16 @@ class TeamsHandle {
           .collection("year").doc(thisYearNow.toString()).collection("matches")
           .doc(match.matchKey)
           .delete();
+
+      await FirebaseFirestore.instance
+          .collection('votes')
+          .doc('${match.homeTeam.nameEnglish}${match.awayTeam.nameEnglish}${match.dateString}')
+          .set({
+        'cancelled': true,
+        'hasMatchFinished': true,
+        'statsUpdated':false
+      }, SetOptions(merge: true));
+
       navigatorKey.currentState?.pushReplacementNamed('/home');
       print('Το έγγραφο διαγράφηκε επιτυχώς!');
     } catch (e) {

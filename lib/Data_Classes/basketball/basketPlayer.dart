@@ -23,16 +23,16 @@ class BasketPlayer extends ChangeNotifier{
   String get teamNameEnglish => _teamNameEnglish;
 
 
-//  Future<void> scoredGoal() async {
-//    _goals++;
-//
-//    await FirebaseFirestore.instance
-//        .collection('teams')
-//        .doc(teamName)
-//        .set({
-//      'Players': toMap(),
-//    }, SetOptions(merge: true));
-//  }
+  Future<void> scoredPoints(int points) async {
+    _points=_points+points;
+
+    await FirebaseFirestore.instance
+        .collection('teams')
+        .doc(teamName)
+        .set({
+      'Players': toMap(),
+    }, SetOptions(merge: true));
+  }
 
 
   Map<String,Map<String, dynamic>> toMap() {
