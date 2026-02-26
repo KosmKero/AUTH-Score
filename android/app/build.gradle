@@ -38,7 +38,7 @@ android {
 
     defaultConfig {
         applicationId "com.authteam.authscore"
-        minSdkVersion 23
+        minSdkVersion flutter.minSdkVersion
         //noinspection EditedTargetSdkVersion
         targetSdkVersion 35
         versionCode 1
