@@ -499,7 +499,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                 darkModeOn ? Colors.white70 : Colors.blue[700],
                           ),
                           title: Text(
-                            "authscore@gmail.com",
+                            "uniscore.info@gmail.com",
                             style: TextStyle(
                               fontSize: 16,
                               color:
