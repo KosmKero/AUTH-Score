@@ -7,7 +7,7 @@ class AdManager {
   // === Ad Unit IDs ===
   static final String bannerAdUnitId = Platform.isAndroid
       ?'ca-app-pub-1918416043234880/2473426532' //ca-app-pub-1918416043234880/2473426532  == ΤΟ ΔΙΚΟ ΜΑΣ   ca-app-pub-3940256099942544/6300978111 == ΤΟ ΤΕΣΤΙΝΚ
-      : 'ca-app-pub-1918416043234880/8698889690';
+      : 'ca-app-pub-1918416043234880/9422859440';
 
   static final String nativeAdUnitId = Platform.isAndroid
       ? 'ca-app-pub-1918416043234880/7386007711'

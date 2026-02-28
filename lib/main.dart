@@ -60,7 +60,7 @@ void main() async {
     //await MatchHandle().resetPlayerData("2026");
     User? user = FirebaseAuth.instance.currentUser;
 
-    await initTracking();
+   // await initTracking(); προβλημα
 
     if(user!=null) {
       loadUser(user);
@@ -117,6 +117,20 @@ class _LoadingScreenState extends State<LoadingScreen> {
   @override
   void initState() {
     super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      try {
+        // Δίνουμε 1 δευτερόλεπτο καθυστέρηση για απόλυτη σταθερότητα στο iOS
+        await Future.delayed(const Duration(milliseconds: 1000));
+        await initTracking();
+      } catch (e) {
+        print("Tracking initialization skipped or failed: $e");
+      }
+    });
+
+
+
+
     _loadData();
     if(isLoggedIn) {
       _loadLanguage();

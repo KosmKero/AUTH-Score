@@ -346,9 +346,17 @@ class _AddMatchScreenState extends State<AddMatchScreen> {
                       return;
                     }
 
-
                     DateTime currentDate = DateTime.now();
-                    DateTime matchDate = DateTime(year, month, day);
+                    final TimeOfDay time = matchTime ?? const TimeOfDay(hour: 20, minute: 15);
+
+                    DateTime matchDate = DateTime(
+                      year,
+                      month,
+                      day,
+                      time.hour,
+                      time.minute,
+                    );
+
                     if (matchDate.isBefore(currentDate)) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
