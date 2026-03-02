@@ -70,7 +70,7 @@ class _matchDetailsPageViewState extends State<_matchDetailsPageView> {
         iconTheme: IconThemeData(color: darkModeNotifier.value?Colors.white:Colors.black),
         actions: [
           if (!match.matchStarted)
-            if (globalUser.controlTheseTeams(match.homeTeam.name, match.awayTeam.name))
+            if (globalUser.controlTheseTeamsFootball(match.homeTeam.name, match.awayTeam.name))
               IconButton(onPressed: () async {
                //await Navigator.push(
                //    context,

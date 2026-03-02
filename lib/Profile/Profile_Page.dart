@@ -255,7 +255,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                 setState(() {
                                   isLoggedIn = false;
                                   globalUser =
-                                      AppUser(" ", " ", [], [], "user", {}, "");
+                                      AppUser(" ", " ", [], [], "user", {}, "",false);
                                   signOutUser();
                                 });
                               }
@@ -696,7 +696,7 @@ class _ProfilePageState extends State<ProfilePage> {
                             setState(() {
                               isLoggedIn = false;
                               globalUser =
-                                  AppUser(" ", " ", [], [], "user", {}, "");
+                                  AppUser(" ", " ", [], [], "user", {}, "",false);
                             });
                           }
                         },
@@ -839,7 +839,7 @@ Future<bool> _deleteAccount(BuildContext context) async {
     );
 
     isLoggedIn = false;
-    globalUser = AppUser(" ", " ", [], [], "user", {}, "");
+    globalUser = AppUser(" ", " ", [], [], "user", {}, "",false);
 
     return true;
     if (!context.mounted) return false;

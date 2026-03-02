@@ -93,7 +93,7 @@ class _BasketMatchNotStartedDetailsState extends State<BasketMatchNotStartedDeta
 
   Widget _isAdminWidget() {
     // Check if the user is logged in
-    if (globalUser.controlTheseTeams(
+    if (globalUser.controlTheseTeamsFootball(
         widget.match.homeTeam.name, widget.match.awayTeam.name)) {
       return TextButton(
         child: Text(

@@ -6,19 +6,14 @@ import 'package:untitled1/Data_Classes/MatchDetails.dart';
 import '../Data_Classes/AppUser.dart';
 import '../globals.dart';
 
-class UserHandleBase
-{
-
+class UserHandleBase {
   User? user;
-
 
   final FirebaseAuth database = FirebaseAuth.instance; // Αναφορά στη βάση
 
-
   //Επιστρέφει true αν συνδεθει και false αν το username υπάρχει ήδη ή συναντήσει πρόβλημα
-  Future<bool> signUpWithEmail(String email,String username, String password,String uni,BuildContext context) async
-  {
-
+  Future<bool> signUpWithEmail(String email, String username, String password,
+      String uni, BuildContext context) async {
     if (!isValidEmail(email)) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -31,11 +26,8 @@ class UserHandleBase
       return false;
     }
 
-
-    if (await isUsernameAvailable(username))
-    {
+    if (await isUsernameAvailable(username)) {
       try {
-
         UserCredential userCredential =
             await FirebaseAuth.instance.createUserWithEmailAndPassword(
           email: email,
@@ -52,26 +44,24 @@ class UserHandleBase
             'username': username,
             'email': email,
             "University": uni,
-            "Favourite Teams":[],
-            "Controlled Teams":[],
-            "darkMode":false,
-            "Language":true,
+            "Favourite Teams": [],
+            "Controlled Teams": [],
+            "darkMode": false,
+            "Language": true,
             'role': 'user',
             "fcmToken": " ",
-            'matchKeys': {}
+            'matchKeys': {},
+            'moderator': false
           });
 
-
-          globalUser = AppUser(username, uni, [], [],"user",{},"");
+          globalUser = AppUser(username, uni, [], [], "user", {}, "", false);
           globalUser.loggedIn();
 
-         //await user?.sendEmailVerification();
-
+          //await user?.sendEmailVerification();
 
           return true;
         }
-      }
-      catch (e) {
+      } catch (e) {
         if (password.length < 6 && password.isNotEmpty) {
           // Εμφανίζουμε μήνυμα για κωδικό μικρότερο από 6 χαρακτήρες
           ScaffoldMessenger.of(context).showSnackBar(
@@ -130,25 +120,23 @@ class UserHandleBase
         }
         return false;
       }
-    }
-    else
-    {
-      ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(greek?"Αυτό το όνομα χρήστη χρησιμοποιείται ήδη! Επέλεξε κάποιο άλλο.":'This username already exists! Please try another one.'),
-            duration: Duration(seconds: 2),
-          ));
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(greek
+            ? "Αυτό το όνομα χρήστη χρησιμοποιείται ήδη! Επέλεξε κάποιο άλλο."
+            : 'This username already exists! Please try another one.'),
+        duration: Duration(seconds: 2),
+      ));
       return false;
     }
     return false;
   }
 
   bool isValidEmail(String email) {
-    final emailRegex = RegExp(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$");
+    final emailRegex =
+        RegExp(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$");
     return emailRegex.hasMatch(email);
   }
-
-
 
   //συναρτηση για ελεγχο αν υπαρχει το username
   Future<bool> isUsernameAvailable(String username) async {
@@ -167,13 +155,11 @@ class UserHandleBase
         .where("username", isEqualTo: username)
         .get();
 
-    if(querySnapshot.docs.isNotEmpty) {
+    if (querySnapshot.docs.isNotEmpty) {
       final userDoc = querySnapshot.docs.first;
       greek = userDoc.get("Language");
     }
   }
-
-
 
   Future<bool> login(String email, String password) async {
     try {
@@ -185,12 +171,12 @@ class UserHandleBase
 
       user = userCredential.user;
 
+      DocumentSnapshot userDoc = await FirebaseFirestore.instance
+          .collection("users")
+          .doc(FirebaseAuth.instance.currentUser!.uid)
+          .get();
 
-      DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection("users").doc(FirebaseAuth.instance.currentUser!.uid).get();
-
-
-      if (userDoc.exists && userDoc.data() != null)
-      {
+      if (userDoc.exists && userDoc.data() != null) {
         Map<String, bool> matchKeys = {};
 
         try {
@@ -200,47 +186,51 @@ class UserHandleBase
           }
         } catch (e) {}
 
+        final data = userDoc.data() as Map<String, dynamic>;
+
         globalUser = AppUser(
-          userDoc.get("username").toString(),
-          userDoc.get("University").toString(),
-          (userDoc['Favourite Teams'] as List<dynamic>).map((e) => e.toString()).toList(),
-          (userDoc['Controlled Teams'] as List<dynamic>).map((e) => e.toString()).toList(),
-          userDoc['role'],
+          data["username"].toString(),
+          data["University"].toString(),
+          (data['Favourite Teams'] as List<dynamic>)
+              .map((e) => e.toString())
+              .toList(),
+          (data['Controlled Teams'] as List<dynamic>)
+              .map((e) => e.toString())
+              .toList(),
+          data['role'],
           matchKeys,
-          userDoc['email']
+          data['email'],
+          (data['moderator'] as bool?) ?? false, // ✅ SAFE
         );
 
         globalUser.loggedIn();
         darkModeNotifier.value = userDoc.get("darkMode");
-        if(darkModeNotifier.value) {
+        if (darkModeNotifier.value) {
           isToggled = true;
+        } else {
+          isToggled = false;
         }
-        else{isToggled =false;}
-
 
         await loadLanguage(username);
-
-      }
-      else
-      {
+      } else {
         print("Error: User document does not exist or is empty.");
       }
 
       return true;
-
     } catch (e) {
       print("Error signing in: $e");
       return false;
     }
-
   }
 
   Future<void> resetPassword(BuildContext context, String email) async {
     try {
-      if (!isValidEmail(email)){
+      if (!isValidEmail(email)) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(greek ? 'Συμπλήρωσε σωστά το email σου' : 'Please fill in your email.') ,
+            content: Text(greek
+                ? 'Συμπλήρωσε σωστά το email σου'
+                : 'Please fill in your email.'),
             backgroundColor: Colors.red,
             duration: Duration(seconds: 2),
           ),
@@ -251,7 +241,9 @@ class UserHandleBase
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(greek ? 'Ένα email επαναφοράς κωδικού στάλθηκε!' :  'A password reset email has been sent!'),
+          content: Text(greek
+              ? 'Ένα email επαναφοράς κωδικού στάλθηκε!'
+              : 'A password reset email has been sent!'),
           backgroundColor: Colors.green,
           duration: Duration(seconds: 2),
         ),
@@ -277,14 +269,11 @@ class UserHandleBase
     }
   }
 
-
-
   //συνάρτηση που προσθέτει το ονομα της ομαδας που θα μπορει να ελέγχει ο admin
   Future<void> addControlledTeamToFirestore(List<String> list) async {
     // Convert the list of Team objects to a list of maps
 
-
-    if (globalUser.isAdmin && globalUser.isLoggedIn){
+    if (globalUser.isAdmin && globalUser.isLoggedIn) {
       await FirebaseFirestore.instance
           .collection('users')
           .doc(FirebaseAuth.instance.currentUser!.uid)
@@ -296,7 +285,6 @@ class UserHandleBase
       globalUser.addControlledTeams(list);
     }
   }
-
 
   Future<void> changeDarkMode(String username) async {
     final querySnapshot = await FirebaseFirestore.instance
@@ -330,10 +318,8 @@ class UserHandleBase
     }
   }
 
-
-
   //true == greek  else english
-  Future<void> updateLanguageChoice(String username,String language) async {
+  Future<void> updateLanguageChoice(String username, String language) async {
     final querySnapshot = await FirebaseFirestore.instance
         .collection("users")
         .where("username", isEqualTo: username)
@@ -343,9 +329,8 @@ class UserHandleBase
       final userDoc = querySnapshot.docs.first;
 
       if (userDoc.data().containsKey("Language")) {
-
         bool nextLanguage = false;
-        if(language=="English") {
+        if (language == "English") {
           nextLanguage = false;
         } else {
           nextLanguage = true;
@@ -355,11 +340,7 @@ class UserHandleBase
             .collection("users")
             .doc(userDoc.id)
             .update({"Language": nextLanguage});
-
-
-
-      }
-      else {
+      } else {
         // Αν δεν υπάρχει, ορίζουμε την πρώτη τιμή (π.χ. true)
         await FirebaseFirestore.instance
             .collection("users")
@@ -369,30 +350,26 @@ class UserHandleBase
     }
   }
 
-
   Future<String> getSelectedLanguage(String username) async {
     final querySnapshot = await FirebaseFirestore.instance
         .collection("users")
         .where("username", isEqualTo: username)
         .get();
 
-    if (querySnapshot.docs.first.get("Language")==true) {
+    if (querySnapshot.docs.first.get("Language") == true) {
       return "Ελληνικά";
     }
 
     return "English";
   }
 
-
-  Future<void> getUser(User user)async
-  {
+  Future<void> getUser(User user) async {
     DocumentSnapshot userDoc = await FirebaseFirestore.instance
         .collection("users")
         .doc(user.uid)
         .get();
 
-    if(userDoc.exists && userDoc.data() != null){
-
+    if (userDoc.exists && userDoc.data() != null) {
       Map<String, bool> matchKeys = {};
 
       try {
@@ -402,53 +379,54 @@ class UserHandleBase
         }
       } catch (e) {}
 
+      final data = userDoc.data() as Map<String, dynamic>;
+
       globalUser = AppUser(
-        userDoc.get("username").toString(),
-        userDoc.get("University").toString(),
-        (userDoc['Favourite Teams'] as List<dynamic>).map((e) => e.toString()).toList(),
-        (userDoc['Controlled Teams'] as List<dynamic>).map((e) => e.toString()).toList(),
-        userDoc['role'],
-       matchKeys,
-        userDoc['email']
+        data["username"].toString(),
+        data["University"].toString(),
+        (data['Favourite Teams'] as List<dynamic>)
+            .map((e) => e.toString())
+            .toList(),
+        (data['Controlled Teams'] as List<dynamic>)
+            .map((e) => e.toString())
+            .toList(),
+        data['role'],
+        matchKeys,
+        data['email'],
+        (data['moderator'] as bool?) ?? false,
       );
+
       globalUser.loggedIn();
       isLoggedIn = true;
 
       darkModeNotifier.value = userDoc.get("darkMode");
-      if(darkModeNotifier.value) {
+      if (darkModeNotifier.value) {
         isToggled = true;
+      } else {
+        isToggled = false;
       }
-      else{isToggled =false;}
 
       await loadLanguage(globalUser.username);
-
-    }
-    else{
+    } else {
       print("Error: User document does not exist or is empty.");
     }
-
   }
-
 
   Future<void> addNotifyMatch(MatchDetails match) async {
     bool value;
     if (globalUser.favoriteList.contains(match.homeTeam.name) ||
-        globalUser.favoriteList.contains(match.awayTeam.name) ){
-      value=false;
-    }
-    else{
-      value=true;
+        globalUser.favoriteList.contains(match.awayTeam.name)) {
+      value = false;
+    } else {
+      value = true;
     }
 
     await FirebaseFirestore.instance
         .collection('users')
         .doc(FirebaseAuth.instance.currentUser!.uid)
         .set({
-      'matchKeys': {
-        match.matchKey: value
-      }
+      'matchKeys': {match.matchKey: value}
     }, SetOptions(merge: true));
-
   }
 
   Future<void> deleteNotifyMatch(MatchDetails match) async {
@@ -464,17 +442,8 @@ class UserHandleBase
     await FirebaseFirestore.instance
         .collection('users')
         .doc(uid)
-        .update({
-      key: FieldValue.delete()
-    });
+        .update({key: FieldValue.delete()});
 
     print('Deleted $key successfully');
   }
-
-
-
-
-
-
 }
-

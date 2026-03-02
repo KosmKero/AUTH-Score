@@ -469,7 +469,7 @@ class MatchDetails extends ChangeNotifier {
   //ετοιμο
   Future<void> homeScored(String name, bool hasName) async {
     if (hasMatchStarted &&
-        globalUser.controlTheseTeams(homeTeam.name, awayTeam.name)) {
+        globalUser.controlTheseTeamsFootball(homeTeam.name, awayTeam.name)) {
       int half;
       (!isExtraTimeTime)
           ? (!_hasSecondHalfStarted)
@@ -521,7 +521,7 @@ class MatchDetails extends ChangeNotifier {
   //ετοιμο
   void awayScored(String name, bool hasName) {
     if (hasMatchStarted &&
-        globalUser.controlTheseTeams(homeTeam.name, awayTeam.name)) {
+        globalUser.controlTheseTeamsFootball(homeTeam.name, awayTeam.name)) {
       int half;
       (!isExtraTimeTime)
           ? ((!_hasSecondHalfStarted) ? half = 0 : half = 1)
@@ -740,7 +740,7 @@ class MatchDetails extends ChangeNotifier {
   Future<void> playerGotCard(String name, Team team, bool isYellow, int? minute,
       bool isHomeTeam) async {
     if ((!hasMatchFinished || (isExtraTimeTime && !_hasExtraTimeFinished)) &&
-        globalUser.controlTheseTeams(homeTeam.name, awayTeam.name)) {
+        globalUser.controlTheseTeamsFootball(homeTeam.name, awayTeam.name)) {
       for (Player player in team.players) {
         if ("${player.name.substring(0, 1)}. ${player.surname}" == name) {
           isYellow ? await player.gotYellowCard() : await player.gotRedCard();
@@ -776,7 +776,7 @@ class MatchDetails extends ChangeNotifier {
 
   //ετοιμο
   Future<void> cancelGoal(Goal goal1) async {
-    if (globalUser.controlTheseTeams(homeTeam.name, awayTeam.name)) {
+    if (globalUser.controlTheseTeamsFootball(homeTeam.name, awayTeam.name)) {
       //μικροτερο απο 3 ωρες
       if (_matchFacts.containsKey(goal1.half)) {
         _matchFacts[goal1.half]!
@@ -824,7 +824,7 @@ class MatchDetails extends ChangeNotifier {
   Future<void> editGoal(Goal oldGoal, Goal newGoal) async {
     if (startTimeInSeconds >
             DateTime.now().millisecondsSinceEpoch ~/ 1000 - 10800 &&
-        globalUser.controlTheseTeams(homeTeam.name, awayTeam.name)) {
+        globalUser.controlTheseTeamsFootball(homeTeam.name, awayTeam.name)) {
       if (_matchFacts.containsKey(oldGoal.half)) {
         cancelGoal(oldGoal);
 
@@ -876,7 +876,7 @@ class MatchDetails extends ChangeNotifier {
   Future<void> editCard(CardP oldCard, CardP newCard) async {
     if (startTimeInSeconds >
             DateTime.now().millisecondsSinceEpoch ~/ 1000 - 10800 &&
-        globalUser.controlTheseTeams(homeTeam.name, awayTeam.name)) {
+        globalUser.controlTheseTeamsFootball(homeTeam.name, awayTeam.name)) {
       if (_matchFacts.containsKey(oldCard.half)) {
         // 1. Διαγραφή της παλιάς κάρτας
         _matchFacts[oldCard.half]!
@@ -946,7 +946,7 @@ class MatchDetails extends ChangeNotifier {
 //ετοιμο
   void cancelCard(CardP card1) {
     if ((!hasMatchFinished || (isExtraTimeTime && !hasExtraTimeFinished)) &&
-        globalUser.controlTheseTeams(homeTeam.name, awayTeam.name)) {
+        globalUser.controlTheseTeamsFootball(homeTeam.name, awayTeam.name)) {
       if (_matchFacts.containsKey(card1.half)) {
         _matchFacts[card1.half]!
             .removeWhere((card) => card is CardP && card == card1);

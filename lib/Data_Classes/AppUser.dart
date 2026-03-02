@@ -15,11 +15,12 @@ class AppUser
   String _username,_university,_email;
   bool _isLoggedIn=false;
   late bool _isAdmin;
+  final bool _isUpperAdmin;
 
   List<String> favoriteList=[];
   List<String> _controlledTeams=[];
   Map<String,bool>  _matchKeys={};
-  AppUser(this._username,this._university,this.favoriteList,this._controlledTeams,String role,this._matchKeys,this._email){
+  AppUser(this._username,this._university,this.favoriteList,this._controlledTeams,String role,this._matchKeys,this._email, this._isUpperAdmin){
     (role=="admin") ? (_isAdmin=true) : (_isAdmin=false);
   }
 
@@ -30,6 +31,9 @@ class AppUser
   bool get isAdmin=> _isAdmin;
   List<String> get controlledTeams=> _controlledTeams;
   Map<String,bool> get matchKeys=> _matchKeys;
+
+
+
 
   Future<void> addFavoriteTeam(Team team) async {
     favoriteList.add(team.name);
@@ -88,8 +92,9 @@ class AppUser
   }
 
 
-  bool controlTheseTeams(String team1,String? team2) {
+  bool controlTheseTeamsFootball(String team1,String? team2) {
     if (!_isAdmin) return false;
+    if (_isUpperAdmin) return true;
     for (String name in controlledTeams){
       if (name==team1 ){
         return true;

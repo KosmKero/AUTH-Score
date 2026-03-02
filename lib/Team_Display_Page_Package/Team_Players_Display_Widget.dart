@@ -36,12 +36,12 @@ class _TeamPlayersDisplayWidgetState extends State<TeamPlayersDisplayWidget> {
         scrollDirection: Axis.vertical,
         child: Column(
           children: [
-            (globalUser.controlTheseTeams(widget.team.name,null)) ? addPlayer() : SizedBox.shrink(),
+            (globalUser.controlTheseTeamsFootball(widget.team.name,null)) ? addPlayer() : SizedBox.shrink(),
             playersCard(0, positionList(0)),
             playersCard(1, positionList(1)),
             playersCard(2, positionList(2)),
             playersCard(3, positionList(3)),
-            if((globalUser.controlTheseTeams(widget.team.name,null)))
+            if((globalUser.controlTheseTeamsFootball(widget.team.name,null)))
               Padding(
                 padding: EdgeInsets.only(top: 20,left: 10),
                 child: Text(
@@ -118,7 +118,7 @@ class _TeamPlayersDisplayWidgetState extends State<TeamPlayersDisplayWidget> {
 
   Widget playerName(Player player) {
     return GestureDetector(
-      onDoubleTap: (globalUser.controlTheseTeams(widget.team.name,null)) ?  () async {
+      onDoubleTap: (globalUser.controlTheseTeamsFootball(widget.team.name,null)) ?  () async {
         final updatedPlayer = await Navigator.push(
           context,
           MaterialPageRoute(

@@ -67,7 +67,7 @@ class _TeamEditPageState extends State<TeamEditPage> {
               SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () async {
-                  if (globalUser.controlTheseTeams(widget.team.name, null) && coach.isNotEmpty && foundingYear.isNotEmpty) {
+                  if (globalUser.controlTheseTeamsFootball(widget.team.name, null) && coach.isNotEmpty && foundingYear.isNotEmpty) {
                     await FirebaseFirestore.instance.collection('year').doc(thisYearNow.toString()).collection('teams').doc(widget.team.name).set({
                       "Foundation Year": int.parse(foundingYear) ,
                       "Coach": coach,

@@ -368,7 +368,7 @@ class _AddMatchScreenState extends State<AddMatchScreen> {
                     }
 
 
-                    if (globalUser.controlTheseTeams(homeTeam!.name, awayTeam!.name)) {
+                    if (globalUser.controlTheseTeamsFootball(homeTeam!.name, awayTeam!.name)) {
                       TeamsHandle().addMatch(
                           homeTeam!,
                           awayTeam!,

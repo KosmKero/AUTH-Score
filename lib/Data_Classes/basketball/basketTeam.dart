@@ -79,7 +79,7 @@ class basketTeam {
 
   // Method to add a player
   Future<void> addPlayer(BasketPlayer player) async {
-    if (globalUser.controlTheseTeams(name, null)) {
+    if (globalUser.controlTheseTeamsFootball(name, null)) {
       _players.add(player);
 
       await teamDoc.set({
@@ -89,7 +89,7 @@ class basketTeam {
   }
 
   Future<void> deletePlayer(BasketPlayer player) async {
-    if (globalUser.controlTheseTeams(name, null)) {
+    if (globalUser.controlTheseTeamsFootball(name, null)) {
       _players.remove(player);
 
       await teamDoc.update({
@@ -100,7 +100,7 @@ class basketTeam {
 
   Future<void> updatePlayer(
       BasketPlayer oldPlayer, BasketPlayer newPlayer) async {
-    if (!globalUser.controlTheseTeams(name, null)) return;
+    if (!globalUser.controlTheseTeamsFootball(name, null)) return;
     final oldKey = '${oldPlayer.name}${oldPlayer.number}';
     final newKey = '${newPlayer.name}${newPlayer.number}';
 

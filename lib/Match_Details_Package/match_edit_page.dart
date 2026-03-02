@@ -64,7 +64,7 @@ class _MatchEditPageState extends State<MatchEditPage> {
     int formattedTime = _selectedTime.hour * 100 + _selectedTime.minute;
 
     if (!widget.match.hasMatchStarted) {
-      if (globalUser.controlTheseTeams(
+      if (globalUser.controlTheseTeamsFootball(
           widget.match.homeTeam.name, widget.match.awayTeam.name)) {
         final nav = navigatorKey.currentState;
 

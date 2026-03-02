@@ -95,7 +95,7 @@ class _TeamDetailsWidgetState extends State<TeamDetailsWidget> {
                   vertical: 15),
               child: Column(
                 children: [
-                  if (globalUser.controlTheseTeams(widget.team.name, null))
+                  if (globalUser.controlTheseTeamsFootball(widget.team.name, null))
                     IconButton(
                         onPressed: () async {
                           await Navigator.push(

@@ -285,7 +285,7 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
   Widget _buildMatchDetails() {
     return Column(
       children: [
-        if (globalUser.controlTheseTeams(
+        if (globalUser.controlTheseTeamsFootball(
             widget.match.homeTeam.name,widget.match.awayTeam.name) && widget.match.isPenaltyTime && (DateTime.now().millisecondsSinceEpoch ~/ 1000<widget.match.startTimeInSeconds + 3*3600))
           ElevatedButton(onPressed:() async {
            await widget.match.cancelPenalty();
@@ -372,7 +372,7 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
         onLongPress:() {
           ((!widget.match.hasMatchEndedFinal || widget.match.startTimeInSeconds >
               DateTime.now().millisecondsSinceEpoch ~/ 1000 - 110800) &&
-              globalUser.controlTheseTeams(
+              globalUser.controlTheseTeamsFootball(
                   widget.match.homeTeam.name, widget.match.awayTeam.name))
               ?
           showModalBottomSheet(
@@ -523,7 +523,7 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
   Widget _isAdminWidgetGoal(bool homeTeamScored) {
     // Check if the user is logged in
 
-    if (globalUser.controlTheseTeams(
+    if (globalUser.controlTheseTeamsFootball(
         widget.match.homeTeam.name, widget.match.awayTeam.name) && widget.match.hasExtraTimeFinished && widget.match.isPenaltyTime && !widget.match.isShootoutOver  && DateTime.now().millisecondsSinceEpoch ~/ 1000<widget.match.startTimeInSeconds + 10*3600 ) {
       return Column(
         children: [
@@ -549,7 +549,7 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
         ],
       );
       }
-    else if (globalUser.controlTheseTeams(
+    else if (globalUser.controlTheseTeamsFootball(
             widget.match.homeTeam.name, widget.match.awayTeam.name) && (!widget.match.hasMatchFinished || (widget.match.isExtraTimeTime && !widget.match.hasExtraTimeFinished)) ) {
       return GestureDetector(
         onTap: () {
@@ -596,7 +596,7 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
     }
     // Check if the user is logged in
     if (widget.match.hasMatchFinished && (!widget.match.isExtraTimeTime || widget.match.hasExtraTimeFinished) &&
-        (globalUser.controlTheseTeams(
+        (globalUser.controlTheseTeamsFootball(
                 widget.match.homeTeam.name, widget.match.awayTeam.name))) {
       return ElevatedButton(
         style: ElevatedButton.styleFrom(
@@ -616,7 +616,7 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
           style: TextStyle(color: Colors.white, fontSize: 9),
         ),
       );
-    } else if (globalUser.controlTheseTeams(
+    } else if (globalUser.controlTheseTeamsFootball(
         widget.match.homeTeam.name, widget.match.awayTeam.name)) {
       MatchDetails match = widget.match;
       String progress = " ";
@@ -789,7 +789,7 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
   }
 
   Widget _cardAdmin(bool homeTeamCard) {
-    if (globalUser.controlTheseTeams(
+    if (globalUser.controlTheseTeamsFootball(
             widget.match.homeTeam.name, widget.match.awayTeam.name) && (!widget.match.hasMatchFinished || (widget.match.isExtraTimeTime && !widget.match.hasExtraTimeFinished)) && !widget.match.isExtraTimeHalf()) {
       return TextButton(
           onPressed: () {

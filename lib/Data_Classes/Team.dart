@@ -61,7 +61,7 @@ class Team {
 
   // Method to add a player
   Future<void> addPlayer(Player player) async {
-   if (globalUser.controlTheseTeams(name,null)) {
+   if (globalUser.controlTheseTeamsFootball(name,null)) {
       _players.add(player);
 
       await FirebaseFirestore.instance
@@ -74,7 +74,7 @@ class Team {
   }
 
   Future<void> deletePlayer(Player player) async {
-    if (globalUser.controlTheseTeams(name,null)){
+    if (globalUser.controlTheseTeamsFootball(name,null)){
       _players.remove(player);
 
       await FirebaseFirestore.instance
@@ -87,7 +87,7 @@ class Team {
   }
 
   Future<void> updatePlayer(Player oldPlayer, Player newPlayer) async {
-    if (!globalUser.controlTheseTeams(name, null)) return;
+    if (!globalUser.controlTheseTeamsFootball(name, null)) return;
     final oldKey = '${oldPlayer.name}${oldPlayer.number}';
     final newKey = '${newPlayer.name}${newPlayer.number}';
 
