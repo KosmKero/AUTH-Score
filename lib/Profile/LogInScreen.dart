@@ -650,13 +650,13 @@ class _CreateSignUp extends State<CreateSignUp> {
 }
 
 //ΔΗΜΙΟΥΡΓΕΙ ΤΟ ΚΟΥΜΠΙ ΓΙΑ ΤΟ SIGN IN/ SIGN UP
-class CreateButton extends StatelessWidget {
+class CreateButton extends StatefulWidget {
   final bool signIn;
   final TextEditingController emailText;
   final TextEditingController passwordText;
   final TextEditingController? sxolhText;
   final TextEditingController? usernameText;
-  //final User user;
+
   const CreateButton({
     super.key,
     required this.signIn,
@@ -666,19 +666,45 @@ class CreateButton extends StatelessWidget {
     this.sxolhText,
   });
 
-  //ΔΗΜΙΟΥΡΓΕΙ ΤΟ ΚΟΥΜΠΙ ΠΟΥ ΘΑ ΠΑΤΗΣΕΙ ΑΝ ΘΕΛΕΙ ΝΑ ΚΑΝΕΙΟ SIGN IN Ή LOG IN
   @override
-  Widget build(BuildContext context)
-  {
+  State<CreateButton> createState() => _CreateButtonState();
+}
+
+class _CreateButtonState extends State<CreateButton> {
+  // 1. Δημιουργούμε τη μεταβλητή για το loading
+  bool isLoading = false;
+
+  @override
+  Widget build(BuildContext context) {
     return Padding(
       padding: EdgeInsets.only(left: 25, right: 25),
       child: Container(
         width: double.infinity,
         height: 50,
         child: ElevatedButton(
-          onPressed: () //ΑΝΑΛΟΓΑ ΜΕ ΤΗΝ ΚΑΤΑΣΤΑΣΗ ΠΟΥ ΕΙΜΑΣΤΕ ΚΑΛΟΥΜΕ ΜΙΑ ΑΠΟ ΤΙΣ 2 ΣΥΝΑΡΤΗΣΕΙΣ
-          {
-            signIn ? checkBase(context,emailText,passwordText) : addInBase(context,emailText,passwordText,sxolhText,usernameText);
+          // 2. Αν φορτώνει, κάνουμε το onPressed null (απενεργοποιεί το κουμπί)
+          onPressed: isLoading
+              ? null
+              : () async {
+            // Ξεκινάει το loading
+            setState(() {
+              isLoading = true;
+            });
+
+            // Τρέχουμε τη συνάρτηση (πρόσεξε το await που προστέθηκε)
+            if (widget.signIn) {
+              await checkBase(context, widget.emailText, widget.passwordText);
+            } else {
+              await addInBase(context, widget.emailText, widget.passwordText, widget.sxolhText, widget.usernameText);
+            }
+
+            // 3. Ελέγχουμε αν το Widget υπάρχει ακόμα στην οθόνη πριν αλλάξουμε το state
+            // (Σε περίπτωση που το checkBase/addInBase έκανε Navigator.pop)
+            if (mounted) {
+              setState(() {
+                isLoading = false; // Σταματάει το loading
+              });
+            }
           },
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.blue[700],
@@ -688,8 +714,20 @@ class CreateButton extends StatelessWidget {
             ),
             elevation: 3,
           ),
-          child: Text(
-            signIn ? greek?"Σύνδεση":"SIGN IN" : greek?"Εγγραφή":"SIGN UP",
+          // 4. Ανάλογα με το isLoading, δείχνουμε το κυκλάκι ή το κείμενο
+          child: isLoading
+              ? SizedBox(
+            height: 24,
+            width: 24,
+            child: CircularProgressIndicator(
+              color: Colors.white,
+              strokeWidth: 2.5,
+            ),
+          )
+              : Text(
+            widget.signIn
+                ? (greek ? "Σύνδεση" : "SIGN IN")
+                : (greek ? "Εγγραφή" : "SIGN UP"),
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
@@ -702,8 +740,7 @@ class CreateButton extends StatelessWidget {
   }
 }
 
-
-void checkBase(BuildContext context,emailText,passwordText) async
+Future<void> checkBase(BuildContext context,emailText,passwordText) async
 {
 
   try
@@ -760,7 +797,7 @@ void checkBase(BuildContext context,emailText,passwordText) async
 }
 
 
-void addInBase(BuildContext context,TextEditingController  emailText,TextEditingController  passwordText, sxolhText, usernameText) async
+Future<void> addInBase(BuildContext context,TextEditingController  emailText,TextEditingController  passwordText, sxolhText, usernameText) async
 {
   //ΠΑΙΡΝΩ ΤΙΣ ΤΙΜΕΣ ΤΩΝ ΠΕΔΙΩΝ!!
   String email = emailText.text;
