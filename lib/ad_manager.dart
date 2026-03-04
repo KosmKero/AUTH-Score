@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'package:app_tracking_transparency/app_tracking_transparency.dart';
 
 class AdManager {
   // === Ad Unit IDs ===
@@ -57,10 +56,10 @@ class AdManager {
     );
   }
 }
-Future<void> initTracking() async {
-  final status = await AppTrackingTransparency.trackingAuthorizationStatus;
-  if (status == TrackingStatus.notDetermined) {
-    await Future.delayed(const Duration(milliseconds: 200));
-    await AppTrackingTransparency.requestTrackingAuthorization();
-  }
-}
+//Future<void> initTracking() async {
+//  final status = await AppTrackingTransparency.trackingAuthorizationStatus;
+//  if (status == TrackingStatus.notDetermined) {
+//    await Future.delayed(const Duration(milliseconds: 200));
+//    await AppTrackingTransparency.requestTrackingAuthorization();
+//  }
+//}

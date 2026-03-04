@@ -58,10 +58,6 @@
         <true/>
     </dict>
 
-    <key>NSUserTrackingUsageDescription</key>
-    <string>Η εφαρμογή χρησιμοποιεί αυτό το αναγνωριστικό για να προβάλλει σχετικές διαφημίσεις.</string>
-
-
     <key>SKAdNetworkItems</key>
     <array>
       <dict>
