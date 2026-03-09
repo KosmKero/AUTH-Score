@@ -18,6 +18,8 @@
 	<string>APPL</string>
 	<key>GADApplicationIdentifier</key>
 	<string>ca-app-pub-1918416043234880~5866757810</string>
+	<key>NSUserTrackingUsageDescription</key>
+    <string>Αυτό το αναγνωριστικό θα χρησιμοποιηθεί για να σας παρέχουμε εξατομικευμένες διαφημίσεις και καλύτερη εμπειρία χρήσης.</string>
 	<key>CFBundleShortVersionString</key>
 	<string>$(FLUTTER_BUILD_NAME)</string>
 	<key>CFBundleVersion</key>

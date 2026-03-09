@@ -41,7 +41,7 @@ Future<void> loadUser(User user) async{
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await MobileAds.instance.initialize();
+  //await MobileAds.instance.initialize();
   //await Hive.initFlutter();
 
  //Hive.registerAdapter(MatchModelAdapter());
@@ -68,6 +68,12 @@ void main() async {
     print("✅ Firebase initialized successfully!");
   } catch (e) {
     print("❌ Firebase initialization failed: $e");
+  }
+
+  try {
+    await MobileAds.instance.initialize();
+  } catch (e) {
+    print("❌ Ads initialization failed: $e");
   }
 
   try {
