@@ -1,8 +1,6 @@
-
-
-import Flutter
 import UIKit
-import google_mobile_ads
+import Flutter
+import FirebaseCore // Προσθήκη
 
 @main
 @objc class AppDelegate: FlutterAppDelegate {
@@ -11,10 +9,12 @@ import google_mobile_ads
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
 
-    // 1. Καταγράφουμε τα plugins ΠΡΙΝ το super.application
+    // ΠΡΟΣΘΗΚΗ: Αρχικοποιούμε το Firebase στο Native επίπεδο ΠΡΙΝ τα plugins
+    if FirebaseApp.app() == nil {
+        FirebaseApp.configure()
+    }
+
     GeneratedPluginRegistrant.register(with: self)
-
-
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
 }
