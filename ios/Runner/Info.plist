@@ -59,6 +59,12 @@
     </array>
     <key>FirebaseAppDelegateProxyEnabled</key>
     <true/>
+
+    <key>FIREBASE_ANALYTICS_COLLECTION_ENABLED</key>
+    <false/>
+    <key>FirebaseScreenReportingEnabled</key>
+    <false/>
+
     <key>NSAppTransportSecurity</key>
     <dict>
         <key>NSAllowsArbitraryLoads</key>
