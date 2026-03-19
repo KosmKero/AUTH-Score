@@ -1,4 +1,5 @@
-import 'package:firebase_messaging/firebase_messaging.dart';
+/*
+mport 'package:firebase_messaging/firebase_messaging.dart';
 
 @pragma('vm:entry-point')
 Future<void> handleBackgroundMessage(RemoteMessage message) async
@@ -18,3 +19,5 @@ class Messages{
     FirebaseMessaging.onBackgroundMessage(handleBackgroundMessage);
   }
 }
+
+ */

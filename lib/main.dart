@@ -200,10 +200,8 @@ class _LoadingScreenState extends State<LoadingScreen> {
       _loadLanguage();
     }
 
-    initia();
-  //  BettingResultUpdate().recalculateAllScores();
-
-
+    //initia();
+    //  BettingResultUpdate().recalculateAllScores();
   }
 
 
