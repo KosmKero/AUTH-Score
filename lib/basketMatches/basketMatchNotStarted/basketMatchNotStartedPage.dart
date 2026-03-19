@@ -34,7 +34,7 @@ class BasketDetailsMatchNotStarted extends StatelessWidget {
             ),
           ),
           SizedBox(height: 8),
-          BettingChooserBasket(match: match,), //TO KOYMΠΙ ΜΕ ΤΙΣ 2 ΕΠΙΛΟΓΕΣ (12)
+          //BettingChooserBasket(match: match,), //TO KOYMΠΙ ΜΕ ΤΙΣ 2 ΕΠΙΛΟΓΕΣ (12)
           SizedBox(
             height: 70,
           ),
