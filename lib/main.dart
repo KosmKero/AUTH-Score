@@ -136,8 +136,8 @@ void main() async {
 
   try {
     print("✅ All good!");
-    await Messages().initNotification();
-  } catch(e) {
+    //Messages().initNotification();
+  } catch (e) {
     print("❌ Could not load messages $e");
   }
 
