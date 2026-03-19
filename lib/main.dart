@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_analytics/firebase_analytics.dart';
+//mport 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -60,7 +60,53 @@ void main() async {
       options: DefaultFirebaseOptions.currentPlatform,
     );
 
-    await FirebaseAnalytics.instance.setAnalyticsCollectionEnabled(true);
+   // await FirebaseAnalytics.instance.setAnalyticsCollectionEnabled(true); //an δουλεψουν ποτε τα αναλυτικς
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//xvrise
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    // 2. Ρύθμιση Remote Config (Πριν από οτιδήποτε άλλο)
+  //  final remoteConfig = FirebaseRemoteConfig.instance;
+  //  await remoteConfig.setConfigSettings(RemoteConfigSettings(
+  //    fetchTimeout: const Duration(seconds: 15),
+  //    minimumFetchInterval:  kDebugMode ? Duration.zero : const Duration(hours: 12),
+  //  ));
+//
+  //  // Ορισμός defaults
+  //  await remoteConfig.setDefaults(const {
+  //    "has_home_sponsor": false,
+  //    "home_sponsor_image_url": "",
+  //    "home_sponsor_link": "",
 
 
 

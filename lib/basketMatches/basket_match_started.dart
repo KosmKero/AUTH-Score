@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:dropdown_search/dropdown_search.dart';
-import 'package:firebase_analytics/firebase_analytics.dart';
+//mport 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:untitled1/Data_Classes/Player.dart';
 import 'package:untitled1/Data_Classes/basketball/basketMatch.dart';
@@ -27,9 +27,10 @@ import '../../ad_manager.dart';
 import 'basketMatchNotStarted/basketMatchUpperBody.dart';
 
 class basketMatchStartedPage extends StatelessWidget {
-  final basketMatch match;
+  final BasketMatch match;
 
-  const basketMatchStartedPage({Key? key, required this.match}) : super(key: key);
+  const basketMatchStartedPage({Key? key, required this.match})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +43,7 @@ class basketMatchStartedPage extends StatelessWidget {
 
 class _MatchStartedView extends StatefulWidget {
   const _MatchStartedView(this.match);
-  final basketMatch match;
+  final BasketMatch match;
   @override
   State<_MatchStartedView> createState() => _MatchStartedViewState();
 }
@@ -58,9 +59,10 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.match.matchFinished) {
-      logScreenViewSta(screenName: 'Match ended page',screenClass: 'Match ended page');
-
+    if (widget.match.hasMatchFinished) {
+      logScreenViewSta(
+          screenName: 'Match ended page', screenClass: 'Match ended page');
+/*
       FirebaseAnalytics.instance.logEvent(
         name: 'Match Ended Clicked',
         parameters: {
@@ -68,11 +70,15 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
           'home_team': widget.match.homeTeam.nameEnglish,
           'away_team': widget.match.awayTeam.nameEnglish,
         },
-      );
-    }
-    else{
-      logScreenViewSta(screenName: 'Match started page',screenClass: 'Match started page');
 
+      );
+
+
+ */
+    } else {
+      logScreenViewSta(
+          screenName: 'Match started page', screenClass: 'Match started page');
+/*
       FirebaseAnalytics.instance.logEvent(
         name: 'Match Started Clicked',
         parameters: {
@@ -81,8 +87,8 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
           'away_team': widget.match.awayTeam.nameEnglish,
         },
       );
+ */
     }
-
 
     return Container(
       //color: Colors.blueGrey,
@@ -91,18 +97,22 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
         child: Column(
           children: [
             Container(
-              color:darkModeNotifier.value? Colors.grey[900]: Color.fromARGB(50, 5, 150, 200),
+              color: darkModeNotifier.value
+                  ? Colors.grey[900]
+                  : Color.fromARGB(50, 5, 150, 200),
               child: Padding(
                 padding: const EdgeInsets.all(5.0),
                 child: Column(
                   children: [
                     Center(
                         child: Text(
-                          widget.match.matchweekInfo(),
-                          style: TextStyle(
-                              fontSize: 13,
-                              color: darkModeNotifier.value?Colors.white: Colors.grey[800]),
-                        )),
+                      widget.match.matchweekInfo(),
+                      style: TextStyle(
+                          fontSize: 13,
+                          color: darkModeNotifier.value
+                              ? Colors.white
+                              : Colors.grey[800]),
+                    )),
                     SizedBox(
                       height: 10,
                     ),
@@ -117,7 +127,7 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
                         ),
                         Flexible(
                           fit: FlexFit.tight,
-                          child: (widget.match.matchFinished )
+                          child: (widget.match.hasMatchFinished)
                               ? _buildMatchFinishedScore()
                               : _buildMatchScoreLive(),
                         ),
@@ -130,9 +140,7 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
                     ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-
-                      ],
+                      children: [],
                     ),
                     const Divider(),
                     NavigationButtons(onSectionChange: _changeSection),
@@ -150,10 +158,17 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
   Widget _buildMatchFinishedScore() {
     Color homeColor, awayColor;
 
-    (widget.match.homeScore > widget.match.awayScore) ? {homeColor = darkModeNotifier.value ? Colors.white : Colors.black, awayColor = Colors.grey}
+    (widget.match.homeScore > widget.match.awayScore)
+        ? {
+            homeColor = darkModeNotifier.value ? Colors.white : Colors.black,
+            awayColor = Colors.grey
+          }
         : (widget.match.homeScore < widget.match.awayScore)
-        ? {homeColor = Colors.grey, awayColor = darkModeNotifier.value ? Colors.white : Colors.black}
-        : {homeColor = Colors.blueGrey, awayColor = Colors.blueGrey};
+            ? {
+                homeColor = Colors.grey,
+                awayColor = darkModeNotifier.value ? Colors.white : Colors.black
+              }
+            : {homeColor = Colors.blueGrey, awayColor = Colors.blueGrey};
 
     return Container(
       //color:darkModeNotifier.value? Colors.grey[900]: Color.fromARGB(50, 5, 150, 200),
@@ -162,8 +177,7 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
           Text(
             widget.match.dateString,
             style: TextStyle(
-                color: darkModeNotifier.value?Colors.white:Colors.black
-            ),
+                color: darkModeNotifier.value ? Colors.white : Colors.black),
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -189,21 +203,22 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
           ),
           Text('Ολοκληρώθηκε',
               style: TextStyle(
-                  fontWeight: FontWeight.w400, fontSize: 12,
-                  color: darkModeNotifier.value?Colors.white: Colors.black))
+                  fontWeight: FontWeight.w400,
+                  fontSize: 12,
+                  color: darkModeNotifier.value ? Colors.white : Colors.black))
         ],
       ),
     );
   }
 
   Widget _buildMatchScoreLive() {
-    return Consumer<basketMatch>(
+    return Consumer<BasketMatch>(
       builder: (context, matchDetails, child) {
         // Λαμβάνουμε το χρόνο σε δευτερόλεπτα από το matchDetails
-     //  int secondsElapsed = DateTime.now().millisecondsSinceEpoch ~/ 1000-matchDetails.startTimeInSeconds;
+        //  int secondsElapsed = DateTime.now().millisecondsSinceEpoch ~/ 1000-matchDetails.startTimeInSeconds;
 
-     //  int minutes = secondsElapsed ~/ 60;
-     //  int seconds = secondsElapsed % 60;
+        //  int minutes = secondsElapsed ~/ 60;
+        //  int seconds = secondsElapsed % 60;
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -213,42 +228,39 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
             Text(
               "${matchDetails.homeScore}-${matchDetails.awayScore}",
               style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 25,
-                  color: Colors.red),
+                  fontWeight: FontWeight.bold, fontSize: 25, color: Colors.red),
             ),
 
-         // (matchDetails.isPenaltyTime)?
-         // Text(
-         //   'Πέναλτι',
-         //   style: const TextStyle(
-         //       fontWeight: FontWeight.bold, fontSize: 15, color: Colors.red),
-         //   textAlign: TextAlign.center,
-         // ):
-         // // Ελέγχουμε αν είναι το ημίχρονο ή όχι
-         // (!matchDetails.isHalfTime() && !matchDetails.isExtraTimeHalf() && !(matchDetails.hasMatchFinished && !matchDetails.hasExtraTimeStarted))
-         //     ? Text(
-         //   '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}',
-         //   style: const TextStyle(
-         //       fontWeight: FontWeight.bold, fontSize: 16, color: Colors.red),
-         // )
-         //     : Text(
-         //   (matchDetails.hasMatchFinished && !matchDetails.hasExtraTimeStarted)? 'Αναμονή Παράτασης': matchDetails.isHalfTime() ? 'Ημίχρονο' : 'Ημίχρονο Παράτασης',
-         //   style: const TextStyle(
-         //       fontWeight: FontWeight.bold, fontSize: 13, color: Colors.red),
-         //   textAlign: TextAlign.center,
-          //  )
+            // (matchDetails.isPenaltyTime)?
+            // Text(
+            //   'Πέναλτι',
+            //   style: const TextStyle(
+            //       fontWeight: FontWeight.bold, fontSize: 15, color: Colors.red),
+            //   textAlign: TextAlign.center,
+            // ):
+            // // Ελέγχουμε αν είναι το ημίχρονο ή όχι
+            // (!matchDetails.isHalfTime() && !matchDetails.isExtraTimeHalf() && !(matchDetails.hasMatchFinished && !matchDetails.hasExtraTimeStarted))
+            //     ? Text(
+            //   '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}',
+            //   style: const TextStyle(
+            //       fontWeight: FontWeight.bold, fontSize: 16, color: Colors.red),
+            // )
+            //     : Text(
+            //   (matchDetails.hasMatchFinished && !matchDetails.hasExtraTimeStarted)? 'Αναμονή Παράτασης': matchDetails.isHalfTime() ? 'Ημίχρονο' : 'Ημίχρονο Παράτασης',
+            //   style: const TextStyle(
+            //       fontWeight: FontWeight.bold, fontSize: 13, color: Colors.red),
+            //   textAlign: TextAlign.center,
+            //  )
           ],
         );
       },
     );
   }
 
-
   Widget _buildBasketMatchDetails() {
     // Παράδειγμα δεδομένων — αντικατέστησε με τα δικά σου
-    final homeScores = [33, 29, 18, 20, 20, 21,20, 21];
-    final awayScores = [25, 26, 34, 29, 20, 21,20, 21];
+    final homeScores = [33, 29, 18, 20, 20, 21, 20, 21];
+    final awayScores = [25, 26, 34, 29, 20, 21, 20, 21];
     final periodLabels = ["1η Περ.", "2η Περ.", "3η Περ.", "4η Περ."];
 
     return Container(
@@ -305,78 +317,80 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
     );
   }
 
-
-
   Widget _halfBuilder(int half) {
-    int ha= (half % 2==0) ? 2 : 1;
+    int ha = (half % 2 == 0) ? 2 : 1;
     return Column(children: [
       Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Container(
             height: 1,
-            width: (half>2) ? 65 : 100,
-            color: (widget.match.matchFinished )
+            width: (half > 2) ? 65 : 100,
+            color: (widget.match.hasMatchFinished)
                 ? Colors.blueGrey
                 : Colors.redAccent,
           ),
           Text(
-            " ${ha}ο ημίχρονο ${(half>2) ? 'παράτασης' : ""}",
+            " ${ha}ο ημίχρονο ${(half > 2) ? 'παράτασης' : ""}",
             style: TextStyle(
-                color:(widget.match.matchFinished) ?darkModeNotifier.value?Colors.white: Colors.black : Colors.redAccent),
+                color: (widget.match.hasMatchFinished)
+                    ? darkModeNotifier.value
+                        ? Colors.white
+                        : Colors.black
+                    : Colors.redAccent),
           ),
           Container(
-
             height: 1,
-            width: (half>2) ? 65 : 100,
-            color: (widget.match.matchFinished)
+            width: (half > 2) ? 65 : 100,
+            color: (widget.match.hasMatchFinished)
                 ? Colors.blueGrey
                 : Colors.redAccent,
           ),
         ],
       ),
-   //   ListView.builder(
-   //     shrinkWrap: true,
-   //     physics: NeverScrollableScrollPhysics(), // Prevents nested scrolling
-   //     itemCount: (widget.match.matchFact[half - 1] ?? []).length,
-   //     itemBuilder: (context, index) {
-   //       int reversedIndex =
-   //           (widget.match.matchFact[half - 1]!.length - 1) - index;
-   //       return Padding(
-   //         padding: const EdgeInsets.all(2.0),
-   //         child: (widget.match.matchFact[half - 1]![reversedIndex] is Goal)
-   //             ? buildGoalIndicator(
-   //             widget.match.matchFact[half - 1]![reversedIndex] as Goal,widget.match)
-   //             : buildCardIndicator(
-   //             widget.match.matchFact[half - 1]![reversedIndex] as CardP,widget.match),
-   //       );
-   //     },
-   //   ),
+      //   ListView.builder(
+      //     shrinkWrap: true,
+      //     physics: NeverScrollableScrollPhysics(), // Prevents nested scrolling
+      //     itemCount: (widget.match.matchFact[half - 1] ?? []).length,
+      //     itemBuilder: (context, index) {
+      //       int reversedIndex =
+      //           (widget.match.matchFact[half - 1]!.length - 1) - index;
+      //       return Padding(
+      //         padding: const EdgeInsets.all(2.0),
+      //         child: (widget.match.matchFact[half - 1]![reversedIndex] is Goal)
+      //             ? buildGoalIndicator(
+      //             widget.match.matchFact[half - 1]![reversedIndex] as Goal,widget.match)
+      //             : buildCardIndicator(
+      //             widget.match.matchFact[half - 1]![reversedIndex] as CardP,widget.match),
+      //       );
+      //     },
+      //   ),
     ]);
   }
-
 
   void scoreChanged() {
     setState(() {});
   }
 
-  Widget _sectionChooser(int selectedIndex, basketMatch match) {
+  Widget _sectionChooser(int selectedIndex, BasketMatch match) {
     switch (selectedIndex) {
       case 0:
         return _buildBasketMatchDetails();
-    // case 1:
-    //   return Starting11Display(
-    //     match: match,
-    //   );
+      // case 1:
+      //   return Starting11Display(
+      //     match: match,
+      //   );
       case 1:
         DateTime now = DateTime.now();
         int seasonYear = now.month > 8 ? now.year : now.year - 1;
-        return OneGroupStandings(group: match.homeTeam.group, seasonYear: seasonYear,);
+        return OneGroupStandings(
+          group: match.homeTeam.group,
+          seasonYear: seasonYear,
+        );
       default:
         return _buildBasketMatchDetails();
     }
   }
-
 
   /*
   Widget _matchProgressAdmin() {

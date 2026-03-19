@@ -26,7 +26,6 @@ class basketTeam {
       this._coach,
       this._position,
       this._initials,
-      this.secondCoachName,
       this.coachName,
       [List<BasketPlayer>? players]) {
     _players = players ?? []; // Initialize players list if null
@@ -34,7 +33,7 @@ class basketTeam {
     loadTeamImage();
   }
 
-  final String _initials, coachName,secondCoachName;
+  final String _initials, coachName;
   int? _foundationYear;
   final String name, _nameEnglish;
   String _coach;
@@ -79,7 +78,7 @@ class basketTeam {
 
   // Method to add a player
   Future<void> addPlayer(BasketPlayer player) async {
-    if (globalUser.controlTheseTeamsFootball(name, null)) {
+    if (globalUser.controlTheseTeamsFootball(name, null)) { //αλλαγη συναρτησης
       _players.add(player);
 
       await teamDoc.set({
@@ -89,25 +88,25 @@ class basketTeam {
   }
 
   Future<void> deletePlayer(BasketPlayer player) async {
-    if (globalUser.controlTheseTeamsFootball(name, null)) {
+    if (globalUser.controlTheseTeamsFootball(name, null)) { //αλλαγη συναρτησης
       _players.remove(player);
 
       await teamDoc.update({
-        'Players.${player.name}${player.number}': FieldValue.delete(),
+        'Players.${player.name}${player.surname}${player.number}': FieldValue.delete(),
       });
     }
   }
 
-  Future<void> updatePlayer(
-      BasketPlayer oldPlayer, BasketPlayer newPlayer) async {
-    if (!globalUser.controlTheseTeamsFootball(name, null)) return;
-    final oldKey = '${oldPlayer.name}${oldPlayer.number}';
-    final newKey = '${newPlayer.name}${newPlayer.number}';
+  Future<void> updatePlayer(BasketPlayer oldPlayer, BasketPlayer newPlayer) async {
+    if (!globalUser.controlTheseTeamsFootball(name, null)) return; ////αλλαγη συναρτησης
+
+    // ΝΕΑ KEYS
+    final oldKey = '${oldPlayer.name}${oldPlayer.surname}${oldPlayer.number}';
+    final newKey = '${newPlayer.name}${newPlayer.surname}${newPlayer.number}';
 
     if (oldKey != newKey) {
-      // Μετακίνησε/μετονόμασε τον παίχτη: διαγραφή παλιού κλειδιού + προσθήκη νέου
       await teamDoc.update({
-        'Players.${oldPlayer.name}${oldPlayer.number}': FieldValue.delete(),
+        'Players.$oldKey': FieldValue.delete(),
       });
 
       await teamDoc.set({
@@ -119,7 +118,6 @@ class basketTeam {
       }, SetOptions(merge: true));
     }
 
-    // Ενημέρωσε και την τοπική λίστα
     _players.remove(oldPlayer);
     _players.add(newPlayer);
   }
@@ -237,7 +235,7 @@ class basketTeam {
     _position = pos;
   }
 
-  Future<void> loadTeamImage() async {
+  Future<void> loadTeamImage() async { //ιδια λογικη με ποδοσφαιρο
    //try {
    //  // Προσπάθεια να φορτωθεί το αρχείο
    //  await rootBundle.load('logos/$nameEnglish.png');
@@ -251,28 +249,28 @@ class basketTeam {
   Future<void> increasePointsFor(int points) async {
     _pointsFor=_pointsFor+points;
     await teamDoc
-        .set({'pointsFor': _pointsFor}, SetOptions(merge: true));
+        .set({'pointsFor': FieldValue.increment(points)}, SetOptions(merge: true));
   }
 
   Future<void> decreasePointsFor(int points) async {
-    if (_pointsFor > 0) {
-      _pointsFor=_pointsFor-points;
+    if (_pointsFor - points >= 0) {
+      _pointsFor = _pointsFor - points;
       await teamDoc.set(
-          {'pointsFor': FieldValue.increment(-1)}, SetOptions(merge: true));
+          {'pointsFor': FieldValue.increment(-points)}, SetOptions(merge: true));
     }
   }
 
   Future<void> increasePointsAgainst(int points) async {
     _pointsAgainst=_pointsAgainst+points;
     await teamDoc.set(
-        {'pointsAgainst': FieldValue.increment(1)}, SetOptions(merge: true));
+        {'pointsAgainst': FieldValue.increment(points)}, SetOptions(merge: true));
   }
 
   Future<void> decreasePointsAgainst(int points) async {
-    if (_pointsAgainst > 0) {
-      _pointsAgainst=_pointsAgainst-points;
+    if (_pointsAgainst - points >= 0) {
+      _pointsAgainst = _pointsAgainst - points;
       await teamDoc.set(
-          {'pointsAgainst': FieldValue.increment(-1)}, SetOptions(merge: true));
+          {'pointsAgainst': FieldValue.increment(-points)}, SetOptions(merge: true));
     }
   }
 

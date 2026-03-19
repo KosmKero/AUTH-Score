@@ -467,7 +467,7 @@ class MatchDetails extends ChangeNotifier {
   }
 
   //ετοιμο
-  Future<void> homeScored(String name, bool hasName) async {
+  void homeScored(String name, bool hasName) {
     if (hasMatchStarted &&
         globalUser.controlTheseTeamsFootball(homeTeam.name, awayTeam.name)) {
       int half;
@@ -622,6 +622,33 @@ class MatchDetails extends ChangeNotifier {
     }
   }
 
+  Future<void> noMatch30(bool isHomeTeam) async{//κερδισε η γηγπεδουχος 3-0 στα χαρτια;
+      int homeGoals = (isHomeTeam) ? 3 : 0;
+      int awayGoals = (!isHomeTeam) ? 3 : 0;
+      matchStarted();
+
+      // 1. Ενημέρωση του εγγράφου του αγώνα
+      await FirebaseFirestore.instance
+          .collection('year')
+          .doc(global.thisYearNow.toString())
+          .collection("matches")
+          .doc(matchDocId)
+          .update({
+        'GoalHome': homeGoals,
+        'GoalAway': awayGoals,
+        'hasFirstHalfFinished': true,
+        'hasSecondHalfStarted': true,
+      });
+
+      _hasMatchFinished = true;
+      matchFinishedBase(true,);
+
+      await MatchHandle().matchFinished(this);
+      updateStandings(true);
+      notifyListeners();
+
+
+  }
   void updateStandings(bool progress) {
 
       if (progress) {

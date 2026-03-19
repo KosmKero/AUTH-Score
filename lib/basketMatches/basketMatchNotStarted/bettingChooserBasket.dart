@@ -8,7 +8,7 @@ import '../../Data_Classes/MatchDetails.dart';
 import '../../Firebase_Handle/TeamsHandle.dart';
 import 'basketMatchNotStartedPage.dart';
 class BettingChooserBasket extends StatefulWidget {
-  final basketMatch match;
+  final BasketMatch match;
   late final matchKey;
   BettingChooserBasket({
     super.key,
@@ -145,7 +145,7 @@ class _BettingChooserBasketState extends State<BettingChooserBasket> {
   }
 
   Future<void> saveUserVoteToMatch({
-    required basketMatch match,
+    required BasketMatch match,
     required String choice,
   }) async {
 
@@ -177,7 +177,7 @@ class _BettingChooserBasketState extends State<BettingChooserBasket> {
 
   }
 
-  Future<String?> getUserVoteFromMatch({required basketMatch match}) async {
+  Future<String?> getUserVoteFromMatch({required BasketMatch match}) async {
 
 
     final doc = await FirebaseFirestore.instance

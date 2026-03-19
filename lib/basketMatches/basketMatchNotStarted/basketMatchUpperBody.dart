@@ -1,4 +1,4 @@
-import 'package:firebase_analytics/firebase_analytics.dart';
+//mport 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:untitled1/API/user_handle.dart';
 import 'package:untitled1/Data_Classes/basketball/basketMatch.dart';
@@ -19,7 +19,7 @@ import 'basketMatchNotStartedPage.dart';
 
 //ΟΛΟ ΕΔΩ ΑΦΟΡΑ ΤΟ ΕΠΑΝΩ ΚΟΜΜΑΤΙ ΤΗΣ ΣΕΛΙΔΑΣ. ΓΙΑ ΤΗΝ ΩΡΑ =,ΜΕΡΑ ΚΙΑ ΤΙς ΟΜΑΔΕΣ. ΤΟ ΜΠΛΕ ΠΛΑΙΣΙΟ ΣΤΗΝ ΑΡΧΗ ΑΡΧΗ ΠΑΝΩ
 class BasketMatchNotStartedDetails extends StatefulWidget {
-  final basketMatch match;
+  final BasketMatch match;
 
   const BasketMatchNotStartedDetails({super.key, required this.match});
 
@@ -39,6 +39,7 @@ class _BasketMatchNotStartedDetailsState extends State<BasketMatchNotStartedDeta
   @override
   Widget build(BuildContext context) {
     logScreenViewSta(screenName: 'Match Not Started Page',screenClass: 'Match Not Started Page');
+    /*
     FirebaseAnalytics.instance.logEvent(
       name: 'Match Not Started Clicked',
       parameters: {
@@ -47,7 +48,7 @@ class _BasketMatchNotStartedDetailsState extends State<BasketMatchNotStartedDeta
         'away_team': widget.match.awayTeam.nameEnglish,
       },
     );
-
+     */
 
 
     return SingleChildScrollView(
@@ -322,7 +323,7 @@ class _buildAwayTeamName extends State<buildAwayTeamName> {
   }
 }
 
-Widget _sectionChooser(int selectedIndex, basketMatch match) {
+Widget _sectionChooser(int selectedIndex, BasketMatch match) {
   switch (selectedIndex) {
     case 0:
       return BasketDetailsMatchNotStarted(match: match);

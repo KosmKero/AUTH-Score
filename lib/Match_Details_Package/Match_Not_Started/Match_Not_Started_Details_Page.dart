@@ -1,4 +1,4 @@
-import 'package:firebase_analytics/firebase_analytics.dart';
+//mport 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:untitled1/API/user_handle.dart';
 import 'package:untitled1/Firebase_Handle/user_handle_in_base.dart';
@@ -37,6 +37,7 @@ class _MatchNotStartedDetailsState extends State<MatchNotStartedDetails> {
   @override
   Widget build(BuildContext context) {
     logScreenViewSta(screenName: 'Match Not Started Page',screenClass: 'Match Not Started Page');
+    /*
     FirebaseAnalytics.instance.logEvent(
       name: 'Match Not Started Clicked',
       parameters: {
@@ -45,6 +46,8 @@ class _MatchNotStartedDetailsState extends State<MatchNotStartedDetails> {
         'away_team': widget.match.awayTeam.nameEnglish,
       },
     );
+
+     */
 
 
 

@@ -67,13 +67,17 @@ class _matchDetailsPageViewState extends State<_matchDetailsPageView> {
         actions: [
           if (!match.hasMatchStarted)
             if (globalUser.controlTheseTeamsFootball(match.homeTeam.name, match.awayTeam.name))
-              IconButton(onPressed: () async {
-                await Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => MatchEditPage(match: match,),
-                    ));
-              }, icon: Icon(Icons.edit)),
+              Row(
+                children: [
+                  IconButton(onPressed: () async {
+                    await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => MatchEditPage(match: match,),
+                        ));
+                  }, icon: Icon(Icons.edit)),
+                ],
+              ),
 
           FutureBuilder<bool>(
             future: globalUser.isSuperUser(),
@@ -87,6 +91,135 @@ class _matchDetailsPageViewState extends State<_matchDetailsPageView> {
               if (snapshot.hasData && snapshot.data == true) {
                 return Row(
                   children: [
+                    IconButton(
+                      onPressed: () async {
+                        // ΒΗΜΑ 1: Παράθυρο επιλογής νικητή
+                        String? winner = await showDialog<String>(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return SimpleDialog(
+                              title: const Text('3-0 Άνευ αγώνα',textAlign: TextAlign.center,
+                                  style: TextStyle(fontWeight: FontWeight.bold)),
+                              children: <Widget>[
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: const Text(
+                                    'Ποια ομάδα κέρδισε το ματς στα χαρτιά:',
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                                const Divider(),
+                                Row(
+                                  children: [
+                                    // Χρησιμοποιούμε Expanded για να μοιραστεί η οθόνη ακριβώς στη μέση (50/50)
+                                    Expanded(
+                                      child: SimpleDialogOption(
+                                        onPressed: () => Navigator.pop(context, match.homeTeam.name),
+                                        padding: EdgeInsets.zero, // Μηδενίζουμε το εσωτερικό padding του option για περισσότερο χώρο
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            SizedBox(
+                                                height: 60,
+                                                width: 100,
+                                                child: match.homeTeam.image
+                                            ),
+                                            const SizedBox(height: 12),
+                                            Text(
+                                              match.homeTeam.name,
+                                              textAlign: TextAlign.center, // Κεντράρισμα κειμένου
+                                              maxLines: 2, // Επιτρέπει μέχρι 2 γραμμές αν είναι μεγάλο το όνομα
+                                              overflow: TextOverflow.ellipsis, // Αν είναι ακόμα μεγαλύτερο, βάζει αποσιωπητικά (...)
+                                              style: const TextStyle(
+                                                fontSize: 12,
+                                                height: 1.1, // Μικραίνει το κενό μεταξύ των γραμμών αν πάει από κάτω
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+
+                                    // Δεύτερη ομάδα
+                                    Expanded(
+                                      child: SimpleDialogOption(
+                                        onPressed: () => Navigator.pop(context, match.awayTeam.name),
+                                        padding: EdgeInsets.zero,
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            SizedBox(
+                                                height: 60,
+                                                width: 100,
+                                                child: match.awayTeam.image
+                                            ),
+                                            const SizedBox(height: 12),
+                                            Text(
+                                              match.awayTeam.name,
+                                              textAlign: TextAlign.center,
+                                              maxLines: 2,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: const TextStyle(
+                                                fontSize: 12,
+                                                height: 1.1,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                )
+                              ],
+                            );
+                          },
+                        );
+
+                        // Αν ο χρήστης πάτησε έξω από το παράθυρο και δεν επέλεξε τίποτα, σταματάμε
+                        if (winner == null) return;
+
+                        // ΒΗΜΑ 2: Παράθυρο Επιβεβαίωσης ("Είσαι σίγουρος;")
+                        bool? confirm = await showDialog<bool>(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: const Text('Επιβεβαίωση'),
+                            content: Text('Είσαι σίγουρος ότι θέλεις να κατοχυρώσεις τον αγώνα με 3-0 υπέρ της ομάδας "$winner";'),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(context, false),
+                                child: const Text('Ακύρωση'),
+                              ),
+                              TextButton(
+                                onPressed: () => Navigator.pop(context, true),
+                                child: const Text('Ναι, σίγουρα'),
+                              ),
+                            ],
+                          ),
+                        );
+
+                        // ΒΗΜΑ 3: Εκτέλεση (Αν πάτησε "Ναι")
+                        if (confirm == true) {
+                          // Υπολογίζουμε ποιος πήρε τα 3 γκολ και ποιος τα 0
+                          int homeGoals = (winner == match.homeTeam.name) ? 3 : 0;
+                          int awayGoals = (winner == match.awayTeam.name) ? 3 : 0;
+
+                          match.noMatch30(winner == match.homeTeam.name);
+                          print("✅ Ο αγώνας έληξε $homeGoals - $awayGoals υπέρ της ομάδας $winner");
+
+                          // Προαιρετικά: Εμφάνισε ένα snackbar επιτυχίας
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Το ματς κατοχυρώθηκε στην ομάδα $winner με 3-0!')),
+                          );
+                        }
+
+                      },
+                      icon: Icon(Icons.gavel, ),
+                      tooltip: '3-0 Άνευ αγώνος', // Εμφανίζεται αν το κρατήσεις πατημένο!
+                      style: IconButton.styleFrom(
+                        padding: const EdgeInsets.all(12), // Για να μην είναι πολύ μικρό
+                      ),
+                    ),
+
                     IconButton(
                       onPressed: () async {
                         await showDialog(

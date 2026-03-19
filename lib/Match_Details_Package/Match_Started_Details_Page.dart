@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:dropdown_search/dropdown_search.dart';
-import 'package:firebase_analytics/firebase_analytics.dart';
+//mport 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:untitled1/Data_Classes/Player.dart';
 import 'package:untitled1/Firebase_Handle/user_handle_in_base.dart';
@@ -92,8 +92,10 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
   @override
   Widget build(BuildContext context) {
     if (widget.match.hasMatchEndedFinal) {
-      logScreenViewSta(screenName: 'Match ended page',screenClass: 'Match ended page');
+      logScreenViewSta(
+          screenName: 'Match ended page', screenClass: 'Match ended page');
 
+      /*
       FirebaseAnalytics.instance.logEvent(
         name: 'Match Ended Clicked',
         parameters: {
@@ -116,6 +118,8 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
       );
     }
 
+       */
+    }
 
     return Container(
       //color: Colors.blueGrey,

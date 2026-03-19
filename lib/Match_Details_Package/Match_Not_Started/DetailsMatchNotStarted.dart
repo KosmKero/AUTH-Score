@@ -132,7 +132,7 @@ class TeamFormWidget extends StatelessWidget {
                         SizedBox(
                             height: 25,
                             width: 25,
-                            child: team.image),
+                            child: Center(child: team.image)),
                         SizedBox(width: 5,),
                         Flexible(
                           //width: teamNameWidth,
