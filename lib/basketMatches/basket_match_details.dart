@@ -15,7 +15,7 @@ import 'basket_match_started.dart';
 
 
 class basketMatchDetailsPage extends StatelessWidget {
-  final basketMatch match;
+  final BasketMatch match;
   const basketMatchDetailsPage(this.match, {Key? key,}): super(key: key);
 
 
@@ -62,14 +62,14 @@ class _matchDetailsPageViewState extends State<_matchDetailsPageView> {
 
   @override
   Widget build(BuildContext context) {
-    final match = Provider.of<basketMatch>(context);
+    final match = Provider.of<BasketMatch>(context);
     return Scaffold(
       backgroundColor: darkModeNotifier.value ? Color.fromARGB(255, 30, 30, 30) : Colors.white,
       appBar: AppBar(
         backgroundColor:darkModeNotifier.value?Colors.grey[900]: Color.fromARGB(50, 5, 150, 200),
         iconTheme: IconThemeData(color: darkModeNotifier.value?Colors.white:Colors.black),
         actions: [
-          if (!match.matchStarted)
+          if (!match.hasMatchStarted)
             if (globalUser.controlTheseTeamsFootball(match.homeTeam.name, match.awayTeam.name))
               IconButton(onPressed: () async {
                //await Navigator.push(
@@ -167,8 +167,8 @@ class _matchDetailsPageViewState extends State<_matchDetailsPageView> {
     );
   }
 
-  Widget matchProgress(basketMatch match){
-    if (!match.matchStarted) {
+  Widget matchProgress(BasketMatch match){
+    if (!match.hasMatchStarted) {
       return BasketMatchNotStartedDetails(match: match,);
     }
     else {
