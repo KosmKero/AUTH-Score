@@ -1,11 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 
+import '../../globals.dart';
+
 
 class BasketPlayer extends ChangeNotifier{
   final String _name, _surname,_teamName,_teamNameEnglish;
-  late int _points;
-  int _position,_number; //αν ειναι 0 ειναι τερματοφυλακας,αν ειναι 1 ειναι αμυντικος, αν ειναι 2 τότε είναι μέσος, αν ειανι 3 ειναι επιθετικος
+  int _points;
+  final int _position,_number; //αν ειναι 1 ειναι pg,2 sg,3 sf,4 pf, 5 c
 
   // Constructor
   BasketPlayer(this._name, this._surname,this._position, this._points,this._number,this._teamName, this._teamNameEnglish);
@@ -26,18 +28,24 @@ class BasketPlayer extends ChangeNotifier{
   Future<void> scoredPoints(int points) async {
     _points=_points+points;
 
+    notifyListeners();
+
     await FirebaseFirestore.instance
+        .collection('basket')
+        .doc(thisYearNow.toString())
         .collection('teams')
         .doc(teamName)
         .set({
       'Players': toMap(),
     }, SetOptions(merge: true));
+
+
   }
 
 
   Map<String,Map<String, dynamic>> toMap() {
     return {
-      name+number.toString(): {
+      _name+_surname+_number.toString(): { //ισως θελει αλλο key
         'Name': _name,
         'Surname': _surname,
         'Points': _points,

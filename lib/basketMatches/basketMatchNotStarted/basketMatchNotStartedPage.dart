@@ -11,7 +11,7 @@ import 'bettingChooserBasket.dart';
 //ΤΟ ΚΟΜΜΑΤΙ ΑΥΤΟ ΑΦΟΡΑ ΟΛΟ ΤΟ ΥΠΟΛΟΙΠΟ ΜΕΡΟΣ ΤΗΣ ΣΕΛΙΔΑΣ
 class BasketDetailsMatchNotStarted extends StatelessWidget {
   const BasketDetailsMatchNotStarted({super.key, required this.match});
-  final basketMatch match;
+  final BasketMatch match;
 
   @override
   Widget build(BuildContext context) {
