@@ -15,7 +15,6 @@ import 'package:untitled1/Firebase_Handle/TeamsHandle.dart';
 import 'package:untitled1/Firebase_Handle/user_handle_in_base.dart';
 import 'package:untitled1/championship_details/sector_chooser.dart';
 import 'API/NotificationService.dart';
-import 'API/TeamHandle.dart';
 import 'Favorite_Page.dart';
 import 'Firebase_Handle/firebase_screen_stats_helper.dart';
 import 'HomePage.dart';
