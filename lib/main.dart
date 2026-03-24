@@ -57,40 +57,7 @@ void main() async {
       options: DefaultFirebaseOptions.currentPlatform,
     );
 
-   // await FirebaseAnalytics.instance.setAnalyticsCollectionEnabled(true); //an δουλεψουν ποτε τα αναλυτικς
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//xvrise
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    await FirebaseAnalytics.instance.setAnalyticsCollectionEnabled(true); //an δουλεψουν ποτε τα αναλυτικς
 
     // 2. Ρύθμιση Remote Config (Πριν από οτιδήποτε άλλο)
   //  final remoteConfig = FirebaseRemoteConfig.instance;
