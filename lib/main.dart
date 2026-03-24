@@ -120,8 +120,8 @@ void main() async {
     //await MatchHandle.migrateMatches();
     //await MatchHandle.migrateTeams();
     //await MatchHandle().resetPlayerData("2026");
-    await Future.delayed(const Duration(milliseconds: 100)); //να προλαβουν να γινουν ολα σωστα
     await Future.delayed(
+        const Duration(milliseconds: 100)); //να προλαβουν να γινουν ολα σωστα
 
     User? user = FirebaseAuth.instance.currentUser;
      await initTracking(); //προβλημα
