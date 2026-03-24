@@ -1,7 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-//mport 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_remote_config/firebase_remote_config.dart';
+import 'package:flutter/foundation.dart';
 
 import 'firebase_options.dart';
 
@@ -25,20 +27,16 @@ import 'Data_Classes/MatchDetails.dart';
 import 'ad_manager.dart';
 import 'globals.dart';
 
-
 List<MatchDetails> upcomingMatches = [];
 List<MatchDetails> previousMatches = [];
 List<List<MatchDetails>> matches = [];
 List<Team> favouriteTeams = [];
 List<Player> players = [];
 
-
-Future<void> loadUser(User user) async{
+Future<void> loadUser(User user) async {
   UserHandleBase userHandle = UserHandleBase();
-   userHandle.getUser(user);
+  userHandle.getUser(user);
 }
-
-
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -108,19 +106,27 @@ void main() async {
   //    "home_sponsor_link": "",
 
 
-
-
+    // 3. Παράλληλη αρχικοποίηση Ads και Remote Config Fetch
+    await Future.wait([
+      MobileAds.instance
+          .initialize()
+          .catchError((e) => print("Ads init error: $e")),
+      //remoteConfig
+      //    .fetchAndActivate()
+      //    .catchError((e) => print("Remote Config error: $e")),
+    ]);
 
     await Firebase.initializeApp();
     //await MatchHandle.migrateMatches();
     //await MatchHandle.migrateTeams();
     //await MatchHandle().resetPlayerData("2026");
     await Future.delayed(const Duration(milliseconds: 100)); //να προλαβουν να γινουν ολα σωστα
+    await Future.delayed(
+
     User? user = FirebaseAuth.instance.currentUser;
+     await initTracking(); //προβλημα
 
-   // await initTracking(); προβλημα
-
-    if(user!=null) {
+    if (user != null) {
       loadUser(user);
     }
     print("✅ Firebase initialized successfully!");
@@ -192,11 +198,8 @@ class _LoadingScreenState extends State<LoadingScreen> {
    //  }
    //});
 
-
-
-
     _loadData();
-    if(isLoggedIn) {
+    if (isLoggedIn) {
       _loadLanguage();
     }
 
@@ -229,12 +232,11 @@ class _LoadingScreenState extends State<LoadingScreen> {
       MatchHandle().initializeMatces(matches);
       TopPlayersHandle().initializeList(teams);
 
-
       // Add a small delay so users can see the loading completed message
       setState(() {
         _loadingMessage = "All set!";
       });
-      await Future.delayed(Duration(milliseconds: 500));
+      await Future.delayed(Duration(milliseconds: 200));
 
       // Navigate to main screen once loading is complete
       if (mounted) {
