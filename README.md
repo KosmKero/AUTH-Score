@@ -1,4 +1,4 @@
-# AUTHScore
+# UNIScore
 
 A new Flutter project.
 
