@@ -9,7 +9,7 @@
 
 
     <application
-            android:label="AUTH Score"
+            android:label="UniScore"
             android:icon="@mipmap/ic_launcher">
 
         <!-- ✅ AdMob App ID -->

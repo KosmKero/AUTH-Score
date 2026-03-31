@@ -15,7 +15,7 @@ if (localPropertiesFile.exists()) {
 
 android {
     namespace = "com.authteam.authscore"
-    compileSdk = 35  // Changed from 35 to match targetSdk
+    compileSdk = 36 // Changed from 35 to match targetSdk
 
     lint {
         baseline = file("lint-baseline.xml")
@@ -39,7 +39,7 @@ android {
     defaultConfig {
         applicationId "com.authteam.authscore"
         minSdkVersion flutter.minSdkVersion
-        //noinspection EditedTargetSdkVersion
+        //noinspection OldTargetApi,EditedTargetSdkVersion
         targetSdkVersion 35
         versionCode 1
         versionName "1.0"
@@ -85,4 +85,11 @@ dependencies {
     implementation 'androidx.multidex:multidex:2.0.1'
     coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.5'
     implementation 'androidx.appcompat:appcompat:1.7.0'
+}
+configurations.all {
+    resolutionStrategy {
+        force 'androidx.browser:browser:1.8.0'
+        force 'androidx.core:core:1.13.1'
+        force 'androidx.core:core-ktx:1.13.1'
+    }
 }
