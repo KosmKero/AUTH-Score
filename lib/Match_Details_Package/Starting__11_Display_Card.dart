@@ -12,6 +12,168 @@ import '../../Data_Classes/MatchDetails.dart';
 import '../Data_Classes/Player.dart';
 import '../globals.dart';
 
+
+
+
+
+
+
+import 'package:flutter/material.dart';
+import '../Data_Classes/Player.dart';
+// import '../globals.dart'; // Για τα δικαιώματα του globalUser
+
+class LiveLineupScreen extends StatefulWidget {
+  final String homeTeamName;
+  final String awayTeamName;
+  final List<Player> homeRoster; // Οι 18 επιλεγμένοι
+  final List<Player> awayRoster; // Οι 18 επιλεγμένοι
+  // Προφανώς κάπου εδώ θα περνάς και ποιός είναι βασικός/πάγκος (π.χ. μέσω του MatchDetails)
+
+  const LiveLineupScreen({
+    super.key,
+    required this.homeTeamName,
+    required this.awayTeamName,
+    required this.homeRoster,
+    required this.awayRoster,
+  });
+
+  @override
+  State<LiveLineupScreen> createState() => _LiveLineupScreenState();
+}
+
+class _LiveLineupScreenState extends State<LiveLineupScreen> {
+  // Ποια ομάδα βλέπουμε τώρα (true = Γηπεδούχος, false = Φιλοξενούμενος)
+  bool showHomeTeam = true;
+
+  @override
+  void initState() {
+    super.initState();
+    // ΕΛΕΓΧΟΣ ΔΙΚΑΙΩΜΑΤΩΝ ΚΑΤΑ ΤΗΝ ΕΝΑΡΞΗ:
+    // Αν ελέγχει ΜΟΝΟ τον φιλοξενούμενο, του δείχνουμε κατευθείαν τον φιλοξενούμενο
+    /*
+    if (!globalUser.controlsTeam(widget.homeTeamName) && globalUser.controlsTeam(widget.awayTeamName)) {
+      showHomeTeam = false;
+    }
+    */
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // Διαλέγουμε ποια λίστα παικτών θα δείξουμε με βάση το κουμπί
+    List<Player> currentList = showHomeTeam ? widget.homeRoster : widget.awayRoster;
+
+    return Column(
+      children: [
+        // --- 1. ΤΑ ΚΟΥΜΠΙΑ ΕΠΙΛΟΓΗΣ ΟΜΑΔΑΣ ---
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Row(
+            children: [
+              // Κουμπί Γηπεδούχου (Εμφανίζεται μόνο αν έχει δικαίωμα)
+              // if (globalUser.controlsTeam(widget.homeTeamName) || globalUser.isAdmin)
+              Expanded(
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: showHomeTeam ? Colors.blue.shade800 : Colors.grey.shade300,
+                    foregroundColor: showHomeTeam ? Colors.white : Colors.black,
+                  ),
+                  onPressed: () => setState(() => showHomeTeam = true),
+                  child: Text(widget.homeTeamName),
+                ),
+              ),
+              const SizedBox(width: 8),
+
+              // Κουμπί Φιλοξενούμενου (Εμφανίζεται μόνο αν έχει δικαίωμα)
+              // if (globalUser.controlsTeam(widget.awayTeamName) || globalUser.isAdmin)
+              Expanded(
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: !showHomeTeam ? Colors.red.shade800 : Colors.grey.shade300,
+                    foregroundColor: !showHomeTeam ? Colors.white : Colors.black,
+                  ),
+                  onPressed: () => setState(() => showHomeTeam = false),
+                  child: Text(widget.awayTeamName),
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        // --- 2. Η ΛΙΣΤΑ ΤΩΝ 18 ΠΑΙΚΤΩΝ ---
+        Expanded(
+          child: ListView.builder(
+            itemCount: currentList.length,
+            itemBuilder: (context, index) {
+              final player = currentList[index];
+
+              // ΥΠΟΘΕΣΗ: Ελέγχεις αν είναι βασικός. Για το παράδειγμα, έστω ότι οι πρώτοι 11 της λίστας είναι οι βασικοί.
+              bool isStarter = index < 11; // Αντικατέστησέ το με τον πραγματικό σου έλεγχο (π.χ. match.starting11.contains(player.id))
+
+              return Card(
+                margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                // Πράσινο περίγραμμα για βασικούς, Πορτοκαλί για πάγκο
+                shape: RoundedRectangleBorder(
+                  side: BorderSide(
+                      color: isStarter ? Colors.green : Colors.orange,
+                      width: 2
+                  ),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: ListTile(
+                  leading: CircleAvatar(
+                    backgroundColor: isStarter ? Colors.green.shade100 : Colors.orange.shade100,
+                    child: Text(
+                      player.number as String,
+                      style: TextStyle(
+                        color: isStarter ? Colors.green.shade900 : Colors.orange.shade900,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  title: Text("${player.surname} ${player.name}"),
+                  subtitle: Text(isStarter ? "Βασικός" : "Πάγκος"),
+
+                  // --- 3. ΤΟ ΚΟΥΜΠΙ ΤΗΣ ΑΛΛΑΓΗΣ ---
+                  // Εμφανίζεται ΜΟΝΟ δίπλα στους Βασικούς (isStarter == true)
+                  trailing: isStarter
+                      ? IconButton(
+                    icon: const Icon(Icons.swap_horiz, size: 30, color: Colors.blue),
+                    onPressed: () {
+                      // Εδώ θα ανοίγει το Popup για να διαλέξει ποιόν θα βάλει από τον πάγκο!
+                      _showSubstitutionDialog(context, player);
+                    },
+                  )
+                      : null, // Ο πάγκος δεν έχει κουμπί, μπαίνει μόνο όταν βγει κάποιος βασικός
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  // Η μέθοδος που ανοίγει το Popup
+  void _showSubstitutionDialog(BuildContext context, Player playerOut) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text("Αλλαγή Παίκτη"),
+          content: Text("Ποιος μπαίνει στη θέση του ${playerOut.surname};"),
+          // Εδώ θα βάλουμε μια ListView με τους παίκτες του πάγκου!
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("Ακύρωση"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
 /*
 class Starting11Display extends StatefulWidget {
   final MatchDetails match;

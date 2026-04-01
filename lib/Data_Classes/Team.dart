@@ -1,6 +1,8 @@
 import 'dart:ui';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+//mport 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/services.dart';
 import 'package:untitled1/Team_Display_Page_Package/TeamDisplayPage.dart';
 import 'package:flutter/material.dart';
@@ -18,7 +20,7 @@ class Team {
   Team(this.name,this._nameEnglish,this._matches, this._wins, this._losses, this._draws,this._group,this._foundationYear,this._titles,this._coach,this._position,this._initials ,[List<Player>? players]) {
     _players = players ?? []; // Initialize players list if null
 
-    loadTeamImage();
+    //loadTeamImage();
   }
 
   String _initials;
@@ -55,9 +57,9 @@ class Team {
 
   String get coach => _coach;
 
-  Image get image {
-      return _image;
-  }
+ //Image get image {
+ //    return _image;
+ //}
 
   // Method to add a player
   Future<void> addPlayer(Player player) async {
@@ -274,16 +276,45 @@ class Team {
     _position=pos;
   }
 
-  Future<void> loadTeamImage() async {
-    try {
-      // Προσπάθεια να φορτωθεί το αρχείο
-      await rootBundle.load('logos/$nameEnglish.png');
-      _image= Image.asset('logos/$nameEnglish.png');
-    } catch (e) {
-      // Αν δεν υπάρχει, χρησιμοποίησε fallback
-      _image= Image.asset('fotos/default_team_logo.png');
-    }
+ //Future<void> loadTeamImage() async {
+ //  try {
+ //    // Προσπάθεια να φορτωθεί το αρχείο
+ //    await rootBundle.load('logos/$nameEnglish.png');
+ //    _image= Image.asset('logos/$nameEnglish.png');
+ //  } catch (e) {
+ //    // Αν δεν υπάρχει, χρησιμοποίησε fallback
+ //    _image= Image.asset('fotos/default_team_logo.png');
+ //  }
+ //}
+
+  Widget get image {
+
+    final String v = '2';//FirebaseRemoteConfig.instance.getString('logo_version');
+    final String imageUrl = "https://firebasestorage.googleapis.com/v0/b/auth-score-742c5.firebasestorage.app/o/logos%2F${nameEnglish.toUpperCase()}.png?alt=media&v=$v";
+
+    return CachedNetworkImage(
+      imageUrl: imageUrl,
+      cacheKey: "${nameEnglish.toUpperCase()}_$v",
+      memCacheHeight: 100,
+      memCacheWidth: 100,
+      placeholder: (context, url) => Image.asset(
+        'fotos/default_team_logo.png',
+        width: 25,
+        height: 25,
+      ),
+      errorWidget: (context, url, error) => Image.asset(
+        'fotos/default_team_logo.png',
+        width: 25,
+        height: 25,
+        fit: BoxFit.contain,
+      ),
+      width: 25,
+      height: 25,
+      fit: BoxFit.contain,
+      fadeInDuration: const Duration(milliseconds: 20),
+    );
   }
+
 
   Future<void> increaseGoalsFor() async {
     _goalsFor++;

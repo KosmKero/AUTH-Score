@@ -54,6 +54,11 @@ class _HomePageState extends State<HomePage> {
     return Column(
       children: [
         // === Banner Ad ===
+       // SmartBanner(
+       //   hasSponsor: FirebaseRemoteConfig.instance.getBool('has_home_sponsor'),
+       //   sponsorImageUrl: FirebaseRemoteConfig.instance.getString('home_sponsor_image_url'),
+       //   sponsorLink: FirebaseRemoteConfig.instance.getString('home_sponsor_link'),
+       // ),
         if (_isBannerAdReady && _bannerAd != null)
           Container(
             color: darkModeNotifier.value ? Color(0xFF121212) : lightModeBackGround,

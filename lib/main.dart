@@ -93,7 +93,6 @@ void main() async {
           .catchError((e) => print("Remote Config error: $e")),
     ]);
 
-    //await Firebase.initializeApp();
     //await MatchHandle.migrateMatches();
     //await MatchHandle.migrateTeams();
     //await MatchHandle().resetPlayerData("2026");
@@ -169,15 +168,6 @@ class _LoadingScreenState extends State<LoadingScreen> {
   void initState() {
     super.initState();
 
-   //WidgetsBinding.instance.addPostFrameCallback((_) async {
-   //  try {
-   //    // Δίνουμε 1 δευτερόλεπτο καθυστέρηση για απόλυτη σταθερότητα στο iOS
-   //    await Future.delayed(const Duration(milliseconds: 1000));
-   //    await initTracking();
-   //  } catch (e) {
-   //    print("Tracking initialization skipped or failed: $e");
-   //  }
-   //});
 
     _loadData();
     if (isLoggedIn) {
