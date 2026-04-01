@@ -4,7 +4,7 @@ const PDFDocument = require('pdfkit');
 const sgMail = require('@sendgrid/mail'); // Ενεργοποιήθηκε
 
 // Καλό είναι να το βάλεις σε μια μεταβλητή περιβάλλοντος αργότερα
-sgMail.setApiKey('mlsn.f0e32c1c55b1b8f667a9e5301cfbd330d66d3120c6f964f6b41da14fd27da7e6');
+sgMail.setApiKey('mlsn.');
 
 
 // Initialize admin αν δεν έχει γίνει ήδη
