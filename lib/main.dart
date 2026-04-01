@@ -4,7 +4,12 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 
+import 'API/BasketballMatchHandle.dart';
+import 'Data_Classes/basketball/basketMatch.dart';
+import 'Data_Classes/basketball/basketTeam.dart';
+import 'Firebase_Handle/BasketTeamsHandle.dart';
 import 'firebase_options.dart';
 
 import 'package:flutter/material.dart';
@@ -43,13 +48,11 @@ void main() async {
   //await MobileAds.instance.initialize();
   //await Hive.initFlutter();
 
- //Hive.registerAdapter(MatchModelAdapter());
- //Hive.registerAdapter(GoalAdapter());
- //Hive.registerAdapter(PenaltyAdapter());
+  //Hive.registerAdapter(MatchModelAdapter());
+  //Hive.registerAdapter(GoalAdapter());
+  //Hive.registerAdapter(PenaltyAdapter());
 
- //await Hive.openBox<MatchModel>('matches');
-
-
+  //await Hive.openBox<MatchModel>('matches');
 
   try {
     // 1. Αρχικοποίηση Firebase
@@ -60,30 +63,37 @@ void main() async {
     await FirebaseAnalytics.instance.setAnalyticsCollectionEnabled(true); //an δουλεψουν ποτε τα αναλυτικς
 
     // 2. Ρύθμιση Remote Config (Πριν από οτιδήποτε άλλο)
-  //  final remoteConfig = FirebaseRemoteConfig.instance;
-  //  await remoteConfig.setConfigSettings(RemoteConfigSettings(
-  //    fetchTimeout: const Duration(seconds: 15),
-  //    minimumFetchInterval:  kDebugMode ? Duration.zero : const Duration(hours: 12),
-  //  ));
-//
-  //  // Ορισμός defaults
-  //  await remoteConfig.setDefaults(const {
-  //    "has_home_sponsor": false,
-  //    "home_sponsor_image_url": "",
-  //    "home_sponsor_link": "",
+    final remoteConfig = FirebaseRemoteConfig.instance;
+    await remoteConfig.setConfigSettings(RemoteConfigSettings(
+      fetchTimeout: const Duration(seconds: 15),
+      minimumFetchInterval:
+          kDebugMode ? Duration.zero : const Duration(hours: 12),
+    ));
 
+    // Ορισμός defaults
+   await remoteConfig.setDefaults(const {
+     "has_home_sponsor": false,
+     "home_sponsor_image_url": "",
+     "home_sponsor_link": "",
+     "has_match_sponsor": false,
+     "match_sponsor_image_url": "",
+     "match_sponsor_link": "",
+     "has_splash_sponsor": false,
+     "splash_logo_url": "",
+     "logoVersion": "1"
+   });
 
     // 3. Παράλληλη αρχικοποίηση Ads και Remote Config Fetch
     await Future.wait([
       MobileAds.instance
           .initialize()
           .catchError((e) => print("Ads init error: $e")),
-      //remoteConfig
-      //    .fetchAndActivate()
-      //    .catchError((e) => print("Remote Config error: $e")),
+      remoteConfig
+          .fetchAndActivate()
+          .catchError((e) => print("Remote Config error: $e")),
     ]);
 
-    await Firebase.initializeApp();
+    //await Firebase.initializeApp();
     //await MatchHandle.migrateMatches();
     //await MatchHandle.migrateTeams();
     //await MatchHandle().resetPlayerData("2026");
@@ -109,10 +119,16 @@ void main() async {
 
   try {
     print("✅ All good!");
-    //Messages().initNotification();
+    Messages().initNotification();
   } catch (e) {
     print("❌ Could not load messages $e");
   }
+
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
+
 
   runApp(const MyApp());
 }
@@ -122,8 +138,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    logScreenViewSta(screenName: 'Opened',screenClass: 'Opened');
-
+    logScreenViewSta(screenName: 'Opened', screenClass: 'Opened');
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
@@ -131,7 +146,6 @@ class MyApp extends StatelessWidget {
       routes: {
         '/home': (context) => LoadingScreen(),
       },
-
       home: LoadingScreen(),
     );
   }
@@ -170,10 +184,9 @@ class _LoadingScreenState extends State<LoadingScreen> {
       _loadLanguage();
     }
 
-    //initia();
+    initia();
     //  BettingResultUpdate().recalculateAllScores();
   }
-
 
   Future<void> _loadLanguage() async {
     UserHandleBase userHandle = UserHandleBase();
@@ -223,13 +236,10 @@ class _LoadingScreenState extends State<LoadingScreen> {
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       backgroundColor: lightModeBackGround,
       body: Center(
-        child: _hasError
-            ? _buildErrorWidget()
-            : _buildLoadingWidget(),
+        child: _hasError ? _buildErrorWidget() : _buildLoadingWidget(),
       ),
     );
   }
