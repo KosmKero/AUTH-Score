@@ -15,26 +15,8 @@ class UserBetHistory extends StatefulWidget {
 }
 
 class _UserBetHistoryState extends State<UserBetHistory> {
-  BannerAd? _bannerAd;
-  bool _isBannerAdReady = false;
 
-  @override
-  void initState() {
-    super.initState();
-    _bannerAd = AdManager.createBannerAd(
-      onStatusChanged: (status) {
-        setState(() {
-          _isBannerAdReady = status;
-        });
-      },
-    )..load();
-  }
 
-  @override
-  void dispose() {
-    _bannerAd?.dispose();
-    super.dispose();
-  }
   final backgroundColor = darkModeNotifier.value ? darkModeBackGround : lightModeBackGround;
   @override
   Widget build(BuildContext context) {
@@ -107,17 +89,7 @@ class _UserBetHistoryState extends State<UserBetHistory> {
           );
         },
       ),
-      bottomNavigationBar: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (_isBannerAdReady && _bannerAd != null)
-            SizedBox(
-              width: _bannerAd!.size.width.toDouble(),
-              height: _bannerAd!.size.height.toDouble(),
-              child: AdWidget(ad: _bannerAd!),
-            ),
-        ],
-      ),
+
     );
   }
 }

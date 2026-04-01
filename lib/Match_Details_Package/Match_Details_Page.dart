@@ -34,27 +34,6 @@ class _matchDetailsPageView extends StatefulWidget {
 }
 
 class _matchDetailsPageViewState extends State<_matchDetailsPageView> {
-  BannerAd? _bannerAd;
-
-  bool _isBannerAdReady = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _bannerAd = AdManager.createBannerAd(
-      onStatusChanged: (status) {
-        setState(() {
-          _isBannerAdReady = status;
-        });
-      },
-    )..load();
-  }
-
-  @override
-  void dispose() {
-    _bannerAd?.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -279,18 +258,6 @@ class _matchDetailsPageViewState extends State<_matchDetailsPageView> {
         ],
       ),
       body: matchProgress(match),
-      bottomNavigationBar: Column(
-        mainAxisSize: MainAxisSize.min, // Για να μην γεμίζει όλη την οθόνη
-        children: [
-          if (_isBannerAdReady && _bannerAd != null)
-            SizedBox(
-              width: _bannerAd!.size.width.toDouble(),
-              height: _bannerAd!.size.height.toDouble(),
-              child: AdWidget(ad: _bannerAd!),
-            ),
-        ],
-      ),
-
 
 
     );

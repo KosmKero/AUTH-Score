@@ -3,6 +3,10 @@ const { onRequest } = require("firebase-functions/v2/https");
 const { setGlobalOptions } = require("firebase-functions/v2");
 const admin = require("firebase-admin");
 
+const pdfSender = require('./pdfSender');
+exports.generateMatchReport = pdfSender.generateMatchReport;
+
+
 admin.initializeApp();
 
 // Set the maximum instances for your functions

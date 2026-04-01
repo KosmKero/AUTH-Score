@@ -171,38 +171,7 @@ class _searchDetailsState extends State<searchDetails> {
     cachedMatches[thisYearNow] = MatchHandle().getAllMatches();
 
 
-    if (_bannerTeam == null && !_isTeamAdReady) {
-      _bannerTeam = AdManager.createBannerAd(
-        onStatusChanged: (status) {
-          setState(() {
-            _isTeamAdReady = status;
-          });
-        },
-      )
-        ..load();
-    }
 
-    if (_bannerMatch == null && !_isMatchAdReady) {
-      _bannerMatch = AdManager.createBannerAd(
-        onStatusChanged: (status) {
-          setState(() {
-            _isMatchAdReady = status;
-          });
-        },
-      )
-        ..load();
-    }
-
-    if (_bannerHistory == null && !_isHistoryAdReady) {
-      _bannerHistory = AdManager.createBannerAd(
-        onStatusChanged: (status) {
-          setState(() {
-            _isHistoryAdReady = status;
-          });
-        },
-      )
-        ..load();
-    }
   }
   @override
   void dispose() {
