@@ -21,7 +21,7 @@ class TeamsHandle {
       'Coach': team.coach,
       'Matches': team.matches,
       'Wins': team.wins,
-      'Losses': team.losses,
+      'Loses': team.losses,
       'Draws': team.draws,
       'Group': team.group,
       'Foundation Year': team.foundationYear,
