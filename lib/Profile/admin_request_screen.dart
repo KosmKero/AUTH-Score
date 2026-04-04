@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
@@ -22,26 +23,17 @@ class _AdminRequestScreenState extends State<AdminRequestScreen> {
   void initState() {
     super.initState();
 
-    _bannerAd = AdManager.createBannerAd(
-      onStatusChanged: (status) {
-        setState(() {
-          _isBannerAdReady = status;
-        });
-      },
-    )..load();
+
 
     _fetchGroups(); // Κλήση της μεθόδου για ανάκτηση ομάδων
 
 
   }
-  BannerAd? _bannerAd;
 
-  bool _isBannerAdReady = false;
 
 
   @override
   void dispose() {
-    _bannerAd?.dispose();
     super.dispose();
   }
 
@@ -125,12 +117,11 @@ class _AdminRequestScreenState extends State<AdminRequestScreen> {
       bottomNavigationBar: Column(
         mainAxisSize: MainAxisSize.min, // Για να μην γεμίζει όλη την οθόνη
         children: [
-          if (_isBannerAdReady && _bannerAd != null)
-            SizedBox(
-              width: _bannerAd!.size.width.toDouble(),
-              height: _bannerAd!.size.height.toDouble(),
-              child: AdWidget(ad: _bannerAd!),
-            ),
+          SmartBanner(
+            hasSponsor: FirebaseRemoteConfig.instance.getBool('has_home_sponsor'),
+            sponsorImageUrl: FirebaseRemoteConfig.instance.getString('home_sponsor_image_url'),
+            sponsorLink: FirebaseRemoteConfig.instance.getString('home_sponsor_link'),
+          ),
         ],
       ),
     );

@@ -25,27 +25,7 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  @override
-  void initState() {
-    super.initState();
 
-    // Create banner ad with listener
-    if (_bannerAd == null && !_isBannerAdReady) {
-      _bannerAd = AdManager.createBannerAd(
-        onStatusChanged: (status) {
-          setState(() {
-            _isBannerAdReady = status;
-          });
-        },
-      )..load();
-    }
-    }
-
-  @override
-  void dispose() {
-    _bannerAd?.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
