@@ -36,12 +36,12 @@ class _TeamPlayersDisplayWidgetState extends State<TeamPlayersDisplayWidget> {
         scrollDirection: Axis.vertical,
         child: Column(
           children: [
-            (globalUser.controlTheseTeamsFootball(widget.team.name,null)) ? addPlayer() : SizedBox.shrink(),
+            (globalUser.controlTheseTeamsFootball(widget.team.name,null) || globalUser.isUpperAdmin) ? addPlayer() : SizedBox.shrink(),
             playersCard(0, positionList(0)),
             playersCard(1, positionList(1)),
             playersCard(2, positionList(2)),
             playersCard(3, positionList(3)),
-            if((globalUser.controlTheseTeamsFootball(widget.team.name,null)))
+            if(globalUser.controlTheseTeamsFootball(widget.team.name,null) || globalUser.isUpperAdmin )
               Padding(
                 padding: EdgeInsets.only(top: 20,left: 10),
                 child: Text(
@@ -117,8 +117,10 @@ class _TeamPlayersDisplayWidgetState extends State<TeamPlayersDisplayWidget> {
   }
 
   Widget playerName(Player player) {
+    bool isCaptain = globalUser.controlTheseTeamsFootball(widget.team.name, null) || globalUser.isUpperAdmin;
+
     return GestureDetector(
-      onDoubleTap: (globalUser.controlTheseTeamsFootball(widget.team.name,null)) ?  () async {
+      onDoubleTap: isCaptain ? () async {
         final updatedPlayer = await Navigator.push(
           context,
           MaterialPageRoute(
@@ -128,65 +130,84 @@ class _TeamPlayersDisplayWidgetState extends State<TeamPlayersDisplayWidget> {
             ),
           ),
         );
-        if (updatedPlayer is bool && updatedPlayer==true){
+        if (updatedPlayer is bool && updatedPlayer == true) {
           setState(() {
-            final index = widget.team.players.indexWhere((p) => p.name == player.name && p.number==player.number);
+            final index = widget.team.players.indexWhere((p) => p.name == player.name && p.number == player.number);
             if (index != -1) {
               widget.team.players.removeAt(index);
             }
           });
         } else if (updatedPlayer != null && updatedPlayer is Player) {
           setState(() {
-           //Βρες τη θέση του παλιού παίκτη και αντικατάστησέ τον
-           final index = widget.team.players.indexWhere((p) => p.name == player.name && p.number==player.number);
-           if (index != -1) {
-             widget.team.players[index] = updatedPlayer;
-           }
-
+            final index = widget.team.players.indexWhere((p) => p.name == player.name && p.number == player.number);
+            if (index != -1) {
+              widget.team.players[index] = updatedPlayer;
+            }
           });
         }
       } : null,
-
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(children: [
-            SizedBox(
-                width: 31, height: 31, child: Image.asset('fotos/randomUserPic.png')),
-            SizedBox(width: 10),
-            Text(" ${player.number < 10 ? ' ${player.number}' : '${player.number}'}", style: TextStyle(color: darkModeNotifier.value?Colors.white:Colors.black,
-                fontFamily: "Arial",
-                fontSize: 15,
-                fontWeight: FontWeight.bold
-            )
-            ),
-            SizedBox(width: 10,),
-
-                Text(" ${player.name} ${player.surname}",
+          Row(
+            children: [
+              SizedBox(
+                  width: 31,
+                  height: 31,
+                  child: Image.asset('fotos/randomUserPic.png')),
+              SizedBox(width: 10),
+              Text(
+                " ${player.number < 10 ? ' ${player.number}' : '${player.number}'}",
                 style: TextStyle(
-                  color:darkModeNotifier.value?Colors.white:Colors.black,
-                  fontFamily: "Arial",
-                  fontSize: 16.5
-                ),),
-                //για ηλικία παικτών
-                //Row(
-                //  mainAxisAlignment: MainAxisAlignment.start,
-                //  children: [
-//
-                //    Text("  ${player.age} έτη", style: TextStyle(color:darkModeNotifier.value?Colors.white:Colors.black,
-                //      fontFamily: "Arial",
-                //      fontSize: 15
-                //      )
-                //    ),
-                //  ],
-                //),
+                    color: darkModeNotifier.value ? Colors.white : Colors.black,
+                    fontFamily: "Arial",
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold),
+              ),
+              SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  "${player.surname} ${player.name}",
+                  style: TextStyle(
+                      color: darkModeNotifier.value ? Colors.white : Colors.black,
+                      fontFamily: "Arial",
+                      fontSize: 16.5),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
 
-          ]),
-          SizedBox(height: 3),
+          //Εμφανίζεται ΜΟΝΟ στον αρχηγό/admin ---
+          if (isCaptain)
+            Padding(
+              padding: const EdgeInsets.only(left: 52.0, top: 4.0), // Για να ευθυγραμμιστεί με το όνομα
+              child: Row(
+                children: [
+                  // 1. Συμμετοχές
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: Colors.blueAccent.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Text(
+                      "Συμμετοχές: ${player.appearances}",
+                      style: const TextStyle(fontSize: 12, color: Colors.blueAccent, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  // 2. Κάρτα Υγείας
+                  _buildHealthCardStatus(player.cardExpiryDate),
+                ],
+              ),
+            ),
+
+          const SizedBox(height: 6),
         ],
       ),
     );
   }
-
 
   Widget addPlayer() {
     return IconButton(
@@ -212,5 +233,51 @@ class _TeamPlayersDisplayWidgetState extends State<TeamPlayersDisplayWidget> {
       ),
     );
   }
+
+  // Ελέγχει την ημερομηνία και επιστρέφει το πατητό εικονίδιο (Tooltip)
+  Widget _buildHealthCardStatus(DateTime? issueDate) {
+    if (issueDate == null) {
+      return const Tooltip(
+        message: "Χωρίς Κάρτα Υγείας",
+        triggerMode: TooltipTriggerMode.tap,
+        showDuration: Duration(seconds: 3),
+        child: Icon(Icons.error, color: Colors.red, size: 22),
+      );
+    }
+
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+
+    // ΝΕΟ: Υπολογίζουμε τη Λήξη = Ημερομηνία Έκδοσης + 1 Χρόνος
+    final expiration = DateTime(issueDate.year + 1, issueDate.month, issueDate.day);
+
+    // Βρίσκουμε τις μέρες που απομένουν μέχρι να λήξει
+    final daysLeft = expiration.difference(today).inDays;
+
+    if (daysLeft < 0) {
+      return const Tooltip(
+        message: "Ληγμένη Κάρτα!",
+        triggerMode: TooltipTriggerMode.tap,
+        showDuration: Duration(seconds: 3),
+        child: Icon(Icons.cancel, color: Colors.red, size: 22),
+      );
+    } else if (daysLeft <= 30) {
+      return Tooltip(
+        message: "Λήγει σε $daysLeft μέρες",
+        triggerMode: TooltipTriggerMode.tap,
+        showDuration: const Duration(seconds: 3),
+        child: const Icon(Icons.warning_amber_rounded, color: Colors.orange, size: 22),
+      );
+    } else {
+      return const Tooltip(
+        message: "Έγκυρη Κάρτα Υγείας",
+        triggerMode: TooltipTriggerMode.tap,
+        showDuration: Duration(seconds: 2),
+        child: Icon(Icons.check_circle, color: Colors.green, size: 22),
+      );
+    }
+  }
+
+
 }
 

@@ -95,19 +95,6 @@ class _TeamDetailsWidgetState extends State<TeamDetailsWidget> {
                   vertical: 15),
               child: Column(
                 children: [
-                  if (globalUser.controlTheseTeamsFootball(widget.team.name, null))
-                    IconButton(
-                        onPressed: () async {
-                          await Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) =>
-                                      TeamEditPage(widget.team)));
-                          if (!mounted) return;
-
-                          setState(() {});
-                        },
-                        icon: Icon(Icons.edit)),
                   Row(
                     mainAxisAlignment: MainAxisAlignment
                         .spaceBetween, // Στοίχιση αριστερά-δεξιά
@@ -192,8 +179,7 @@ class _TeamDetailsWidgetState extends State<TeamDetailsWidget> {
                   SizedBox(height: 10),
                   //ΓΙΑ ΤΟΝ ΠΡΟΠΟΝΗΤΗ!!
                   Row(
-                    mainAxisAlignment: MainAxisAlignment
-                        .spaceBetween, // Στοίχιση αριστερά-δεξιά
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Row(
                         children: [
@@ -216,17 +202,22 @@ class _TeamDetailsWidgetState extends State<TeamDetailsWidget> {
                           ),
                         ],
                       ),
-                      Padding(
-                          padding: EdgeInsets.only(right: 7),
-                          child: Text(
-                            '${widget.team.coach}',
-                            style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                                color: darkModeNotifier.value
-                                    ? Colors.white
-                                    : Colors.black),
-                          )),
+                      // Εδώ χρησιμοποιούμε Flexible σωστά, απευθείας στο εξωτερικό Row
+                      Flexible(
+                        child: Padding(
+                            padding: EdgeInsets.only(right: 7, left: 10),
+                            child: Text(
+                              widget.team.coach,
+                              textAlign: TextAlign.right,
+                              overflow: TextOverflow.ellipsis, // Βάζει ... αν το όνομα είναι τεράστιο
+                              style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: darkModeNotifier.value
+                                      ? Colors.white
+                                      : Colors.black),
+                            )),
+                      ),
                     ],
                   ),
                 ],
@@ -240,36 +231,49 @@ class _TeamDetailsWidgetState extends State<TeamDetailsWidget> {
 }
 
 //ΑΦΟΡΑ ΤΗΝ ΚΑΤΑΣΚΕΥΗ ΤΩΝ ΟΝΟΜΑΤΩΝ ΤΩΝ ΟΜΑΔΩΝ ΣΤΟ ΚΑΤΩ ΜΕΡΟΣ
-class TeamFormWidget extends StatelessWidget {
+class TeamFormWidget extends StatefulWidget {
   final Team team;
+  const TeamFormWidget({super.key, required this.team});
 
-  TeamFormWidget({super.key, required this.team});
+  @override
+  State<TeamFormWidget> createState() => _TeamFormWidgetState();
+}
+
+class _TeamFormWidgetState extends State<TeamFormWidget> {
+  late Future<List<String>> _formFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    // Καλούμε τη βάση ΜΟΝΟ ΜΙΑ ΦΟΡΑ όταν φορτώνει το widget!
+    _formFuture = getFinalFive(widget.team.name);
+  }
 
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
 
     return FutureBuilder<List<String>>(
-      future: getFinalFive(team.name),
+      future: _formFuture, // Χρησιμοποιούμε τη μεταβλητή, όχι τη συνάρτηση
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const CircularProgressIndicator();
         } else if (snapshot.hasError) {
-          return const Text("Error loading results");
+          return const Text("Σφάλμα φόρτωσης");
         } else {
           final results = snapshot.data ?? [];
           final displayResults =
               results.length == 6 ? results.sublist(1) : results;
 
           return Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: displayResults
-                    .map((result) => Padding(
-                          padding: EdgeInsets.symmetric(
-                              horizontal: screenWidth * 0.015),
-                          child: _buildResultIcon(result, screenWidth),
-                        ))
-                    .toList(),
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: displayResults
+                .map((result) => Padding(
+                      padding:
+                          EdgeInsets.symmetric(horizontal: screenWidth * 0.015),
+                      child: _buildResultIcon(result, screenWidth),
+                    ))
+                .toList(),
           );
         }
       },

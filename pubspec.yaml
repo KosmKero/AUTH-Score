@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.1.0+38
+version: 1.1.1+38
 
 environment:
   sdk: ^3.6.1
@@ -32,9 +32,9 @@ dependencies:
     sdk: flutter
   firebase_auth: ^5.5.1
   cloud_firestore: ^5.6.5
-  google_mobile_ads: ^6.0.0
   firebase_analytics: ^11.4.5
   firebase_remote_config: ^5.2.1
+  firebase_storage: ^12.4.10
   url_launcher: ^6.3.1
   cached_network_image: 3.4.1
   app_tracking_transparency: ^2.0.6
@@ -45,12 +45,18 @@ dependencies:
   hive: ^2.2.3
   hive_flutter: ^1.1.0
   intl: ^0.19.0
+  uuid: ^4.3.3
+  shimmer: ^3.0.0
+  flutter_native_splash: ^2.4.0
+
 
   sqflite: ^2.3.3+1
 
   #για το pdf
   pdf: ^3.10.7
   printing: ^5.11.0
+  mailer: ^7.1.0
+
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -63,6 +69,11 @@ dependencies:
   provider: ^6.1.2
   flutter_launcher_icons: ^0.14.3
   css_colors: ^1.1.7
+
+  signature: ^5.4.0
+  speech_to_text: ^7.1.0
+
+  wakelock_plus: ^1.2.8
 
 flutter_launcher_icons:
   android: true
@@ -163,5 +174,25 @@ flutter:
     - logos/HMMY2.png
     - logos/GEOPONIA.png
 
+    - uniScoreLogo/uniScore_logo11.png
+
+    - uniScoreLogo/Uniscore_31.png
+    - uniScoreLogo/Uniscoretext.png
+    - uniScoreLogo/Uniscore32.png
 
 
+
+
+
+flutter_native_splash:
+  color: "#97B4C3"       # Ανοιχτό μπλε για Light Mode
+  color_dark: "#121212"  # Βαθύ σκούρο μπλε για Dark Mode
+  image: uniScoreLogo/Uniscore32.png
+
+  image_dark: uniScoreLogo/Uniscore32.png
+
+  android_12:
+    color: "#97B4C3"
+    color_dark: "#121212"
+    image: uniScoreLogo/Uniscore32.png
+    image_dark: uniScoreLogo/Uniscore32.png

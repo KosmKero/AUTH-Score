@@ -762,7 +762,7 @@ Future<void> checkBase(BuildContext context,emailText,passwordText) async
       emailText.clear();
       passwordText.clear();
 
-
+      loggedInNotifications.value = true;
       //ΕΠΙΣΤΡΕΦΩ ΣΤΗΝ ΑΡΧΙΚΗ ΣΕΛΙΔΑ!!
       try
       {
@@ -829,6 +829,7 @@ Future<void> addInBase(BuildContext context,TextEditingController  emailText,Tex
   {
     //AppUser currentUser = AppUser(_email,_password,_sxolh);
     isLoggedIn = true; //ΑΛΛΑΖΩ ΚΑΤΑΣΤΑΣΗ ΧΡΗΣΤΗ
+    loggedInNotifications.value = true;
 
     //ΚΑΘΑΡΙΖΩ ΤΑ ΠΕΔΙΑ ΟΤΑΝ ΠΑΤΗΣΕΙ ΤΟ ΚΟΥΜΠΙ ΕΓΓΡΑΦΗΣ
     emailText.clear();

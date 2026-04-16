@@ -37,12 +37,10 @@ class _ProfilePageState extends State<ProfilePage> {
   String selectedLanguage = "";
   UserHandleBase userHandleBase = UserHandleBase();
 
-  late Future<bool> _isSuperAdminFuture;
   @override
   void initState() {
     super.initState();
     _loadLanguage();
-    _isSuperAdminFuture = globalUser.isSuperUser();
   }
 
   Future<void> _loadLanguage() async {
@@ -82,13 +80,14 @@ class _ProfilePageState extends State<ProfilePage> {
                 children: [
                   Container(
                     width: double.infinity,
+                    alignment: Alignment.center,
                     padding: const EdgeInsets.symmetric(
-                        vertical: 20, horizontal: 15),
+                        vertical: 12, horizontal: 15),
                     decoration: BoxDecoration(
-                      color: darkModeOn ? Color(0xFF1E1E1E) : Colors.blue[50],
-                      borderRadius: BorderRadius.only(
-                        bottomLeft: Radius.circular(20),
-                        bottomRight: Radius.circular(20),
+                      color: darkModeOn ? const Color(0xFF1E1E1E) : Colors.blue[50],
+                      borderRadius: const BorderRadius.only(
+                        bottomLeft: Radius.circular(25),
+                        bottomRight: Radius.circular(25),
                       ),
                       boxShadow: [
                         BoxShadow(
@@ -96,23 +95,23 @@ class _ProfilePageState extends State<ProfilePage> {
                               ? Colors.black.withOpacity(0.3)
                               : Colors.blue.withOpacity(0.1),
                           blurRadius: 10,
-                          offset: Offset(0, 5),
+                          offset: const Offset(0, 5),
                         ),
                       ],
                     ),
                     child: Text(
-                      greek ? "Επεξεργασία Προφίλ" : "Edit profile",
+                      greek ? "Ο Λογαριασμός μου" : "My Account",
+                      textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: greek ? 24 : 26,
                         fontWeight: FontWeight.bold,
-                        fontFamily: 'Arial',
                         fontStyle: FontStyle.italic,
                         color: darkModeOn ? Colors.white : Colors.blue[900],
                       ),
                     ),
                   ),
                   Container(
-                    margin: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                    margin: EdgeInsets.symmetric(vertical: 13, horizontal: 20),
                     padding: EdgeInsets.symmetric(horizontal: 5, vertical: 2),
                     decoration: BoxDecoration(
                       color: darkModeOn ? Color(0xFF1E1E1E) : Colors.white,
@@ -151,7 +150,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           )),
                     ),
                   ),
-                  SizedBox(height: 20),
+                  SizedBox(height: 12),
                   Container(
                     margin: EdgeInsets.symmetric(horizontal: 20, vertical: 5),
                     decoration: BoxDecoration(
@@ -254,8 +253,9 @@ class _ProfilePageState extends State<ProfilePage> {
                               } else {
                                 setState(() {
                                   isLoggedIn = false;
+                                  loggedInNotifications.value = false;
                                   globalUser =
-                                      AppUser(" ", " ", [], [], "user", {}, "",false);
+                                      AppUser(" ", " ", [], [],[], "user", {}, "",false, false, false);
                                   signOutUser();
                                 });
                               }
@@ -558,104 +558,76 @@ class _ProfilePageState extends State<ProfilePage> {
                       ],
                     ),
                   ),
-                  FutureBuilder<bool>(
-                    future: _isSuperAdminFuture,
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return CircularProgressIndicator(); // Ή SizedBox.shrink() αν θες να μη φαίνεται τίποτα
-                      }
-                      if (snapshot.hasData &&
-                          snapshot.data! &&
-                          globalUser.isAdmin &&
-                          globalUser.isLoggedIn) {
-                        return Container(
-                          margin: EdgeInsets.all(20),
-                          padding:
-                              EdgeInsets.symmetric(horizontal: 5, vertical: 2),
-                          decoration: BoxDecoration(
-                            color:
-                                darkModeOn ? Color(0xFF1E1E1E) : Colors.white,
-                            borderRadius: BorderRadius.circular(15),
-                            boxShadow: [
-                              BoxShadow(
-                                color: darkModeOn
-                                    ? Colors.black.withOpacity(0.3)
-                                    : Colors.black.withOpacity(0.1),
-                                blurRadius: 10,
-                                offset: Offset(0, 5),
-                              ),
-                            ],
+                  // Αντί για FutureBuilder, απλός και γρήγορος έλεγχος!
+                  if (isLoggedIn && globalUser.isUpperAdmin)
+                    Container(
+                      margin: EdgeInsets.all(20),
+                      padding: EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: darkModeOn ? Color(0xFF1E1E1E) : Colors.white,
+                        borderRadius: BorderRadius.circular(15),
+                        boxShadow: [
+                          BoxShadow(
+                            color: darkModeOn
+                                ? Colors.black.withOpacity(0.3)
+                                : Colors.black.withOpacity(0.1),
+                            blurRadius: 10,
+                            offset: Offset(0, 5),
                           ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              ListTile(
-                                dense: true,
-                                leading: Icon(
-                                  Icons.admin_panel_settings,
-                                  color:
-                                      darkModeOn ? Colors.white : Colors.blue,
-                                ),
-                                title: TextButton(
-                                  onPressed: () async {
-                                    if (await _isSuperAdminFuture) {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) =>
-                                              RequestApprovalScreen(),
-                                        ),
-                                      );
-                                    }
-                                  },
-                                  child: Text(
-                                    greek ? "Διαχειριστές" : "Admins handle",
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w600,
-                                      color: darkModeOn
-                                          ? Colors.white
-                                          : Colors.blue[900],
-                                    ),
+                        ],
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          ListTile(
+                            dense: true,
+                            leading: Icon(
+                              Icons.admin_panel_settings,
+                              color: darkModeOn ? Colors.white : Colors.blue,
+                            ),
+                            title: TextButton(
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => RequestApprovalScreen(),
                                   ),
+                                );
+                              },
+                              child: Text(
+                                greek ? "Διαχειριστές" : "Admins handle",
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                  color: darkModeOn ? Colors.white : Colors.blue[900],
                                 ),
                               ),
-                              ListTile(
-                                dense: true,
-                                leading: Icon(
-                                  Icons.admin_panel_settings,
-                                  color:
-                                      darkModeOn ? Colors.white : Colors.blue,
-                                ),
-                                title: TextButton(
-                                  onPressed: () async {
-                                    if (await _isSuperAdminFuture) {
-                                      BettingResultUpdate()
-                                          .checkAndUpdateStats();
-                                    }
-                                  },
-                                  child: Text(
-                                    greek
-                                        ? "Ανανέωση στοιχημάτων"
-                                        : "Betting update",
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w600,
-                                      color: darkModeOn
-                                          ? Colors.white
-                                          : Colors.blue[900],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
+                            ),
                           ),
-                        );
-                      } else {
-                        return SizedBox.shrink();
-                      }
-                    },
-                  ),
+                          if (globalUser.isSuperUser)
+                            ListTile(
+                            dense: true,
+                            leading: Icon(
+                              Icons.admin_panel_settings,
+                              color: darkModeOn ? Colors.white : Colors.blue,
+                            ),
+                            title: TextButton(
+                              onPressed: () {
+                                BettingResultUpdate().checkAndUpdateStats();
+                              },
+                              child: Text(
+                                greek ? "Ανανέωση στοιχημάτων" : "Betting update",
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                  color: darkModeOn ? Colors.white : Colors.blue[900],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   if (isLoggedIn)
                   Container(
                     margin: const EdgeInsets.symmetric(
@@ -695,8 +667,9 @@ class _ProfilePageState extends State<ProfilePage> {
                           if (isDeleted) {
                             setState(() {
                               isLoggedIn = false;
+                              loggedInNotifications.value = false;
                               globalUser =
-                                  AppUser(" ", " ", [], [], "user", {}, "",false);
+                                  AppUser(" ", " ", [], [],[], "user", {}, "",false, false, false);
                             });
                           }
                         },
@@ -839,7 +812,8 @@ Future<bool> _deleteAccount(BuildContext context) async {
     );
 
     isLoggedIn = false;
-    globalUser = AppUser(" ", " ", [], [], "user", {}, "",false);
+    loggedInNotifications.value = false;
+    globalUser = AppUser(" ", " ", [], [],[], "user", {}, "",false, false, false);
 
     return true;
     if (!context.mounted) return false;

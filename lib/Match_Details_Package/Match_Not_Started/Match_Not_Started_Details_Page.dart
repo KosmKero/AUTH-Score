@@ -1,6 +1,5 @@
-//mport 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
-import 'package:untitled1/API/user_handle.dart';
 import 'package:untitled1/Firebase_Handle/user_handle_in_base.dart';
 import 'package:untitled1/Match_Details_Package/Match_Not_Started/DetailsMatchNotStarted.dart';
 import '../../Data_Classes/MatchDetails.dart';
@@ -12,7 +11,6 @@ import '../../championship_details/StandingsPage.dart';
 import '../../globals.dart';
 import '../../main.dart';
 import '../Starting__11_Display_Card.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
 import '../../ad_manager.dart';
 
 //ΟΛΟ ΕΔΩ ΑΦΟΡΑ ΤΟ ΕΠΑΝΩ ΚΟΜΜΑΤΙ ΤΗΣ ΣΕΛΙΔΑΣ. ΓΙΑ ΤΗΝ ΩΡΑ =,ΜΕΡΑ ΚΙΑ ΤΙς ΟΜΑΔΕΣ. ΤΟ ΜΠΛΕ ΠΛΑΙΣΙΟ ΣΤΗΝ ΑΡΧΗ ΑΡΧΗ ΠΑΝΩ
@@ -37,7 +35,7 @@ class _MatchNotStartedDetailsState extends State<MatchNotStartedDetails> {
   @override
   Widget build(BuildContext context) {
     logScreenViewSta(screenName: 'Match Not Started Page',screenClass: 'Match Not Started Page');
-    /*
+
     FirebaseAnalytics.instance.logEvent(
       name: 'Match Not Started Clicked',
       parameters: {
@@ -47,7 +45,7 @@ class _MatchNotStartedDetailsState extends State<MatchNotStartedDetails> {
       },
     );
 
-     */
+
 
 
 
@@ -81,21 +79,20 @@ class _MatchNotStartedDetailsState extends State<MatchNotStartedDetails> {
                 ),
                 Center(child: _isAdminWidget()),
                 const Divider(),
-                NavigationButtons(onSectionChange: _changeSection),
+                NavigationButtons(onSectionChange: _changeSection, homeTeamName: widget.match.homeTeam.name, awayTeamName: widget.match.awayTeam.name, ),
               ],
             ),
           ),
         ),
         _sectionChooser(selectedIndex, widget.match),
-        SizedBox(height: 20,),
-      ])
+      ]
+      )
     );
   }
 
   Widget _isAdminWidget() {
     // Check if the user is logged in
-    if (globalUser.controlTheseTeamsFootball(
-        widget.match.homeTeam.name, widget.match.awayTeam.name)) {
+    if (globalUser.isUpperAdmin) {
       return TextButton(
         child: Text(
             greek?"Εκκίνηση Αγώνα":"Start match",
@@ -143,9 +140,8 @@ class _MatchNotStartedDetailsState extends State<MatchNotStartedDetails> {
 
 class NavigationButtons extends StatefulWidget {
   final Function(int) onSectionChange;
-
-  const NavigationButtons({Key? key, required this.onSectionChange})
-      : super(key: key);
+  String homeTeamName,awayTeamName;
+  NavigationButtons({super.key, required this.onSectionChange,required this.homeTeamName, required this.awayTeamName});
 
   @override
   State<NavigationButtons> createState() => _NavigationButtonsState();
@@ -171,8 +167,9 @@ class _NavigationButtonsState extends State<NavigationButtons> {
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           _buildTextButton(greek ? "Λεπτομέρειες" : "Details", 0),
-          // _buildTextButton(greek?"Συνθέσεις":"Teams", 1),
-          _buildTextButton(greek ? "Βαθμολογία" : "Standing", 1),
+          if (globalUser.isUpperAdmin || globalUser.controlTheseTeamsFootball(widget.homeTeamName, widget.awayTeamName))
+          _buildTextButton(greek?"Συνθέσεις":"Teams", 1),
+          _buildTextButton(greek ? "Βαθμολογία" : "Standing", 2),
         ],
       ),
     );
@@ -327,9 +324,9 @@ Widget _sectionChooser(int selectedIndex, MatchDetails match) {
   switch (selectedIndex) {
     case 0:
       return DetailsMatchNotStarted(match: match);
-    //case 1:
-    //  return Starting11Display(match: match,);
     case 1:
+    return LineupsDisplayTab(match: match);
+    case 2:
       int year;
       if (match.month>8) {
         year=match.year;

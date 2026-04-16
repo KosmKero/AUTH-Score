@@ -16,12 +16,18 @@ class AppUser
   bool _isLoggedIn=false;
   late bool _isAdmin;
   final bool _isUpperAdmin;
+  late final  bool _isSuperUser;
+
+  final ValueNotifier<bool> _notifyAllMatches = ValueNotifier<bool>(false);
 
   List<String> favoriteList=[];
   List<String> _controlledTeams=[];
+  List<String> _mainTeams = [];  //βασικοι αρχηγοι
   Map<String,bool>  _matchKeys={};
-  AppUser(this._username,this._university,this.favoriteList,this._controlledTeams,String role,this._matchKeys,this._email, this._isUpperAdmin){
+  AppUser(this._username,this._university,this.favoriteList,this._controlledTeams,this._mainTeams, String role,this._matchKeys,this._email, this._isUpperAdmin, this._isSuperUser,notifyAllMatches){
     (role=="admin") ? (_isAdmin=true) : (_isAdmin=false);
+
+    _notifyAllMatches.value = notifyAllMatches;
   }
 
   String get username => _username;
@@ -32,8 +38,14 @@ class AppUser
   List<String> get controlledTeams=> _controlledTeams;
   Map<String,bool> get matchKeys=> _matchKeys;
 
+  bool get isSuperUser => _isSuperUser;
+  bool get isUpperAdmin => (_isUpperAdmin || _isSuperUser);
 
+  ValueNotifier<bool> get notifyAllMatches => _notifyAllMatches;
 
+  void setNotifyAllMatches(bool noti ){
+    _notifyAllMatches.value=noti;
+  }
 
   Future<void> addFavoriteTeam(Team team) async {
     favoriteList.add(team.name);
@@ -91,10 +103,20 @@ class AppUser
     _isAdmin=false;
   }
 
+  bool isMainCaptainOf(String teamName) {
+    if (_isSuperUser || _isUpperAdmin) return true; // SuperUser & Γραμματεία τα κάνουν όλα
+    return _mainTeams.contains(teamName);
+  }
+
+  // Ελέγχει αν είναι απλός αρχηγός (μπορεί να βάλει σκορ, να δει το Roster κτλ)
+  bool isCaptainOf(String teamName) {
+    if (_isSuperUser || _isUpperAdmin) return true;
+    return _controlledTeams.contains(teamName);
+  }
 
   bool controlTheseTeamsFootball(String team1,String? team2) {
     if (!_isAdmin) return false;
-    if (_isUpperAdmin) return true;
+
     for (String name in controlledTeams){
       if (name==team1 ){
         return true;
@@ -107,6 +129,15 @@ class AppUser
 
     }
     return false;
+  }
+
+  void addMainTeam(String teamName) {
+    if (!_mainTeams.contains(teamName)) {
+      _mainTeams.add(teamName);
+    }
+    if (!_controlledTeams.contains(teamName)) {
+      _controlledTeams.add(teamName); // Πρέπει να είναι και στα δύο!
+    }
   }
 
   void changeUsername(String username){
@@ -160,25 +191,6 @@ class AppUser
 
     print("Stats updated for all users who voted in $matchKey.");
   }
-
-
-  Future<bool> isSuperUser() async {
-    final userDoc = await FirebaseFirestore.instance
-        .collection('users')
-        .doc(FirebaseAuth.instance.currentUser?.uid)
-        .get();
-
-    // Ελέγχει αν ο χρήστης είναι superuser
-    if (userDoc.exists && userDoc.data()?['superuser'] ==
-    "super123userRR"){
-      return true;
-    }
-    return false;
-
-  }
-
-
-
 
 
 }

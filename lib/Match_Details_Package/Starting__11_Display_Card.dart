@@ -1,491 +1,320 @@
 import 'package:flutter/material.dart';
-import 'package:untitled1/API/user_handle.dart';
-import 'package:untitled1/Firebase_Handle/user_handle_in_base.dart';
-import 'package:untitled1/main.dart';
-import '../../Data_Classes/MatchDetails.dart';
-import '../Data_Classes/Player.dart';
-
-//ΑΥΤΟ ΤΟ ΚΟΜΜΑΤΙ ΑΦΟΡΑ ΤΙΣ ΣΥΝΘΕΣΕΙΣ ΠΟΥ ΘΑ ΕΜΦΑΝΙΖΟΝΤΑΙ ΓΙΑ ΤΗΝ ΚΑΘΕ ΟΜΆΔΑ
-
-import 'package:flutter/material.dart';
-import '../../Data_Classes/MatchDetails.dart';
+import '../Data_Classes/MatchDetails.dart';
 import '../Data_Classes/Player.dart';
 import '../globals.dart';
+import 'choosePlayers.dart'; // Ή το σωστό path για το LiveLineupScreen
 
+class LineupsDisplayTab extends StatefulWidget {
+  final MatchDetails match;
 
-
-
-
-
-
-import 'package:flutter/material.dart';
-import '../Data_Classes/Player.dart';
-// import '../globals.dart'; // Για τα δικαιώματα του globalUser
-
-class LiveLineupScreen extends StatefulWidget {
-  final String homeTeamName;
-  final String awayTeamName;
-  final List<Player> homeRoster; // Οι 18 επιλεγμένοι
-  final List<Player> awayRoster; // Οι 18 επιλεγμένοι
-  // Προφανώς κάπου εδώ θα περνάς και ποιός είναι βασικός/πάγκος (π.χ. μέσω του MatchDetails)
-
-  const LiveLineupScreen({
-    super.key,
-    required this.homeTeamName,
-    required this.awayTeamName,
-    required this.homeRoster,
-    required this.awayRoster,
-  });
+  const LineupsDisplayTab({super.key, required this.match, });
 
   @override
-  State<LiveLineupScreen> createState() => _LiveLineupScreenState();
+  State<LineupsDisplayTab> createState() => _LineupsDisplayTabState();
 }
 
-class _LiveLineupScreenState extends State<LiveLineupScreen> {
-  // Ποια ομάδα βλέπουμε τώρα (true = Γηπεδούχος, false = Φιλοξενούμενος)
+class _LineupsDisplayTabState extends State<LineupsDisplayTab> {
   bool showHomeTeam = true;
 
   @override
   void initState() {
     super.initState();
-    // ΕΛΕΓΧΟΣ ΔΙΚΑΙΩΜΑΤΩΝ ΚΑΤΑ ΤΗΝ ΕΝΑΡΞΗ:
-    // Αν ελέγχει ΜΟΝΟ τον φιλοξενούμενο, του δείχνουμε κατευθείαν τον φιλοξενούμενο
-    /*
-    if (!globalUser.controlsTeam(widget.homeTeamName) && globalUser.controlsTeam(widget.awayTeamName)) {
+    // 🌟 ΝΕΟ: Αν ο χρήστης ελέγχει ΜΟΝΟ τους φιλοξενούμενους, άνοιξε απευθείας αυτούς!
+    bool canEditHome = globalUser.controlTheseTeamsFootball(widget.match.homeTeam.name, null) || globalUser.isUpperAdmin;
+    bool canEditAway = globalUser.controlTheseTeamsFootball(widget.match.awayTeam.name, null) || globalUser.isUpperAdmin;
+
+    if (!canEditHome && canEditAway) {
       showHomeTeam = false;
     }
-    */
   }
 
   @override
   Widget build(BuildContext context) {
-    // Διαλέγουμε ποια λίστα παικτών θα δείξουμε με βάση το κουμπί
-    List<Player> currentList = showHomeTeam ? widget.homeRoster : widget.awayRoster;
+    bool canEditHome = globalUser.controlTheseTeamsFootball(widget.match.homeTeam.name, null) || globalUser.isUpperAdmin;
+    bool canEditAway = globalUser.controlTheseTeamsFootball(widget.match.awayTeam.name, null) || globalUser.isUpperAdmin;
+    bool isSpectator = !canEditHome && !canEditAway && !globalUser.isUpperAdmin;
 
-    return Column(
-      children: [
-        // --- 1. ΤΑ ΚΟΥΜΠΙΑ ΕΠΙΛΟΓΗΣ ΟΜΑΔΑΣ ---
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Row(
-            children: [
-              // Κουμπί Γηπεδούχου (Εμφανίζεται μόνο αν έχει δικαίωμα)
-              // if (globalUser.controlsTeam(widget.homeTeamName) || globalUser.isAdmin)
-              Expanded(
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: showHomeTeam ? Colors.blue.shade800 : Colors.grey.shade300,
-                    foregroundColor: showHomeTeam ? Colors.white : Colors.black,
-                  ),
-                  onPressed: () => setState(() => showHomeTeam = true),
-                  child: Text(widget.homeTeamName),
-                ),
-              ),
-              const SizedBox(width: 8),
+    // Ελέγχει αν έχει δικαίωμα στην ομάδα που ΒΛΕΠΕΙ αυτή τη στιγμή
+    bool canEditCurrentTeam = showHomeTeam ? canEditHome : canEditAway;
 
-              // Κουμπί Φιλοξενούμενου (Εμφανίζεται μόνο αν έχει δικαίωμα)
-              // if (globalUser.controlsTeam(widget.awayTeamName) || globalUser.isAdmin)
-              Expanded(
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: !showHomeTeam ? Colors.red.shade800 : Colors.grey.shade300,
-                    foregroundColor: !showHomeTeam ? Colors.white : Colors.black,
-                  ),
-                  onPressed: () => setState(() => showHomeTeam = false),
-                  child: Text(widget.awayTeamName),
-                ),
-              ),
-            ],
+    // Αν είναι φίλαθλος και δεν έχουν δηλωθεί οι συνθέσεις
+    if (isSpectator && widget.match.homeStarters.isEmpty && widget.match.awayStarters.isEmpty) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Text(
+            greek ? "Οι συνθέσεις δεν είναι διαθέσιμες ακόμα." : "Lineups are not available yet.",
+            style: TextStyle(color: darkModeNotifier.value ? Colors.white54 : Colors.black54),
           ),
-        ),
-
-        // --- 2. Η ΛΙΣΤΑ ΤΩΝ 18 ΠΑΙΚΤΩΝ ---
-        Expanded(
-          child: ListView.builder(
-            itemCount: currentList.length,
-            itemBuilder: (context, index) {
-              final player = currentList[index];
-
-              // ΥΠΟΘΕΣΗ: Ελέγχεις αν είναι βασικός. Για το παράδειγμα, έστω ότι οι πρώτοι 11 της λίστας είναι οι βασικοί.
-              bool isStarter = index < 11; // Αντικατέστησέ το με τον πραγματικό σου έλεγχο (π.χ. match.starting11.contains(player.id))
-
-              return Card(
-                margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                // Πράσινο περίγραμμα για βασικούς, Πορτοκαλί για πάγκο
-                shape: RoundedRectangleBorder(
-                  side: BorderSide(
-                      color: isStarter ? Colors.green : Colors.orange,
-                      width: 2
-                  ),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: ListTile(
-                  leading: CircleAvatar(
-                    backgroundColor: isStarter ? Colors.green.shade100 : Colors.orange.shade100,
-                    child: Text(
-                      player.number as String,
-                      style: TextStyle(
-                        color: isStarter ? Colors.green.shade900 : Colors.orange.shade900,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  title: Text("${player.surname} ${player.name}"),
-                  subtitle: Text(isStarter ? "Βασικός" : "Πάγκος"),
-
-                  // --- 3. ΤΟ ΚΟΥΜΠΙ ΤΗΣ ΑΛΛΑΓΗΣ ---
-                  // Εμφανίζεται ΜΟΝΟ δίπλα στους Βασικούς (isStarter == true)
-                  trailing: isStarter
-                      ? IconButton(
-                    icon: const Icon(Icons.swap_horiz, size: 30, color: Colors.blue),
-                    onPressed: () {
-                      // Εδώ θα ανοίγει το Popup για να διαλέξει ποιόν θα βάλει από τον πάγκο!
-                      _showSubstitutionDialog(context, player);
-                    },
-                  )
-                      : null, // Ο πάγκος δεν έχει κουμπί, μπαίνει μόνο όταν βγει κάποιος βασικός
-                ),
-              );
-            },
-          ),
-        ),
-      ],
-    );
-  }
-
-  // Η μέθοδος που ανοίγει το Popup
-  void _showSubstitutionDialog(BuildContext context, Player playerOut) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text("Αλλαγή Παίκτη"),
-          content: Text("Ποιος μπαίνει στη θέση του ${playerOut.surname};"),
-          // Εδώ θα βάλουμε μια ListView με τους παίκτες του πάγκου!
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text("Ακύρωση"),
-            ),
-          ],
-        );
-      },
-    );
-  }
-}
-
-/*
-class Starting11Display extends StatefulWidget {
-  final MatchDetails match;
-
-  Starting11Display({super.key, required this.match});
-
-  @override
-  _Starting11DisplayState createState() => _Starting11DisplayState();
-}
-
-class _Starting11DisplayState extends State<Starting11Display> {
-  // Διαθέσιμα Συστήματα Παιχνιδιού
-  final Map<String, List<int>> formations = {
-    "4-3-3": [1, 4, 3, 3],
-    "4-4-2": [1, 4, 4, 2],
-    "3-5-2": [1, 3, 5, 2],
-    "5-3-2": [1, 5, 3, 2]
-  };
-
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        // Dropdown για την επιλογή συστήματος
-        (globalUser.controlTheseTeams(widget.match.homeTeam.name, widget.match.awayTeam.name) ?? false )?DropdownButton<String>(
-          value: widget.match.selectedFormationHome,
-          items: formations.keys.map((String formation) {
-            return DropdownMenuItem<String>(
-              value: formation,
-              child: Text(formation),
-            );
-          }).toList(),
-          onChanged: (String? newFormation) {
-            if (newFormation != null) {
-              setState(() {
-                widget.match.selectedFormationHome = newFormation;
-                updateFormation(newFormation , true); // Ενημέρωση του γηπέδου
-              });
-            }
-          },
-        ) : SizedBox.shrink(),
-        Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0),
-            child: Container(
-              color: Colors.grey,
-              height: 735, // Προσαρμόσιμο ύψος ανάλογα με το γήπεδο
-              child: Stack(
-                children: [
-                  Positioned.fill(
-                    //child: Image.asset("fotos/γηπεδο.png", fit: BoxFit.cover),
-                  ),
-                  Column(
-                   // crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      buildFormation(true), // Δημιουργεί τη διάταξη των παικτών
-                      buildFormation(false),
-                    ],
-                  )
-                ],
-              ),
-            ),
-          ),
-        (globalUser.controlTheseTeams(widget.match.homeTeam.name, widget.match.awayTeam.name))?DropdownButton<String>(
-          value: widget.match.selectedFormationAway,
-          items: formations.keys.map((String formation) {
-            return DropdownMenuItem<String>(
-              value: formation,
-              child: Text(formation),
-            );
-          }).toList(),
-          onChanged: (String? newFormation) {
-            if (newFormation != null) {
-              setState(() {
-                widget.match.selectedFormationAway = newFormation;
-                updateFormation(newFormation,false); // Ενημέρωση του γηπέδου
-              });
-            }
-          },
-        ) : SizedBox.shrink(),
-        SizedBox(height: 10,)
-
-      ],
-    );
-  }
-
-  // Ενημέρωση της λίστας των παικτών σύμφωνα με το νέο σύστημα
-  void updateFormation(String formation,bool isHomeTeam) {
-    List<int> positions = formations[formation]!;
-    List<Player?> newPlayers = List.generate(11, (index) => null);
-
-    int count = 0;
-    int lim =(isHomeTeam) ? widget.match.players11[0].length: widget.match.players11[1].length;
-
-    for (int i = 0; i < positions.length; i++) {
-      for (int j = 0; j < positions[i]; j++) {
-        if (count < lim ) {
-         // newPlayers[count] = widget.match.players11[0][count];
-          newPlayers[count]=null;
-
-          count++;
-        }
-      }
-    }
-    (isHomeTeam) ? widget.match.makeAllFalse(0) : widget.match.makeAllFalse(1);
-
-
-    setState(() {
-      if (isHomeTeam) {
-        widget.match.players11[0] = newPlayers;
-      }
-      else {
-        widget.match.players11[1] = newPlayers;
-      }
-    });
-  }
-
-  // Κατασκευή των σειρών των παικτών στο γήπεδο
-  Widget buildFormation(bool isHomeTeam) {
-    List<int> formation = (isHomeTeam) ? formations[widget.match.selectedFormationHome]! : formations[widget.match.selectedFormationAway]!;
-    List<Widget> rows = [];
-
-
-    int index = (isHomeTeam) ? 0 : 11; // Ξεκινά από 0
-    for (int numPlayers in (isHomeTeam) ? formation : formation.reversed) {
-      rows.add(
-        Column(
-          children: [
-            SizedBox(height: 5,),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              textDirection: (isHomeTeam) ? TextDirection.ltr : TextDirection.rtl,
-              children: List.generate(numPlayers, (i) {
-                // Αποθηκεύουμε την τρέχουσα τιμή πριν την αυξήσουμε
-                (isHomeTeam) ? index++ : index--; // Αυξάνουμε το index κατά 1 ή τομειωνουμε
-                return PlayerWidget(
-                  players: (isHomeTeam) ? widget.match.playersSelectedHome : widget.match.playersSelectedAway,
-                  playersList: (isHomeTeam) ? widget.match.players11Home : widget.match.players11Away,
-                  ind: (isHomeTeam) ? index-1: index, // Χρησιμοποιούμε το σωστό index
-                  profColor: (isHomeTeam)? Colors.black : Colors.blueGrey, match: widget.match,
-                );
-              }),
-            ),
-            SizedBox(height: 18),
-          ],
         ),
       );
     }
 
+    List<Player> teamRoster = showHomeTeam ? widget.match.homeTeam.players : widget.match.awayTeam.players;
+    List<String> squadKeys = showHomeTeam ? widget.match.homeSquad : widget.match.awaySquad;
+    List<String> starterKeys = showHomeTeam ? widget.match.homeStarters : widget.match.awayStarters;
+
+    List<Player> starters = teamRoster.where((p) => starterKeys.contains("${p.name}${p.number}")).toList();
+    starters.sort((a, b) => widget.match.getDisplayNumber(a).compareTo(widget.match.getDisplayNumber(b)));
+
+    List<Player> bench = teamRoster.where((p) {
+      String key = "${p.name}${p.number}";
+      return squadKeys.contains(key) && !starterKeys.contains(key);
+    }).toList();
+    bench.sort((a, b) => widget.match.getDisplayNumber(a).compareTo(widget.match.getDisplayNumber(b)));
+
     return Column(
-      mainAxisAlignment: MainAxisAlignment.start,
-      children: rows,
-    );
-  }
-}
-
-
-class PlayerWidget extends StatefulWidget {
-  final Map<Player?, bool> players;
-  final List<Player?> playersList;
-  final  int ind;
-  final Color profColor;
-  final MatchDetails match;
-  const PlayerWidget({super.key, required this.players,required this.playersList,required this.ind,required this.profColor, required this.match});
-
-  @override
-  State<PlayerWidget> createState() => _PlayerWidgetState();
-}
-
-class _PlayerWidgetState extends State<PlayerWidget> {
-
-  void tapped() {
-    // Εμφάνιση διαλόγου ή bottom sheet με διαθέσιμους παίκτες
-    if (globalUser.controlTheseTeams(widget.match.homeTeam.name, widget.match.awayTeam.name) &&
-        (DateTime.now().millisecondsSinceEpoch ~/ 1000) > widget.match.startTimeInSeconds + 3600)
-    // Έχει περάσει μία ώρα από την έναρξη
-     {
-      showAvailablePlayers();
-    }
-  }
-
-  void showAvailablePlayers() {
-    // Φιλτράρουμε τους διαθέσιμους παίκτες
-    List<Player?> availablePlayers = widget.players.entries
-        .where((entry) => !entry.value) // Ελέγχουμε την boolean τιμή
-        .map((entry) => entry.key) // Παίρνουμε μόνο τα ονόματα
-        .toList();
-
-    if (availablePlayers.isEmpty) {
-      // Αν δεν υπάρχουν διαθέσιμοι παίκτες
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: Text("Διαθέσιμοι Παίκτες"),
-          content: Text("Δεν υπάρχουν διαθέσιμοι παίκτες."),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text("Κλείσιμο"),
-            ),
-          ],
-        ),
-      );
-      return;
-    }
-
-    // Εμφάνιση bottom sheet με διαθέσιμους παίκτες
-    showModalBottomSheet(
-      context: context,
-      builder: (context) {
-        return Container(
-          height: 400, // Ύψος του bottom sheet
-          child: ListView.builder(
-            itemCount: availablePlayers.length,
-            itemBuilder: (context, index) {
-              return ListTile(
-                title: Text(
-                    "${availablePlayers[index]?.name} ${availablePlayers[index]?.surname}"),
-                onTap: () {
-                  // Εδώ μπορείς να προσθέσεις τη λογική επιλογής παίκτη
-                  setPlayer(availablePlayers[index]!);
-                  widget.players[availablePlayers[index]] = true;
-                  Navigator.of(context).pop(); // Κλείνει το bottom sheet
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // 🌟 1. ΚΟΥΜΠΙ ΕΠΕΞΕΡΓΑΣΙΑΣ (Μόνο αν ελέγχει την τρέχουσα ομάδα)
+        if (canEditCurrentTeam)
+          Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: SizedBox(
+              width: double.infinity,
+              height: 50,
+              child: ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: darkModeNotifier.value ? Colors.blue[700] : Colors.blue,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                ),
+                icon: const Icon(Icons.edit, color: Colors.white),
+                label: Text(greek ? "Επεξεργασία Αποστολής" : "Edit Squad", style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+                onPressed: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => LiveLineupScreen(
+                            match: widget.match,
+                            initialIsHomeTeam: showHomeTeam, // Περνάει τη σωστή ομάδα!
+                          )
+                      )
+                  ).then((_) => setState(() {}));
                 },
-              );
-            },
+              ),
+            ),
           ),
-        );
-      },
+
+        // 🌟 2. ΕΠΙΛΟΓΗ ΟΜΑΔΑΣ (Κουμπιά ή Στατικός Τίτλος)
+        _buildTeamSelector(canEditHome, canEditAway, isSpectator),
+
+        // 3. ΛΙΣΤΕΣ ΠΑΙΚΤΩΝ & STAFF
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildSectionHeader(greek ? "ΒΑΣΙΚΟΙ (${starters.length})" : "STARTERS (${starters.length})", Colors.green),
+            _buildPlayerList(starters, Colors.green),
+            const SizedBox(height: 10),
+            _buildSectionHeader(greek ? "ΠΑΓΚΟΣ (${bench.length})" : "BENCH (${bench.length})", Colors.blue),
+            _buildPlayerList(bench, Colors.blue),
+
+            const SizedBox(height: 10),
+
+            _buildStaffSection(),
+
+            const SizedBox(height: 30),
+          ],
+        ),
+      ],
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    // Έλεγχος αν το index είναι εντός ορίων
-    if (widget.ind < 0 || widget.ind >= widget.playersList.length) {
-      return SizedBox.shrink(); // Επιστρέφει κενό widget αν το index είναι εκτός ορίων
+  // 🌟 ΝΕΑ ΣΥΝΑΡΤΗΣΗ: Αποφασίζει τι θα δείξει στην επιλογή ομάδας
+  Widget _buildTeamSelector(bool canEditHome, bool canEditAway, bool isSpectator) {
+    // Αν είναι Admin ή Φίλαθλος, βλέπει και τα δύο κουμπιά κανονικά
+    if ((canEditHome && canEditAway) || isSpectator) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12.0),
+        child: Row(
+          children: [
+            Expanded(child: _teamBtn(widget.match.homeTeam.name, true, Colors.blue[800]!)),
+            const SizedBox(width: 8),
+            Expanded(child: _teamBtn(widget.match.awayTeam.name, false, Colors.red[800]!)),
+          ],
+        ),
+      );
     }
 
-    Player? currentPlayer = widget.playersList[widget.ind]; // Παίκτης για το τρέχον index
+    // Αν είναι Αρχηγός και ελέγχει ΜΟΝΟ ΤΗ ΜΙΑ ομάδα, του δείχνουμε απλά το όνομά της (δεν επιλέγει)
+    String teamName = showHomeTeam ? widget.match.homeTeam.name : widget.match.awayTeam.name;
+    Color teamColor = showHomeTeam ? Colors.blue[800]! : Colors.red[800]!;
 
-    return InkWell(
-      onTap: () {
-        if (globalUser.isAdmin) {
-          if (currentPlayer == null) {
-            tapped(); // Εμφάνιση διαθέσιμων παικτών αν δεν υπάρχει επιλεγμένος
-          } else {
-            // Αφαιρούμε τον παίκτη από τους επιλεγμένους
-            setPlayer(null);
-            widget.players[currentPlayer] = false;
-            tapped(); // Καλούμε τη μέθοδο tapped
-          }
-        }
-      },
-      child: SizedBox(
-        height: 68,
-        child: Column(
-          children: [
-            Container(
-              width:  70, // Ορίζει το πλάτος του κύκλου
-              height: 40, // Ορίζει το ύψος του κύκλου
-              decoration: BoxDecoration(
-                color: Colors.white70, // Χρώμα του κύκλου
-                shape: BoxShape.circle, // Ορίζει το σχήμα ως κύκλο
-              ),
-              child: Icon(Icons.person, size: 40, color: (currentPlayer != null) ? widget.profColor : Colors.blue),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12.0),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 14),
+        decoration: BoxDecoration(
+          color: teamColor.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: teamColor.withOpacity(0.5), width: 2),
+        ),
+        child: Center(
+          child: Text(
+            "Ρόστερ: $teamName",
+            style: TextStyle(
+                color: darkModeNotifier.value ? Colors.white : teamColor,
+                fontWeight: FontWeight.bold,
+                fontSize: 16
             ),
-            if (currentPlayer != null) // Εμφανίζει τον παίκτη μόνο αν υπάρχει
-              Column(
-                children: [
-                  (currentPlayer.surname.length<5)?Text(
-                    "${currentPlayer.number} ${currentPlayer.name.substring(0, 1)}. ${currentPlayer.surname}",
-                    style: TextStyle(
-                      color: Colors.white70,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 10,
-                    ),
-                  ):Text(
-                    "${currentPlayer.number} ${currentPlayer.name.substring(0, 1)}.",
-                    style: TextStyle(
-                      color: Colors.white70,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 10,
-                    ),
-                  ),
-                  if (currentPlayer.surname.length>=5)Text(
-                    currentPlayer.surname,
-                    style: TextStyle(
-                      color: Colors.white70,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 10,
-                    ),
-                  )
-                ],
-              ),
-          ],
+          ),
         ),
       ),
     );
   }
 
+  Widget _teamBtn(String name, bool isHome, Color color) {
+    bool active = showHomeTeam == isHome;
+    return ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: active ? color : Colors.grey[300],
+        foregroundColor: active ? Colors.white : Colors.black54,
+      ),
+      onPressed: () => setState(() => showHomeTeam = isHome),
+      child: Text(name, overflow: TextOverflow.ellipsis),
+    );
+  }
 
-  void setPlayer(Player? player) {
+  Widget _buildSectionHeader(String title, Color color) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 16.0, top: 10, bottom: 5),
+      child: Row(
+        children: [
+          Icon(Icons.sports_soccer, color: color, size: 18),
+          const SizedBox(width: 8),
+          Text(title, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: darkModeNotifier.value ? Colors.white70 : Colors.black54)),
+        ],
+      ),
+    );
+  }
 
-    for (Player? player in widget.playersList){
-      print("${player?.surname} ${player?.name}");
+  Widget _buildPlayerList(List<Player> players, Color highlightColor) {
+    if (players.isEmpty) return Padding(padding: const EdgeInsets.all(16.0), child: Text(greek ? "Δεν έχουν δηλωθεί παίκτες" : "No players declared"));
+
+    String? currentCaptainKey = showHomeTeam ? widget.match.homeCaptain : widget.match.awayCaptain;
+
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: players.length,
+      itemBuilder: (context, index) {
+        final player = players[index];
+        String playerKey = "${player.name}${player.number}";
+        bool isSubbedOut = (showHomeTeam ? widget.match.homeSubsOut : widget.match.awaySubsOut).contains(playerKey);
+        bool isSubbedIn = (showHomeTeam ? widget.match.homeSubsIn : widget.match.awaySubsIn).contains(playerKey);
+        bool isCaptain = (currentCaptainKey == playerKey);
+
+        return Card(
+          margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
+          color: darkModeNotifier.value ? Colors.grey[850] : Colors.white,
+          shape: RoundedRectangleBorder(side: BorderSide(color: highlightColor.withOpacity(0.5), width: 1), borderRadius: BorderRadius.circular(8)),
+          child: ListTile(
+            dense: true,
+            leading: CircleAvatar(
+              backgroundColor: highlightColor.withOpacity(0.2), radius: 16,
+              child: Text(widget.match.getDisplayNumber(player).toString(), style: TextStyle(color: highlightColor, fontWeight: FontWeight.bold, fontSize: 12)),
+            ),
+            title: Row(
+              children: [
+                Expanded(
+                  child: RichText(
+                    overflow: TextOverflow.ellipsis,
+                    text: TextSpan(
+                      children: [
+                        TextSpan(text: "${player.surname} ${player.name}", style: TextStyle(color: isSubbedOut ? Colors.grey : (darkModeNotifier.value ? Colors.white : Colors.black), fontSize: 14)),
+                        if (isCaptain) TextSpan(text: " (C)", style: TextStyle(color: Colors.blue[600], fontWeight: FontWeight.bold, fontStyle: FontStyle.italic, fontSize: 13)),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                if (!widget.match.hasMatchStarted)
+                  _buildHealthCardStatus(player.cardExpiryDate),
+              ],
+            ),
+            trailing: isSubbedOut ? Icon(Icons.output, color: Colors.red[300], size: 20) : isSubbedIn ? Icon(Icons.input, color: Colors.green[300], size: 20) : null,
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildHealthCardStatus(DateTime? issueDate) {
+    if (issueDate == null) return const Tooltip(message: "Χωρίς Κάρτα Υγείας", triggerMode: TooltipTriggerMode.tap, showDuration: Duration(seconds: 3), child: Icon(Icons.warning_amber_rounded, color: Colors.orange, size: 20));
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final expiration = DateTime(issueDate.year + 1, issueDate.month, issueDate.day);
+    final daysLeft = expiration.difference(today).inDays;
+    if (daysLeft < 0) return const Tooltip(message: "Ληγμένη Κάρτα Υγείας!", triggerMode: TooltipTriggerMode.tap, showDuration: Duration(seconds: 3), child: Icon(Icons.warning_amber_rounded, color: Colors.orange, size: 20));
+    else return SizedBox.fromSize();
+  }
+
+  Widget _buildStaffSection() {
+    String? coach = showHomeTeam ? widget.match.homeCoach : widget.match.awayCoach;
+    String? assistant = showHomeTeam ? widget.match.homeAssistant : widget.match.awayAssistant;
+    String? kitman = showHomeTeam ? widget.match.homeKitman : widget.match.awayKitman;
+
+    if ((coach == null || coach.isEmpty) &&
+        (assistant == null || assistant.isEmpty) &&
+        (kitman == null || kitman.isEmpty)) {
+      return const SizedBox.shrink();
     }
-    setState(() {
-      widget.playersList[widget.ind] = player;
-    });
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionHeader(greek ? "ΤΕΧΝΙΚΟ ΕΠΙΤΕΛΕΙΟ" : "TECHNICAL STAFF", Colors.orange),
+        Card(
+          margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+          color: darkModeNotifier.value ? Colors.grey[850] : Colors.white,
+          shape: RoundedRectangleBorder(
+            side: BorderSide(color: Colors.orange.withOpacity(0.5), width: 1),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Column(
+              children: [
+                if (coach != null && coach.isNotEmpty)
+                  _staffRow(Icons.person, greek ? "Προπονητής:" : "Coach:", coach),
+
+                if (assistant != null && assistant.isNotEmpty) ...[
+                  if (coach != null && coach.isNotEmpty) const Divider(height: 12, thickness: 0.5),
+                  _staffRow(Icons.group, greek ? "Βοηθός:" : "Assistant:", assistant),
+                ],
+
+                if (kitman != null && kitman.isNotEmpty) ...[
+                  if ((coach != null && coach.isNotEmpty) || (assistant != null && assistant.isNotEmpty))
+                    const Divider(height: 12, thickness: 0.5),
+                  _staffRow(Icons.medical_services, greek ? "Ιατρ. / Φροντ.:" : "Medical / Kitman:", kitman),
+                ],
+              ],
+            ),
+          ),
+        )
+      ],
+    );
+  }
+
+  Widget _staffRow(IconData icon, String role, String name) {
+    return Row(
+      children: [
+        Icon(icon, size: 20, color: Colors.grey),
+        const SizedBox(width: 10),
+        Text(role, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.grey, fontSize: 13)),
+        const SizedBox(width: 8),
+        Expanded(
+            child: Text(
+              name,
+              style: TextStyle(
+                  color: darkModeNotifier.value ? Colors.white : Colors.black,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14
+              ),
+              overflow: TextOverflow.ellipsis,
+            )
+        ),
+      ],
+    );
   }
 }
-
- */

@@ -2,16 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:collection/collection.dart';
 
 import '../Data_Classes/Player.dart';
-import '../Data_Classes/Team.dart'; // Για το PriorityQueue
+import '../Data_Classes/Team.dart';
 
 class TopPlayersHandle extends ChangeNotifier {
   static List<Team> _teamsList = [];
   static List<Player> _topPlayers = [];
 
-  // **Κανονικός Κατασκευαστής**
   TopPlayersHandle();
 
-  // Getter για τη λίστα των top παικτών (για ασφάλεια, δεν εκθέτουμε την ίδια τη λίστα)
+  // Getter για τη λίστα των top παικτών
   List<Player> get topPlayers => _topPlayers;
 
   // **Αρχικοποίηση της λίστας των ομάδων**
@@ -20,14 +19,14 @@ class TopPlayersHandle extends ChangeNotifier {
     sortTopPlayers();
   }
 
-  void playerScored(Player player){
+  Future<void> playerScored(Player player) async {
 
-    player.scoredGoal();
+    await player.scoredGoal();
     sortTopPlayers();
   }
 
-  void goalCancelled(Player player){
-    player.goalCancelled();
+  Future<void> goalCancelled(Player player) async {
+    await player.goalCancelled();
     sortTopPlayers();
   }
 
@@ -53,6 +52,6 @@ class TopPlayersHandle extends ChangeNotifier {
     // for (Player player in _topPlayers){
     //   print(player.surname+player.goals.toString());
     // }
-    notifyListeners(); // ✅ Ενημερώνουμε τους listeners για να ανανεωθεί το UI
+    notifyListeners(); //  Ενημερώνουμε τους listeners για να ανανεωθεί το UI
   }
 }

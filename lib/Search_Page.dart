@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:untitled1/API/Match_Handle.dart';
 import 'Data_Classes/MatchDetails.dart';
 import 'Data_Classes/Player.dart';
@@ -148,13 +147,6 @@ class _searchDetailsState extends State<searchDetails> {
   List<int> seasons = [2026, 2025];
   int selectedSeason = 2026;
 
-  BannerAd? _bannerTeam;
-  BannerAd? _bannerMatch;
-  BannerAd? _bannerHistory;
-
-  bool _isTeamAdReady = false;
-  bool _isMatchAdReady = false;
-  bool _isHistoryAdReady = false;
 
   @override
   void initState() {
@@ -171,16 +163,9 @@ class _searchDetailsState extends State<searchDetails> {
     cachedMatches[thisYearNow] = MatchHandle().getAllMatches();
 
 
-
   }
   @override
-  void dispose() {
-    _debounce?.cancel();
-    _bannerTeam?.dispose();
-    _bannerMatch?.dispose();
-    _bannerHistory?.dispose();
-    super.dispose();
-  }
+
 
   @override
   void didUpdateWidget(covariant searchDetails oldWidget) {
@@ -298,20 +283,6 @@ class _searchDetailsState extends State<searchDetails> {
     );
   }
 
-
-
-
-
-
-  Widget _buildBanner(BannerAd? banner, bool isReady) {
-    if (!isReady || banner == null) return SizedBox();
-    return SizedBox(
-      width: banner.size.width.toDouble(),
-      height: banner.size.height.toDouble(),
-      child: AdWidget(ad: banner),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     if (widget.selectedIndex == 0) {
@@ -342,7 +313,6 @@ class _searchDetailsState extends State<searchDetails> {
             );
           },
         ),
-        bottomNavigationBar: _buildBanner(_bannerTeam, _isTeamAdReady),
       );
     } else if (widget.selectedIndex == 1) {
       // Αγώνες
@@ -367,7 +337,6 @@ class _searchDetailsState extends State<searchDetails> {
             );
           },
         ),
-        bottomNavigationBar: _buildBanner(_bannerMatch, _isMatchAdReady),
       );
     } else {
       // Ιστορικό
@@ -400,7 +369,6 @@ class _searchDetailsState extends State<searchDetails> {
             ),
           ],
         ),
-        bottomNavigationBar: _buildBanner(_bannerHistory, _isHistoryAdReady),
       );
     }
   }

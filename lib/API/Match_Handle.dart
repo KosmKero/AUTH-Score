@@ -4,6 +4,7 @@ import 'package:untitled1/globals.dart';
 
 import '../Data_Classes/MatchDetails.dart';
 import '../Data_Classes/Penaltys.dart';
+import '../Data_Classes/Player.dart';
 import '../Data_Classes/Team.dart';
 
 class MatchHandle {
@@ -25,11 +26,45 @@ class MatchHandle {
     matchesList[0].remove(match);
     matchesList[1].add(match);
 
+
+
     await FirebaseFirestore.instance
         .collection("year").doc(thisYearNow.toString()).collection('matches')
         .doc(match.matchDocId)
         .set({'Type': 'previous'},
         SetOptions(merge: true)); // ώστε να μη διαγράψει άλλα πεδία
+
+
+
+    //Αυξηση συμμετοχων
+    // Όσοι έπαιξαν = Αυτοί που είναι τώρα μέσα (Starters) + Αυτοί που ξεκίνησαν ή μπήκαν, αλλά βγήκαν (SubsOut).
+    Set<String> homePlayedKeys = {...match.homeStarters, ...match.homeSubsOut};
+    Set<String> awayPlayedKeys = {...match.awayStarters, ...match.awaySubsOut};
+
+    List<Future> updateTasks = []; // Λίστα για να κάνουμε τα updates ταυτόχρονα και γρήγορα
+
+    // 2. Ενημερώνουμε τους Γηπεδούχους
+    for (String key in homePlayedKeys) {
+      try {
+        Player p = match.homeTeam.players.firstWhere((player) => player.uniqueKey == key);
+        updateTasks.add(p.playerPlayed());
+      } catch (e) {
+        print("Δεν βρέθηκε ο παίκτης $key");
+      }
+    }
+
+    // 3. Ενημερώνουμε τους Φιλοξενούμενους
+    for (String key in awayPlayedKeys) {
+      try {
+        Player p = match.awayTeam.players.firstWhere((player) => player.uniqueKey == key);
+        updateTasks.add(p.playerPlayed());
+      } catch (e) {
+        print("Δεν βρέθηκε ο παίκτης $key");
+      }
+    }
+
+    await Future.wait(updateTasks);
+
 
   }
   Future<void> matchNotFinished(MatchDetails match) async {
@@ -43,6 +78,35 @@ class MatchHandle {
           .set({ 'Type': "upcoming"},
               SetOptions(merge: true)); // ώστε να μη διαγράψει άλλα πεδία
     }
+
+    Set<String> homePlayedKeys = {...match.homeStarters, ...match.homeSubsOut};
+    Set<String> awayPlayedKeys = {...match.awayStarters, ...match.awaySubsOut};
+
+    List<Future> updateTasks = []; // Λίστα για ταυτόχρονα updates
+
+    // 2. Αφαιρούμε από τους Γηπεδούχους
+    for (String key in homePlayedKeys) {
+      try {
+        Player p = match.homeTeam.players.firstWhere((player) => player.uniqueKey == key);
+        updateTasks.add(p.cancelPlayerPlayed());
+      } catch (e) {
+        print("Δεν βρέθηκε ο παίκτης $key για αφαίρεση συμμετοχής");
+      }
+    }
+
+    // 3. Αφαιρούμε από τους Φιλοξενούμενους
+    for (String key in awayPlayedKeys) {
+      try {
+        Player p = match.awayTeam.players.firstWhere((player) => player.uniqueKey == key);
+        updateTasks.add(p.cancelPlayerPlayed());
+      } catch (e) {
+        print("Δεν βρέθηκε ο παίκτης $key για αφαίρεση συμμετοχής");
+      }
+    }
+
+    // Εκτελούμε όλες τις αφαιρέσεις ταυτόχρονα
+    await Future.wait(updateTasks);
+
   }
 
   // Μέθοδοι για πρόσβαση στα δεδομένα
@@ -123,7 +187,26 @@ class MatchHandle {
             penalties: (data['penalties'] as List<dynamic>? ?? [])
                 .map((p) => PenaltyShoot.fromMap(Map<String, dynamic>.from(p)))
                 .toList(),
-            slot: data["slot"] ?? 0
+            slot: data["slot"] ?? 0,
+          homeSquad: List<String>.from(data['homeSquad'] ?? []),
+          homeStarters: List<String>.from(data['homeStarters'] ?? []),
+          awaySquad: List<String>.from(data['awaySquad'] ?? []),
+          awayStarters: List<String>.from(data['awayStarters'] ?? []),
+          homeSubsIn: List<String>.from(data['homeSubsIn'] ?? []),
+          awaySubsIn: List<String>.from(data['awaySubsIn'] ?? []),
+          homeSubsOut: List<String>.from(data['homeSubsOut'] ?? []),
+          awaySubsOut: List<String>.from(data['awaySubsOut'] ?? []),
+          temporaryNumbers: Map<String, int>.from(data['temporaryNumbers'] ?? {}),
+
+          homeCaptain: data['homeCaptain'],
+          awayCaptain: data['awayCaptain'],
+          homeCoach: data['homeCoach'],
+          awayCoach: data['awayCoach'],
+          homeAssistant: data['homeAssistant'],
+          awayAssistant: data['awayAssistant'],
+          homeKitman: data['homeKitman'],
+          awayKitman: data['awayKitman'],
+
 
         );
 
@@ -229,6 +312,7 @@ class MatchHandle {
           updates["Players.$playerKey.Goals"] = 0;
           updates["Players.$playerKey.numOfRedCards"] = 0;
           updates["Players.$playerKey.numOfYellowCards"] = 0;
+          updates["Players.$playerKey.Appearances"] = 0;
         });
 
         batch.update(doc.reference, updates);

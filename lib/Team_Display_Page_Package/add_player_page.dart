@@ -3,6 +3,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:uuid/uuid.dart';
 
 import '../Data_Classes/Player.dart';
 import '../Data_Classes/Team.dart';
@@ -58,7 +59,7 @@ class _AddPlayerScreenState extends State<AddPlayerScreen> {
 
     int pos = (position == 'Τερματοφύλακας') ? 0 : (position == 'Αμυντικός') ? 1 : (position == 'Μέσος') ? 2 : 3;
 
-    final newPlayer = Player(name, surname, pos, 0, number, 20, widget.team.name, 0, 0,widget.team.nameEnglish);
+    final newPlayer = Player(name, surname, pos, 0, number, 20, widget.team.name, 0, 0,widget.team.nameEnglish,null,0,const Uuid().v4());
     widget.onPlayerAdded(newPlayer);  // Καλούμε το callback για την προσθήκη του παίκτη
     Navigator.pop(context, newPlayer);  // Επιστροφή στην προηγούμενη οθόνη
   }

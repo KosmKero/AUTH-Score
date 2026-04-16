@@ -1,11 +1,11 @@
+import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:untitled1/matchesContainer.dart';
 import 'package:untitled1/API/Match_Handle.dart';
-import 'package:untitled1/Match_Details_Package/add_match_page.dart';
 import 'package:untitled1/ad_manager.dart';
 import 'Firebase_Handle/firebase_screen_stats_helper.dart';
+import 'Profile/bets/choosePage.dart';
 import 'globals.dart';
 
 class HomePage extends StatefulWidget {
@@ -15,9 +15,6 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   bool upcomingMatches = true;
-
-  BannerAd? _bannerAd;
-  bool _isBannerAdReady = false;
 
   void changeMatches() {
     setState(() {
@@ -34,53 +31,24 @@ class _HomePageState extends State<HomePage> {
     return Column(
       children: [
         // === Banner Ad ===
-       // SmartBanner(
-       //   hasSponsor: FirebaseRemoteConfig.instance.getBool('has_home_sponsor'),
-       //   sponsorImageUrl: FirebaseRemoteConfig.instance.getString('home_sponsor_image_url'),
-       //   sponsorLink: FirebaseRemoteConfig.instance.getString('home_sponsor_link'),
-       // ),
-        if (_isBannerAdReady && _bannerAd != null)
-          Container(
-            color: darkModeNotifier.value ? Color(0xFF121212) : lightModeBackGround,
-            width: double.infinity.toDouble(),
-            height: _bannerAd!.size.height.toDouble(),
-            child: AdWidget(ad: _bannerAd!),
-          ),
+        SmartBanner(
+          hasSponsor: FirebaseRemoteConfig.instance.getBool('has_home_sponsor'),
+          sponsorImageUrl: FirebaseRemoteConfig.instance.getString('home_sponsor_image_url'),
+          sponsorName: "homepage_Sponsor",
+          sponsorLink: FirebaseRemoteConfig.instance.getString('home_sponsor_link'),
+          height: FirebaseRemoteConfig.instance.getDouble('home_sponsor_image_height'),
+          // Αν το to20best είναι true, δώσε τη συνάρτηση. Αλλιώς, δώσε null!
+          onCustomTap: FirebaseRemoteConfig.instance.getBool('to20best')
+              ? () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => TopUsersAndHistory()),
+            );
+          }
+              : null,
+          customBgColor: darkModeNotifier.value ? Color(0xFF121212) : lightModeBackGround,
+        ),
 
-        // === Admin Button ===
-        if (globalUser.isAdmin) Container(height: 5,color: darkModeNotifier.value ? Color(0xFF121212) : lightModeBackGround,) ,
-        if (globalUser.isAdmin)
-          Container(
-            color: darkModeNotifier.value ? Color(0xFF121212) : lightModeBackGround,
-            width: double.infinity,
-            height: 60,
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: darkModeNotifier.value
-                    ? darkModeBackGround
-                    : Color.fromARGB(250, 74, 111, 150),
-              ),
-              onPressed: () async {
-                await Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => AddMatchScreen()),
-                );
-              },
-              child: Text(
-                greek ? "Προσθήκη Αγώνα" : "Add new match",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontFamily: 'Arial',
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16.5,
-                  wordSpacing: 1,
-                  letterSpacing: 0.5,
-                ),
-              ),
-            ),
-          ),
-
-        // === Toggle Button for Matches ===
         Container(
           color: darkModeNotifier.value ? Color(0xFF121212) : lightModeBackGround,
           width: double.infinity,

@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -10,10 +11,11 @@ import 'package:flutter/services.dart';
 import 'Data_Classes/basketball/basketMatch.dart';
 import 'Data_Classes/basketball/basketTeam.dart';
 //import 'Firebase_Handle/BasketTeamsHandle.dart';
+import 'Match_Details_Package/add_match_page.dart';
+import 'Team_Display_Page_Package/addTeamScreen.dart';
 import 'firebase_options.dart';
 
 import 'package:flutter/material.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:untitled1/API/Match_Handle.dart';
 import 'package:untitled1/API/top_players_handle.dart';
 import 'package:untitled1/Data_Classes/Team.dart';
@@ -60,7 +62,9 @@ void main() async {
       options: DefaultFirebaseOptions.currentPlatform,
     );
 
-    await FirebaseAnalytics.instance.setAnalyticsCollectionEnabled(true); //an δουλεψουν ποτε τα αναλυτικς
+    //await FirebaseAnalytics.instance.setAnalyticsCollectionEnabled(true); //an δουλεψουν ποτε τα αναλυτικς
+    await FirebaseAnalytics.instance.setAnalyticsCollectionEnabled(!kDebugMode);
+
 
     // 2. Ρύθμιση Remote Config (Πριν από οτιδήποτε άλλο)
     final remoteConfig = FirebaseRemoteConfig.instance;
@@ -80,14 +84,13 @@ void main() async {
      "match_sponsor_link": "",
      "has_splash_sponsor": false,
      "splash_logo_url": "",
+     'has_top20_sponsor':false,
+     'top20_sponsor_link': '',
      "logoVersion": "1"
    });
 
     // 3. Παράλληλη αρχικοποίηση Ads και Remote Config Fetch
     await Future.wait([
-      MobileAds.instance
-          .initialize()
-          .catchError((e) => print("Ads init error: $e")),
       remoteConfig
           .fetchAndActivate()
           .catchError((e) => print("Remote Config error: $e")),
@@ -108,12 +111,6 @@ void main() async {
     print("✅ Firebase initialized successfully!");
   } catch (e) {
     print("❌ Firebase initialization failed: $e");
-  }
-
-  try {
-    await MobileAds.instance.initialize();
-  } catch (e) {
-    print("❌ Ads initialization failed: $e");
   }
 
   try {
@@ -206,13 +203,26 @@ class _LoadingScreenState extends State<LoadingScreen> {
       setState(() {
         _loadingMessage = "All set!";
       });
-      await Future.delayed(Duration(milliseconds: 200));
+      bool hasSplashSponsor = FirebaseRemoteConfig.instance.getBool('has_splash_sponsor');
+
+
+      int delayMilliseconds = hasSplashSponsor ? 1200 : 200;
+
+      await Future.delayed(Duration(milliseconds: delayMilliseconds));
 
       // Navigate to main screen once loading is complete
       if (mounted) {
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (context) => MainScreen()),
         );
+
+        if (pendingMatchId != null) {
+          // Δίνουμε μισό δευτερόλεπτο να χτιστεί η MainScreen και μετά πάμε στο ματς!
+          Future.delayed(const Duration(milliseconds: 500), () {
+            NotificationService.navigateToMatch(pendingMatchId!);
+            pendingMatchId = null; // Το καθαρίζουμε για να μην ξανανοίξει
+          });
+        }
       }
     } catch (e) {
       print("Error loading data: $e");
@@ -226,8 +236,11 @@ class _LoadingScreenState extends State<LoadingScreen> {
 
   @override
   Widget build(BuildContext context) {
+    var brightness = MediaQuery.of(context).platformBrightness;
+    bool isDarkMode = brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: lightModeBackGround,
+      backgroundColor: isDarkMode ? const Color(0xFF121212) : const Color(0xFF97B4C3),
       body: Center(
         child: _hasError ? _buildErrorWidget() : _buildLoadingWidget(),
       ),
@@ -235,29 +248,79 @@ class _LoadingScreenState extends State<LoadingScreen> {
   }
 
   Widget _buildLoadingWidget() {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
+    // Παίρνουμε το ύψος της οθόνης για να υπολογίσουμε τη θέση
+    final double screenHeight = MediaQuery.of(context).size.height;
+
+    bool hasSplashSponsor=  FirebaseRemoteConfig.instance.getBool('has_splash_sponsor');
+    String splashLogoUrl = FirebaseRemoteConfig.instance.getString('splash_logo_url');
+
+    return Stack(
+      alignment: Alignment.center, // Κεντράρει τα πάντα στο Stack
       children: [
-        Text(
-          "UniScore",
-          style: TextStyle(
-            fontSize: 30,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
+        // 1. Το "UniScore" - ΑΠΟΛΥΤΩΣ ΚΕΝΤΡΑΡΙΣΜΕΝΟ
+        const Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(height: 29,),
+              Text(
+                "UniScore",
+                style: TextStyle(
+                  fontSize: 30,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                  letterSpacing: 1.2,
+                ),
+              ),
+            ],
           ),
         ),
-        SizedBox(height: 40),
-        CircularProgressIndicator(
-          color: Colors.white,
-        ),
-        SizedBox(height: 20),
-        Text(
-          _loadingMessage,
-          style: TextStyle(
-            fontSize: 16,
-            color: Colors.white,
+
+        Positioned(
+          top: screenHeight / 2 + 50, // 50 pixels κάτω από το κέντρο της οθόνης
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // To Spinner
+              const CircularProgressIndicator(
+                color: Colors.white,
+              ),
+              const SizedBox(height: 20),
+
+              Text(
+                _loadingMessage,
+                style: const TextStyle(
+                  fontSize: 16,
+                  color: Colors.white,
+                ),
+              ),
+            ],
           ),
         ),
+        if (hasSplashSponsor && splashLogoUrl.isNotEmpty)
+          Positioned(
+            bottom: 40,
+            left: 0,
+            right: 0,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                 "Powered by",
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.white.withOpacity(0.7), // Ελαφρώς διάφανο για να μην "φωνάζει"
+                    letterSpacing: 1.0,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                SmartBanner(hasSponsor: hasSplashSponsor,
+                  height: FirebaseRemoteConfig.instance.getDouble('splash_screen_sponsor_image_height'),
+                  sponsorImageUrl: splashLogoUrl,
+                  customBgColor: (MediaQuery.of(context).platformBrightness == Brightness.dark) ? const Color(0xFF121212) : const Color(0xFF97B4C3),)
+              ],
+            ),
+          ),
       ],
     );
   }
@@ -419,7 +482,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       builder: (context, isDarkMode, _) {
         return AppBar(
           title: Row(
-            children: [
+            children: const [
               Text(
                 "UniScore",
                 style: TextStyle(
@@ -428,19 +491,22 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                   color: Colors.white,
                 ),
               ),
-
             ],
           ),
-
           backgroundColor: isDarkMode
               ? const Color(0xFF121212)
               : const Color.fromARGB(250, 46, 90, 136),
           actions: [
-
             Row(
               children: [
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 2),
+                  child: NotificationsForAllChampionship(),
+                ),
+
+                // 1. Κουμπί Αναζήτησης
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 5),
+                  padding: const EdgeInsets.symmetric(horizontal: 2),
                   child: IconButton(
                     icon: const Icon(Icons.search, color: Colors.white),
                     onPressed: () {
@@ -451,8 +517,72 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                     },
                   ),
                 ),
-                //NotificationsForAllChampionship()
 
+                // 2. Κουμπί Προσθήκης Αγώνα (Άμεση πρόσβαση για Admins)
+                if (globalUser.isAdmin || globalUser.isUpperAdmin)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 2),
+                    child: IconButton(
+                      icon: const Icon(Icons.add_circle_outline, color: Colors.white),
+                      tooltip: greek ? "Προσθήκη Αγώνα" : "Add Match",
+                      onPressed: () async {
+
+                        bool? didChange = await Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => AddMatchScreen()),
+                        );
+
+                        if (didChange == true) {
+                          await loadTeams();
+                          await loadMatches();
+                          MatchHandle().initializeMatces(matches);
+                          TopPlayersHandle().initializeList(teams);
+
+                          if (!context.mounted) return;
+                          // Ανανεώνει το UI της αρχικής σελίδας
+                          onOptionSelected(selectedOption);
+                        }
+                      },
+                    ),
+                  ),
+
+                // 3. Κουμπί Προσθήκης Ομάδας (Άμεση πρόσβαση μόνο για UpperAdmin)
+                if (globalUser.isUpperAdmin)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 2),
+                    child: IconButton(
+                      icon: const Icon(Icons.group_add, color: Colors.white),
+                      tooltip: greek ? "Προσθήκη Ομάδας" : "Add Team",
+                      onPressed: () async {
+                        bool? didChange = await Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => const AddTeamScreen()),
+                        );
+
+                        if (didChange == true) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(greek ? "Ανανέωση δεδομένων..." : "Refreshing data..."),
+                              duration: const Duration(seconds: 1),
+                              backgroundColor: Colors.blue,
+                            ),
+                          );
+
+                          await loadTeams();
+                          await loadMatches();
+                          MatchHandle().initializeMatces(matches);
+                          TopPlayersHandle().initializeList(teams);
+
+                          if (!context.mounted) return;
+
+                          onOptionSelected(selectedOption);
+                        }
+                      },
+                    ),
+                  ),
+
+                // Μικρό κενό δεξιά για να μην κολλάνε τα εικονίδια στην άκρη της οθόνης
+                const SizedBox(width: 8),
               ],
             ),
           ],
@@ -465,7 +595,6 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 }
 
-
 class NotificationsForAllChampionship extends StatefulWidget {
   const NotificationsForAllChampionship({super.key});
 
@@ -474,26 +603,68 @@ class NotificationsForAllChampionship extends StatefulWidget {
 }
 
 class _NotificationsForAllChampionshipState extends State<NotificationsForAllChampionship> {
-  bool active= false;
   @override
   Widget build(BuildContext context) {
-    return IconButton(
-      onPressed: () {
-        setState(() {
-          active = !active;
-        });
-        // εδώ μπορείς να βάλεις και FirebaseMessaging.subscribeToTopic / unsubscribe
+    return ValueListenableBuilder<bool>(
+      valueListenable: loggedInNotifications,
+      builder: (context, isLogged, child) {
+
+        // 1. Αν δεν είναι συνδεδεμένος, δείχνουμε "νεκρό" εικονίδιο αμέσως!
+        if (!isLogged) {
+          return IconButton(
+            icon: const Icon(Icons.notifications_none, color: Colors.white),
+            onPressed: () => _showLoginWarning(context),
+          );
+        }
+
+        // 2. Αν ΕΙΝΑΙ συνδεδεμένος, ακούμε τον τρέχοντα χρήστη
+        return ValueListenableBuilder<bool>(
+          valueListenable: globalUser.notifyAllMatches,
+          builder: (context, active, child) {
+            return IconButton(
+              tooltip: greek ? "Ειδοποιήσεις για όλα τα ματς" : "Notifications for all matches",
+              onPressed: () {
+
+
+                bool newValue = !active;
+
+                globalUser.setNotifyAllMatches(newValue);
+
+
+                setState(() {});
+                if (mounted) {
+                  ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    content: Text(newValue
+                        ? (greek ? "Ενεργοποιήθηκαν οι ειδοποιήσεις!" : "Enabled!")
+                        : (greek ? "Απενεργοποιήθηκαν οι ειδοποιήσεις." : "Disabled.")),
+                    duration: const Duration(milliseconds: 1300),
+                    backgroundColor: newValue ? Colors.green : Colors.grey[700],
+                  ));
+                }
+                UserHandleBase().setNotifyAllMatches(newValue);
+              },
+              icon: Icon(
+                active ? Icons.notifications_active : Icons.notifications_none,
+                color: active ? Colors.amber : Colors.white,
+              ),
+            );
+          },
+        );
       },
-      icon: Icon(
-        active
-            ? Icons.notifications_active
-            : Icons.notifications_none,
-        color: Colors.white,
-      ),
     );
   }
-}
 
+  // Βοηθητική συνάρτηση για καθαρό κώδικα
+  void _showLoginWarning(BuildContext context) {
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(greek ? "Πρέπει να συνδεθείς για να έχεις ειδοποιήσεις" : "Please log in"),
+      duration: const Duration(milliseconds: 1300),
+      backgroundColor: Colors.redAccent.withOpacity(0.9),
+    ));
+  }
+}
 
 
 
@@ -535,7 +706,6 @@ Widget _buildBody(int selectedIndex) {
       return StandingsOrKnockoutsChooserPage();
     case 2:
       return FavoritePage();
-
 
     case 3:
       return ProfilePage(user: globalUser);

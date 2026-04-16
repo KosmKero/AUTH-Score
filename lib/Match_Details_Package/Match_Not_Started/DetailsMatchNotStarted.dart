@@ -89,30 +89,48 @@ Future<List<String>> getFinalFive(String teamName) async{
   return teamsHandle.getPreviousResults(teamName);
 }
 
-//ΑΦΟΡΑ ΤΗΝ ΚΑΤΑΣΚΕΥΗ ΤΩΝ ΟΝΟΜΑΤΩΝ ΤΩΝ ΟΜΑΔΩΝ ΣΤΟ ΚΑΤΩ ΜΕΡΟΣ
-class TeamFormWidget extends StatelessWidget {
+// 🌟 2. Το TeamFormWidget έγινε StatefulWidget!
+class TeamFormWidget extends StatefulWidget {
   final Team team;
 
   const TeamFormWidget({super.key, required this.team});
+
+  @override
+  State<TeamFormWidget> createState() => _TeamFormWidgetState();
+}
+
+class _TeamFormWidgetState extends State<TeamFormWidget> {
+  late Future<List<String>> formFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    formFuture = getFinalFive(widget.team.name);
+  }
 
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
 
     return FutureBuilder<List<String>>(
-      future: getFinalFive(team.name),
+      future: formFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const CircularProgressIndicator();
+          // Μικρότερο indicator για να μην χαλάει το UI
+          return const SizedBox(height: 30, width: 30, child: CircularProgressIndicator(strokeWidth: 2));
         }
         else if (snapshot.hasError) {
           return const Text("Error loading results");
-        } else {
+        }
+        else {
           final results = snapshot.data ?? [];
-          final displayResults = results.length == 6 ? results.sublist(1) : results;
+
+          final displayResults = results.length > 5
+              ? results.sublist(results.length - 5)
+              : results;
 
           return Padding(
-            padding: EdgeInsets.only(left: 0, top: 5),
+            padding: const EdgeInsets.only(left: 0, top: 5),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -123,44 +141,39 @@ class TeamFormWidget extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => TeamDisplayPage(team)),
+                            builder: (context) => TeamDisplayPage(widget.team)),
                       );
                     },
                     child: Row(
                       children: [
-                        SizedBox(width: 10,),
+                        const SizedBox(width: 10),
                         SizedBox(
                             height: 25,
                             width: 25,
-                            child: Center(child: team.image)),
-                        SizedBox(width: 5,),
+                            child: Center(child: widget.team.image)),
+                        const SizedBox(width: 5),
                         Flexible(
-                          //width: teamNameWidth,
-                         // alignment: Alignment.centerLeft,
                           child: Text(
-                              team.name,
-                              style: TextStyle(
-                                fontSize: screenWidth * 0.036, // Responsive font size
-                                fontWeight: FontWeight.w600,
-                                color: darkModeNotifier.value?Colors.white:Colors.black,
-                                letterSpacing: 1.3,
-                              ),
-                              overflow: TextOverflow.ellipsis,
+                            widget.team.name,
+                            style: TextStyle(
+                              fontSize: screenWidth * 0.036, // Responsive font size
+                              fontWeight: FontWeight.w600,
+                              color: darkModeNotifier.value ? Colors.white : Colors.black,
+                              letterSpacing: 1.3,
                             ),
+                            overflow: TextOverflow.ellipsis,
                           ),
+                        ),
                       ],
                     ),
                   ),
                 ),
-                Container(
-                  //width: resultsWidth,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: displayResults.map((result) => Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 3),
-                      child: _buildResultIcon(result),
-                    )).toList(),
-                  ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: displayResults.map((result) => Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 3),
+                    child: _buildResultIcon(result),
+                  )).toList(),
                 ),
               ],
             ),

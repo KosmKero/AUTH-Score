@@ -6,8 +6,9 @@ import '../globals.dart';
 class PenaltyShoot {
   final bool isScored;
   final bool isHomeTeam;
+  final String? timestamp;
 
-  PenaltyShoot({required this.isScored, required this.isHomeTeam});
+  PenaltyShoot({required this.isScored, required this.isHomeTeam, required this.timestamp});
 
   Map<String, dynamic> toMap() => {
     'isScored': isScored,
@@ -18,8 +19,8 @@ class PenaltyShoot {
   factory PenaltyShoot.fromMap(Map<String, dynamic> map) => PenaltyShoot(
     isScored: map['isScored'] ?? false,
     isHomeTeam: map['isHomeTeam'] ?? true,
+    timestamp: map['timestamp'],
   );
-
 }
 
 class PenaltyShootout extends ChangeNotifier{

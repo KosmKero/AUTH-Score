@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:untitled1/Profile/admin/pinWatch.dart';
 import 'package:untitled1/Profile/admin/see_feedback.dart';
 import 'package:untitled1/Profile/admin/user_statistics.dart';
 import 'admins_handle.dart';
@@ -11,12 +12,23 @@ class RequestApprovalScreen extends StatefulWidget {
 }
 
 class _RequestApprovalScreenState extends State<RequestApprovalScreen> {
-  int selectedIndex = 0;
+  late int selectedIndex;
 
   void _changeSection(int index) {
     setState(() {
       selectedIndex = index;
     });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    if (!globalUser.isSuperUser && globalUser.isUpperAdmin) {
+      selectedIndex = 3;
+    } else {
+      selectedIndex = 0;
+    }
   }
 
   @override
@@ -39,12 +51,16 @@ class _RequestApprovalScreenState extends State<RequestApprovalScreen> {
             onSectionChange: _changeSection,
             selectedIndex: selectedIndex,
           ),
+
           selectedIndex == 0
-                ? Expanded(child: RequestHandlePage())
-                : selectedIndex == 1
-                ? AdminListWidget()
-                : selectedIndex == 2? Expanded(child: FeedbackViewPage())
-          : SchoolStatsPage(),
+              ? Expanded(child: RequestHandlePage())
+              : selectedIndex == 1
+              ? Expanded(child: AdminListWidget()) //
+              : selectedIndex == 2
+              ? Expanded(child: FeedbackViewPage())
+              : selectedIndex ==3 ?
+                Expanded(child: TeamPinsDashboard())
+              : Expanded(child: SchoolStatsPage()),
 
         ],
       ),
@@ -73,14 +89,16 @@ class _NavigationButtons extends StatelessWidget {
         scrollDirection: Axis.horizontal,
         child: Row(
           children: [
-            const SizedBox(width: 10),
+            if (globalUser.isSuperUser)
             _buildTextButton("See Requests", 0, textColor),
-            const SizedBox(width: 10),
+            if (globalUser.isSuperUser)
             _buildTextButton("See Admins", 1, textColor),
-            const SizedBox(width: 10),
+            if (globalUser.isSuperUser)
             _buildTextButton("See Feedback", 2, textColor),
-            const SizedBox(width: 10),
-            _buildTextButton("User Stats", 3, textColor),
+            if (globalUser.isUpperAdmin)
+            _buildTextButton("Pins Page", 3, textColor),
+            if (globalUser.isSuperUser)
+            _buildTextButton("User Stats", 4, textColor),
             const SizedBox(width: 10),
           ],
         ),
@@ -96,24 +114,29 @@ class _NavigationButtons extends StatelessWidget {
       onTap: () {
         onSectionChange(index);
       },
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
+      child: Row(
         children: [
-          Text(
-            text,
-            style: TextStyle(
-              fontSize: 17,
-              color: isSelected ? Colors.blue : textColor,
-              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-            ),
+          SizedBox(width: 10),
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                text,
+                style: TextStyle(
+                  fontSize: 17,
+                  color: isSelected ? Colors.blue : textColor,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                ),
+              ),
+              SizedBox(height: 3),
+              if (isSelected)
+                Container(
+                  width: 60,
+                  height: 3,
+                  color: Colors.blue,
+                ),
+            ],
           ),
-          SizedBox(height: 3),
-          if (isSelected)
-            Container(
-              width: 60,
-              height: 3,
-              color: Colors.blue,
-            ),
         ],
       ),
     );

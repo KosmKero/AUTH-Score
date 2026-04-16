@@ -17,6 +17,7 @@ android {
     namespace = "com.authteam.authscore"
     compileSdk = 36 // Changed from 35 to match targetSdk
 
+    ndkVersion = "28.2.13676358"
     lint {
         baseline = file("lint-baseline.xml")
     }
@@ -41,10 +42,10 @@ android {
         minSdkVersion flutter.minSdkVersion
         //noinspection OldTargetApi,EditedTargetSdkVersion
         targetSdkVersion 35
-        versionCode 1
-        versionName "1.0"
+
         versionCode  flutter.versionCode?.toInteger() ?: 2
         versionName  flutter.versionName ?: "1.0.1"
+
         multiDexEnabled true
     }
 
@@ -80,7 +81,6 @@ dependencies {
 
     implementation 'com.google.firebase:firebase-auth'
     implementation 'com.google.firebase:firebase-analytics'
-    implementation 'com.google.android.gms:play-services-ads:24.2.0'
 
     implementation 'androidx.multidex:multidex:2.0.1'
     coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.5'

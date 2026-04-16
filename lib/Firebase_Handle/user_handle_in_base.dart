@@ -13,7 +13,8 @@ class UserHandleBase {
 
   //Επιστρέφει true αν συνδεθει και false αν το username υπάρχει ήδη ή συναντήσει πρόβλημα
   Future<bool> signUpWithEmail(String email, String username, String password,
-      String uni, BuildContext context) async {
+      String uni, BuildContext context) async
+  {
     if (!isValidEmail(email)) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -54,7 +55,9 @@ class UserHandleBase {
             'moderator': false
           });
 
-          globalUser = AppUser(username, uni, [], [], "user", {}, "", false);
+
+
+          globalUser = AppUser(username, uni, [], [], [], "user", {}, "", false, false, false);
           globalUser.loggedIn();
 
           //await user?.sendEmailVerification();
@@ -188,6 +191,11 @@ class UserHandleBase {
 
         final data = userDoc.data() as Map<String, dynamic>;
 
+        bool isSuper = false;
+        if (data['superuser'] == "super123userRR") {
+          isSuper = true;
+        }
+
         globalUser = AppUser(
           data["username"].toString(),
           data["University"].toString(),
@@ -197,10 +205,16 @@ class UserHandleBase {
           (data['Controlled Teams'] as List<dynamic>)
               .map((e) => e.toString())
               .toList(),
+            (data['Main Teams'] as List<dynamic>? ?? [])
+                .map((e) => e.toString())
+                .toList(),
           data['role'],
           matchKeys,
           data['email'],
-          (data['moderator'] as bool?) ?? false, // ✅ SAFE
+          (data['moderator'] as bool?) ?? false,
+            isSuper,
+            (data['notifyAllMatches'] as bool?) ?? false
+
         );
 
         globalUser.loggedIn();
@@ -222,6 +236,54 @@ class UserHandleBase {
       return false;
     }
   }
+
+
+  Future<void> refreshGlobalUserData() async {
+    User? currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser == null) return;
+
+    try {
+      DocumentSnapshot userDoc = await FirebaseFirestore.instance
+          .collection("users")
+          .doc(currentUser.uid)
+          .get();
+
+      if (userDoc.exists && userDoc.data() != null) {
+        final data = userDoc.data() as Map<String, dynamic>;
+
+        Map<String, bool> matchKeys = {};
+        try {
+          final raw = data['matchKeys'];
+          if (raw is Map) {
+            matchKeys = Map<String, bool>.from(raw);
+          }
+        } catch (e) {}
+
+        bool isSuper = false;
+        if (data['superuser'] == "super123userRR") {
+          isSuper = true;
+        }
+
+        // Ενημερώνουμε την καθολική μεταβλητή με τα ΝΕΑ δεδομένα
+        globalUser = AppUser(
+            data["username"].toString(),
+            data["University"].toString(),
+            (data['Favourite Teams'] as List<dynamic>).map((e) => e.toString()).toList(),
+            (data['Controlled Teams'] as List<dynamic>).map((e) => e.toString()).toList(),
+            (data['Main Teams'] as List<dynamic>? ?? []).map((e) => e.toString()).toList(),
+            data['role'],
+            matchKeys,
+            data['email'],
+            (data['moderator'] as bool?) ?? false,
+            isSuper,
+            (data['notifyAllMatches'] as bool?) ?? false
+        );
+      }
+    } catch (e) {
+      print("Σφάλμα κατά την ανανέωση του globalUser: $e");
+    }
+  }
+
 
   Future<void> resetPassword(BuildContext context, String email) async {
     try {
@@ -381,23 +443,34 @@ class UserHandleBase {
 
       final data = userDoc.data() as Map<String, dynamic>;
 
+      bool isSuper = false;
+      if (data['superuser'] == "super123userRR") {
+        isSuper = true;
+      }
+
       globalUser = AppUser(
-        data["username"].toString(),
+        data["username"].toString() ,
         data["University"].toString(),
-        (data['Favourite Teams'] as List<dynamic>)
+        (data['Favourite Teams'] as List<dynamic>? ?? [])
             .map((e) => e.toString())
             .toList(),
-        (data['Controlled Teams'] as List<dynamic>)
+        (data['Controlled Teams'] as List<dynamic>? ?? [])
             .map((e) => e.toString())
             .toList(),
-        data['role'],
+          (data['Main Teams'] as List<dynamic>? ?? [])
+              .map((e) => e.toString())
+              .toList(),
+        data['role'] ?? "user",
         matchKeys,
         data['email'],
         (data['moderator'] as bool?) ?? false,
+        isSuper,
+        (data['notifyAllMatches'] as bool?) ?? false
       );
 
       globalUser.loggedIn();
       isLoggedIn = true;
+      loggedInNotifications.value = true;
 
       darkModeNotifier.value = userDoc.get("darkMode");
       if (darkModeNotifier.value) {
@@ -411,6 +484,38 @@ class UserHandleBase {
       print("Error: User document does not exist or is empty.");
     }
   }
+
+  // Στο UserHandleBase.dart
+  Future<void> setMatchNotificationOverride(String matchKey, bool notify) async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) return;
+
+    // Αποθηκεύουμε ρητά true (θέλει ειδοποίηση) ή false (ΣΙΓΑΣΗ)
+    await FirebaseFirestore.instance.collection('users').doc(uid).set({
+      'matchKeys': {matchKey: notify}
+    }, SetOptions(merge: true));
+
+    // Ενημερώνουμε και το τοπικό globalUser για να αλλάξει το εικονίδιο αμέσως
+    globalUser.matchKeys[matchKey] = notify;
+  }
+  Future<void> setNotifyAllMatches(bool notifyAll) async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) {
+      print('User not logged in');
+      return;
+    }
+
+    // Προσθέτει ένα νέο πεδίο στο document του χρήστη
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .set({
+      'notifyAllMatches': notifyAll
+    }, SetOptions(merge: true));
+
+    globalUser.setNotifyAllMatches(notifyAll);
+  }
+
 
   Future<void> addNotifyMatch(MatchDetails match) async {
     bool value;

@@ -12,9 +12,9 @@ import 'package:untitled1/main.dart';
 import '../Data_Classes/Player.dart';
 import '../Data_Classes/Team.dart';
 import '../Firebase_Handle/firebase_screen_stats_helper.dart';
+import 'editTeamPage.dart';
 
-class TeamDisplayPage extends StatefulWidget{
-
+class TeamDisplayPage extends StatefulWidget {
   const TeamDisplayPage(this.team, {super.key});
   final Team team;
 
@@ -23,6 +23,14 @@ class TeamDisplayPage extends StatefulWidget{
 }
 
 class _TeamDisplayPageState extends State<TeamDisplayPage> {
+  late Team team;
+
+  @override
+  void initState() {
+    super.initState();
+    team = widget.team; // Αρχικά παίρνει την ομάδα που του πασάραμε
+  }
+
   int selectedIndex = 0;
 
   void _changeSection(int index) {
@@ -33,7 +41,7 @@ class _TeamDisplayPageState extends State<TeamDisplayPage> {
 
   @override
   Widget build(BuildContext context) {
-    logScreenViewSta(screenName: 'Team page',screenClass: 'Team page');
+    logScreenViewSta(screenName: 'Team page', screenClass: 'Team page');
     /*FirebaseAnalytics.instance.logEvent(
       name: 'team clicked',
       parameters: {
@@ -43,52 +51,89 @@ class _TeamDisplayPageState extends State<TeamDisplayPage> {
 
      */
 
-
-    return Scaffold( //ΑΦΟΡΑ ΤΟ ΟΝΟΜΑ ΠΑΝΩ ΣΤΗΝ ΣΕΛΙΔΑ
+    return Scaffold(
+        //ΑΦΟΡΑ ΤΟ ΟΝΟΜΑ ΠΑΝΩ ΣΤΗΝ ΣΕΛΙΔΑ
         appBar: AppBar(
-            backgroundColor:darkModeNotifier.value? Color(0xFF121212): const Color.fromARGB(250, 46, 90, 136),
+            backgroundColor: darkModeNotifier.value
+                ? Color(0xFF121212)
+                : const Color.fromARGB(250, 46, 90, 136),
             iconTheme: IconThemeData(color: Colors.white),
             title: Row(
               children: [
+                SizedBox(height: 33, width: 33, child: team.image),
                 SizedBox(
-                    height: 33,
-                    width:  33,
-                    child: widget.team.image),
-                SizedBox(width: 10,),
-            Flexible(
-              child: Text(
-                widget.team.name,
-                maxLines: 2,
-                softWrap: true,
-                overflow: TextOverflow.ellipsis, // για ασφάλεια αν είναι πολύ μεγάλο
-                style: TextStyle(
-                  fontSize: 21,
-                  fontWeight: FontWeight.bold,
-                  fontFamily: 'Arial',
-                  fontStyle: FontStyle.italic,
-                  color: Colors.white,
+                  width: 10,
                 ),
-              ),)
+                Flexible(
+                  child: Text(
+                    team.name,
+                    maxLines: 2,
+                    softWrap: true,
+                    overflow: TextOverflow
+                        .ellipsis, // για ασφάλεια αν είναι πολύ μεγάλο
+                    style: TextStyle(
+                      fontSize: 21,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'Arial',
+                      fontStyle: FontStyle.italic,
+                      color: Colors.white,
+                    ),
+                  ),
+                )
               ],
             ),
             actions: [
-              isFavourite(team: widget.team,),
-            ]
-        ),
-        body:Scaffold(
-          backgroundColor:darkModeNotifier.value?Color(0xFF121212): lightModeBackGround,
-          body: Column(
-      children: [
-        //Text(team.name,style: TextStyle(color: Color.fromARGB(100, 255, 10, 40),)),
-        _NavigationButtons(onSectionChange: _changeSection),
-        _sectionChooser(selectedIndex , widget.team,)
-      ],
-    )
-      )
-      );
+              if (globalUser.controlTheseTeamsFootball(widget.team.name, null) || globalUser.isUpperAdmin)
+                IconButton(
+                    icon: const Icon(Icons.edit, color: Colors.white),
+                    tooltip: greek ? "Επεξεργασία" : "Edit",
+                    onPressed: () async {
+                      bool? didChange = await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              EditTeamScreen(team: team),
+                        ),
+                      );
+
+                      if (didChange == true) {
+                        await loadTeams();
+
+                        Team? updatedTeam =
+                            TeamsHandle().getTeamFromList(team.name, teams);
+
+                        if (!context.mounted) return;
+
+                        if (updatedTeam != null) {
+                          setState(() {
+                            team = updatedTeam;
+                          });
+
+
+                          setState(() {});
+                        }
+                      }
+                    }),
+              isFavourite(
+                team: team,
+              ),
+              const SizedBox(width: 8)
+            ]),
+        body: Scaffold(
+            backgroundColor: darkModeNotifier.value
+                ? Color(0xFF121212)
+                : lightModeBackGround,
+            body: Column(
+              children: [
+                //Text(team.name,style: TextStyle(color: Color.fromARGB(100, 255, 10, 40),)),
+                _NavigationButtons(onSectionChange: _changeSection),
+                _sectionChooser(
+                  selectedIndex,
+                  team,
+                )
+              ],
+            )));
   }
-
-
 }
 
 //ΑΦΟΡΑ ΤΑ 3 ΚΟΥΜΠΙΑ ΚΑΤΩ ΑΠΟ ΤΟ ΟΝΟΜΑ!!
@@ -153,7 +198,11 @@ class _NavigationButtonsState extends State<_NavigationButtons> {
             text,
             style: TextStyle(
               fontSize: 17,
-              color: isSelected ? Color.fromARGB(250, 46, 90, 136) :darkModeNotifier.value?Colors.white: Colors.white,
+              color: isSelected
+                  ? Color.fromARGB(250, 46, 90, 136)
+                  : darkModeNotifier.value
+                      ? Colors.white
+                      : Colors.white,
               fontWeight: isSelected ? FontWeight.bold : FontWeight.w700,
               //backgroundColor: darkModeNotifier.value==true?Colors.black87: lightModeBackGround
             ),
@@ -170,7 +219,6 @@ class _NavigationButtonsState extends State<_NavigationButtons> {
     );
   }
 }
-
 
 //ελεγχει την κατασταση για το αν η ομαδα ειναι στα αγαπημενα ή οχι.
 class isFavourite extends StatefulWidget {
@@ -194,12 +242,12 @@ class _isFavouriteState extends State<isFavourite> {
 
   Future<void> _checkIfFavourite() async {
     if (isLoggedIn) {
-      bool result = globalUser.favoriteList.contains(widget.team.name);//      await teamsHandle.isFavouriteTeam(widget.team.name);
+      bool result = globalUser.favoriteList.contains(widget.team
+          .name); //      await teamsHandle.isFavouriteTeam(widget.team.name);
       setState(() {
         isFavourite = result;
       });
     }
-
   }
 
   @override
@@ -257,9 +305,6 @@ class _isFavouriteState extends State<isFavourite> {
   }
 }
 
-
-
-
 Widget _sectionChooser(int selectedIndex, Team team) {
   switch (selectedIndex) {
     case 0:
@@ -277,5 +322,3 @@ Widget _sectionChooser(int selectedIndex, Team team) {
       return TeamDetailsWidget(team: team);
   }
 }
-
-

@@ -1,6 +1,5 @@
 //mport 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
-import 'package:untitled1/API/user_handle.dart';
 import 'package:untitled1/Data_Classes/basketball/basketMatch.dart';
 import 'package:untitled1/Data_Classes/basketball/basketTeam.dart';
 import 'package:untitled1/Firebase_Handle/user_handle_in_base.dart';
@@ -13,7 +12,6 @@ import '../../Team_Display_Page_Package/one_group_standings.dart';
 import '../../championship_details/StandingsPage.dart';
 import '../../globals.dart';
 import '../../main.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
 import '../../ad_manager.dart';
 import 'basketMatchNotStartedPage.dart';
 
@@ -94,8 +92,7 @@ class _BasketMatchNotStartedDetailsState extends State<BasketMatchNotStartedDeta
 
   Widget _isAdminWidget() {
     // Check if the user is logged in
-    if (globalUser.controlTheseTeamsFootball(
-        widget.match.homeTeam.name, widget.match.awayTeam.name)) {
+    if (true) {
       return TextButton(
         child: Text(
           greek?"Εκκίνηση Αγώνα":"Start match",

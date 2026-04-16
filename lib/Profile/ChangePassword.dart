@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/material.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:untitled1/globals.dart';
 import '../Data_Classes/AppUser.dart';
 import '../Firebase_Handle/firebase_screen_stats_helper.dart';
@@ -29,8 +28,6 @@ class ChangePassword extends StatefulWidget
 class _ChangePassword extends State<ChangePassword>
 {
 
-  BannerAd? _bannerAd;
-
 
   @override
   Widget build(BuildContext context){
@@ -48,16 +45,6 @@ class _ChangePassword extends State<ChangePassword>
               )
           ),
         ),
-      bottomNavigationBar: Column(
-        mainAxisSize: MainAxisSize.min, // Για να μην γεμίζει όλη την οθόνη
-        children: [
-          SmartBanner(
-            hasSponsor: FirebaseRemoteConfig.instance.getBool('has_home_sponsor'),
-            sponsorImageUrl: FirebaseRemoteConfig.instance.getString('home_sponsor_image_url'),
-            sponsorLink: FirebaseRemoteConfig.instance.getString('home_sponsor_link'),
-          ),
-        ],
-      ),
     );
   }
 }

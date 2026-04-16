@@ -505,7 +505,7 @@ class _MatchContainerTimeState extends State<MatchContainerTime>
 class MatchNotificationIcon extends StatefulWidget {
   final MatchDetails match;
 
-  MatchNotificationIcon({
+  const MatchNotificationIcon({
     super.key,
     required this.match,
   });
@@ -515,72 +515,79 @@ class MatchNotificationIcon extends StatefulWidget {
 }
 
 class _MatchNotificationIconState extends State<MatchNotificationIcon> {
-  @override
-  void initState() {
-    super.initState();
+
+  // Η "έξυπνη" συνάρτηση που αποφασίζει αν το καμπανάκι πρέπει να ανάβει
+  bool _isNotificationActive() {
+    if (!globalUser.isLoggedIn) return false;
+
+    final isFavorite = globalUser.favoriteList.contains(
+        widget.match.homeTeam.name) ||
+        globalUser.favoriteList.contains(widget.match.awayTeam.name);
+
+    // Αν υπάρχει ΡΗΤΗ επιλογή (true/false) στη Map, ΥΠΕΡΙΣΧΥΕΙ των πάντων!
+    // Αν δεν υπάρχει (είναι null), τότε κοιτάμε αν είναι αγαπημένη ομάδα ή αν έχει το "Notify All" ενεργό.
+    return globalUser.matchKeys[widget.match.matchKey] ??
+        (globalUser.notifyAllMatches.value || isFavorite);
   }
 
   Future<void> toggleNotification() async {
-    if (globalUser.isLoggedIn) {
-      final newValue = !widget.match.notify.value;
-
-      widget.match.enableNotify(newValue);
-
-      // Προαιρετικά ενημερωτικό μήνυμα
-      if (newValue) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: (!greek)
-              ? Text(
-                  'Reminder set for ${widget.match.homeTeam.nameEnglish}-${widget.match.awayTeam.nameEnglish}')
-              : Text(
-                  'Θα λάβετε ειδοποίηση για το ματς ${widget.match.homeTeam.name}-${widget.match.awayTeam.name}'),
-          duration: Duration(seconds: 2),
-        ));
-      }
-
-      final isFavorite =
-          globalUser.favoriteList.contains(widget.match.homeTeam.name) ||
-              globalUser.favoriteList.contains(widget.match.awayTeam.name);
-
-      if (newValue) {
-        if (!isFavorite) {
-          await UserHandleBase().addNotifyMatch(widget.match);
-        } else {
-          await UserHandleBase().deleteNotifyMatch(widget.match);
-        }
-      } else {
-        if (!isFavorite) {
-          await UserHandleBase().deleteNotifyMatch(widget.match);
-        } else {
-          await UserHandleBase().addNotifyMatch(widget.match);
-        }
-      }
-    } else {
+    if (!globalUser.isLoggedIn) {
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(greek
             ? "Πρέπει να συνδεθείς για να έχεις ειδοποιήσεις."
             : "Please log in to receive notifications."),
-        duration: Duration(seconds: 2),
-        // behavior: SnackBarBehavior.floating,
+        duration: const Duration(seconds: 2),
         backgroundColor: Colors.redAccent.withOpacity(0.9),
       ));
+      return;
     }
+
+    // Βρίσκουμε την τωρινή κατάσταση και την αντιστρέφουμε
+    bool currentlyActive = _isNotificationActive();
+    bool newValue = !currentlyActive;
+
+    setState(() {
+      globalUser.matchKeys[widget.match.matchKey] = newValue;
+      widget.match.enableNotify(
+          newValue);
+    });
+
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(
+          greek
+              ? (newValue
+              ? 'Ενεργοποιήθηκαν οι ειδοποιήσεις για αυτό το ματς.'
+              : 'Έγινε σίγαση ειδοποιήσεων για αυτό το ματς.')
+              : (newValue
+              ? 'Notifications enabled for this match.'
+              : 'Notifications muted for this match.')
+      ),
+      duration: const Duration(milliseconds: 1500),
+
+    ));
+
+    await UserHandleBase().setMatchNotificationOverride(
+        widget.match.matchKey, newValue);
   }
 
   @override
   Widget build(BuildContext context) {
+
     return ValueListenableBuilder<bool>(
-      valueListenable: widget.match.notify,
-      builder: (context, value, _) {
+      valueListenable: globalUser.notifyAllMatches,
+      builder: (context, globalActive, child) {
+        bool isActive = _isNotificationActive();
+
         return IconButton(
           icon: Icon(
-            value ? Icons.notifications_active : Icons.notifications_off,
-            color: value
+            isActive ? Icons.notifications_active : Icons.notifications_off,
+            color: isActive
                 ? (darkModeNotifier.value ? Colors.amber : Colors.blue)
                 : Colors.grey,
           ),
-          tooltip:
-              value ? "Απενεργοποίηση ειδοποίησης" : "Ενεργοποίηση ειδοποίησης",
+          tooltip: isActive ? "Απενεργοποίηση" : "Ενεργοποίηση",
           onPressed: toggleNotification,
         );
       },

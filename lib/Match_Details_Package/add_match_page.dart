@@ -16,7 +16,6 @@ class _AddMatchScreenState extends State<AddMatchScreen> {
 
   Team? homeTeam;
   Team? awayTeam;
-  int time = 0;
   int day = 0;
   int month = 0;
   int year = 0;
@@ -27,387 +26,312 @@ class _AddMatchScreenState extends State<AddMatchScreen> {
 
   @override
   Widget build(BuildContext context) {
-    logScreenViewSta(screenName: 'Add Match Page',screenClass: 'Add Match Page');
+    logScreenViewSta(screenName: 'Add Match Page', screenClass: 'Add Match Page');
+
+    bool isDark = darkModeNotifier.value;
+    Color bgColor = isDark ? const Color(0xFF121212) : Colors.grey[100]!;
+    Color cardColor = isDark ? Colors.grey[850]! : Colors.white;
+    Color textColor = isDark ? Colors.white : Colors.black87;
 
     return Scaffold(
-
-      backgroundColor:
-      darkModeNotifier.value ? Color(0xFF1E1E1E) : Colors.white,
+      backgroundColor: bgColor,
       appBar: AppBar(
-        title: Text("Προσθήκη Ματς",
-            style: TextStyle(
-                color: darkModeNotifier.value ? Colors.white : Colors.black,
-                fontSize: 22,
-                fontFamily: "Arial")),
-        backgroundColor:
-        darkModeNotifier.value ? Color(0xFF1E1E1E) : Colors.white,
-        iconTheme: IconThemeData(
-            color: darkModeNotifier.value ? Colors.white : Colors.black),
+        title: Text(
+          greek ? "Προσθήκη Ματς" : "Add Match",
+          style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+        ),
+        backgroundColor: isDark ? Colors.grey[900] : const Color.fromARGB(250, 46, 90, 136),
+        iconTheme: const IconThemeData(color: Colors.white),
+        elevation: 0,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
           child: ListView(
+            physics: const BouncingScrollPhysics(),
             children: [
-              DropdownSearch<Team>(
-                popupProps: PopupProps.menu(
-                  showSearchBox: true,  // Enable search box for filtering teams
-                  menuProps: MenuProps(
-                    backgroundColor: darkModeNotifier.value ? Colors.grey[900] : Colors.white,
-                  ),
-                  searchFieldProps: TextFieldProps(
-                    style: TextStyle(
-                      color: darkModeNotifier.value ? Colors.white : Colors.black,  // Ρύθμιση του χρώματος του κειμένου του search box
-                    ),
-                  ),
-                  itemBuilder: (context, Team item, isSelected) {
-                    return ListTile(
-                      title: Text(
-                        item.name,
-                        style: TextStyle(
-                          color: darkModeNotifier.value ? Colors.white : Colors.grey[900],  // Set text color based on dark mode
-                        ),
-                      ),
-                    );
-                  },
-                ),
-                itemAsString: (Team team) => team.name,  // Display the team name in the dropdown list
-                dropdownDecoratorProps: DropDownDecoratorProps(
-                  dropdownSearchDecoration: InputDecoration(
-                    labelText: 'Γηπεδούχος Ομάδα',
-                    labelStyle: TextStyle(
-                      color: darkModeNotifier.value ? Colors.white : Colors.grey[800],  // Set label color based on dark mode
-                    ),
-                  ),
-                ),
-                selectedItem: homeTeam,
-                items: teams,
-                onChanged: (Team? value) {
-                  setState(() {
-                    homeTeam = value!;
-                  });
-                },
-                dropdownBuilder: (context, selectedItem) {
-                  return Text(
-                    selectedItem != null ? selectedItem.name : 'Επιλέξτε Ομάδα',
-                    style: TextStyle(
-                      color: darkModeNotifier.value ? Colors.white : Colors.grey[900],  // Set text color based on dark mode
-                    ),
-                  );
-                },
+              // --- ΓΗΠΕΔΟΥΧΟΣ ---
+              _buildDropdownTeam(
+                label: greek ? 'Γηπεδούχος Ομάδα' : 'Home Team',
+                icon: Icons.home,
+                selectedTeam: homeTeam,
+                isDark: isDark,
+                cardColor: cardColor,
+                onChanged: (Team? value) => setState(() => homeTeam = value),
               ),
-              SizedBox(height: 12),
-              DropdownSearch<Team>(
-                popupProps: PopupProps.menu(
-                  showSearchBox: true,  // Enable search box for filtering teams
-                  menuProps: MenuProps(
-                    backgroundColor: darkModeNotifier.value ? Colors.grey[900] : Colors.white,
-                  ),
-                  searchFieldProps: TextFieldProps(
-                    style: TextStyle(
-                      color: darkModeNotifier.value ? Colors.white : Colors.black,  // Ρύθμιση του χρώματος του κειμένου του search box
-                    ),
-                  ),
-                  itemBuilder: (context, Team item, isSelected) {
-                    return ListTile(
-                      title: Text(
-                        item.name,
-                        style: TextStyle(
-                          color: darkModeNotifier.value ? Colors.white : Colors.grey[900],  // Set text color based on dark mode
-                        ),
-                      ),
-                    );
-                  },
-                ),
-                itemAsString: (Team team) => team.name,  // Display the team name in the dropdown list
-                dropdownDecoratorProps: DropDownDecoratorProps(
-                  dropdownSearchDecoration: InputDecoration(
-                    labelText: 'Φιλοξενούμενη Ομάδα',
-                    labelStyle: TextStyle(
-                      color: darkModeNotifier.value ? Colors.white : Colors.grey[800],  // Set label color based on dark mode
-                    ),
+              const SizedBox(height: 16),
 
-                  ),
-                ),
-                selectedItem: awayTeam,
-                items: teams,
-                onChanged: (Team? value) {
-                  setState(() {
-                    awayTeam = value!;
-                  });
-                },
-                dropdownBuilder: (context, selectedItem) {
-                  return Text(
-                    selectedItem != null ? selectedItem.name : 'Επιλέξτε Ομάδα',
-                    style: TextStyle(
-                      color: darkModeNotifier.value ? Colors.white : Colors.grey[900],  // Set text color based on dark mode
-                    ),
-                  );
-                },
+              // --- ΦΙΛΟΞΕΝΟΥΜΕΝΗ ---
+              _buildDropdownTeam(
+                label: greek ? 'Φιλοξενούμενη Ομάδα' : 'Away Team',
+                icon: Icons.flight_takeoff,
+                selectedTeam: awayTeam,
+                isDark: isDark,
+                cardColor: cardColor,
+                onChanged: (Team? value) => setState(() => awayTeam = value),
               ),
+              const SizedBox(height: 24),
 
-              SizedBox(
-                height: 20,
-              ),
-              ListTile(
-                title: Text(
-                  'Ώρα: ${matchTime != null ? matchTime!.format(context) : 'Επιλέξτε Ώρα'}',
-                  style: TextStyle(
-                      color: darkModeNotifier.value
-                          ? Colors.white
-                          : Colors.grey[900]),
-                ),
-                trailing: Icon(
-                  Icons.access_time,
-                  color:
-                  darkModeNotifier.value ? Colors.white : Colors.grey[900],
-                ),
+              // --- ΕΠΙΛΟΓΗ ΩΡΑΣ ---
+              InkWell(
                 onTap: () async {
                   final TimeOfDay? picked = await showTimePicker(
                     context: context,
-                    initialTime: matchTime ?? TimeOfDay(hour: 20, minute: 15),
+                    initialTime: matchTime ?? const TimeOfDay(hour: 20, minute: 15),
                   );
-                  if (picked != null) {
-                    setState(() {
-                      matchTime = picked;
-                    });
-                  }
+                  if (picked != null) setState(() => matchTime = picked);
                 },
+                borderRadius: BorderRadius.circular(12),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                  decoration: BoxDecoration(
+                    color: cardColor,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.access_time, color: Colors.blue[400]),
+                      const SizedBox(width: 12),
+                      Text(
+                        matchTime != null ? matchTime!.format(context) : (greek ? 'Επιλέξτε Ώρα' : 'Select Time'),
+                        style: TextStyle(color: textColor, fontSize: 16),
+                      ),
+                      const Spacer(),
+                      const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
+                    ],
+                  ),
+                ),
               ),
+              const SizedBox(height: 16),
+
+              // --- ΗΜΕΡΟΜΗΝΙΑ (Ημέρα / Μήνας / Έτος) ---
               Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Expanded(
-                    child: TextFormField(
-                      decoration: InputDecoration(
-                          labelText: 'Ημέρα',
-                          labelStyle: TextStyle(
-                              color: darkModeNotifier.value
-                                  ? Colors.white
-                                  : Colors.grey[900]),
-                        errorStyle: TextStyle(
-                          color: Colors.redAccent,
-                          fontSize: 9, // Μικρότερο αν θες να μην τρώει πολύ χώρο
-                        ),),
-                      keyboardType: TextInputType.number,
+                    child: _buildModernTextField(
+                      label: greek ? 'Ημέρα' : 'Day',
+                      isDark: isDark,
+                      cardColor: cardColor,
                       validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Παρακαλώ εισάγετε ημέρα';
-                        }
-                        try {
-                          int dayValue = int.parse(value);
-                          if (dayValue < 1 || dayValue > 31) {
-                            return 'Η ημέρα πρέπει να είναι μεταξύ 1 και 31';
-                          }
-                        } catch (e) {
-                          return 'Παρακαλώ εισάγετε έγκυρο αριθμό';
-                        }
+                        if (value == null || value.isEmpty) return greek ? 'Κενό' : 'Empty';
+                        int? v = int.tryParse(value);
+                        if (v == null || v < 1 || v > 31) return '1-31';
                         return null;
                       },
                       onSaved: (value) => day = int.parse(value!),
-                      style: TextStyle(color:  darkModeNotifier.value
-                          ? Colors.white
-                          : Colors.grey[900]),
                     ),
                   ),
-                  SizedBox(width: 8),
+                  const SizedBox(width: 10),
                   Expanded(
-                    child: TextFormField(
-                      decoration: InputDecoration(
-                          labelText: 'Μήνας',
-                          labelStyle: TextStyle(
-                              color: darkModeNotifier.value
-                                  ? Colors.white
-                                  : Colors.grey[900]),
-                        errorStyle: TextStyle(
-                          color: Colors.redAccent,
-                          fontSize: 9, // Μικρότερο αν θες να μην τρώει πολύ χώρο
-                        ),),
-                      keyboardType: TextInputType.number,
+                    child: _buildModernTextField(
+                      label: greek ? 'Μήνας' : 'Month',
+                      isDark: isDark,
+                      cardColor: cardColor,
                       validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Παρακαλώ εισάγετε μήνα';
-                        }
-                        try {
-                          int monthValue = int.parse(value);
-                          if (monthValue < 1 || monthValue > 12) {
-                            return 'Ο μήνας πρέπει να είναι μεταξύ 1 και 12';
-                          }
-                        } catch (e) {
-                          return 'Παρακαλώ εισάγετε έγκυρο αριθμό';
-                        }
+                        if (value == null || value.isEmpty) return greek ? 'Κενό' : 'Empty';
+                        int? v = int.tryParse(value);
+                        if (v == null || v < 1 || v > 12) return '1-12';
                         return null;
                       },
                       onSaved: (value) => month = int.parse(value!),
-                      style: TextStyle(color:  darkModeNotifier.value
-                          ? Colors.white
-                          : Colors.grey[900]),
                     ),
                   ),
-                  SizedBox(width: 8),
+                  const SizedBox(width: 10),
                   Expanded(
-                    child: TextFormField(
-                      decoration: InputDecoration(
-                          labelText: 'Έτος',
-                          labelStyle: TextStyle(
-                              color: darkModeNotifier.value
-                                  ? Colors.white
-                                  : Colors.grey[900]),
-                        errorStyle: TextStyle(
-                          color: Colors.redAccent,
-                          fontSize: 9, // Μικρότερο αν θες να μην τρώει πολύ χώρο
-                        ),),
-                      keyboardType: TextInputType.number,
+                    child: _buildModernTextField(
+                      label: greek ? 'Έτος' : 'Year',
+                      isDark: isDark,
+                      cardColor: cardColor,
                       validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Παρακαλώ εισάγετε έτος';
-                        }
-                        try {
-                          int yearValue = int.parse(value);
-                          if (yearValue < DateTime.now().year ||yearValue > DateTime.now().year+1 ) {
-                            return 'Επιλέξτε έγκυρο έτος';
-                          }
-                        } catch (e) {
-                          return 'Παρακαλώ εισάγετε έγκυρο αριθμό';
-                        }
+                        if (value == null || value.isEmpty) return greek ? 'Κενό' : 'Empty';
+                        int? v = int.tryParse(value);
+                        int currentYear = DateTime.now().year;
+                        if (v == null || v < currentYear || v > currentYear + 1) return 'Λάθος';
                         return null;
                       },
                       onSaved: (value) => year = int.parse(value!),
-                      style: TextStyle(color:  darkModeNotifier.value
-                          ? Colors.white
-                          : Colors.grey[900]),
                     ),
                   ),
                 ],
               ),
-              SwitchListTile(
-                title: Text(
-                  "Φάση Ομίλων;",
-                  style: TextStyle(
-                      color: darkModeNotifier.value
-                          ? Colors.white
-                          : Colors.grey[900]),
+              const SizedBox(height: 16),
+
+              // --- ΦΑΣΗ ΟΜΙΛΩΝ (Switch) ---
+              Container(
+                decoration: BoxDecoration(color: cardColor, borderRadius: BorderRadius.circular(12)),
+                child: SwitchListTile(
+                  title: Text(greek ? "Φάση Ομίλων;" : "Group Phase?", style: TextStyle(color: textColor, fontWeight: FontWeight.bold)),
+                  activeColor: Colors.blue,
+                  value: isGroupPhase,
+                  onChanged: (value) => setState(() => isGroupPhase = value),
                 ),
-                value: isGroupPhase,
-                onChanged: (value) {
-                  setState(() {
-                    isGroupPhase = value;
-                  });
-                },
               ),
-              if (!isGroupPhase) TextFormField(
-                decoration: InputDecoration(
-                    labelText: greek ? 'Φάση play-off' : "Play-off stage",
-                    labelStyle: TextStyle(
-                        color: darkModeNotifier.value
-                            ? Colors.white
-                            : Colors.grey[900])),
-                keyboardType: TextInputType.number,
-                style: TextStyle(color:  darkModeNotifier.value
-                    ? Colors.white
-                    : Colors.grey[900]),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Παρακαλώ εισάγετε αριθμό αγωνιστικής';
-                  }
-                  try {
-                    int.parse(value);
-                  }
-                  catch (e) {
-                    return 'Παρακαλώ εισάγετε έγκυρο αριθμό';
-                  }
-                  return null;
-                },
-                onSaved: (value) => game = int.parse(value!),
-              ),
-              SizedBox(height: 30),
-              ElevatedButton(
-                onPressed: () {
-                  if (_formKey.currentState!.validate()) {
-                    _formKey.currentState?.save();
+              const SizedBox(height: 16),
 
-                    if (homeTeam == null || awayTeam == null) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text("Παρακαλώ επιλέξτε και τις δύο ομάδες!"),
-                          backgroundColor: Colors.red,
-                        )
-                      );
-                      return;
-                    }
+              // --- ΑΓΩΝΙΣΤΙΚΗ / ΦΑΣΗ ---
+              if (!isGroupPhase)
+                _buildModernTextField(
+                  label: greek ? 'Φάση play-off (πχ 16, 8, 4, 2)' : "Play-off stage (16, 8, 4, 2)",
+                  isDark: isDark,
+                  cardColor: cardColor,
+                  icon: Icons.emoji_events,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) return greek ? 'Παρακαλώ εισάγετε αριθμό' : 'Required';
+                    if (int.tryParse(value) == null) return greek ? 'Μόνο αριθμοί' : 'Numbers only';
+                    return null;
+                  },
+                  onSaved: (value) => game = int.parse(value!),
+                ),
 
-                    if (matchTime == null) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text("Παρακαλώ επιλέξτε ώρα!"),
-                          backgroundColor: Colors.red,
-                        )
-                      );
-                      return;
-                    }
+              const SizedBox(height: 32),
 
-                    DateTime currentDate = DateTime.now();
-                    final TimeOfDay time = matchTime ?? const TimeOfDay(hour: 20, minute: 15);
-
-                    DateTime matchDate = DateTime(
-                      year,
-                      month,
-                      day,
-                      time.hour,
-                      time.minute,
-                    );
-
-                    if (matchDate.isBefore(currentDate)) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text("Δεν γίνεται να βάλεις παρελθοντική ημερομηνία!"),
-                          backgroundColor: Colors.red,
-                        )
-                      );
-                      return;
-                    }
-
-
-                    if (globalUser.controlTheseTeamsFootball(homeTeam!.name, awayTeam!.name)) {
-                      TeamsHandle().addMatch(
-                          homeTeam!,
-                          awayTeam!,
-                          day,
-                          month,
-                          year,
-                          game,
-                          false,
-                          isGroupPhase,
-                          matchTime!.hour * 100 + matchTime!.minute,
-                          "upcoming",
-                          0,
-                          0);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text("Το ματς προστέθηκε!")));
-                      WidgetsBinding.instance.addPostFrameCallback((_) {
-                        navigatorKey.currentState?.pushReplacementNamed('/home');
-                      });
-
-                      Navigator.pop(context);
-                    }
-                    else{
-                      ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text("Πρέπει να ελέγχεις τουλάχιστον τη μία από τις δύο ομάδες!")));
-                    }
-                  }
-                },
-                child: Text(
-                  'Προσθήκη Ματς',
-                  style: TextStyle(
-                    fontFamily: "Arial",
-                    fontSize: 17,
+              // --- ΚΟΥΜΠΙ ΑΠΟΘΗΚΕΥΣΗΣ ---
+              SizedBox(
+                height: 50,
+                width: double.infinity,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue[700],
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    elevation: 2,
+                  ),
+                  onPressed: _onSavePressed,
+                  child: Text(
+                    greek ? 'ΑΠΟΘΗΚΕΥΣΗ ΜΑΤΣ' : 'SAVE MATCH',
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: 1),
                   ),
                 ),
               ),
+              const SizedBox(height: 20),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  // --- LOGIC ΓΙΑ ΤΟ SAVE (Καθαρισμένο από την UI μέθοδο) ---
+  void _onSavePressed() {
+    if (_formKey.currentState!.validate()) {
+      _formKey.currentState?.save();
+
+      if (homeTeam == null || awayTeam == null) {
+        _showError(greek ? "Παρακαλώ επιλέξτε και τις δύο ομάδες!" : "Please select both teams!");
+        return;
+      }
+
+      if (matchTime == null) {
+        _showError(greek ? "Παρακαλώ επιλέξτε ώρα!" : "Please select time!");
+        return;
+      }
+
+      DateTime currentDate = DateTime.now();
+      final TimeOfDay time = matchTime ?? const TimeOfDay(hour: 20, minute: 15);
+      DateTime matchDate = DateTime(year, month, day, time.hour, time.minute);
+
+      if (matchDate.isBefore(currentDate)) {
+        _showError(greek ? "Δεν γίνεται να βάλεις παρελθοντική ημερομηνία!" : "Cannot use past date!");
+        return;
+      }
+
+      if (globalUser.controlTheseTeamsFootball(homeTeam!.name, awayTeam!.name) || globalUser.isUpperAdmin) {
+        TeamsHandle().addMatch(
+            homeTeam!, awayTeam!, day, month, year, game, false, isGroupPhase,
+            time.hour * 100 + time.minute, "upcoming", 0, 0);
+
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(greek ? "Το ματς προστέθηκε επιτυχώς!" : "Match added successfully!"),
+          backgroundColor: Colors.green,
+        ));
+
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          navigatorKey.currentState?.pushReplacementNamed('/home');
+        });
+        Navigator.pop(context, true);
+      } else {
+        _showError(greek ? "Πρέπει να ελέγχεις τουλάχιστον τη μία ομάδα!" : "You must control at least one team!");
+      }
+    }
+  }
+
+  void _showError(String msg) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg), backgroundColor: Colors.red));
+  }
+
+  // --- WIDGETS ΓΙΑ ΤΟ UI ---
+  Widget _buildDropdownTeam({
+    required String label,
+    required IconData icon,
+    required Team? selectedTeam,
+    required bool isDark,
+    required Color cardColor,
+    required Function(Team?) onChanged,
+  }) {
+    return DropdownSearch<Team>(
+      popupProps: PopupProps.menu(
+        showSearchBox: true,
+        menuProps: MenuProps(backgroundColor: cardColor, borderRadius: BorderRadius.circular(12)),
+        searchFieldProps: TextFieldProps(
+          style: TextStyle(color: isDark ? Colors.white : Colors.black),
+          decoration: InputDecoration(
+            hintText: greek ? 'Αναζήτηση...' : 'Search...',
+            hintStyle: const TextStyle(color: Colors.grey),
+            prefixIcon: const Icon(Icons.search, color: Colors.grey),
+          ),
+        ),
+        itemBuilder: (context, Team item, isSelected) {
+          return ListTile(
+            title: Text(item.name, style: TextStyle(color: isDark ? Colors.white : Colors.grey[900])),
+          );
+        },
+      ),
+      itemAsString: (Team team) => team.name,
+      dropdownDecoratorProps: DropDownDecoratorProps(
+        dropdownSearchDecoration: InputDecoration(
+          labelText: label,
+          labelStyle: const TextStyle(color: Colors.grey),
+          prefixIcon: Icon(icon, color: Colors.blue[400]),
+          filled: true,
+          fillColor: cardColor,
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+        ),
+      ),
+      selectedItem: selectedTeam,
+      items: teams,
+      onChanged: onChanged,
+      dropdownBuilder: (context, selectedItem) {
+        return Text(
+          selectedItem != null ? selectedItem.name : (greek ? 'Επιλέξτε Ομάδα' : 'Select Team'),
+          style: TextStyle(color: isDark ? Colors.white : Colors.grey[900]),
+        );
+      },
+    );
+  }
+
+  Widget _buildModernTextField({
+    required String label,
+    required bool isDark,
+    required Color cardColor,
+    IconData? icon,
+    required String? Function(String?) validator,
+    required void Function(String?) onSaved,
+  }) {
+    return TextFormField(
+      keyboardType: TextInputType.number,
+      style: TextStyle(color: isDark ? Colors.white : Colors.black),
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: const TextStyle(color: Colors.grey, fontSize: 13),
+        prefixIcon: icon != null ? Icon(icon, color: Colors.blue[400]) : null,
+        filled: true,
+        fillColor: cardColor,
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+        errorStyle: const TextStyle(color: Colors.redAccent, fontSize: 10),
+      ),
+      validator: validator,
+      onSaved: onSaved,
     );
   }
 }

@@ -78,7 +78,7 @@ class basketTeam {
 
   // Method to add a player
   Future<void> addPlayer(BasketPlayer player) async {
-    if (globalUser.controlTheseTeamsFootball(name, null)) { //αλλαγη συναρτησης
+    if (globalUser.controlTheseTeamsFootball(name, null) || globalUser.isUpperAdmin) { //αλλαγη συναρτησης
       _players.add(player);
 
       await teamDoc.set({
@@ -88,7 +88,7 @@ class basketTeam {
   }
 
   Future<void> deletePlayer(BasketPlayer player) async {
-    if (globalUser.controlTheseTeamsFootball(name, null)) { //αλλαγη συναρτησης
+    if (globalUser.controlTheseTeamsFootball(name, null) || globalUser.isUpperAdmin) { //αλλαγη συναρτησης
       _players.remove(player);
 
       await teamDoc.update({
@@ -98,7 +98,7 @@ class basketTeam {
   }
 
   Future<void> updatePlayer(BasketPlayer oldPlayer, BasketPlayer newPlayer) async {
-    if (!globalUser.controlTheseTeamsFootball(name, null)) return; ////αλλαγη συναρτησης
+    if (!(globalUser.controlTheseTeamsFootball(name, null) || globalUser.isUpperAdmin)) return; ////αλλαγη συναρτησης
 
     // ΝΕΑ KEYS
     final oldKey = '${oldPlayer.name}${oldPlayer.surname}${oldPlayer.number}';

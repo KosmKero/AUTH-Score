@@ -10,10 +10,13 @@ import 'Data_Classes/Team.dart';
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 bool isLoggedIn=false;
-ValueNotifier<bool> darkModeNotifier = ValueNotifier<bool>(false);
+
+ValueNotifier<bool> loggedInNotifications = ValueNotifier<bool>(false);
+
+ValueNotifier<bool> darkModeNotifier = ValueNotifier<bool>(WidgetsBinding.instance.platformDispatcher.platformBrightness == Brightness.dark );
 bool greek = true;
 String username = "";
-AppUser globalUser= AppUser("","",[],[],"user",{},"",false);
+AppUser globalUser= AppUser("","",[],[],[], "user",{},"",false, false, false);
 bool isToggled = false;
 
 List<Team> topTeams = [];
@@ -21,7 +24,8 @@ List<Team> topTeams = [];
 
 List<Team> teams = [];
 
-int thisYearNow=2026;
+String? pendingMatchId;
+int thisYearNow=2027;
 
 Map<int, MatchDetails> playOffMatches = {};
 

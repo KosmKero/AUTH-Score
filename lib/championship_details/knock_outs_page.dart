@@ -7,16 +7,24 @@ import '../Match_Details_Package/Match_Details_Page.dart';
 import '../globals.dart';
 
 class KnockOutsPage extends StatefulWidget {
-  KnockOutsPage({super.key, required this.playOffMatches} );
-  Map<int, MatchDetails> playOffMatches;
+  const KnockOutsPage({super.key, required this.playOffMatches});
+
+  final Map<int, MatchDetails> playOffMatches;
+
   @override
   State<KnockOutsPage> createState() => _KnockOutsPageState();
 }
 
 class _KnockOutsPageState extends State<KnockOutsPage> {
+
+  @override
+  void initState() {
+    logScreenViewSta(screenName: 'Knock Outs Page',screenClass: 'Knock Outs Page');
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
-    logScreenViewSta(screenName: 'Knock Outs Page',screenClass: 'Knock Outs Page');
 
 
     return Expanded(

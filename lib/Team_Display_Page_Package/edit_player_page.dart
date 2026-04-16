@@ -59,7 +59,7 @@ class _PlayerEditPageState extends State<PlayerEditPage> {
   void _saveForm() {
     if (_formKey.currentState!.validate()) {
 
-      Player newPlayer = Player(_nameController.text, _surnameController.text, int.parse(_positionController.text), int.parse(_goalsController.text), int.parse(_numberController.text), 22, widget.player.teamName, int.parse(_yellowController.text), int.parse(_redController.text),widget.team.nameEnglish);
+      Player newPlayer = Player(_nameController.text, _surnameController.text, int.parse(_positionController.text), int.parse(_goalsController.text), int.parse(_numberController.text), 22, widget.player.teamName, int.parse(_yellowController.text), int.parse(_redController.text),widget.team.nameEnglish, widget.player.cardExpiryDate,widget.player.appearances);
 
       setState(() {
         widget.team.updatePlayer(widget.player, newPlayer);
