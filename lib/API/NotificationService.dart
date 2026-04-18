@@ -56,7 +56,6 @@ class NotificationService {
 
   static void _listenToForegroundMessages() {
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      print('📥 Foreground message: ${message.notification?.title}');
 
       RemoteNotification? notification = message.notification;
       AndroidNotification? android = message.notification?.android;
@@ -138,7 +137,6 @@ class NotificationService {
       }
 
       if (targetMatch != null) {
-        print("✅ Το ματς βρέθηκε! Πάμε στη σελίδα...");
         navigatorKey.currentState?.push(
           MaterialPageRoute(
             builder: (context) => matchDetailsPage(targetMatch!),
@@ -152,7 +150,7 @@ class NotificationService {
 
   static void _watchTokenRefresh() {
     _messaging.onTokenRefresh.listen((newToken) {
-      print('♻️ Token refreshed: $newToken');
+
       _saveTokenToFirestore(newToken);
     });
   }

@@ -3,6 +3,7 @@ plugins {
     id "kotlin-android"
     id "dev.flutter.flutter-gradle-plugin"
     id 'com.google.gms.google-services'
+    id 'com.google.firebase.crashlytics'
 }
 
 def localProperties = new Properties()
@@ -15,7 +16,7 @@ if (localPropertiesFile.exists()) {
 
 android {
     namespace = "com.authteam.authscore"
-    compileSdk = 36 // Changed from 35 to match targetSdk
+    compileSdk = 35 // Changed from 35 to match targetSdk
 
     ndkVersion = "28.2.13676358"
     lint {

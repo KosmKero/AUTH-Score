@@ -8,7 +8,7 @@ class SpeechService {
   Future<bool> initSpeech() async {
     _isAvailable = await _speech.initialize(
       onStatus: (status) => print('Speech status: $status'),
-      onError: (error) => print('Speech error: $error'),
+      onError: (error)   => print('Speech error: $error')  ,
     );
     return _isAvailable;
   }

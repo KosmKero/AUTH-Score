@@ -47,11 +47,6 @@ class TopPlayersHandle extends ChangeNotifier {
     _topPlayers = minHeap.toList();
     _topPlayers.sort((a, b) => b.goals.compareTo(a.goals));
 
-    print("Η λίστα των παικτών ενημερώθηκε!${_topPlayers.length}");
-
-    // for (Player player in _topPlayers){
-    //   print(player.surname+player.goals.toString());
-    // }
     notifyListeners(); //  Ενημερώνουμε τους listeners για να ανανεωθεί το UI
   }
 }

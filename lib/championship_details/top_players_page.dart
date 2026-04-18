@@ -49,7 +49,7 @@ class _TopPlayersView extends State<TopPlayersPage> {
             end: Alignment.bottomCenter,
             colors: darkModeNotifier.value
                 ? [const Color(0xFF1E1E1E), const Color(0xFF121212)]
-                : [lightModeBackGround, lightModeBackGround.withOpacity(0.8)],
+                : [lightModeBackGround, lightModeBackGround.withValues(alpha:0.8)],
           ),
         ),
         child: Padding(
@@ -61,7 +61,7 @@ class _TopPlayersView extends State<TopPlayersPage> {
               Container(
                 padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
                 decoration: BoxDecoration(
-                  color: darkModeNotifier.value ? Colors.white.withOpacity(0.1) : Colors.black.withOpacity(0.05),
+                  color: darkModeNotifier.value ? Colors.white.withValues(alpha:0.1) : Colors.black.withValues(alpha:0.05),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Row(
@@ -111,14 +111,14 @@ class _TopPlayersView extends State<TopPlayersPage> {
         padding: const EdgeInsets.all(12), // Το padding μπήκε στο Container
         decoration: BoxDecoration(
           color: darkModeNotifier.value
-              ? Colors.white.withOpacity(0.05)
-              : Colors.black.withOpacity(0.02),
+              ? Colors.white.withValues(alpha:0.05)
+              : Colors.black.withValues(alpha:0.02),
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
               color: darkModeNotifier.value
-                  ? Colors.black.withOpacity(0.2)
-                  : Colors.grey.withOpacity(0.1),
+                  ? Colors.black.withValues(alpha:0.2)
+                  : Colors.grey.withValues(alpha:0.1),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -139,8 +139,8 @@ class _TopPlayersView extends State<TopPlayersPage> {
                       color: i < 3
                           ? const [Colors.amber, Color(0xFFC0C0C0), Color(0xFFCD7F32)][i]
                           : darkModeNotifier.value
-                          ? Colors.white.withOpacity(0.1)
-                          : Colors.black.withOpacity(0.05),
+                          ? Colors.white.withValues(alpha:0.1)
+                          : Colors.black.withValues(alpha:0.05),
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Center(
@@ -165,8 +165,8 @@ class _TopPlayersView extends State<TopPlayersPage> {
                       boxShadow: [
                         BoxShadow(
                           color: darkModeNotifier.value
-                              ? Colors.black.withOpacity(0.2)
-                              : Colors.grey.withOpacity(0.1),
+                              ? Colors.black.withValues(alpha:0.2)
+                              : Colors.grey.withValues(alpha:0.1),
                           blurRadius: 4,
                           offset: const Offset(0, 2),
                         ),
@@ -213,8 +213,8 @@ class _TopPlayersView extends State<TopPlayersPage> {
                           : "Τερματοφύλακας",
                       style: TextStyle(
                         color: darkModeNotifier.value
-                            ? Colors.white.withOpacity(0.7)
-                            : Colors.black.withOpacity(0.7),
+                            ? Colors.white.withValues(alpha: 0.7)
+                            : Colors.black.withValues(alpha: 0.7),
                         fontSize: 12,
                       ),
                     ),
@@ -229,8 +229,8 @@ class _TopPlayersView extends State<TopPlayersPage> {
               height: 40,
               decoration: BoxDecoration(
                 color: darkModeNotifier.value
-                    ? Colors.white.withOpacity(0.1)
-                    : Colors.black.withOpacity(0.05),
+                    ? Colors.white.withValues(alpha: 0.1)
+                    : Colors.black.withValues(alpha: 0.05),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Center(

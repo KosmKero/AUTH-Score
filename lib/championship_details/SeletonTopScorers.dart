@@ -25,7 +25,7 @@ class SkeletonTopPlayers extends StatelessWidget {
                 margin: const EdgeInsets.only(bottom: 8),
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: isDark ? Colors.white.withOpacity(0.05) : Colors.white,
+                  color: isDark ? Colors.white.withValues(alpha:0.05) : Colors.white,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Row(

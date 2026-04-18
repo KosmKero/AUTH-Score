@@ -1,7 +1,5 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:untitled1/Team_Display_Page_Package/TeamDisplayPage.dart';
-import 'package:untitled1/main.dart';
 
 import '../Data_Classes/MatchDetails.dart';
 import '../Data_Classes/Team.dart';
@@ -9,8 +7,8 @@ import '../Firebase_Handle/firebase_screen_stats_helper.dart';
 import '../globals.dart';
 
 class StandingsPage extends StatefulWidget {
-  // 🌟 Προσθέσαμε τα seasonMatches στον Constructor
-  StandingsPage(this.seasonYear, this.teamsList, this.seasonMatches, {super.key});
+  //Προσθέσαμε τα seasonMatches στον Constructor
+  const StandingsPage(this.seasonYear, this.teamsList, this.seasonMatches, {super.key});
 
   final int seasonYear;
   final List<Team> teamsList;
@@ -95,13 +93,19 @@ class StandingsPage1 extends State<StandingsPage> {
 
           for (var match in headToHead) {
             if (match.homeTeam.name == a.name) {
-              if (match.scoreHome > match.scoreAway) aPoints += 3;
-              else if (match.scoreHome == match.scoreAway) { aPoints += 1; bPoints += 1; }
-              else bPoints += 3;
+              if (match.scoreHome > match.scoreAway) {
+                aPoints += 3;
+              } else if (match.scoreHome == match.scoreAway) { aPoints += 1; bPoints += 1; }
+              else {
+                bPoints += 3;
+              }
             } else {
-              if (match.scoreAway > match.scoreHome) aPoints += 3;
-              else if (match.scoreAway == match.scoreHome) { aPoints += 1; bPoints += 1; }
-              else bPoints += 3;
+              if (match.scoreAway > match.scoreHome) {
+                aPoints += 3;
+              } else if (match.scoreAway == match.scoreHome) { aPoints += 1; bPoints += 1; }
+              else {
+                bPoints += 3;
+              }
             }
           }
 
@@ -239,7 +243,7 @@ class StandingsPage1 extends State<StandingsPage> {
                               child: isPromotionSpot
                                   ? Container(
                                 width: screenWidth * 0.07, height: screenWidth * 0.07,
-                                decoration: BoxDecoration(color: isDark ? Colors.green.shade700 : Colors.green, shape: BoxShape.circle, boxShadow: [BoxShadow(color: isDark ? Colors.black26 : Colors.green.withOpacity(0.3), blurRadius: 4, offset: const Offset(0, 2))]),
+                                decoration: BoxDecoration(color: isDark ? Colors.green.shade700 : Colors.green, shape: BoxShape.circle, boxShadow: [BoxShadow(color: isDark ? Colors.black26 : Colors.green.withValues(alpha:0.3), blurRadius: 4, offset: const Offset(0, 2))]),
                                 child: Center(child: Text((index + 1).toString(), style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: screenWidth * 0.033))),
                               )
                                   : Container(

@@ -1,10 +1,6 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/src/foundation/change_notifier.dart';
-
-
-import '../Firebase_Handle/TeamsHandle.dart';
 
 import '../main.dart';
 import 'MatchDetails.dart';
@@ -12,9 +8,10 @@ import 'Team.dart';
 
 class AppUser
 {
-  String _username,_university,_email;
+  String _username;
+  final String _university,_email;
   bool _isLoggedIn=false;
-  late bool _isAdmin;
+  late  bool _isAdmin;
   final bool _isUpperAdmin;
   late final  bool _isSuperUser;
 
@@ -53,7 +50,7 @@ class AppUser
     for (MatchDetails match in upcomingMatches){
       if (match.homeTeam.name==team.name || match.awayTeam.name ==team.name ){
         match.enableNotify(true);
-        print (match.notify);
+
       }
     }
   }
@@ -64,7 +61,7 @@ class AppUser
     for (MatchDetails match in upcomingMatches){
       if (match.homeTeam.name==team.name || match.awayTeam.name ==team.name ){
         match.enableNotify(false);
-        print (match.notify);
+
       }
     }
   }
