@@ -100,50 +100,46 @@ class Team {
           .collection('teams') // π.χ. "teams"
           .doc(name)
           .update({
-        'Players.${player.name}${player.number}': FieldValue.delete(),
+        'Players.${player.uniqueKey}': FieldValue.delete(),
       });
     }
   }
 
   Future<void> updatePlayer(Player oldPlayer, Player newPlayer) async {
-    if (!(globalUser.controlTheseTeamsFootball(name, null) ||
-        globalUser.isUpperAdmin)) return;
-    final oldKey = '${oldPlayer.name}${oldPlayer.number}';
-    final newKey = '${newPlayer.name}${newPlayer.number}';
+    if (!(globalUser.controlTheseTeamsFootball(name, null) || globalUser.isUpperAdmin)) return;
 
-    if (oldKey != newKey) {
-      // Μετακίνησε/μετονόμασε τον παίχτη: διαγραφή παλιού κλειδιού + προσθήκη νέου
-      await FirebaseFirestore.instance
-          .collection('year')
-          .doc(thisYearNow.toString())
-          .collection('teams') // π.χ. "teams"
-          .doc(name)
-          .update({
-        'Players.${oldPlayer.name}${oldPlayer.number}': FieldValue.delete(),
-      });
+    // ✅ Παίρνουμε τα πραγματικά κλειδιά (είτε είναι UUID είτε Όνομα+Νούμερο)
+    final oldKey = oldPlayer.uniqueKey;
+    final newKey = newPlayer.uniqueKey;
 
-      await FirebaseFirestore.instance
-          .collection('year')
-          .doc(thisYearNow.toString())
-          .collection('teams')
-          .doc(newPlayer.teamName)
-          .set({
-        'Players': newPlayer.toMap(),
-      }, SetOptions(merge: true));
-    } else {
-      await FirebaseFirestore.instance
-          .collection('year')
-          .doc(thisYearNow.toString())
-          .collection('teams')
-          .doc(newPlayer.teamName)
-          .set({
-        'Players': newPlayer.toMap(),
-      }, SetOptions(merge: true));
-    }
-
-    // Ενημέρωσε και την τοπική λίστα
     _players.remove(oldPlayer);
     _players.add(newPlayer);
+
+
+    if (oldKey != newKey) {
+      // Αυτό θα συμβεί ΜΟΝΟ σε παλιούς παίκτες (χωρίς UUID) που τους άλλαξες όνομα/νούμερο.
+      // Πρέπει να διαγράψουμε την παλιά εγγραφή.
+      await FirebaseFirestore.instance
+          .collection('year')
+          .doc(thisYearNow.toString())
+          .collection('teams')
+          .doc(name)
+          .update({
+        'Players.$oldKey': FieldValue.delete(),
+      });
+    }
+
+    // Είτε άλλαξε το κλειδί είτε όχι, αποθηκεύουμε τα νέα δεδομένα με το νέο (ή το ίδιο) κλειδί.
+    await FirebaseFirestore.instance
+        .collection('year')
+        .doc(thisYearNow.toString())
+        .collection('teams')
+        .doc(newPlayer.teamName)
+        .set({
+      'Players': newPlayer.toMap(),
+    }, SetOptions(merge: true));
+
+
   }
 
 // Ενιαία ενημέρωση στατιστικών ομάδας μετά από αγώνα
@@ -360,7 +356,7 @@ class Team {
     Map<String, dynamic> playersMap = {};
     for (var player in _players) {
       // Χρησιμοποιούμε το όνομα+νούμερο ως κλειδί, όπως το είχαμε συμφωνήσει!
-      playersMap['${player.name}${player.number}'] = player.toMap2();
+      playersMap[player.uniqueKey] = player.toMap2();
     }
 
     // 2. Επιστρέφουμε τα στοιχεία της ομάδας

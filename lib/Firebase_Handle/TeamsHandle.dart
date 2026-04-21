@@ -92,7 +92,6 @@ class TeamsHandle {
                     playerData['Position'] ?? 0,
                     playerData['Goals'] ?? 0,
                     playerData['Number'] ?? 0,
-                    playerData['Age'] ?? 0,
                     playerData['TeamName'] ?? "",
                     playerData['numOfYellowCards'] ?? 0,
                     playerData['numOfRedCards'] ?? 0,
@@ -157,7 +156,6 @@ class TeamsHandle {
                     playerData['Position'] ?? 0,
                     playerData['Goals'] ?? 0,
                     playerData['Number'] ?? 0,
-                    playerData['Age'] ?? 0,
                     playerData['TeamName'] ?? "",
                     playerData['numOfYellowCards'] ?? 0,
                     playerData['numOfRedCards'] ?? 0,
@@ -299,7 +297,6 @@ class TeamsHandle {
             playerData['Position'] ?? 0,
             playerData['Goals'] ?? 0,
             playerData['Number'] ?? 0,
-            playerData['Age'] ?? 0,
             playerData['TeamName'] ?? "Unknown",
             playerData['numOfYellowCards'] ?? 0,
             playerData['numOfRedCards'] ?? 0,
@@ -419,6 +416,12 @@ class TeamsHandle {
             awayKitman: data['awayKitman'],
         );
 
+        if (data.containsKey('facts')) {
+          final factsMap = Map<String, dynamic>.from(data['facts']);
+          // Χρησιμοποιούμε τη στατική μέθοδο που ήδη έχεις στον helper σου
+          match.matchFact.addAll(await MatchFactsStorageHelper.decodeMatchFacts(factsMap));
+        }
+
         if (!match.isGroupPhase){
           int g= match.game;
           int slot = (g==16) ? 0 : (g==8) ? 8 : (g==4) ? 12 : 14;
@@ -525,6 +528,12 @@ class TeamsHandle {
               homeKitman: data['homeKitman'],
               awayKitman: data['awayKitman'],
           );
+
+          if (data.containsKey('facts')) {
+            final factsMap = Map<String, dynamic>.from(data['facts']);
+            // Χρησιμοποιούμε τη στατική μέθοδο που ήδη έχεις στον helper σου
+            match.matchFact.addAll(await MatchFactsStorageHelper.decodeMatchFacts(factsMap));
+          }
 
           int g= match.game;
           int slot = (g==16) ? 0 : (g==8) ? 8 : (g==4) ? 12 : 14;

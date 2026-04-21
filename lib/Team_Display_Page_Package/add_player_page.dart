@@ -1,6 +1,3 @@
-
-
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:uuid/uuid.dart';
@@ -12,213 +9,215 @@ import '../globals.dart';
 
 class AddPlayerScreen extends StatefulWidget {
   final Team team;
-  final Function(Player) onPlayerAdded;  // Callback για την προσθήκη του παίκτη
+  final Function(Player) onPlayerAdded;
 
-  AddPlayerScreen({required this.team, required this.onPlayerAdded});
+  const AddPlayerScreen({Key? key, required this.team, required this.onPlayerAdded}) : super(key: key);
 
   @override
   _AddPlayerScreenState createState() => _AddPlayerScreenState();
 }
 
 class _AddPlayerScreenState extends State<AddPlayerScreen> {
+  final _formKey = GlobalKey<FormState>();
+
   final _nameController = TextEditingController();
   final _surnameController = TextEditingController();
   final _numberController = TextEditingController();
-  final _ageController = TextEditingController();
 
-  String _selectedPosition = 'Τερματοφύλακας'; // Default αρχική τιμή
+  String _selectedPosition = 'Τερματοφύλακας';
   final List<String> positions = ['Τερματοφύλακας', 'Αμυντικός', 'Μέσος', 'Επιθετικός'];
 
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _surnameController.dispose();
+    _numberController.dispose();
+    super.dispose();
+  }
+
   void _savePlayer() {
-    final name = _nameController.text.trim();
-    final surname = _surnameController.text.trim();
-    final position = _selectedPosition;
-    final number = int.tryParse(_numberController.text.trim());
-    //final age = int.tryParse(_ageController.text.trim());
+    if (_formKey.currentState!.validate()) {
+      final name = _nameController.text.trim();
+      final surname = _surnameController.text.trim();
+      final number = int.parse(_numberController.text.trim());
+      int pos = positions.indexOf(_selectedPosition);
 
-    if (name.isEmpty || surname.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Συμπλήρωσε όνομα, επώνυμο')),
+      final newPlayer = Player(
+          name,
+          surname,
+          pos,
+          0, // Goals
+          number,
+          widget.team.name,
+          0, // Yellow cards
+          0, // Red cards
+          widget.team.nameEnglish,
+          null, // Health card
+          0, // Appearances
+          const Uuid().v4() // Νέο ασφαλές ID!
       );
-      return;
+
+      widget.onPlayerAdded(newPlayer);
+      Navigator.pop(context, newPlayer);
     }
-
-    if (number == null || number < 1 || number > 99) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Ο αριθμός πρέπει να είναι μεταξύ 1 και 99')),
-      );
-      return;
-    }
-
-    //if (age == null || age < 5 || age > 55) {
-    //  ScaffoldMessenger.of(context).showSnackBar(
-    //    SnackBar(content: Text('Η ηλικία πρέπει να είναι μεταξύ 5 και 50')),
-    //  );
-    //  return;
-    //}
-
-    int pos = (position == 'Τερματοφύλακας') ? 0 : (position == 'Αμυντικός') ? 1 : (position == 'Μέσος') ? 2 : 3;
-
-    final newPlayer = Player(name, surname, pos, 0, number, 20, widget.team.name, 0, 0,widget.team.nameEnglish,null,0,const Uuid().v4());
-    widget.onPlayerAdded(newPlayer);  // Καλούμε το callback για την προσθήκη του παίκτη
-    Navigator.pop(context, newPlayer);  // Επιστροφή στην προηγούμενη οθόνη
   }
 
   @override
   Widget build(BuildContext context) {
-    logScreenViewSta(screenName: 'Add player',screenClass: 'Add player page');
+    logScreenViewSta(screenName: 'Add player', screenClass: 'Add player page');
 
+    bool isDark = darkModeNotifier.value;
+    Color bgColor = isDark ? const Color(0xFF121212) : Colors.grey[100]!;
+    Color cardColor = isDark ? Colors.grey[850]! : Colors.white;
 
     return Scaffold(
-      backgroundColor: darkModeNotifier.value?Color(0xFF121212):Colors.white,
+      backgroundColor: bgColor,
       appBar: AppBar(
-          backgroundColor: darkModeNotifier.value?Color(0xFF121212):Colors.white,
-          iconTheme:IconThemeData(
-            color: darkModeNotifier.value ? Colors.white : Colors.black, // Set icon color
-          ),
-          title: Text(
-            'Προσθήκη νέου παίκτη',
-            style:
-            TextStyle(fontSize: 24,
-                fontWeight: FontWeight.w600,
-                fontFamily: 'Arial',
-                color:darkModeNotifier.value? Colors.white: Colors.black
-            ),
-          )
+        title: Text(
+          greek ? 'Προσθήκη Νέου Παίκτη' : 'Add New Player',
+          style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+        ),
+        backgroundColor: isDark ? Colors.grey[900] : const Color.fromARGB(250, 46, 90, 136),
+        iconTheme: const IconThemeData(color: Colors.white),
+        elevation: 0,
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            TextField(
-              style: TextStyle(
-                  color: darkModeNotifier.value?Colors.white:Colors.black,
-                  fontSize: 14.5,
-                  fontFamily: "Arial"
+        physics: const BouncingScrollPhysics(),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                greek ? "Στοιχεία Παίκτη" : "Player Details",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: isDark ? Colors.white : Colors.black87),
               ),
-              controller: _nameController,
-              decoration: InputDecoration(
-                  labelText: 'Όνομα',
-                  labelStyle: TextStyle(
-                      color: darkModeNotifier.value?Colors.white:Colors.black,
-                      fontSize: 16,
-                      fontFamily: "Arial"
-                  )
+              const SizedBox(height: 15),
+
+              _buildModernTextField(
+                  controller: _nameController,
+                  label: greek ? 'Όνομα' : 'Name',
+                  icon: Icons.person,
+                  isDark: isDark,
+                  cardColor: cardColor
               ),
-            ),
-            SizedBox(height: 20,),
-            TextField(
-              style: TextStyle(
-                  color: darkModeNotifier.value?Colors.white:Colors.black,
-                  fontSize: 16,
-                  fontFamily: "Arial"
+              const SizedBox(height: 12),
+
+              _buildModernTextField(
+                  controller: _surnameController,
+                  label: greek ? 'Επώνυμο' : 'Surname',
+                  icon: Icons.person_outline,
+                  isDark: isDark,
+                  cardColor: cardColor
               ),
-              controller: _surnameController,
-              decoration: InputDecoration(
-                  labelText: 'Επώνυμο',
-                  labelStyle: TextStyle(
-                      color: darkModeNotifier.value?Colors.white:Colors.black
-                  )
-              ),
-            ),
-            SizedBox(height: 20),
-            DropdownButtonFormField<String>(
-              value: _selectedPosition,
-              dropdownColor: darkModeNotifier.value ? Colors.grey[850] : Colors.white,
-              style: TextStyle(
-                  color: darkModeNotifier.value ? Colors.white : Colors.black,
-                  fontSize: 16,
-                  fontFamily: "Arial"
-              ),
-              decoration: InputDecoration(
-                labelText: 'Θέση',
-                labelStyle: TextStyle(
-                    color: darkModeNotifier.value?Colors.white:Colors.black,
-                    fontFamily: "Arial",
-                    fontSize: 20
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderSide: BorderSide(
-                    color: darkModeNotifier.value ? Colors.white : Colors.black,
-                  ),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(
-                    color: darkModeNotifier.value ? Colors.white : Colors.black,
-                  ),
-                ),
-              ),
-              items: positions.map((position) {
-                return DropdownMenuItem<String>(
-                  value: position,
-                  child: Text(
-                    position,
-                    style: TextStyle(
-                        color: darkModeNotifier.value ? Colors.white : Colors.black,
-                        fontSize: 16,
-                        fontFamily: "Arial"
+              const SizedBox(height: 12),
+
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start, // Στοίχιση πάνω γιατί το FormField μπορεί να μεγαλώσει με το error text
+                children: [
+                  Expanded(
+                    flex: 1,
+                    child: _buildModernTextField(
+                        controller: _numberController,
+                        label: greek ? 'Νούμερο' : 'Number',
+                        icon: Icons.numbers,
+                        isNumber: true,
+                        isDark: isDark,
+                        cardColor: cardColor
                     ),
                   ),
-                );
-              }).toList(),
-              onChanged: (value) {
-                setState(() {
-                  _selectedPosition = value!;
-                });
-              },
-            ),
-            SizedBox(height: 20,),
-            TextField(
-              controller: _numberController,
-              keyboardType: TextInputType.number,
-              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-              style: TextStyle(
-                  color: darkModeNotifier.value?Colors.white:Colors.black,
-                  fontSize: 16,
-                  fontFamily: "Arial"
+                  const SizedBox(width: 10),
+                  Expanded(
+                    flex: 2,
+                    child: DropdownButtonFormField<String>(
+                      value: _selectedPosition,
+                      dropdownColor: cardColor,
+                      style: TextStyle(color: isDark ? Colors.white : Colors.black, fontSize: 16),
+                      decoration: InputDecoration(
+                        labelText: greek ? 'Θέση' : 'Position',
+                        labelStyle: TextStyle(color: isDark ? Colors.grey[400] : Colors.grey[600], fontSize: 13),
+                        prefixIcon: Icon(Icons.sports_soccer, color: isDark ? Colors.blue[300] : Colors.blue[400]),
+                        filled: true,
+                        fillColor: cardColor,
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Colors.blueAccent, width: 1.5)),
+                      ),
+                      items: positions.map((position) {
+                        return DropdownMenuItem<String>(
+                          value: position,
+                          child: Text(position),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        setState(() {
+                          _selectedPosition = value!;
+                        });
+                      },
+                    ),
+                  ),
+                ],
               ),
-              decoration: InputDecoration(
-                  labelText: 'Αριθμός Φανέλας',
-                  labelStyle: TextStyle(
-                      color: darkModeNotifier.value?Colors.white:Colors.black,
-                      fontSize: 16
-                  )
-              ),
-            ),
-            SizedBox(height: 20,),
-            //TextField(
-            //  controller: _ageController,
-            //  keyboardType: TextInputType.number,
-            //  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-            //  style: TextStyle(
-            //      color: darkModeNotifier.value?Colors.white:Colors.black,
-            //      fontSize: 16,
-            //      fontFamily: "Arial"
-            //  ),
-            //  decoration: InputDecoration(
-            //      labelText: 'Ηλικία',
-            //      labelStyle: TextStyle(
-            //          color: darkModeNotifier.value?Colors.white:Colors.black,
-            //          fontSize: 16,
-            //          fontFamily: "Arial"
-            //      )
-            //  ),
-            //),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _savePlayer,
-              child: Text(
-                'Αποθήκευση',
-                style: TextStyle(
-                    fontSize: 16,
-                    fontFamily: "Arial"
+
+              const SizedBox(height: 40),
+
+              SizedBox(
+                height: 50,
+                width: double.infinity,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green[600], // Πράσινο χρώμα γιατί είναι ενέργεια "Προσθήκης"
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    elevation: 2,
+                  ),
+                  onPressed: _savePlayer,
+                  child: Text(
+                    greek ? 'ΠΡΟΣΘΗΚΗ ΠΑΙΚΤΗ' : 'ADD PLAYER',
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: 1),
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
-}
 
+  // Το ίδιο Helper Widget για τέλεια ευκρίνεια και συνέπεια
+  Widget _buildModernTextField({
+    required TextEditingController controller,
+    required String label,
+    required IconData icon,
+    required bool isDark,
+    required Color cardColor,
+    bool isNumber = false,
+  }) {
+    return TextFormField(
+      controller: controller,
+      keyboardType: isNumber ? TextInputType.number : TextInputType.text,
+      inputFormatters: isNumber ? [FilteringTextInputFormatter.digitsOnly] : null,
+      style: TextStyle(color: isDark ? Colors.white : Colors.black, fontSize: 16),
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: TextStyle(color: isDark ? Colors.grey[400] : Colors.grey[600], fontSize: 13),
+        prefixIcon: Icon(icon, color: isDark ? Colors.blue[300] : Colors.blue[400]),
+        filled: true,
+        fillColor: cardColor,
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Colors.blueAccent, width: 1.5)),
+        errorStyle: const TextStyle(color: Colors.redAccent, fontSize: 10),
+      ),
+      validator: (value) {
+        if (value == null || value.trim().isEmpty) return greek ? 'Υποχρεωτικό' : 'Required';
+        if (isNumber) {
+          final number = int.tryParse(value);
+          if (number == null || number < 1 || number > 99) {
+            return greek ? 'Από 1 έως 99' : 'Between 1 and 99';
+          }
+        }
+        return null;
+      },
+    );
+  }
+}
