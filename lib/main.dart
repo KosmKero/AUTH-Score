@@ -82,19 +82,19 @@ void main() async {
     ));
 
     // Ορισμός defaults
-   await remoteConfig.setDefaults(const {
-     "has_home_sponsor": false,
-     "home_sponsor_image_url": "",
-     "home_sponsor_link": "",
-     "has_match_sponsor": false,
-     "match_sponsor_image_url": "",
-     "match_sponsor_link": "",
-     "has_splash_sponsor": false,
-     "splash_logo_url": "",
-     'has_top20_sponsor':false,
-     'top20_sponsor_link': '',
-     "logoVersion": "1"
-   });
+    await remoteConfig.setDefaults(const {
+      "has_home_sponsor": false,
+      "home_sponsor_image_url": "",
+      "home_sponsor_link": "",
+      "has_match_sponsor": false,
+      "match_sponsor_image_url": "",
+      "match_sponsor_link": "",
+      "has_splash_sponsor": false,
+      "splash_logo_url": "",
+      'has_top20_sponsor': false,
+      'top20_sponsor_link': '',
+      "logoVersion": "1"
+    });
 
     // 3. Παράλληλη αρχικοποίηση Ads και Remote Config Fetch
     await Future.wait([
@@ -110,7 +110,7 @@ void main() async {
         const Duration(milliseconds: 100)); //να προλαβουν να γινουν ολα σωστα
 
     User? user = FirebaseAuth.instance.currentUser;
-     await initTracking(); //προβλημα
+    await initTracking(); //προβλημα
 
     if (user != null) {
       loadUser(user);
@@ -131,7 +131,6 @@ void main() async {
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
-
 
   runApp(const MyApp());
 }
@@ -172,7 +171,6 @@ class _LoadingScreenState extends State<LoadingScreen> {
   void initState() {
     super.initState();
 
-
     _loadData();
     if (isLoggedIn) {
       _loadLanguage();
@@ -210,8 +208,8 @@ class _LoadingScreenState extends State<LoadingScreen> {
       setState(() {
         _loadingMessage = "All set!";
       });
-      bool hasSplashSponsor = FirebaseRemoteConfig.instance.getBool('has_splash_sponsor');
-
+      bool hasSplashSponsor =
+          FirebaseRemoteConfig.instance.getBool('has_splash_sponsor');
 
       int delayMilliseconds = hasSplashSponsor ? 1200 : 200;
 
@@ -247,7 +245,8 @@ class _LoadingScreenState extends State<LoadingScreen> {
     bool isDarkMode = brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: isDarkMode ? const Color(0xFF121212) : const Color(0xFF97B4C3),
+      backgroundColor:
+          isDarkMode ? const Color(0xFF121212) : const Color(0xFF97B4C3),
       body: Center(
         child: _hasError ? _buildErrorWidget() : _buildLoadingWidget(),
       ),
@@ -258,8 +257,10 @@ class _LoadingScreenState extends State<LoadingScreen> {
     // Παίρνουμε το ύψος της οθόνης για να υπολογίσουμε τη θέση
     final double screenHeight = MediaQuery.of(context).size.height;
 
-    bool hasSplashSponsor=  FirebaseRemoteConfig.instance.getBool('has_splash_sponsor');
-    String splashLogoUrl = FirebaseRemoteConfig.instance.getString('splash_logo_url');
+    bool hasSplashSponsor =
+        FirebaseRemoteConfig.instance.getBool('has_splash_sponsor');
+    String splashLogoUrl =
+        FirebaseRemoteConfig.instance.getString('splash_logo_url');
 
     return Stack(
       alignment: Alignment.center, // Κεντράρει τα πάντα στο Stack
@@ -269,7 +270,9 @@ class _LoadingScreenState extends State<LoadingScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              SizedBox(height: 29,),
+              SizedBox(
+                height: 29,
+              ),
               Text(
                 "UniScore",
                 style: TextStyle(
@@ -313,18 +316,25 @@ class _LoadingScreenState extends State<LoadingScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                 "Powered by",
+                  "Powered by",
                   style: TextStyle(
                     fontSize: 12,
-                    color: Colors.white.withOpacity(0.7), // Ελαφρώς διάφανο για να μην "φωνάζει"
+                    color: Colors.white.withOpacity(
+                        0.7), // Ελαφρώς διάφανο για να μην "φωνάζει"
                     letterSpacing: 1.0,
                   ),
                 ),
                 const SizedBox(height: 10),
-                SmartBanner(hasSponsor: hasSplashSponsor,
-                  height: FirebaseRemoteConfig.instance.getDouble('splash_screen_sponsor_image_height'),
+                SmartBanner(
+                  hasSponsor: hasSplashSponsor,
+                  height: FirebaseRemoteConfig.instance
+                      .getDouble('splash_screen_sponsor_image_height'),
                   sponsorImageUrl: splashLogoUrl,
-                  customBgColor: (MediaQuery.of(context).platformBrightness == Brightness.dark) ? const Color(0xFF121212) : const Color(0xFF97B4C3),)
+                  customBgColor: (MediaQuery.of(context).platformBrightness ==
+                          Brightness.dark)
+                      ? const Color(0xFF121212)
+                      : const Color(0xFF97B4C3),
+                )
               ],
             ),
           ),
@@ -404,19 +414,18 @@ Future<void> loadTeams() async {
 
 
    */
-
-
 }
+
 Future<void> loadYear() async {
-  final doc = await FirebaseFirestore.instance
-      .collection('ThisYear')
-      .doc('2026')
-      .get();
+  final doc =
+      await FirebaseFirestore.instance.collection('ThisYear').doc('2026').get();
 
   final data = doc.data();
   if (data != null && data.containsKey('year')) {
     thisYearNow = data['year'] as int;
   }
+
+  //thisYearNow=2027;
 }
 
 // Original matches loading function
@@ -426,10 +435,8 @@ Future<void> loadMatches() async {
   previousMatches = await teamsHandle.getMatches("previous");
   matches = [upcomingMatches, previousMatches];
 
-
   //teamsHandle.addMatch("ΕΜΠΟΡ.ΝΑΥΤΙΚΟ", "ΜΗΧΑΝ.ΜΗΧΑΝ.", 29, 4, 2025, 1, false, true, 1510, "upcoming", -1, -1);
 }
-
 
 // Original MainScreen and other classes
 class MainScreen extends StatefulWidget {
@@ -530,10 +537,10 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 2),
                     child: IconButton(
-                      icon: const Icon(Icons.add_circle_outline, color: Colors.white),
+                      icon: const Icon(Icons.add_circle_outline,
+                          color: Colors.white),
                       tooltip: greek ? "Προσθήκη Αγώνα" : "Add Match",
                       onPressed: () async {
-
                         bool? didChange = await Navigator.push(
                           context,
                           MaterialPageRoute(builder: (_) => AddMatchScreen()),
@@ -563,13 +570,16 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                       onPressed: () async {
                         bool? didChange = await Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (_) => const AddTeamScreen()),
+                          MaterialPageRoute(
+                              builder: (_) => const AddTeamScreen()),
                         );
 
                         if (didChange == true) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: Text(greek ? "Ανανέωση δεδομένων..." : "Refreshing data..."),
+                              content: Text(greek
+                                  ? "Ανανέωση δεδομένων..."
+                                  : "Refreshing data..."),
                               duration: const Duration(seconds: 1),
                               backgroundColor: Colors.blue,
                             ),
@@ -606,16 +616,17 @@ class NotificationsForAllChampionship extends StatefulWidget {
   const NotificationsForAllChampionship({super.key});
 
   @override
-  State<NotificationsForAllChampionship> createState() => _NotificationsForAllChampionshipState();
+  State<NotificationsForAllChampionship> createState() =>
+      _NotificationsForAllChampionshipState();
 }
 
-class _NotificationsForAllChampionshipState extends State<NotificationsForAllChampionship> {
+class _NotificationsForAllChampionshipState
+    extends State<NotificationsForAllChampionship> {
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<bool>(
       valueListenable: loggedInNotifications,
       builder: (context, isLogged, child) {
-
         // 1. Αν δεν είναι συνδεδεμένος, δείχνουμε "νεκρό" εικονίδιο αμέσως!
         if (!isLogged) {
           return IconButton(
@@ -629,22 +640,24 @@ class _NotificationsForAllChampionshipState extends State<NotificationsForAllCha
           valueListenable: globalUser.notifyAllMatches,
           builder: (context, active, child) {
             return IconButton(
-              tooltip: greek ? "Ειδοποιήσεις για όλα τα ματς" : "Notifications for all matches",
+              tooltip: greek
+                  ? "Ειδοποιήσεις για όλα τα ματς"
+                  : "Notifications for all matches",
               onPressed: () {
-
-
                 bool newValue = !active;
 
                 globalUser.setNotifyAllMatches(newValue);
 
-
-                setState(() {});
                 if (mounted) {
                   ScaffoldMessenger.of(context).hideCurrentSnackBar();
                   ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                     content: Text(newValue
-                        ? (greek ? "Ενεργοποιήθηκαν οι ειδοποιήσεις!" : "Enabled!")
-                        : (greek ? "Απενεργοποιήθηκαν οι ειδοποιήσεις." : "Disabled.")),
+                        ? (greek
+                            ? "Ενεργοποιήθηκαν οι ειδοποιήσεις!"
+                            : "Enabled!")
+                        : (greek
+                            ? "Απενεργοποιήθηκαν οι ειδοποιήσεις."
+                            : "Disabled.")),
                     duration: const Duration(milliseconds: 1300),
                     backgroundColor: newValue ? Colors.green : Colors.grey[700],
                   ));
@@ -666,34 +679,43 @@ class _NotificationsForAllChampionshipState extends State<NotificationsForAllCha
   void _showLoginWarning(BuildContext context) {
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(greek ? "Πρέπει να συνδεθείς για να έχεις ειδοποιήσεις" : "Please log in"),
+      content: Text(greek
+          ? "Πρέπει να συνδεθείς για να έχεις ειδοποιήσεις"
+          : "Please log in"),
       duration: const Duration(milliseconds: 1300),
       backgroundColor: Colors.redAccent.withOpacity(0.9),
     ));
   }
 }
 
-
-
 // ------------------------ BOTTOM NAVIGATION ------------------------
 class CustomBottomNavigationBar extends StatelessWidget {
   final int currentIndex;
   final Function(int) onTap;
 
-  const CustomBottomNavigationBar({super.key, required this.currentIndex, required this.onTap});
+  const CustomBottomNavigationBar(
+      {super.key, required this.currentIndex, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
     return BottomNavigationBar(
-      backgroundColor:  darkModeNotifier.value?Colors.grey[850]: Colors.black87,
+      backgroundColor:
+          darkModeNotifier.value ? Colors.grey[850] : Colors.black87,
       selectedFontSize: 14,
       unselectedFontSize: 12,
       type: BottomNavigationBarType.fixed,
       items: [
-        BottomNavigationBarItem(icon: const Icon(Icons.sports_soccer), label: greek ? "Αγώνες" : "Games"),
-        BottomNavigationBarItem(icon: const Icon(Icons.emoji_events), label: greek ? "Πρωτάθλημα" : "Championship"),
-        BottomNavigationBarItem(icon: Icon(Icons.favorite), label: greek ? "Αγαπημένα" : "Favorite"),
-        BottomNavigationBarItem(icon: Icon(Icons.person), label: greek ? "Προφίλ" : "Profile"),
+        BottomNavigationBarItem(
+            icon: const Icon(Icons.sports_soccer),
+            label: greek ? "Αγώνες" : "Games"),
+        BottomNavigationBarItem(
+            icon: const Icon(Icons.emoji_events),
+            label: greek ? "Πρωτάθλημα" : "Championship"),
+        BottomNavigationBarItem(
+            icon: Icon(Icons.favorite),
+            label: greek ? "Αγαπημένα" : "Favorite"),
+        BottomNavigationBarItem(
+            icon: Icon(Icons.person), label: greek ? "Προφίλ" : "Profile"),
         //BottomNavigationBarItem(icon: Icon(Icons.local_offer), label: greek? 'Φανέλες' : 'Merch')
       ],
       currentIndex: currentIndex,
