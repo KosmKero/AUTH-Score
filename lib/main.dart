@@ -287,6 +287,8 @@ class _LoadingScreenState extends State<LoadingScreen> {
         ),
 
         Positioned(
+          left: 0,
+          right: 0,
           top: screenHeight / 2 + 50, // 50 pixels κάτω από το κέντρο της οθόνης
           child: Column(
             mainAxisSize: MainAxisSize.min,

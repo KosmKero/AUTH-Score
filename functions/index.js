@@ -44,7 +44,11 @@ exports.sendPushNotification = onDocumentUpdated("year/2026/matches/{matchId}", 
       el: `${after.Hometeam} - ${after.Awayteam}`,
     };
 
-    const scorerName = newGoal.scorerName === "Άλλος" ? "" : ` (${newGoal.scorerName})`;
+    let scorerName = "";
+    if (newGoal.playerName && newGoal.playerName.trim() !== "" && newGoal.playerName !== "Άλλος") {
+      scorerName = ` (${newGoal.playerName.trim()})`;
+    }
+
 
     bodies = isHome ?
       {
