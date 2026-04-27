@@ -11,9 +11,13 @@ import '../Match_Details_Package/Match_Details_Page.dart';
 import '../globals.dart';
 import '../main.dart';
 
+@pragma('vm:entry-point')
+Future<void> _handleBackgroundMessage(RemoteMessage message) async {
+  print('🌙 Notification in Background: ${message.notification?.title}');
+}
 
 Future<void> initia() async {
-  await Firebase.initializeApp();
+  // Δεν χρειάζεται ξανά το Firebase.initializeApp αν υπάρχει στο main.dart
   await NotificationService.init();
 }
 
@@ -26,20 +30,26 @@ class NotificationService {
     await _requestPermission();
     await _initLocalNotifications();
     await _handleInitialMessage();
+
     _listenToForegroundMessages();
     _listenToMessageTap();
     _watchTokenRefresh();
+
+    FirebaseMessaging.onBackgroundMessage(_handleBackgroundMessage);
+
     await _saveTokenToFirestore();
   }
 
   static Future<void> _requestPermission() async {
-    NotificationSettings settings = await _messaging.requestPermission(
-      alert: true,
-      badge: true,
-      sound: true,
-    );
-
-    print('🔐 User granted permission: ${settings.authorizationStatus}');
+    try {
+      await _messaging.requestPermission(
+        alert: true,
+        badge: true,
+        sound: true,
+      );
+    } catch (e) {
+     print("⚠️ Η αίτηση για άδεια ειδοποιήσεων εκκρεμεί ήδη: $e");
+    }
   }
 
   static Future<void> _initLocalNotifications() async {
@@ -47,16 +57,13 @@ class NotificationService {
     AndroidInitializationSettings('@drawable/ic_notification');
 
     final InitializationSettings initializationSettings =
-    InitializationSettings(
-      android: initializationSettingsAndroid,
-    );
+    InitializationSettings(android: initializationSettingsAndroid);
 
     await _flutterLocalNotificationsPlugin.initialize(initializationSettings);
   }
 
   static void _listenToForegroundMessages() {
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-
       RemoteNotification? notification = message.notification;
       AndroidNotification? android = message.notification?.android;
 
@@ -72,7 +79,7 @@ class NotificationService {
               importance: Importance.max,
               priority: Priority.high,
               icon: '@drawable/ic_notification',
-              styleInformation: BigTextStyleInformation(''),
+              styleInformation: BigTextStyleInformation(notification.body ?? ''),
             ),
           ),
         );
@@ -82,19 +89,15 @@ class NotificationService {
 
   static void _listenToMessageTap() {
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-      print('📲 Notification tapped (background): ${message.notification?.title}');
-      _handleNotificationClick(message); // Προσθήκη
+      _handleNotificationClick(message);
     });
   }
 
   static Future<void> _handleInitialMessage() async {
     RemoteMessage? initialMessage = await _messaging.getInitialMessage();
     if (initialMessage != null) {
-      print("🚪 Opened from terminated: ${initialMessage.notification?.title}");
-
-      // Βάζουμε ένα μικρό delay για να προλάβει να φορτώσει το αρχικό UI (MaterialApp)
-      Future.delayed(Duration(milliseconds: 500), () {
-        _handleNotificationClick(initialMessage); // Προσθήκη
+      Future.delayed(const Duration(milliseconds: 500), () {
+        _handleNotificationClick(initialMessage);
       });
     }
   }
@@ -102,88 +105,68 @@ class NotificationService {
   static void _handleNotificationClick(RemoteMessage message) {
     if (message.data.containsKey('matchId')) {
       String matchId = message.data['matchId'];
-      print("🎯 Πάτησες την ειδοποίηση για το ματς με ID: $matchId");
-
-      // Αν οι λίστες είναι άδειες (το app μόλις άνοιξε), το κρατάμε για μετά!
       if (upcomingMatches.isEmpty && previousMatches.isEmpty) {
-        print("⏳ Τα δεδομένα φορτώνουν ακόμα. Αποθήκευση ID για αργότερα...");
         pendingMatchId = matchId;
       } else {
-        // Αν το app ήταν στο background και τα ματς είναι ήδη φορτωμένα
         navigateToMatch(matchId);
       }
     }
   }
 
-  // Νέα βοηθητική συνάρτηση που κάνει την πλοήγηση
   static void navigateToMatch(String matchId) {
     if (navigatorKey.currentState != null) {
       MatchDetails? targetMatch;
-
       try {
         targetMatch = upcomingMatches.firstWhere((m) => m.matchDocId == matchId);
-      } catch (e) {}
-
-      if (targetMatch == null) {
+      } catch (e) {
         try {
           targetMatch = previousMatches.firstWhere((m) => m.matchDocId == matchId);
         } catch (e) {}
       }
 
-      if (targetMatch == null) {
-        try {
-          targetMatch = playOffMatches.values.firstWhere((m) => m.matchDocId == matchId);
-        } catch (e) {}
-      }
-
       if (targetMatch != null) {
         navigatorKey.currentState?.push(
-          MaterialPageRoute(
-            builder: (context) => matchDetailsPage(targetMatch!),
-          ),
+          MaterialPageRoute(builder: (context) => matchDetailsPage(targetMatch!)),
         );
-      } else {
-        print("⚠️ Το ματς δεν βρέθηκε στις λίστες.");
       }
     }
   }
 
   static void _watchTokenRefresh() {
     _messaging.onTokenRefresh.listen((newToken) {
-
       _saveTokenToFirestore(newToken);
     });
   }
 
   static Future<void> _saveTokenToFirestore([String? newToken]) async {
-    String? token = newToken ?? await _messaging.getToken();
-    String? userId = FirebaseAuth.instance.currentUser?.uid;
+    String? token = newToken;
 
+    if (token == null) {
+      try {
+        token = await _messaging.getToken();
+      } catch (e) {
+        print("⚠️ FCM Token Error: $e");
+        return;
+      }
+    }
+
+    String? userId = FirebaseAuth.instance.currentUser?.uid;
     if (userId != null && token != null) {
       DocumentReference userDoc = FirebaseFirestore.instance.collection('users').doc(userId);
-
       DocumentSnapshot docSnap = await userDoc.get();
 
       String? savedToken;
       try {
         final data = docSnap.data() as Map<String, dynamic>?;
-        if (data != null && data.containsKey('fcmToken')) {
-          savedToken = data['fcmToken'];
-        }
+        savedToken = data?['fcmToken'];
       } catch (e) {
         savedToken = null;
       }
 
       if (savedToken != token) {
         await userDoc.set({'fcmToken': token}, SetOptions(merge: true));
-        print('💾 Token saved to Firestore successfully.');
-      } else {
-        print('⚖️ Token is already up to date.');
+        print('💾 Token updated in Firestore.');
       }
     }
   }
 }
-
-
-
-

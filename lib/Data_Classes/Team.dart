@@ -29,6 +29,8 @@ class Team {
       this._coach,
       this._position,
       this._initials,
+      this._goalsFor,
+      this._goalsAgainst,
       [List<Player>? players]) {
     _players = players ?? []; // Initialize players list if null
 

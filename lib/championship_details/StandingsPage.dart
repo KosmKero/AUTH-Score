@@ -174,121 +174,150 @@ class StandingsPage1 extends State<StandingsPage> {
     );
   }
 
-  // Η συνάρτηση δέχεται έτοιμη τη λίστα και μόνο ζωγραφίζει!
   Widget buildGroupStandings(int group, List<Team> groupTeams) {
     final isDark = darkModeNotifier.value;
     final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
 
-    final Color rowColor1 = isDark ? const Color(0xFF2D2D2D) : const Color.fromARGB(255, 214, 230, 255);
+    final Color rowColor1 = isDark ? const Color(0xFF2D2D2D) : const Color.fromARGB(255, 235, 243, 255);
     final Color rowColor2 = isDark ? const Color(0xFF1E1E1E) : Colors.white;
-    final Color textColor = isDark ? Colors.white : Colors.black;
-    final Color headerTextColor = isDark ? Colors.white70 : Colors.black54;
+    final Color textColor = isDark ? Colors.white : Colors.black87;
+    final Color headerTextColor = isDark ? Colors.white54 : Colors.black54;
+
+    const double posWidth = 26.0;
+    const double logoWidth = 24.0;
+    const double statWidth = 28.0; // Αντί για 22, για να χωράνε διψήφια άνετα
+    const double goalsWidth = 46.0; // Αντί για 38, για το "12:10"
+    const double ptsWidth = 32.0;
+
+    Widget statCell(String text, double width, {bool isBold = false, Color? color}) {
+      return SizedBox(
+        width: width,
+        child: Center(
+          child: Text(
+            text,
+            style: TextStyle(
+              fontSize: 13.0,
+              fontWeight: isBold ? FontWeight.bold : FontWeight.w500,
+              color: color ?? textColor,
+              fontFamily: 'Arial',
+            ),
+          ),
+        ),
+      );
+    }
 
     return Card(
       color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
-      margin: EdgeInsets.symmetric(horizontal: screenWidth * 0.01, vertical: screenHeight * 0.01),
-      elevation: 4,
+      // 🛠️ Αυξήσαμε λίγο το margin για να μην κολλάει το Card στα πλάγια
+      margin: EdgeInsets.symmetric(horizontal: screenWidth * 0.02, vertical: 8),
+      elevation: 3,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.01, vertical: screenHeight * 0.01),
+        padding: const EdgeInsets.symmetric(vertical: 12.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              greek ? "Όμιλος $group" : "Group $group",
-              style: TextStyle(fontSize: screenWidth * 0.045, fontWeight: FontWeight.bold, color: textColor),
-            ),
-            SizedBox(height: screenHeight * 0.005),
-
-            // Οριζόντιο Scroll για να μην σκάει σε μικρά κινητά
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  // Χρησιμοποιούμε μια σταθερή μικρή αφετηρία αν τα constraints είναι άπειρα (λόγω scrollview)
-                  final availableWidth = screenWidth * 0.95;
-                  final positionWidth = availableWidth * 0.09;
-                  final teamWidth = availableWidth * 0.385;
-                  final statsWidth = availableWidth * 0.085;
-                  final pointsWidth = availableWidth * 0.12;
-
-                  return DataTable(
-                    columnSpacing: 0,
-                    headingRowHeight: screenHeight * 0.05,
-                    dataRowHeight: screenHeight * 0.07,
-                    headingTextStyle: TextStyle(color: headerTextColor, fontWeight: FontWeight.bold, fontSize: screenWidth * 0.03),
-                    dataTextStyle: TextStyle(color: textColor, fontSize: screenWidth * 0.03),
-                    columns: [
-                      DataColumn(label: Container(width: positionWidth, alignment: Alignment.center, child: Text("#", style: TextStyle(fontWeight: FontWeight.bold, color: headerTextColor, fontSize: screenWidth * 0.04)))),
-                      DataColumn(label: Container(alignment: Alignment.centerLeft, child: Text(greek ? "  Ομάδα" : "  Team", style: TextStyle(fontWeight: FontWeight.bold, color: headerTextColor, fontSize: screenWidth * 0.034)))),
-                      DataColumn(label: SizedBox(width: statsWidth, child: Center(child: Text(greek ? "Π" : "G", style: TextStyle(fontWeight: FontWeight.bold, color: headerTextColor, fontSize: screenWidth * 0.033))))),
-                      DataColumn(label: SizedBox(width: statsWidth, child: Center(child: Text(greek ? "Ν" : "W", style: TextStyle(fontWeight: FontWeight.bold, color: headerTextColor, fontSize: screenWidth * 0.032))))),
-                      DataColumn(label: SizedBox(width: statsWidth, child: Center(child: Text(greek ? "Ι" : "D", style: TextStyle(fontWeight: FontWeight.bold, color: headerTextColor, fontSize: screenWidth * 0.032))))),
-                      DataColumn(label: SizedBox(width: statsWidth, child: Center(child: Text(greek ? "Η" : "L", style: TextStyle(fontWeight: FontWeight.bold, color: headerTextColor, fontSize: screenWidth * 0.032))))),
-                      DataColumn(label: SizedBox(width: pointsWidth, child: Center(child: Text(greek ? "Πόντοι" : "Points", style: TextStyle(fontWeight: FontWeight.bold, color: headerTextColor, fontSize: screenWidth * 0.032))))),
-                    ],
-                    rows: List<DataRow>.generate(groupTeams.length, (index) {
-                      final team = groupTeams[index];
-                      final rowColor = index % 2 == 0 ? rowColor1 : rowColor2;
-                      final isPromotionSpot = index < 4;
-
-                      return DataRow(
-                        color: WidgetStateProperty.all(rowColor),
-                        cells: [
-                          DataCell(
-                            Container(
-                              width: positionWidth,
-                              alignment: Alignment.center,
-                              padding: EdgeInsets.only(right: screenWidth * 0.01),
-                              child: isPromotionSpot
-                                  ? Container(
-                                width: screenWidth * 0.07, height: screenWidth * 0.07,
-                                decoration: BoxDecoration(color: isDark ? Colors.green.shade700 : Colors.green, shape: BoxShape.circle, boxShadow: [BoxShadow(color: isDark ? Colors.black26 : Colors.green.withValues(alpha:0.3), blurRadius: 4, offset: const Offset(0, 2))]),
-                                child: Center(child: Text((index + 1).toString(), style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: screenWidth * 0.033))),
-                              )
-                                  : Container(
-                                width: screenWidth * 0.07, height: screenWidth * 0.07,
-                                decoration: BoxDecoration(color: isDark ? Colors.grey.shade800 : Colors.grey.shade200, shape: BoxShape.circle, border: Border.all(color: isDark ? Colors.grey.shade700 : Colors.grey.shade300, width: 1)),
-                                child: Center(child: Text((index + 1).toString(), style: TextStyle(color: isDark ? Colors.white70 : Colors.black54, fontWeight: FontWeight.w500, fontSize: screenWidth * 0.033))),
-                              ),
-                            ),
-                          ),
-                          DataCell(
-                            Container(
-                              width: teamWidth,
-                              alignment: Alignment.centerLeft,
-                              child: TextButton(
-                                onPressed: () async {
-                                  if (!mounted) return;
-                                  await Navigator.push(context, MaterialPageRoute(builder: (context) => TeamDisplayPage(team)));
-                                  if (mounted) _calculateAllGroups();
-                                },
-                                child: Row(
-                                  children: [
-                                    SizedBox(width: screenWidth * 0.06, height: screenWidth * 0.06, child: team.image),
-                                    SizedBox(width: screenWidth * 0.02),
-                                    Flexible(child: Text(team.name, style: TextStyle(fontSize: screenWidth * 0.029, fontWeight: FontWeight.w600, color: textColor), softWrap: true, overflow: TextOverflow.visible)),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                          DataCell(SizedBox(child: Center(child: Text(team.totalGames.toString(), style: TextStyle(color: textColor, fontSize: screenWidth * 0.034))))),
-                          DataCell(SizedBox(child: Center(child: Text(team.wins.toString(), style: TextStyle(color: textColor, fontSize: screenWidth * 0.034))))),
-                          DataCell(SizedBox(child: Center(child: Text(team.draws.toString(), style: TextStyle(color: textColor, fontSize: screenWidth * 0.034))))),
-                          DataCell(SizedBox(child: Center(child: Text(team.losses.toString(), style: TextStyle(color: textColor, fontSize: screenWidth * 0.034))))),
-                          DataCell(SizedBox(child: Center(child: Text(team.totalPoints.toString(), style: TextStyle(color: textColor, fontSize: screenWidth * 0.034))))),
-                        ],
-                      );
-                    }),
-                  );
-                },
+            // ΤΙΤΛΟΣ ΟΜΙΛΟΥ
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 4.0),
+              child: Text(
+                greek ? "Όμιλος $group" : "Group $group",
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: textColor),
               ),
             ),
-            SizedBox(height: screenHeight * 0.01),
+            const SizedBox(height: 8),
+
+            // ΚΕΦΑΛΙΔΑ (Header Row)
+            Container(
+              // 🛠️ Μεγαλύτερο horizontal padding για να αναπνέει
+              padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 8.0),
+              decoration: BoxDecoration(
+                border: Border(bottom: BorderSide(color: isDark ? Colors.white12 : Colors.black12, width: 1)),
+              ),
+              child: Row(
+                children: [
+                  SizedBox(width: posWidth, child: Center(child: Text("#", style: TextStyle(color: headerTextColor, fontSize: 11, fontWeight: FontWeight.bold)))),
+                  const SizedBox(width: logoWidth + 8),
+                  Expanded(child: Text(greek ? "ΟΜΑΔΑ" : "TEAM", style: TextStyle(color: headerTextColor, fontSize: 11, fontWeight: FontWeight.bold))),
+                  statCell(greek ? "ΑΓ" : "P", statWidth, color: headerTextColor),
+                  statCell(greek ? "Ν" : "W", statWidth, color: headerTextColor),
+                  statCell(greek ? "Ι" : "D", statWidth, color: headerTextColor),
+                  statCell(greek ? "Η" : "L", statWidth, color: headerTextColor),
+                  statCell(greek ? "ΓΚΟΛ" : "GLS", goalsWidth, color: headerTextColor),
+                  statCell(greek ? "ΒΑΘ" : "PTS", ptsWidth, color: headerTextColor, isBold: true),
+                ],
+              ),
+            ),
+
+            // ΛΙΣΤΑ ΟΜΑΔΩΝ
+            ...List.generate(groupTeams.length, (index) {
+              final team = groupTeams[index];
+              final rowColor = index % 2 == 0 ? rowColor1 : rowColor2;
+              final isPromotionSpot = index < 4;
+
+              return InkWell(
+                onTap: () async {
+                  if (!mounted) return;
+                  await Navigator.push(context, MaterialPageRoute(builder: (context) => TeamDisplayPage(team)));
+                  if (mounted) _calculateAllGroups();
+                },
+                child: Container(
+                  color: rowColor,
+                  // 🛠️ Μεγαλύτερο horizontal padding και εδώ
+                  padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10.0),
+                  child: Row(
+                    children: [
+                      // Θέση (#)
+                      SizedBox(
+                        width: posWidth,
+                        child: Center(
+                          child: isPromotionSpot
+                              ? Container(
+                            width: 20, height: 20, // 🛠️ Λίγο μεγαλύτερο κυκλάκι
+                            decoration: BoxDecoration(color: isDark ? Colors.green.shade700 : Colors.green, shape: BoxShape.circle),
+                            child: Center(child: Text((index + 1).toString(), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 11))),
+                          )
+                              : Text((index + 1).toString(), style: TextStyle(color: headerTextColor, fontWeight: FontWeight.bold, fontSize: 12)),
+                        ),
+                      ),
+                      const SizedBox(width: 4), // Κενό ανάμεσα σε αριθμό και Logo
+
+                      // Σήμα Ομάδας
+                      SizedBox(
+                        width: logoWidth,
+                        height: logoWidth,
+                        child: team.image,
+                      ),
+                      const SizedBox(width: 8),
+
+                      // Όνομα Ομάδας
+                      Expanded(
+                        child: Text(
+                          team.name,
+                          style: TextStyle(fontWeight: FontWeight.w600, color: textColor, fontSize: 13),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+
+                      // Στατιστικά
+                      statCell(team.totalGames.toString(), statWidth),
+                      statCell(team.wins.toString(), statWidth),
+                      statCell(team.draws.toString(), statWidth),
+                      statCell(team.losses.toString(), statWidth),
+                      statCell("${team.goalsFor}:${team.goalsAgainst}", goalsWidth),
+
+                      // Πόντοι
+                      statCell(team.totalPoints.toString(), ptsWidth, isBold: true, color: isDark ? Colors.lightBlueAccent : Colors.blue.shade700),
+                    ],
+                  ),
+                ),
+              );
+            }),
           ],
         ),
       ),
     );
   }
+
 }

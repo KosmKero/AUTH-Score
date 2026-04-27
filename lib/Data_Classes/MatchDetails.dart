@@ -56,7 +56,6 @@ class MatchDetails extends ChangeNotifier {
   String? awayKitman;
 
   late bool penaltyOver;
-  late DocumentSnapshot _data;
 
   String selectedFormationHome = "4-3-3"; // Προεπιλεγμένο σύστημα
   String selectedFormationAway = "4-3-3";
@@ -262,6 +261,10 @@ class MatchDetails extends ChangeNotifier {
   bool get hasExtraTimeStarted => _hasExtraTimeStarted;
   bool get hasSecondHalfExtraTimeStarted => _hasSecondHalfExtraTimeStarted;
 
+  DateTime get matchDateTime2 {
+    return DateTime.utc(_year, _month, _day, hour, minute).subtract(const Duration(hours: 3));
+  }
+
   int get homeScore => _scoreHome + _scoreHomeExtraTime;
   int get awayScore => _scoreAway + _scoreAwayExtraTime;
 
@@ -382,22 +385,6 @@ class MatchDetails extends ChangeNotifier {
       'statsUpdated': false,
       'GoalHome': scoreHome,
       'GoalAway': awayScore
-    }, SetOptions(merge: true)); // ώστε να μη διαγράψει άλλα πεδία
-  }
-
-  Future<void> homeScoredBase() async {
-    String goal;
-    isExtraTimeTime ? goal = 'GoalHomeExtraTime' : goal = 'GoalHome';
-    await FirebaseFirestore.instance.collection('year').doc(global.thisYearNow.toString()).collection("matches").doc(matchDocId).set({
-      goal: FieldValue.increment(1),
-    }, SetOptions(merge: true)); // ώστε να μη διαγράψει άλλα πεδία
-  }
-
-  Future<void> awayScoredBase() async {
-    String goal;
-    isExtraTimeTime ? goal = 'GoalAwayExtraTime' : goal = 'GoalAway';
-    await FirebaseFirestore.instance.collection('year').doc(global.thisYearNow.toString()).collection("matches").doc(matchDocId).set({
-      goal: FieldValue.increment(1),
     }, SetOptions(merge: true)); // ώστε να μη διαγράψει άλλα πεδία
   }
 
@@ -615,6 +602,22 @@ class MatchDetails extends ChangeNotifier {
 
     // 4. Ενημέρωση παικτών
     await MatchHandle().matchFinished(this);
+
+
+    String correctChoice;
+    (scoreHome > scoreAway)
+        ? correctChoice = "1"
+        : (scoreHome == scoreAway)
+        ? correctChoice = "X"
+        : correctChoice = "2";
+
+    await FirebaseFirestore.instance.collection('votes').doc(matchKey).set({  // ανανεωση του ματς στο στοιχημα
+      'hasMatchFinished': true,
+      'correctChoice': correctChoice,
+      'statsUpdated': false,
+      'GoalHome': scoreHome,
+      'GoalAway': awayScore
+    }, SetOptions(merge: true));
 
     notifyListeners();
   }

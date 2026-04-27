@@ -29,7 +29,7 @@ class _TeamDetailsWidgetState extends State<TeamDetailsWidget> {
           Card(
               color: darkModeNotifier.value ? Color(0xFF1E1E1E) : Colors.white,
               margin: EdgeInsets.symmetric(
-                  horizontal: MediaQuery.of(context).size.width * 0.01,
+                  horizontal: MediaQuery.of(context).size.width * 0.02,
                   vertical: 15),
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(15)),
@@ -90,7 +90,7 @@ class _TeamDetailsWidgetState extends State<TeamDetailsWidget> {
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(15)),
               margin: EdgeInsets.symmetric(
-                  horizontal: MediaQuery.of(context).size.width * 0.01,
+                  horizontal: MediaQuery.of(context).size.width * 0.02,
                   vertical: 15),
               child: Column(
                 children: [

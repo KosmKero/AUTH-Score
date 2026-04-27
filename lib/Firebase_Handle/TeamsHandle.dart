@@ -73,6 +73,8 @@ class TeamsHandle {
             String coach = team.get("Coach") ?? "";
             int position = team.get("position") ?? 0;
             String initials = team.get("initials");
+            int goalsFor = team.get('goalsFor') ?? 0;
+            int goalsAgainst = team.get('goalsAgainst') ?? 0;
 
             List<Player> players = [];
 
@@ -103,7 +105,7 @@ class TeamsHandle {
               });
             }
 
-            allTeams.add(Team(name, nameE, matches, wins, losses, draws, group, foundationYear, titles, coach, position, initials, players));
+            allTeams.add(Team(name, nameE, matches, wins, losses, draws, group, foundationYear, titles, coach, position, initials,goalsFor,goalsAgainst, players));
           } catch (e) {
             print("Error processing team document: ${team.id}, Error: $e");
           }
@@ -137,6 +139,8 @@ class TeamsHandle {
             String coach = team.get("Coach") ?? "";
             int position = team.get("position") ?? 0;
             String initials = team.get("initials");
+            int goalsAgainst = team.get('goalsAgainst') ?? 0;
+            int goalsFor = team.get('goalsFor') ?? 0;
 
             List<Player> players = [];
 
@@ -167,7 +171,7 @@ class TeamsHandle {
               });
             }
 
-            allTeams.add(Team(name, nameE, matches, wins, losses, draws, group, foundationYear, titles, coach, position, initials, players));
+            allTeams.add(Team(name, nameE, matches, wins, losses, draws, group, foundationYear, titles, coach, position, initials,goalsFor,goalsAgainst, players));
           } catch (e) {
             print("Error processing team document: ${team.id}, Error: $e");
           }
@@ -320,6 +324,8 @@ class TeamsHandle {
         data['Coach'] ?? "Unknown",
         data['position'] ?? 0,
         data['initials'] ?? " ",
+        data['goalsFor'] ?? 0,
+        data['goalsAgainst'] ?? 0,
         players,
       );
     } catch (e) {
@@ -354,6 +360,34 @@ class TeamsHandle {
           .collection('year').doc(thisYearNow.toString()).collection("matches")
           .where("Type", isEqualTo: type)
           .get();
+
+
+      /*
+      ----  cache ---
+       try {
+      var collection = FirebaseFirestore.instance
+          .collection('year')
+          .doc(thisYearNow.toString())
+          .collection("matches");
+
+      QuerySnapshot matchDocs;
+
+      try {
+        // Δοκιμάζουμε να τα πάρουμε ΜΟΝΟ από την cache (0 κόστος)
+        matchDocs = await collection
+            .where("Type", isEqualTo: type)
+            .get(const GetOptions(source: Source.cache));
+
+        // Αν η cache είναι άδεια, τότε και μόνο τότε πάμε στον server
+        if (matchDocs.docs.isEmpty) {
+          matchDocs = await collection.where("Type", isEqualTo: type).get();
+        }
+      } catch (e) {
+        // Αν αποτύχει η cache για οποιοδήποτε λόγο, πάμε κανονικά στον server
+        matchDocs = await collection.where("Type", isEqualTo: type).get();
+      }
+       */
+
 
       if (matchDocs.docs.isEmpty) {
         print("⚠️ No matches found for type '$type'.");

@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -12,6 +11,7 @@ import 'package:flutter/services.dart';
 import 'Data_Classes/basketball/basketMatch.dart';
 import 'Data_Classes/basketball/basketTeam.dart';
 //import 'Firebase_Handle/BasketTeamsHandle.dart';
+import 'Firebase_Handle/betting_result_update.dart';
 import 'Match_Details_Package/add_match_page.dart';
 import 'Team_Display_Page_Package/addTeamScreen.dart';
 import 'firebase_options.dart';
@@ -20,7 +20,6 @@ import 'package:flutter/material.dart';
 import 'package:untitled1/API/Match_Handle.dart';
 import 'package:untitled1/API/top_players_handle.dart';
 import 'package:untitled1/Data_Classes/Team.dart';
-import 'package:untitled1/Firebase_Handle/FireBaseMessage.dart';
 import 'package:untitled1/Firebase_Handle/TeamsHandle.dart';
 import 'package:untitled1/Firebase_Handle/user_handle_in_base.dart';
 import 'package:untitled1/championship_details/sector_chooser.dart';
@@ -61,6 +60,11 @@ void main() async {
     // 1. Αρχικοποίηση Firebase
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
+    );
+
+    FirebaseFirestore.instance.settings = const Settings(
+      persistenceEnabled: true,
+      cacheSizeBytes: Settings.CACHE_SIZE_UNLIMITED, // Κράτα όλο το ιστορικό τοπικά
     );
 
     //await FirebaseAnalytics.instance.setAnalyticsCollectionEnabled(true); //an δουλεψουν ποτε τα αναλυτικς
@@ -120,13 +124,6 @@ void main() async {
     print("❌ Firebase initialization failed: $e");
   }
 
-  try {
-    print("✅ All good!");
-    Messages().initNotification();
-  } catch (e) {
-    print("❌ Could not load messages $e");
-  }
-
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
@@ -175,9 +172,9 @@ class _LoadingScreenState extends State<LoadingScreen> {
     if (isLoggedIn) {
       _loadLanguage();
     }
-
-    initia();
-    //  BettingResultUpdate().recalculateAllScores();
+    //EmergencyRescue().restoreAllTimePredictions();
+   // BettingResultUpdate().recalculateAllHistoricalStats();
+      // BettingResultUpdate().recalculateAllScores();
   }
 
   Future<void> _loadLanguage() async {
@@ -192,6 +189,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
       });
       await loadYear();
       await loadTeams();
+      await initia();
 
       setState(() {
         _loadingMessage = "Loading matches...";

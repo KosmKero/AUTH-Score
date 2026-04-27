@@ -22,9 +22,6 @@ class BettingChooser extends StatefulWidget {
 }
 
 class _BettingChooserState extends State<BettingChooser> {
-
-
-
   TeamsHandle teamsHandle = TeamsHandle();
   String _selected = '';
   bool hasChosen = false;
@@ -34,70 +31,112 @@ class _BettingChooserState extends State<BettingChooser> {
   void initState() {
     super.initState();
     _checkIfUserVoted();
-
   }
+
+  bool _isVotingOpen() {
+    int nowInSeconds = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+    int lockTime = widget.match.matchDateTime2.millisecondsSinceEpoch ~/ 1000;  //15 λεπτα μετα την ωρα του ματς
+    return nowInSeconds < lockTime && !widget.match.hasMatchStarted;
+  }
+
   Future<void> _checkIfUserVoted() async {
     final vote = await getUserVoteFromMatch(match: widget.match);
+    bool votingOpen = _isVotingOpen();
+
     if (vote != null && mounted) {
-      // Φόρτωσε τα ποσοστά και όχι μόνο την επιλογή
-      final loadedPercentages = await loadPercentages(
-          widget.match
-      );
+      final loadedPercentages = await loadPercentages(widget.match);
       setState(() {
         hasChosen = true;
         _selected = vote;
         percentages = loadedPercentages;
       });
-    }
-  }
-
-
-  void _updateCount(String value) async {
-    if (hasChosen) return; // Επιστρέφει αν ο χρήστης έχει ήδη επιλέξει.
-
-    if (!globalUser.isLoggedIn) {
-      // Εμφάνιση του snackbar αν ο χρήστης δεν είναι συνδεδεμένος.
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Πρέπει να συνδεθείς για να ψηφίσεις!'),
-          duration: Duration(seconds: 2),
-        ),
-      );
-      return; // Επιστρέφει χωρίς να αποθηκεύσει την ψήφο αν ο χρήστης δεν είναι συνδεδεμένος.
-    }
-
-    await saveUserVoteToMatch(match: widget.match, choice: value);
-
-    final loadedPercentages = await loadPercentages(
-        widget.match
-    );
-
-    if (mounted) {
+    } else if (!votingOpen && mounted) {
+      final loadedPercentages = await loadPercentages(widget.match);
       setState(() {
-        hasChosen = true;
-        _selected = value;
         percentages = loadedPercentages;
       });
     }
   }
 
+  void _updateCount(String value) async {
+    // Αν έχει ψηφίσει ή έχουν κλείσει οι προβλέψεις, αγνόησε το πάτημα
+    if (hasChosen || !_isVotingOpen()) return;
+
+    if (!globalUser.isLoggedIn) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Πρέπει να συνδεθείς για να ψηφίσεις!'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+      return;
+    }
+
+    setState(() {
+      _selected = value;
+      hasChosen = true;
+    });
+
+    try {
+      // Στέλνουμε τα δεδομένα στο Firebase
+      await saveUserVoteToMatch(match: widget.match, choice: value);
+
+      // Φορτώνουμε τα νέα ποσοστά
+      final loadedPercentages = await loadPercentages(widget.match);
+
+      if (mounted) {
+        setState(() {
+          percentages = loadedPercentages;
+        });
+      }
+    } on FirebaseException catch (e) {
+      // GRACEFUL ERROR HANDLING: Πιάνουμε το Rule του Firebase
+      if (e.code == 'permission-denied') {
+        if (mounted) {
+          setState(() {
+            _selected = ''; // Αναιρούμε την επιλογή στο UI
+            hasChosen = false;
+          });
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Οι προβλέψεις για αυτόν τον αγώνα έχουν κλείσει 🔒'),
+              backgroundColor: Colors.redAccent,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      // Αν πέσει το ίντερνετ
+      if (mounted) {
+        setState(() {
+          _selected = '';
+          hasChosen = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Σφάλμα σύνδεσης. Η ψήφος δεν αποθηκεύτηκε.')),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    bool votingOpen = _isVotingOpen();
+
     return Padding(
-      padding: EdgeInsets.only(right: 10),
+      padding: const EdgeInsets.only(right: 10),
       child: Column(
         children: [
+
           SizedBox(
               width: 320,
-              child:SegmentedButton<String>(
+              child: SegmentedButton<String>(
                 segments: [
                   ButtonSegment(
                     value: '1',
                     label: Text(
-                      hasChosen && percentages.isNotEmpty ? percentages[0].toStringAsFixed(2) : "1",
-                      style: TextStyle(
-                        fontSize: 15,
-                      ),
+                      (hasChosen || !votingOpen) && percentages.isNotEmpty ? "${percentages[0].toStringAsFixed(0)}%" : "1",
+                      style: const TextStyle(fontSize: 15),
                       textAlign: TextAlign.center,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -105,43 +144,43 @@ class _BettingChooserState extends State<BettingChooser> {
                   ButtonSegment(
                     value: 'X',
                     label: Text(
-                      hasChosen && percentages.isNotEmpty ? percentages[2].toStringAsFixed(2) : 'X',
-                      style: TextStyle(fontSize: 15),
+                      (hasChosen || !votingOpen) && percentages.isNotEmpty ? "${percentages[2].toStringAsFixed(0)}%" : 'X',
+                      style: const TextStyle(fontSize: 15),
                     ),
                   ),
                   ButtonSegment(
                     value: '2',
                     label: Text(
-                      hasChosen && percentages.isNotEmpty ? percentages[1].toStringAsFixed(2) : '2',
-                      style: TextStyle(fontSize: 15),
+                      (hasChosen || !votingOpen) && percentages.isNotEmpty ? "${percentages[1].toStringAsFixed(0)}%" : '2',
+                      style: const TextStyle(fontSize: 15),
                     ),
                   ),
                 ],
                 style: ButtonStyle(
-                  fixedSize: WidgetStateProperty.all(Size(540, 50)),
+                  fixedSize: WidgetStateProperty.all(const Size(540, 50)),
                   shape: WidgetStateProperty.all(
                     RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(9),
-                      side: BorderSide(color: Colors.black, width: 1.5),
+                      side: const BorderSide(color: Colors.black, width: 1.5),
                     ),
                   ),
                   backgroundColor:
-                  WidgetStateProperty.all(Color.fromARGB(255, 243, 246, 255)),
+                  WidgetStateProperty.all(const Color.fromARGB(255, 243, 246, 255)),
                   elevation: WidgetStateProperty.all(3),
                   shadowColor: WidgetStateProperty.all(Colors.black.withOpacity(0.3)),
                 ),
                 showSelectedIcon: true,
                 selected: _selected.isNotEmpty ? {_selected} : <String>{},
                 emptySelectionAllowed: true,
-                onSelectionChanged: hasChosen
+                // Απενεργοποίηση του κουμπιού αν έχει ψηφίσει ή αν έκλεισαν οι προβλέψεις
+                onSelectionChanged: (hasChosen || !votingOpen)
                     ? null
                     : (newSelection) {
                   _updateCount(newSelection.first);
                 },
               )
-
           ),
-          SizedBox(height: 10),
+          const SizedBox(height: 10),
         ],
       ),
     );
@@ -151,8 +190,6 @@ class _BettingChooserState extends State<BettingChooser> {
     required MatchDetails match,
     required String choice,
   }) async {
-
-
     final docRef = FirebaseFirestore.instance.collection('votes').doc(widget.matchKey);
 
     await docRef.set({
@@ -167,17 +204,14 @@ class _BettingChooserState extends State<BettingChooser> {
       'choice': choice,
       'status': 'pending',
       'createdAt': FieldValue.serverTimestamp(),
-
       'matchInfo': {
         'Hometeam': match.homeTeam.name,
-        'Awayteam':match.awayTeam.name,
+        'Awayteam': match.awayTeam.name,
         'homeTeamEnglish': match.homeTeam.nameEnglish,
         'awayTeamEnglish': match.awayTeam.nameEnglish,
-        'startTime': match.matchDateTime
+        'startTime': match.matchDateTime2
       }
     });
-
-
   }
 
   Future<String?> getUserVoteFromMatch({required MatchDetails match}) async {
@@ -186,25 +220,16 @@ class _BettingChooserState extends State<BettingChooser> {
         .doc(widget.matchKey)
         .get();
 
-    print('Match key: ${widget.matchKey}');
-    print('Full doc: ${doc.data()}');
-
     final uid = FirebaseAuth.instance.currentUser?.uid;
-    print('Current UID: $uid');
 
     if (uid != null && doc.exists) {
       final data = doc.data();
       if (data != null && data['userVotes'] != null) {
         final votes = data['userVotes'] as Map<String, dynamic>;
-        print('All userVotes: $votes');
         final vote = votes[uid] as String?;
-        print('Vote for current user: $vote');
         return vote;
       }
     }
-
-    print('problem');
     return null;
   }
-
 }

@@ -413,7 +413,7 @@ class _MatchContainerTimeState extends State<MatchContainerTime>
     _timer?.cancel(); // cancel previous timer if any
     _secondsElapsed = (DateTime.now().millisecondsSinceEpoch ~/ 1000) -
         widget.match.startTimeInSeconds;
-    print("object");
+
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (!mounted) {
         _timer?.cancel();

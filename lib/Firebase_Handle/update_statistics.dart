@@ -50,84 +50,50 @@ List<String> allItems = [
 
 ];
 
-Future<void> updateSchoolStatistics() async {
+Future<void> updateAllUserStatistics() async {
   final firestore = FirebaseFirestore.instance;
 
-  // Αρχικοποίηση map με 0 για κάθε σχολή
-  Map<String, int> counts = { for (var item in allItems) item: 0 };
-  counts['Άλλο'] = 0; // Προσθήκη της κατηγορίας "Άλλο"
-  int totalUsers = 0;
-
-  // Λήψη όλων των χρηστών από τη συλλογή users
-  final snapshot = await firestore.collection('users').get();
-
-  for (var doc in snapshot.docs) {
-    final university = doc['University'];
-
-    if (university != null) {
-      if (counts.containsKey(university)) {
-        counts[university] = counts[university]! + 1;
-      } else {
-        counts['Άλλο'] = counts['Άλλο']! + 1;
-      }
-
-    }
-    totalUsers++;
-  }
-
-  // Αφαίρεση σχολών με 0 αν δεν τις θέλεις στο τελικό document
-  counts.removeWhere((key, value) => value == 0);
-
-  // Αποθήκευση στο Firestore
-  await firestore.collection('userStats').doc('schoolStats').set({
-    'totalUsers': totalUsers,
-    'schools': counts,
-  });
-}
-
-Future<void> updateFavoriteTeamsStatistics() async {
-  final firestore = FirebaseFirestore.instance;
+  // 1. Προετοιμασία των μετρητών (Counters)
+  Map<String, int> schoolCounts = { for (var item in allItems) item: 0 };
+  schoolCounts['Άλλο'] = 0;
 
   Map<String, int> teamCounts = {};
+
+  int darkCount = 0;
+  int lightCount = 0;
   int totalUsers = 0;
 
+  // 2. Η ΜΟΝΑΔΙΚΗ ανάγνωση από τη βάση! (Εδώ γλιτώνεις το 66% των Reads)
   final snapshot = await firestore.collection('users').get();
 
+  // 3. Επεξεργασία δεδομένων
   for (var doc in snapshot.docs) {
     final data = doc.data();
-    final favTeams = data['Favourite Teams'];
+    totalUsers++;
 
+    // --- Στατιστικά Σχολών ---
+    final university = data['University'];
+    if (university != null) {
+      if (schoolCounts.containsKey(university)) {
+        schoolCounts[university] = schoolCounts[university]! + 1;
+      } else {
+        schoolCounts['Άλλο'] = schoolCounts['Άλλο']! + 1;
+      }
+    }
+
+    // --- Στατιστικά Ομάδων ---
+    final favTeams = data['Favourite Teams'];
     if (favTeams != null && favTeams is List && favTeams.isNotEmpty) {
       for (var team in favTeams) {
         if (team is String && team.trim().isNotEmpty) {
           teamCounts[team] = (teamCounts[team] ?? 0) + 1;
         }
       }
-      totalUsers++; // Αν θεωρείς ότι μετράμε χρήστες που έχουν έστω 1 ομάδα
     }
-  }
 
-  // Αφαίρεση ομάδων με 0 εμφανίσεις αν χρειάζεται (σπάνιο εδώ)
-  teamCounts.removeWhere((key, value) => value == 0);
-
-  await firestore.collection('userStats').doc('favoriteTeamsStat').set({
-    'totalUsers': totalUsers,
-    'teams': teamCounts,
-  });
-}
-
-Future<void> updateDarkModeStatistics() async {
-  final usersCollection = FirebaseFirestore.instance.collection('users');
-  final snapshot = await usersCollection.get();
-
-  int darkCount = 0;
-  int lightCount = 0;
-
-  for (var doc in snapshot.docs) {
-    final data = doc.data();
+    // --- Στατιστικά Dark Mode ---
     if (data.containsKey('darkMode')) {
-      final isDark = data['darkMode'] == true;
-      if (isDark) {
+      if (data['darkMode'] == true) {
         darkCount++;
       } else {
         lightCount++;
@@ -135,12 +101,31 @@ Future<void> updateDarkModeStatistics() async {
     }
   }
 
-  final totalUsers = darkCount + lightCount;
+  // 4. Καθάρισμα άδειων δεδομένων
+  schoolCounts.removeWhere((key, value) => value == 0);
+  teamCounts.removeWhere((key, value) => value == 0);
 
-  await FirebaseFirestore.instance.collection('userStats').doc('darkModeStats').set({
+  // 5. Μαζική αποθήκευση στο Firestore (Batched Write για ασφάλεια & οικονομία)
+  final batch = firestore.batch();
+
+  batch.set(firestore.collection('userStats').doc('schoolStats'), {
     'totalUsers': totalUsers,
+    'schools': schoolCounts,
+  });
+
+  batch.set(firestore.collection('userStats').doc('favoriteTeamsStat'), {
+    'totalUsers': totalUsers, // Ίσως θες να βάλεις άλλον μετρητή αν μετράς μόνο αυτούς με 1+ ομάδα
+    'teams': teamCounts,
+  });
+
+  batch.set(firestore.collection('userStats').doc('darkModeStats'), {
+    'totalUsers': darkCount + lightCount,
     'darkMode': darkCount,
     'lightMode': lightCount,
   });
-}
 
+  // Εκτέλεση όλων των εγγραφών ταυτόχρονα
+  await batch.commit();
+
+  print("✅ Όλα τα στατιστικά ενημερώθηκαν επιτυχώς με 1 μόνο Read Batch!");
+}

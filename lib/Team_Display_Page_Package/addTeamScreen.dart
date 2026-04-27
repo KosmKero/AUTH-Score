@@ -53,6 +53,8 @@ class _AddTeamScreenState extends State<AddTeamScreen> {
           "",                 // coach
           0,                                            // position
           _initialsController.text.trim().toUpperCase(),// initials
+          0,                                            //goals for
+          0,                                            //goals against
           [],                                           // players (άδεια λίστα αρχικά)
         );
 

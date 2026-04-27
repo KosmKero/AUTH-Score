@@ -38,19 +38,21 @@ class _SchoolStatsPageState extends State<SchoolStatsPage> {
     if (doc.exists) {
       final data = doc.data()!;
       setState(() {
-        totalUsers = data['totalUsers'];
+        totalUsers = data['totalUsers'] ?? 0;
         if (showSchools) {
-          schoolCounts = Map<String, int>.from(data['schools']);
+          schoolCounts = Map<String, int>.from(data['schools'] ?? {});
         } else if (showTeams) {
-          teamCounts = Map<String, int>.from(data['teams']);
+          teamCounts = Map<String, int>.from(data['teams'] ?? {});
         } else {
           darkModeCounts = {
-            'Dark Mode': data['darkMode'],
-            'Light Mode': data['lightMode'],
+            'Dark Mode': data['darkMode'] ?? 0,
+            'Light Mode': data['lightMode'] ?? 0,
           };
         }
         loading = false;
       });
+    } else {
+      setState(() { loading = false; });
     }
   }
 
@@ -59,14 +61,9 @@ class _SchoolStatsPageState extends State<SchoolStatsPage> {
       loading = true;
     });
 
-    if (showSchools) {
-      await updateSchoolStatistics();
-    } else if (showTeams) {
-      await updateFavoriteTeamsStatistics();
-    } else {
-      await updateDarkModeStatistics(); // needs to be implemented in Firebase_Handle
-    }
+    await updateAllUserStatistics();
 
+    // Αφού τα ενημέρωσε όλα, ξαναδιαβάζει μόνο το document του τρέχοντος Tab (1 read)
     await fetchData();
   }
 
@@ -83,6 +80,7 @@ class _SchoolStatsPageState extends State<SchoolStatsPage> {
         : showTeams
         ? teamCounts
         : darkModeCounts;
+
     final title = showSchools
         ? "Σχολές"
         : showTeams
@@ -97,7 +95,8 @@ class _SchoolStatsPageState extends State<SchoolStatsPage> {
           "Σύνολο χρηστών: $totalUsers",
           style: TextStyle(
               color: darkModeNotifier.value ? Colors.white : Colors.black,
-              fontSize: 18),
+              fontSize: 18,
+              fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 20),
         Text(
@@ -140,7 +139,7 @@ class _SchoolStatsPageState extends State<SchoolStatsPage> {
           ],
         ),
         const SizedBox(height: 20),
-        Container(
+        SizedBox( // Το Container έγινε SizedBox (βέλτιστη πρακτική στο Flutter)
           height: 450,
           width: double.infinity,
           child: ListView(
@@ -156,7 +155,8 @@ class _SchoolStatsPageState extends State<SchoolStatsPage> {
                   style: TextStyle(
                       color: darkModeNotifier.value
                           ? Colors.white
-                          : Colors.black),
+                          : Colors.black,
+                      fontWeight: FontWeight.w500),
                 ),
                 trailing: Text(
                   "$percentage%",
@@ -164,22 +164,28 @@ class _SchoolStatsPageState extends State<SchoolStatsPage> {
                       color: darkModeNotifier.value
                           ? Colors.white
                           : Colors.black,
-                      fontSize: 15),
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold),
                 ),
                 subtitle: Text(
                   "${entry.value} χρήστες",
                   style: TextStyle(
                       color: darkModeNotifier.value
-                          ? Colors.white
-                          : Colors.black),
+                          ? Colors.grey[400]
+                          : Colors.grey[700]),
                 ),
               );
             }).toList(),
           ),
         ),
-        ElevatedButton(
+        const SizedBox(height: 10),
+        ElevatedButton.icon(
           onPressed: updateAndFetchData,
-          child: const Text("Ανανέωση Στατιστικών"),
+          icon: const Icon(Icons.refresh),
+          label: const Text("Ανανέωση Στατιστικών"),
+          style: ElevatedButton.styleFrom(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          ),
         )
       ],
     );
