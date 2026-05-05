@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -17,7 +18,6 @@ Future<void> _handleBackgroundMessage(RemoteMessage message) async {
 }
 
 Future<void> initia() async {
-  // Δεν χρειάζεται ξανά το Firebase.initializeApp αν υπάρχει στο main.dart
   await NotificationService.init();
 }
 
@@ -28,7 +28,9 @@ class NotificationService {
 
   static Future<void> init() async {
     await _requestPermission();
-    await _initLocalNotifications();
+    await _setupIOSForeground(); // Ρύθμιση για iOS
+    await _initLocalNotifications(); // Ρύθμιση για Android (Channels)
+
     await _handleInitialMessage();
 
     _listenToForegroundMessages();
@@ -37,7 +39,7 @@ class NotificationService {
 
     FirebaseMessaging.onBackgroundMessage(_handleBackgroundMessage);
 
-    await _saveTokenToFirestore();
+    await saveTokenToFirestore();
   }
 
   static Future<void> _requestPermission() async {
@@ -48,16 +50,50 @@ class NotificationService {
         sound: true,
       );
     } catch (e) {
-     print("⚠️ Η αίτηση για άδεια ειδοποιήσεων εκκρεμεί ήδη: $e");
+      print("⚠️ Η αίτηση για άδεια ειδοποιήσεων εκκρεμεί ήδη: $e");
+    }
+  }
+
+  // Ενεργοποίηση ειδοποιήσεων στο προσκήνιο για το iOS
+  static Future<void> _setupIOSForeground() async {
+    if (Platform.isIOS) {
+      await _messaging.setForegroundNotificationPresentationOptions(
+        alert: true,
+        badge: true,
+        sound: true,
+      );
     }
   }
 
   static Future<void> _initLocalNotifications() async {
+    // Δημιουργία Android Notification Channel
+    const AndroidNotificationChannel channel = AndroidNotificationChannel(
+      'high_importance_channel', // id
+      'Ειδοποιήσεις Αγώνων',     // name
+      description: 'Αυτό το κανάλι χρησιμοποιείται για σημαντικές ειδοποιήσεις.',
+      importance: Importance.max,
+    );
+
+    await _flutterLocalNotificationsPlugin
+        .resolvePlatformSpecificImplementation<
+        AndroidFlutterLocalNotificationsPlugin>()
+        ?.createNotificationChannel(channel);
+
     const AndroidInitializationSettings initializationSettingsAndroid =
     AndroidInitializationSettings('@drawable/ic_notification');
 
-    final InitializationSettings initializationSettings =
-    InitializationSettings(android: initializationSettingsAndroid);
+    // Για iOS αν χρειαστεί να διαχειριστείς τοπικές ειδοποιήσεις
+    const DarwinInitializationSettings initializationSettingsIOS =
+    DarwinInitializationSettings(
+      requestSoundPermission: false,
+      requestBadgePermission: false,
+      requestAlertPermission: false,
+    );
+
+    const InitializationSettings initializationSettings = InitializationSettings(
+      android: initializationSettingsAndroid,
+      iOS: initializationSettingsIOS,
+    );
 
     await _flutterLocalNotificationsPlugin.initialize(initializationSettings);
   }
@@ -69,13 +105,13 @@ class NotificationService {
 
       if (notification != null && android != null && !Platform.isIOS) {
         _flutterLocalNotificationsPlugin.show(
-          0,
+          notification.hashCode,
           notification.title,
           notification.body,
           NotificationDetails(
             android: AndroidNotificationDetails(
               'high_importance_channel',
-              'Ειδοποιήσεις',
+              'Ειδοποιήσεις Αγώνων',
               importance: Importance.max,
               priority: Priority.high,
               icon: '@drawable/ic_notification',
@@ -128,24 +164,41 @@ class NotificationService {
         navigatorKey.currentState?.push(
           MaterialPageRoute(builder: (context) => matchDetailsPage(targetMatch!)),
         );
+      } else {
+        print("⚠️ Το match $matchId δεν βρέθηκε καθόλου.");
       }
     }
   }
 
   static void _watchTokenRefresh() {
     _messaging.onTokenRefresh.listen((newToken) {
-      _saveTokenToFirestore(newToken);
+      saveTokenToFirestore(newToken);
     });
   }
 
-  static Future<void> _saveTokenToFirestore([String? newToken]) async {
+  static Future<void> saveTokenToFirestore([String? newToken]) async {
     String? token = newToken;
 
     if (token == null) {
       try {
-        token = await _messaging.getToken();
-      } catch (e) {
-        print("⚠️ FCM Token Error: $e");
+        token = await _messaging.getToken().timeout(
+          const Duration(seconds: 5),
+          onTimeout: () {
+            final errorMsg = "⚠️ Timeout: Το APNs/FCM άργησε να φέρει Token.";
+            print(errorMsg);
+
+            FirebaseCrashlytics.instance.recordError(
+              Exception("FCM Token Fetch Timeout"),
+              StackTrace.current,
+              reason: 'Αποτυχία λήψης token σε 5 δευτερόλεπτα (Πιθανό θέμα iOS/Δικτύου)',
+              fatal: false,
+            );
+
+            return null;
+          },
+        );
+      } catch (e, stackTrace) {
+        FirebaseCrashlytics.instance.recordError(e, stackTrace, reason: 'Σφάλμα στο getToken', fatal: false);
         return;
       }
     }

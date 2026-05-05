@@ -38,62 +38,73 @@ class _OneGroupStandingsState extends State<OneGroupStandings> {
           matchDate.isBefore(seasonEnd.add(const Duration(days: 1)));
     }).toList();
 
+    // 1. Helper function για να "καθαρίζουμε" τα Strings
+    // Αφαιρεί κενά και κάνει τα γράμματα πεζά για ασφαλή σύγκριση.
+    String cleanName(String name) => name.trim().toLowerCase();
+
     groupTeams.sort((a, b) {
+      // Κριτήριο 1: Συνολικοί Βαθμοί
       int pointsCompare = b.totalPoints.compareTo(a.totalPoints);
       if (pointsCompare != 0) return pointsCompare;
 
+      // --- ΕΝΑΡΞΗ ΛΟΓΙΚΗΣ ΙΣΟΒΑΘΜΙΑΣ (MINI-LEAGUE) ---
+
+      // Βρίσκουμε όλες τις ομάδες που έχουν τους ίδιους βαθμούς
       List<Team> tiedTeams = groupTeams.where((t) => t.totalPoints == a.totalPoints).toList();
 
-      if (!tiedTeams.any((t) => t.name == b.name)) return 0;
+      // Φιλτράρουμε τους αγώνες για να κρατήσουμε ΜΟΝΟ αυτούς μεταξύ των ισοβαθμούντων
+      var miniLeagueMatches = validMatches.where((match) {
+        bool isHomeTied = tiedTeams.any((t) => cleanName(t.name) == cleanName(match.homeTeam.name));
+        bool isAwayTied = tiedTeams.any((t) => cleanName(t.name) == cleanName(match.awayTeam.name));
+        return isHomeTied && isAwayTied;
+      }).toList();
 
-      if (tiedTeams.length > 2) {
-        Map<String, int> teamPoints = { for (var t in tiedTeams) t.name: 0 };
+      int aH2hPoints = 0;
+      int bH2hPoints = 0;
 
-        for (var match in validMatches) {
-          if (teamPoints.containsKey(match.homeTeam.name) && teamPoints.containsKey(match.awayTeam.name)) {
-            if (match.scoreHome > match.scoreAway) {
-              teamPoints[match.homeTeam.name] = teamPoints[match.homeTeam.name]! + 3;
-            } else if (match.scoreHome == match.scoreAway) {
-              teamPoints[match.homeTeam.name] = teamPoints[match.homeTeam.name]! + 1;
-              teamPoints[match.awayTeam.name] = teamPoints[match.awayTeam.name]! + 1;
-            } else {
-              teamPoints[match.awayTeam.name] = teamPoints[match.awayTeam.name]! + 3;
-            }
-          }
+      // Υπολογίζουμε τους H2H πόντους για την ομάδα A και την B μέσα σε αυτό το Mini-League
+      for (var match in miniLeagueMatches) {
+        String homeName = cleanName(match.homeTeam.name);
+        String awayName = cleanName(match.awayTeam.name);
+        String nameA = cleanName(a.name);
+        String nameB = cleanName(b.name);
+
+        // Πόντοι για ομάδα Α
+        if (homeName == nameA) {
+          if (match.scoreHome > match.scoreAway) aH2hPoints += 3;
+          else if (match.scoreHome == match.scoreAway) aH2hPoints += 1;
+        } else if (awayName == nameA) {
+          if (match.scoreAway > match.scoreHome) aH2hPoints += 3;
+          else if (match.scoreAway == match.scoreHome) aH2hPoints += 1;
         }
-        int multiCompare = teamPoints[b.name]!.compareTo(teamPoints[a.name]!);
-        if (multiCompare != 0) return multiCompare;
-      } else {
-        final headToHead = validMatches.where((match) =>
-        (match.homeTeam.name == a.name && match.awayTeam.name == b.name) ||
-            (match.homeTeam.name == b.name && match.awayTeam.name == a.name));
 
-        int aPoints = 0;
-        int bPoints = 0;
-
-        for (var match in headToHead) {
-          if (match.homeTeam.name == a.name) {
-            if (match.scoreHome > match.scoreAway) aPoints += 3;
-            else if (match.scoreHome == match.scoreAway) { aPoints += 1; bPoints += 1; }
-            else bPoints += 3;
-          } else {
-            if (match.scoreAway > match.scoreHome) aPoints += 3;
-            else if (match.scoreAway == match.scoreHome) { aPoints += 1; bPoints += 1; }
-            else bPoints += 3;
-          }
+        // Πόντοι για ομάδα Β
+        if (homeName == nameB) {
+          if (match.scoreHome > match.scoreAway) bH2hPoints += 3;
+          else if (match.scoreHome == match.scoreAway) bH2hPoints += 1;
+        } else if (awayName == nameB) {
+          if (match.scoreAway > match.scoreHome) bH2hPoints += 3;
+          else if (match.scoreAway == match.scoreHome) bH2hPoints += 1;
         }
-        int headToHeadCompare = bPoints.compareTo(aPoints);
-        if (headToHeadCompare != 0) return headToHeadCompare;
       }
 
+      print("Comparing ${a.name} vs ${b.name}: H2H Pts: $aH2hPoints - $bH2hPoints");
+
+
+      // Κριτήριο 2: Head-to-Head Βαθμοί
+      if (bH2hPoints != aH2hPoints) return bH2hPoints.compareTo(aH2hPoints);
+
+      // --- ΤΕΛΟΣ ΛΟΓΙΚΗΣ ΙΣΟΒΑΘΜΙΑΣ ---
+
+      // Κριτήριο 3: Συνολική Διαφορά Τερμάτων
       return b.goalDifference.compareTo(a.goalDifference);
     });
 
     // Ενημέρωση της global λίστας topTeams
+    // Προσοχή: Κάνουμε clear πρώτα για να μην προστίθενται διπλότυπα κάθε φορά που καλείται η μέθοδος!
+    topTeams.removeWhere((t) => groupTeams.any((g) => g.name == t.name));
     for (var topTeam in groupTeams.take(4)) {
-      if (!topTeams.any((t) => t.name == topTeam.name)) {
-        topTeams.add(topTeam);
-      }
+      topTeams.add(topTeam);
     }
 
     setState(() {
@@ -244,12 +255,32 @@ class _OneGroupStandingsState extends State<OneGroupStandings> {
 
             const SizedBox(height: 12),
 
-            // ΥΠΟΣΗΜΕΙΩΣΗ
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 14.0),
-              child: Text(
-                greek ? "Οι 4 πρώτοι περνούν στην επόμενη φάση." : "Top 4 teams advance to the next round.",
-                style: TextStyle(fontSize: 12, fontStyle: FontStyle.italic, color: isDark ? Colors.white70 : Colors.black54),
+              child: Row(
+                children: [
+                  Container(
+                    width: 8,
+                    height: 8,
+                    decoration: BoxDecoration(
+                      color: isDark ? Colors.green.shade700 : Colors.green,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      greek
+                          ? "Οι 4 πρώτοι περνούν στην επόμενη φάση"
+                          : "Top 4 teams advance to the next round",
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontStyle: FontStyle.italic,
+                        color: isDark ? Colors.white60 : Colors.black54,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],

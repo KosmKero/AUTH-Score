@@ -189,7 +189,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
       });
       await loadYear();
       await loadTeams();
-      await initia();
+      initia();
 
       setState(() {
         _loadingMessage = "Loading matches...";

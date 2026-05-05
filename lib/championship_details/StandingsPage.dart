@@ -5,6 +5,7 @@ import '../Data_Classes/MatchDetails.dart';
 import '../Data_Classes/Team.dart';
 import '../Firebase_Handle/firebase_screen_stats_helper.dart';
 import '../globals.dart';
+import '../main.dart';
 
 class StandingsPage extends StatefulWidget {
   //Προσθέσαμε τα seasonMatches στον Constructor
@@ -43,88 +44,90 @@ class StandingsPage1 extends State<StandingsPage> {
     DateTime seasonStart = DateTime(widget.seasonYear, 9, 1);
     DateTime seasonEnd = DateTime(widget.seasonYear + 1, 6, 30);
 
-    List<MatchDetails> validMatches = widget.seasonMatches.where((match) {
+    // 1. Φιλτράρουμε τα έγκυρα ματς
+    List<MatchDetails> validMatches = previousMatches.where((match) {
       DateTime matchDate = DateTime(match.year, match.month, match.day);
       return match.isGroupPhase &&
           matchDate.isAfter(seasonStart.subtract(const Duration(days: 1))) &&
           matchDate.isBefore(seasonEnd.add(const Duration(days: 1)));
     }).toList();
 
-    // Καθαρίζουμε την global λίστα για να μην έχουμε ποτέ διπλότυπα
     topTeams.clear();
+    String cleanName(String name) => name.trim().toLowerCase();
 
-    // Για κάθε όμιλο (1 έως 4), κάνουμε την ταξινόμηση
     for (int group = 1; group <= 4; group++) {
+      // 2. ΣΗΜΑΝΤΙΚΟ: Δημιουργούμε ΝΕΑ λίστα (.toList()) για να μην πειράξουμε την αρχική widget.teamsList
       List<Team> groupTeams = widget.teamsList.where((team) => team.group == group).toList();
 
       groupTeams.sort((a, b) {
-        int pointsCompare = b.totalPoints.compareTo(a.totalPoints);
-        if (pointsCompare != 0) return pointsCompare;
-
-        List<Team> tiedTeams = groupTeams.where((t) => t.totalPoints == a.totalPoints).toList();
-
-        if (!tiedTeams.any((t) => t.name == b.name)) return 0;
-
-        if (tiedTeams.length > 2) {
-          Map<String, int> teamPoints = { for (var t in tiedTeams) t.name: 0 };
-
-          for (var match in validMatches) {
-            if (teamPoints.containsKey(match.homeTeam.name) && teamPoints.containsKey(match.awayTeam.name)) {
-              if (match.scoreHome > match.scoreAway) {
-                teamPoints[match.homeTeam.name] = teamPoints[match.homeTeam.name]! + 3;
-              } else if (match.scoreHome == match.scoreAway) {
-                teamPoints[match.homeTeam.name] = teamPoints[match.homeTeam.name]! + 1;
-                teamPoints[match.awayTeam.name] = teamPoints[match.awayTeam.name]! + 1;
-              } else {
-                teamPoints[match.awayTeam.name] = teamPoints[match.awayTeam.name]! + 3;
-              }
-            }
-          }
-
-          int multiCompare = teamPoints[b.name]!.compareTo(teamPoints[a.name]!);
-          if (multiCompare != 0) return multiCompare;
-        } else {
-          final headToHead = validMatches.where((match) =>
-          (match.homeTeam.name == a.name && match.awayTeam.name == b.name) ||
-              (match.homeTeam.name == b.name && match.awayTeam.name == a.name));
-
-          int aPoints = 0;
-          int bPoints = 0;
-
-          for (var match in headToHead) {
-            if (match.homeTeam.name == a.name) {
-              if (match.scoreHome > match.scoreAway) {
-                aPoints += 3;
-              } else if (match.scoreHome == match.scoreAway) { aPoints += 1; bPoints += 1; }
-              else {
-                bPoints += 3;
-              }
-            } else {
-              if (match.scoreAway > match.scoreHome) {
-                aPoints += 3;
-              } else if (match.scoreAway == match.scoreHome) { aPoints += 1; bPoints += 1; }
-              else {
-                bPoints += 3;
-              }
-            }
-          }
-
-          int headToHeadCompare = bPoints.compareTo(aPoints);
-          if (headToHeadCompare != 0) return headToHeadCompare;
+        // Κριτήριο 1: Συνολικοί Βαθμοί (Σιγουρέψου ότι το team.totalPoints είναι up-to-date)
+        if (b.totalPoints != a.totalPoints) {
+          return b.totalPoints.compareTo(a.totalPoints);
         }
 
-        return b.goalDifference.compareTo(a.goalDifference);
+        // --- MINI-LEAGUE LOGIC ---
+        List<Team> tiedTeams = groupTeams.where((t) => t.totalPoints == a.totalPoints).toList();
+
+        var miniLeagueMatches = validMatches.where((match) {
+          bool isHomeTied = tiedTeams.any((t) => cleanName(t.name) == cleanName(match.homeTeam.name));
+          bool isAwayTied = tiedTeams.any((t) => cleanName(t.name) == cleanName(match.awayTeam.name));
+          return isHomeTied && isAwayTied;
+        }).toList();
+
+        int aH2hPoints = 0;
+        int bH2hPoints = 0;
+        int aH2hGD = 0;
+        int bH2hGD = 0;
+
+        for (var match in miniLeagueMatches) {
+          String h = cleanName(match.homeTeam.name);
+          String v = cleanName(match.awayTeam.name);
+          String nameA = cleanName(a.name);
+          String nameB = cleanName(b.name);
+
+          if (h == nameA) {
+            if (match.scoreHome > match.scoreAway) aH2hPoints += 3;
+            else if (match.scoreHome == match.scoreAway) aH2hPoints += 1;
+            aH2hGD += (match.scoreHome - match.scoreAway);
+          } else if (v == nameA) {
+            if (match.scoreAway > match.scoreHome) aH2hPoints += 3;
+            else if (match.scoreAway == match.scoreHome) aH2hPoints += 1;
+            aH2hGD += (match.scoreAway - match.scoreHome);
+          }
+
+          if (h == nameB) {
+            if (match.scoreHome > match.scoreAway) bH2hPoints += 3;
+            else if (match.scoreHome == match.scoreAway) bH2hPoints += 1;
+            bH2hGD += (match.scoreHome - match.scoreAway);
+          } else if (v == nameB) {
+            if (match.scoreAway > match.scoreHome) bH2hPoints += 3;
+            else if (match.scoreAway == match.scoreHome) bH2hPoints += 1;
+            bH2hGD += (match.scoreAway - match.scoreHome);
+          }
+
+        }
+
+        print("Comparing ${a.name} vs ${b.name}: H2H Pts: $aH2hPoints - $bH2hPoints");
+
+
+        if (aH2hPoints != bH2hPoints) return bH2hPoints.compareTo(aH2hPoints);
+        if (aH2hGD != bH2hGD) return bH2hGD.compareTo(aH2hGD);
+
+        // Κριτήριο 3: Συνολική Διαφορά Τερμάτων
+        int overallGD = b.goalDifference.compareTo(a.goalDifference);
+        if (overallGD != 0) return overallGD;
+
+        // Κριτήριο 4: Καλύτερη Επίθεση
+        return b.goalsFor.compareTo(a.goalsFor);
       });
 
-      // Αποθηκεύουμε τον ταξινομημένο όμιλο στο Map
       sortedGroups[group] = groupTeams;
-
-      // Προσθέτουμε τους πρώτους 4 στην global λίστα
       topTeams.addAll(groupTeams.take(4));
     }
 
-    // Ενημερώνουμε το UI
-    setState(() {});
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   @override
@@ -208,7 +211,7 @@ class StandingsPage1 extends State<StandingsPage> {
 
     return Card(
       color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
-      // 🛠️ Αυξήσαμε λίγο το margin για να μην κολλάει το Card στα πλάγια
+
       margin: EdgeInsets.symmetric(horizontal: screenWidth * 0.02, vertical: 8),
       elevation: 3,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -314,6 +317,37 @@ class StandingsPage1 extends State<StandingsPage> {
                 ),
               );
             }),
+
+            const SizedBox(height: 12),
+
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 14.0),
+              child: Row(
+                children: [
+                  Container(
+                    width: 8,
+                    height: 8,
+                    decoration: BoxDecoration(
+                      color: isDark ? Colors.green.shade700 : Colors.green,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      greek
+                          ? "Οι 4 πρώτοι περνούν στην επόμενη φάση"
+                          : "Top 4 teams advance to the next round",
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontStyle: FontStyle.italic,
+                        color: isDark ? Colors.white60 : Colors.black54,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
       ),

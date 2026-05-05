@@ -42,12 +42,12 @@ class _TeamDisplayPageState extends State<TeamDisplayPage> {
 
   @override
   Widget build(BuildContext context) {
-    logScreenViewSta(screenName: 'Team page', screenClass: 'Team page');
+    logScreenViewSta(screenName: 'Team_page', screenClass: 'Team page');
 
     FirebaseAnalytics.instance.logEvent(
-      name: 'team clicked',
+      name: 'team_clicked',
       parameters: {
-        'team name': widget.team.nameEnglish,
+        'team_name': widget.team.nameEnglish,
       },
     );
 
