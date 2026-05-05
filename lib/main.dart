@@ -47,6 +47,7 @@ Future<void> loadUser(User user) async {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  //await MobileAds.instance.initialize();
   //await Hive.initFlutter();
 
   //Hive.registerAdapter(MatchModelAdapter());
@@ -108,6 +109,7 @@ void main() async {
         const Duration(milliseconds: 100)); //να προλαβουν να γινουν ολα σωστα
 
     User? user = FirebaseAuth.instance.currentUser;
+    await initTracking();
 
     if (user != null) {
       loadUser(user);

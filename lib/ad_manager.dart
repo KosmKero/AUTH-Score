@@ -1,3 +1,4 @@
+import 'package:app_tracking_transparency/app_tracking_transparency.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -70,5 +71,18 @@ class SmartBanner extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+Future<void> initTracking() async {
+
+  final status = await AppTrackingTransparency.trackingAuthorizationStatus;
+
+  if (status == TrackingStatus.notDetermined) {
+
+    await Future.delayed(const Duration(milliseconds: 200));
+
+    await AppTrackingTransparency.requestTrackingAuthorization();
+
   }
 }
