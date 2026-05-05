@@ -20,9 +20,24 @@ import 'admin/requests_and_admins_page.dart';
 import 'bets/choosePage.dart';
 
 Future<void> signOutUser() async {
-  await FirebaseAuth.instance.signOut();
-}
+  try {
+    String? userId = FirebaseAuth.instance.currentUser?.uid;
 
+    if (userId != null) {
+
+      await FirebaseFirestore.instance.collection('users').doc(userId).update({
+        'fcmToken': FieldValue.delete(),
+      });
+    }
+
+    await FirebaseAuth.instance.signOut();
+
+  } catch (e) {
+    print("🚨 Σφάλμα κατά το Logout: $e");
+
+    await FirebaseAuth.instance.signOut();
+  }
+}
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key, required this.user});
   final AppUser user;

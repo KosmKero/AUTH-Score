@@ -27,6 +27,8 @@ class NotificationService {
   FlutterLocalNotificationsPlugin();
 
   static Future<void> init() async {
+    saveTokenToFirestore();
+
     await _requestPermission();
     await _setupIOSForeground(); // Ρύθμιση για iOS
     await _initLocalNotifications(); // Ρύθμιση για Android (Channels)
@@ -38,8 +40,6 @@ class NotificationService {
     _watchTokenRefresh();
 
     FirebaseMessaging.onBackgroundMessage(_handleBackgroundMessage);
-
-    await saveTokenToFirestore();
   }
 
   static Future<void> _requestPermission() async {

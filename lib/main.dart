@@ -47,7 +47,6 @@ Future<void> loadUser(User user) async {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  //await MobileAds.instance.initialize();
   //await Hive.initFlutter();
 
   //Hive.registerAdapter(MatchModelAdapter());
@@ -100,12 +99,7 @@ void main() async {
       "logoVersion": "1"
     });
 
-    // 3. Παράλληλη αρχικοποίηση Ads και Remote Config Fetch
-    await Future.wait([
-      remoteConfig
-          .fetchAndActivate()
-          .catchError((e) => print("Remote Config error: $e")),
-    ]);
+    remoteConfig.fetchAndActivate().catchError((e) => print("Remote Config error: $e"));
 
     //await MatchHandle.migrateMatches();
     //await MatchHandle.migrateTeams();
@@ -114,7 +108,6 @@ void main() async {
         const Duration(milliseconds: 100)); //να προλαβουν να γινουν ολα σωστα
 
     User? user = FirebaseAuth.instance.currentUser;
-    await initTracking(); //προβλημα
 
     if (user != null) {
       loadUser(user);
