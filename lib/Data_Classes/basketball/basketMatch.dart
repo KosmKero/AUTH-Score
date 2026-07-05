@@ -11,7 +11,7 @@ import 'basketTeam.dart';
 class BasketMatch extends ChangeNotifier {
   final basketTeam _homeTeam, _awayTeam;
 
-  late int startTimeInSeconds;
+  late int startTimeInSeconds=0;
 
   bool _hasMatchStarted = false;
   bool _hasMatchFinished = false;
@@ -76,7 +76,7 @@ class BasketMatch extends ChangeNotifier {
 
   bool get hasMatchStarted  => _hasMatchStarted;
   bool get hasMatchFinished => _hasMatchFinished;
-  bool get isPeriodEnded => _hasPeriodEnded;
+  bool get hasPeriodEnded => _hasPeriodEnded;
 
   bool get isHalftime => _hasPeriodEnded && _currentPeriod == 2;
 
@@ -385,18 +385,18 @@ class BasketMatch extends ChangeNotifier {
 
   Future<void> _updateBase(Map<String, dynamic> data) async {
     await FirebaseFirestore.instance
-        .collection('year')
+        .collection('basket')
         .doc(global.thisYearNow.toString())
-        .collection("basket_matches")
+        .collection("matches")
         .doc(matchDocId)
         .set(data, SetOptions(merge: true));
   }
 
   void _startListeningForUpdates() {
     _matchSubscription = FirebaseFirestore.instance
-        .collection('year')
+        .collection('basket')
         .doc(global.thisYearNow.toString())
-        .collection("basket_matches")
+        .collection("matches")
         .doc(matchDocId)
         .snapshots()
         .listen((snapshot) {
@@ -423,8 +423,8 @@ class BasketMatch extends ChangeNotifier {
         changed = true;
       }
 
-      if (_hasPeriodEnded != (data['IsPeriodEnded'] ?? false)) {
-        _hasPeriodEnded = data['IsPeriodEnded'] ?? false;
+      if (_hasPeriodEnded != (data['hasPeriodEnded'] ?? false)) {
+        _hasPeriodEnded = data['hasPeriodEnded'] ?? false;
         changed = true;
       }
 

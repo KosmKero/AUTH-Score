@@ -1,5 +1,6 @@
-//mport 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
+import 'package:untitled1/API/user_handle.dart';
 import 'package:untitled1/Data_Classes/basketball/basketMatch.dart';
 import 'package:untitled1/Data_Classes/basketball/basketTeam.dart';
 import 'package:untitled1/Firebase_Handle/user_handle_in_base.dart';
@@ -12,6 +13,7 @@ import '../../Team_Display_Page_Package/one_group_standings.dart';
 import '../../championship_details/StandingsPage.dart';
 import '../../globals.dart';
 import '../../main.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import '../../ad_manager.dart';
 import 'basketMatchNotStartedPage.dart';
 
@@ -37,16 +39,16 @@ class _BasketMatchNotStartedDetailsState extends State<BasketMatchNotStartedDeta
   @override
   Widget build(BuildContext context) {
     logScreenViewSta(screenName: 'Match Not Started Page',screenClass: 'Match Not Started Page');
-    /*
+
     FirebaseAnalytics.instance.logEvent(
-      name: 'Match Not Started Clicked',
+      name: 'Basket Match Not Started Clicked',
       parameters: {
         'match_id': '${widget.match.homeTeam.nameEnglish} ${widget.match.timeString} ${widget.match.awayTeam.nameEnglish}',
         'home_team': widget.match.homeTeam.nameEnglish,
         'away_team': widget.match.awayTeam.nameEnglish,
       },
     );
-     */
+
 
 
     return SingleChildScrollView(
@@ -92,7 +94,8 @@ class _BasketMatchNotStartedDetailsState extends State<BasketMatchNotStartedDeta
 
   Widget _isAdminWidget() {
     // Check if the user is logged in
-    if (true) {
+    if (globalUser.controlTheseTeamsFootball(
+        widget.match.homeTeam.name, widget.match.awayTeam.name)) {
       return TextButton(
         child: Text(
           greek?"Εκκίνηση Αγώνα":"Start match",
@@ -103,8 +106,8 @@ class _BasketMatchNotStartedDetailsState extends State<BasketMatchNotStartedDeta
           ),
         ),
         onPressed: () {
-       //   widget.match.matchStarted();
-       //   setState(() {});
+       widget.match.startMatch();
+       setState(() {});
         },
       );
     } else {
@@ -169,7 +172,7 @@ class _NavigationButtonsState extends State<NavigationButtons> {
         children: [
           _buildTextButton(greek ? "Λεπτομέρειες" : "Details", 0),
            _buildTextButton(greek? "Συνθέσεις" : "Line up", 1),
-          _buildTextButton(greek ? "Βαθμολογία" : "Standing", 1),
+          _buildTextButton(greek ? "Βαθμολογία" : "Standing", 2),
         ],
       ),
     );
@@ -268,65 +271,13 @@ class _buildTeamName extends State<buildTeamName> {
   }
 }
 
-//ΦΤΙΑΧΝΕΙ ΤΟ ΠΕΔΙΟ ΓΙΑ ΤΗΝ ΟΜΑΔΑ ΕΚΤΟΣ ΣΤΟ ΜΠΛΕ ΠΛΑΙΣΙΟ !!!
-class buildAwayTeamName extends StatefulWidget {
-  const buildAwayTeamName({super.key, required this.team});
-  final Team team;
-
-  @override
-  State<buildAwayTeamName> createState() => _buildAwayTeamName();
-}
-
-class _buildAwayTeamName extends State<buildAwayTeamName> {
-  void _toggleFavorite() {
-    setState(() {
-      widget.team.changeFavourite();
-      widget.team.isFavourite
-          ? favouriteTeams.add(widget.team)
-          : favouriteTeams.remove(widget.team);
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: [
-        Column(
-          children: [
-            TextButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => TeamDisplayPage(widget.team)),
-                  );
-                },
-                child: Text(
-                  widget.team.name,
-                  style: TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w600,
-                      color:darkModeNotifier.value?Colors.white: Colors.black),
-                )),
-          ],
-        ),
-        Transform.translate(
-          offset:
-          Offset(-16, 0), // Μετακινεί το εικονίδιο πιο κοντά στο κείμενο
-        ),
-      ],
-    );
-  }
-}
-
 Widget _sectionChooser(int selectedIndex, BasketMatch match) {
   switch (selectedIndex) {
     case 0:
       return BasketDetailsMatchNotStarted(match: match);
-  //case 1:
-  //  return Starting11Display(match: match,);
-    case 1:
+  case 1:
+     //return Starting11Display(match: match,);
+    case 2 ||1:
       int year;
       if (match.month>8) {
         year=match.year;
@@ -334,7 +285,8 @@ Widget _sectionChooser(int selectedIndex, BasketMatch match) {
         year=match.year-1;
       }
 
-      return OneGroupStandings(group: match.homeTeam.group,seasonYear: year,);
+     // return OneGroupStandings(group: match.homeTeam.group,seasonYear: year,);
+      return const Center(child: Text("Βαθμολογία Μπάσκετ - Σύντομα", style: TextStyle(color: Colors.grey)));
     default:
       return BasketDetailsMatchNotStarted(match: match);
   }

@@ -1,15 +1,27 @@
 import 'dart:async';
+
+import 'package:dropdown_search/dropdown_search.dart';
+//mport 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
+import 'package:untitled1/Data_Classes/Player.dart';
 import 'package:untitled1/Data_Classes/basketball/basketMatch.dart';
-
+import 'package:untitled1/Firebase_Handle/user_handle_in_base.dart';
+import 'package:untitled1/Match_Details_Package/penalty_shootout_widget.dart';
+import 'package:untitled1/championship_details/StandingsPage.dart';
 import 'package:untitled1/globals.dart';
+import '../../Data_Classes/MatchDetails.dart';
 import 'package:provider/provider.dart';
-
+import '../API/user_handle.dart';
+import '../Data_Classes/Penaltys.dart';
+import '../Data_Classes/Team.dart';
+import '../Data_Classes/basketball/basketMatch.dart';
+import '../Data_Classes/match_facts.dart';
 import '../Firebase_Handle/firebase_screen_stats_helper.dart';
 import '../Team_Display_Page_Package/one_group_standings.dart';
 import 'basketMatchNotStarted/basketMatchNotStartedPage.dart';
 import 'basketMatchNotStarted/basketMatchUpperBody.dart';
 
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import '../../ad_manager.dart';
 
 import 'basketMatchNotStarted/basketMatchUpperBody.dart';
@@ -201,110 +213,102 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
 
   Widget _buildMatchScoreLive() {
     return Consumer<BasketMatch>(
-      builder: (context, matchDetails, child) {
-        // Λαμβάνουμε το χρόνο σε δευτερόλεπτα από το matchDetails
-        //  int secondsElapsed = DateTime.now().millisecondsSinceEpoch ~/ 1000-matchDetails.startTimeInSeconds;
+      builder: (context, match, child) {
 
-        //  int minutes = secondsElapsed ~/ 60;
-        //  int seconds = secondsElapsed % 60;
+        // Λογική για το κείμενο της περιόδου
+        String periodText = "";
+        if (match.currentPeriod <= 4) {
+          periodText = "${match.currentPeriod}η περίοδος";
+        } else {
+          periodText = "Παράταση";
+        }
+
+        // Αν είναι τέλος περιόδου (αλλά όχι τέλος αγώνα)
+        if (match.hasPeriodEnded) {
+          periodText = "Τέλος ${match.currentPeriod}ου Δεκ.";
+        }
 
         return Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            SizedBox(height: 20),
+            const SizedBox(height: 10),
             Text(
-              "${matchDetails.homeScore}-${matchDetails.awayScore}",
+                periodText,
+                style: TextStyle(
+                    fontWeight: FontWeight.w500,
+                    fontSize: 13,
+                    color:  Colors.red ),
+              ),
+            const SizedBox(height: 4),
+            // ΤΟ ΣΚΟΡ
+            Text(
+              "${match.homeScore} - ${match.awayScore}",
               style: const TextStyle(
                   fontWeight: FontWeight.bold, fontSize: 25, color: Colors.red),
             ),
 
-            // (matchDetails.isPenaltyTime)?
-            // Text(
-            //   'Πέναλτι',
-            //   style: const TextStyle(
-            //       fontWeight: FontWeight.bold, fontSize: 15, color: Colors.red),
-            //   textAlign: TextAlign.center,
-            // ):
-            // // Ελέγχουμε αν είναι το ημίχρονο ή όχι
-            // (!matchDetails.isHalfTime() && !matchDetails.isExtraTimeHalf() && !(matchDetails.hasMatchFinished && !matchDetails.hasExtraTimeStarted))
-            //     ? Text(
-            //   '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}',
-            //   style: const TextStyle(
-            //       fontWeight: FontWeight.bold, fontSize: 16, color: Colors.red),
-            // )
-            //     : Text(
-            //   (matchDetails.hasMatchFinished && !matchDetails.hasExtraTimeStarted)? 'Αναμονή Παράτασης': matchDetails.isHalfTime() ? 'Ημίχρονο' : 'Ημίχρονο Παράτασης',
-            //   style: const TextStyle(
-            //       fontWeight: FontWeight.bold, fontSize: 13, color: Colors.red),
-            //   textAlign: TextAlign.center,
-            //  )
+            // ΧΡΟΝΟΣ (Αν τον υπολογίζεις)
+            // Text("07:42", style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold))
           ],
         );
       },
     );
   }
-
   Widget _buildBasketMatchDetails() {
-    // Παράδειγμα δεδομένων — αντικατέστησε με τα δικά σου
-    final homeScores = [33, 29, 18, 20, 20, 21, 20, 21];
-    final awayScores = [25, 26, 34, 29, 20, 21, 20, 21];
-    final periodLabels = ["1η Περ.", "2η Περ.", "3η Περ.", "4η Περ."];
+    return Consumer<BasketMatch>(
+      builder: (context, match, child) {
+        // 1. Υπολογισμός στηλών (τουλάχιστον 4 για τα δεκάλεπτα)
+        int maxPeriodInData = match.periodScores.keys.fold(0, (max, key) => key > max ? key : max);
+        int totalPeriods = maxPeriodInData > 4 ? maxPeriodInData : 4;
 
-    return Container(
-      margin: EdgeInsets.symmetric(vertical: 21),
-      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
-      decoration: BoxDecoration(
-        color: Colors.grey[100],
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          mainAxisSize: MainAxisSize.min, // ✅ κρατά μόνο όσο χρειάζεται
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: List.generate(periodLabels.length, (index) {
-            return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    periodLabels[index],
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey[600],
-                      fontStyle: FontStyle.italic,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    homeScores[index].toString(),
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.black,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    awayScores[index].toString(),
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.black87,
-                    ),
-                  ),
-                ],
+        return Container(
+          margin: const EdgeInsets.symmetric(vertical: 15, horizontal: 10),
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: darkModeNotifier.value ? Colors.grey[900] : Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
               ),
-            );
-          }),
-        ),
-      ),
+            ],
+            border: Border.all(color: Colors.grey.withOpacity(0.2)),
+          ),
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                // --- ΔΥΝΑΜΙΚΕΣ ΣΤΗΛΕΣ ΠΕΡΙΟΔΩΝ ---
+                ...List.generate(totalPeriods, (index) {
+                  int periodKey = index + 1;
+                  String label = periodKey <= 4 ? "Π$periodKey" : "ΠΑΡ${periodKey - 4}";
+
+                  // Παίρνουμε τα σκορ ή παύλα αν δεν υπάρχει ακόμα data
+                  String hScore = match.periodScores[periodKey]?['home']?.toString() ?? "";
+                  String aScore = match.periodScores[periodKey]?['away']?.toString() ?? "";
+
+                  return Container(
+                    width: 55,
+                    margin: const EdgeInsets.symmetric(horizontal: 4),
+                    child: Column(
+                      children: [
+                        Text(label, style: const TextStyle(fontSize: 10, color: Colors.blue, fontWeight: FontWeight.bold)),
+                        const SizedBox(height: 10),
+                        Text(hScore, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                        const SizedBox(height: 10),
+                        Text(aScore, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.grey)),
+                      ],
+                    ),
+                  );
+                }),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
-
   Widget _halfBuilder(int half) {
     int ha = (half % 2 == 0) ? 2 : 1;
     return Column(children: [

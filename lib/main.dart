@@ -186,6 +186,13 @@ class _LoadingScreenState extends State<LoadingScreen> {
         _loadingMessage = "Loading teams...";
       });
       await loadYear();
+
+     // basketTeam t=basketTeam("das", "sda",4, 2,2, 1,190,1 , "dsdada",1 , "asdewe","sadc");
+     // await BasketTeamsHandle().addNewTeam(t);
+
+
+
+
       await loadTeams();
 
       setState(() {
@@ -198,6 +205,8 @@ class _LoadingScreenState extends State<LoadingScreen> {
       });
       MatchHandle().initializeMatces(matches);
       TopPlayersHandle().initializeList(teams);
+
+      await BasketballMatchHandle().loadAllBasketballData(thisYearNow, basketTeams);
 
       // Add a small delay so users can see the loading completed message
       setState(() {
@@ -377,6 +386,9 @@ Future<void> loadTeams() async {
   TeamsHandle teamsHandle = TeamsHandle();
   teams = await teamsHandle.getAllTeams();
 
+  BasketTeamsHandle basketHandle = BasketTeamsHandle();
+  basketTeams = await basketHandle.getAllTeams();}
+
 /*
   TeamHandle().addTeam('ΤΕΦΑΑ ΣΕΡΡΩΝ', "TEFAA SERRES", "PHED SER");
   TeamHandle().addTeam('ΔΑΣΟΛΟΓΙΑ', "DASOLOGIA", "FOR");
@@ -466,24 +478,29 @@ class _MainScreenState extends State<MainScreen> {
 
 // ------------------------ APP BAR ------------------------
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
-  final Function(String) onOptionSelected;
-  final String selectedOption;
+  final Function(String)?
+      onOptionSelected; // Το έκανα nullable αν δεν το πολυχρησιμοποιε πια
+  final String? selectedOption;
 
   const CustomAppBar({
     super.key,
-    required this.onOptionSelected,
-    required this.selectedOption,
+    this.onOptionSelected,
+    this.selectedOption,
   });
 
   @override
+  @override
   Widget build(BuildContext context) {
+    // 1ο Builder για το Dark Mode
     return ValueListenableBuilder<bool>(
       valueListenable: darkModeNotifier,
       builder: (context, isDarkMode, _) {
-        return AppBar(
-          title: Row(
-            children: const [
-              Text(
+        // 2ο Builder για το Επιλεγμένο Άθλημα (Live UI Updates!)
+        return ValueListenableBuilder<String>(
+          valueListenable: selectedSport,
+          builder: (context, currentSport, _) {
+            return AppBar(
+              title: const Text(
                 "UniScore",
                 style: TextStyle(
                   fontSize: 26,
@@ -491,20 +508,86 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                   color: Colors.white,
                 ),
               ),
-            ],
-          ),
-          backgroundColor: isDarkMode
-              ? const Color(0xFF121212)
-              : const Color.fromARGB(250, 46, 90, 136),
-          actions: [
-            Row(
-              children: [
+              backgroundColor: isDarkMode
+                  ? const Color(0xFF121212)
+                  : const Color.fromARGB(250, 46, 90, 136),
+              actions: [
+                // 1. Επιλογή Αθλήματος (Sport Selector)
+                PopupMenuButton<String>(
+                  icon: Icon(
+                    currentSport == 'football'
+                        ? Icons.sports_soccer
+                        : Icons.sports_basketball,
+                    color: Colors.white,
+                  ),
+                  tooltip: greek ? 'Επιλογή Αθλήματος' : 'Select Sport',
+                  color: isDarkMode ? Colors.grey[900] : Colors.white,
+                  onSelected: (String value) {
+                    // ΕΔΩ ΑΛΛΑΖΕΙ ΤΟ GLOBAL STATE ΧΩΡΙΣ setState()
+                    selectedSport.value = value;
+
+                    // Αν το onOptionSelected χρειάζεται στην από κάτω σελίδα:
+                    if (onOptionSelected != null) {
+                      onOptionSelected!(value);
+                    }
+                  },
+                  itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                    PopupMenuItem<String>(
+                      value: 'football',
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.sports_soccer,
+                            color: currentSport == 'football'
+                                ? Colors.blue
+                                : (isDarkMode ? Colors.white : Colors.black),
+                          ),
+                          const SizedBox(width: 10),
+                          Text(
+                            greek ? 'Ποδόσφαιρο' : 'Football',
+                            style: TextStyle(
+                              fontWeight: currentSport == 'football'
+                                  ? FontWeight.bold
+                                  : FontWeight.normal,
+                              color: isDarkMode ? Colors.white : Colors.black,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    PopupMenuItem<String>(
+                      value: 'basketball',
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.sports_basketball,
+                            color: currentSport == 'basketball'
+                                ? Colors.orange
+                                : (isDarkMode ? Colors.white : Colors.black),
+                          ),
+                          const SizedBox(width: 10),
+                          Text(
+                            greek ? 'Μπάσκετ' : 'Basketball',
+                            style: TextStyle(
+                              fontWeight: currentSport == 'basketball'
+                                  ? FontWeight.bold
+                                  : FontWeight.normal,
+                              color: isDarkMode ? Colors.white : Colors.black,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+
+                // 2. Ειδοποιήσεις
                 const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 2),
                   child: NotificationsForAllChampionship(),
                 ),
 
-                // 1. Κουμπί Αναζήτησης
+                // 3. Κουμπί Αναζήτησης
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 2),
                   child: IconButton(
@@ -518,7 +601,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                   ),
                 ),
 
-                // 2. Κουμπί Προσθήκης Αγώνα (Άμεση πρόσβαση για Admins)
+                // 4. Κουμπί Προσθήκης Αγώνα (Άμεση πρόσβαση για Admins/Γραμματεία)
                 if (globalUser.isAdmin || globalUser.isUpperAdmin)
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 2),
@@ -526,7 +609,6 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                       icon: const Icon(Icons.add_circle_outline, color: Colors.white),
                       tooltip: greek ? "Προσθήκη Αγώνα" : "Add Match",
                       onPressed: () async {
-
                         bool? didChange = await Navigator.push(
                           context,
                           MaterialPageRoute(builder: (_) => AddMatchScreen()),
@@ -539,14 +621,16 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                           TopPlayersHandle().initializeList(teams);
 
                           if (!context.mounted) return;
-                          // Ανανεώνει το UI της αρχικής σελίδας
-                          onOptionSelected(selectedOption);
+                          // Ανανέώνει το UI της αρχικής σελίδας με βάση το άθλημα
+                          if (onOptionSelected != null) {
+                            onOptionSelected!(selectedOption);
+                          }
                         }
                       },
                     ),
                   ),
 
-                // 3. Κουμπί Προσθήκης Ομάδας (Άμεση πρόσβαση μόνο για UpperAdmin)
+                // 5. Κουμπί Προσθήκης Ομάδας (Άμεση πρόσβαση μόνο για UpperAdmin)
                 if (globalUser.isUpperAdmin)
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 2),
@@ -575,17 +659,19 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
 
                           if (!context.mounted) return;
 
-                          onOptionSelected(selectedOption);
+                          if (onOptionSelected != null) {
+                            onOptionSelected!(selectedOption);
+                          }
                         }
                       },
                     ),
                   ),
 
-                // Μικρό κενό δεξιά για να μην κολλάνε τα εικονίδια στην άκρη της οθόνης
+                // Μικρό κενό δεξιά για οπτική ισορροπία
                 const SizedBox(width: 8),
               ],
-            ),
-          ],
+            );
+          },
         );
       },
     );

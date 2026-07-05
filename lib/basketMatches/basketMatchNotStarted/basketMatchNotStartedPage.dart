@@ -4,6 +4,7 @@ import 'package:untitled1/Data_Classes/basketball/basketTeam.dart';
 import 'package:untitled1/Firebase_Handle/TeamsHandle.dart';
 import '../../Data_Classes/MatchDetails.dart';
 import '../../Data_Classes/Team.dart';
+import '../../Firebase_Handle/BasketTeamsHandle.dart';
 import '../../Team_Display_Page_Package/TeamDisplayPage.dart';
 import '../../globals.dart';
 import 'bettingChooserBasket.dart';
@@ -16,35 +17,42 @@ class BasketDetailsMatchNotStarted extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: darkModeNotifier.value?Color.fromARGB(255,30, 30, 30):Colors.white,
+      color: darkModeNotifier.value
+          ? Color.fromARGB(255, 30, 30, 30)
+          : Colors.white,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          SizedBox(height: 70,),
+          SizedBox(
+            height: 70,
+          ),
           Padding(
             padding: EdgeInsets.only(right: 10),
-            child:Text(
-              greek?'Ποιoς Θα κερδίσει;':"Who will win?",
+            child: Text(
+              greek ? 'Ποιoς Θα κερδίσει;' : "Who will win?",
               style: TextStyle(
                   fontSize: 19,
                   fontWeight: FontWeight.bold,
                   fontFamily: 'Arial',
-                  color: darkModeNotifier.value?Colors.white:Colors.black
-              ),
+                  color: darkModeNotifier.value ? Colors.white : Colors.black),
             ),
           ),
           SizedBox(height: 8),
-          //BettingChooserBasket(match: match,), //TO KOYMΠΙ ΜΕ ΤΙΣ 2 ΕΠΙΛΟΓΕΣ (12)
+          BettingChooserBasket(
+            match: match,
+          ), //TO KOYMΠΙ ΜΕ ΤΙΣ 2 ΕΠΙΛΟΓΕΣ (12)
           SizedBox(
             height: 70,
           ),
           Center(
             child: Text(
-              greek?'Αποτελέσματα τελευταίων αγωνιστικών:':"Result of the last games:",
+              greek
+                  ? 'Αποτελέσματα τελευταίων αγωνιστικών:'
+                  : "Result of the last games:",
               style: TextStyle(
                   fontSize: 18,
-                  fontFamily: "Arial", color: darkModeNotifier.value?Colors.white:Colors.black
-              ),
+                  fontFamily: "Arial",
+                  color: darkModeNotifier.value ? Colors.white : Colors.black),
             ),
           ),
           SizedBox(
@@ -53,13 +61,13 @@ class BasketDetailsMatchNotStarted extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 0.0),
             child: Card(
-
               elevation: 8,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
-
               ),
-              color: darkModeNotifier.value ? Color.fromARGB(255, 45, 45, 45) : Colors.white,
+              color: darkModeNotifier.value
+                  ? Color.fromARGB(255, 45, 45, 45)
+                  : Colors.white,
               child: Padding(
                 padding: EdgeInsets.all(12),
                 child: Column(
@@ -81,14 +89,16 @@ class BasketDetailsMatchNotStarted extends StatelessWidget {
   }
 }
 
-Future<List<num>> loadPercentages(MatchDetails match) async {
-  TeamsHandle teamsHandle = TeamsHandle();
-  return teamsHandle.getPercentages('${match.homeTeam.nameEnglish}${match.awayTeam.nameEnglish}${match.dateString}');
+Future<List<num>> loadPercentages(BasketMatch match) async {
+  // ΑΛΛΑΓΗ ΕΔΩ
+  BasketTeamsHandle basketTeamsHandle = BasketTeamsHandle();
+  return basketTeamsHandle.getPercentages(
+      '${match.homeTeam.nameEnglish}${match.awayTeam.nameEnglish}${match.dateString}');
 }
 
-Future<List<String>> getFinalFive(String teamName) async{
-  TeamsHandle teamsHandle = TeamsHandle();
-  return teamsHandle.getPreviousResults(teamName);
+Future<List<String>> getFinalFive(String teamName) async {
+  BasketTeamsHandle basketTeamsHandle = BasketTeamsHandle(); // ΑΛΛΑΓΗ ΕΔΩ
+  return basketTeamsHandle.getPreviousResults(teamName);
 }
 
 //ΑΦΟΡΑ ΤΗΝ ΚΑΤΑΣΚΕΥΗ ΤΩΝ ΟΝΟΜΑΤΩΝ ΤΩΝ ΟΜΑΔΩΝ ΣΤΟ ΚΑΤΩ ΜΕΡΟΣ
@@ -106,12 +116,12 @@ class TeamFormWidget extends StatelessWidget {
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const CircularProgressIndicator();
-        }
-        else if (snapshot.hasError) {
+        } else if (snapshot.hasError) {
           return const Text("Error loading results");
         } else {
           final results = snapshot.data ?? [];
-          final displayResults = results.length == 6 ? results.sublist(1) : results;
+          final displayResults =
+              results.length == 6 ? results.sublist(1) : results;
 
           return Padding(
             padding: EdgeInsets.only(left: 0, top: 5),
@@ -121,30 +131,34 @@ class TeamFormWidget extends StatelessWidget {
                 // Team Name
                 Expanded(
                   child: InkWell(
-                  // onTap: () {
-                  //   Navigator.push(
-                  //     context,
-                  //     MaterialPageRoute(
-                  //         builder: (context) => TeamDisplayPage(team)),
-                  //   );
-                  // },
+                    // onTap: () {
+                    //   Navigator.push(
+                    //     context,
+                    //     MaterialPageRoute(
+                    //         builder: (context) => TeamDisplayPage(team)),
+                    //   );
+                    // },
                     child: Row(
                       children: [
-                        SizedBox(width: 10,),
                         SizedBox(
-                            height: 25,
-                            width: 25,
-                            child: team.image),
-                        SizedBox(width: 5,),
+                          width: 10,
+                        ),
+                        SizedBox(height: 25, width: 25, child: team.image),
+                        SizedBox(
+                          width: 5,
+                        ),
                         Flexible(
                           //width: teamNameWidth,
                           // alignment: Alignment.centerLeft,
                           child: Text(
                             team.name,
                             style: TextStyle(
-                              fontSize: screenWidth * 0.036, // Responsive font size
+                              fontSize:
+                                  screenWidth * 0.036, // Responsive font size
                               fontWeight: FontWeight.w600,
-                              color: darkModeNotifier.value?Colors.white:Colors.black,
+                              color: darkModeNotifier.value
+                                  ? Colors.white
+                                  : Colors.black,
                               letterSpacing: 1.3,
                             ),
                             overflow: TextOverflow.ellipsis,
@@ -158,10 +172,13 @@ class TeamFormWidget extends StatelessWidget {
                   //width: resultsWidth,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    children: displayResults.map((result) => Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 3),
-                      child: _buildResultIcon(result),
-                    )).toList(),
+                    children: displayResults
+                        .map((result) => Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 3),
+                              child: _buildResultIcon(result),
+                            ))
+                        .toList(),
                   ),
                 ),
               ],
