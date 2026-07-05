@@ -6,14 +6,14 @@ import '../globals.dart';
 import 'Team.dart';
 
 class Player extends ChangeNotifier {
-  String? _id; // 🌟 ΝΕΟ ΠΕΔΙΟ: Το αφήνουμε nullable για τους παλιούς παίκτες
+  String? _id;
   final String _name, _surname, _teamName, _teamNameEnglish;
   late int _goals, _numOfYellowCards, _numOfRedCards;
-  int _position, _number, _age, _appearances;
+  int _position, _number, _appearances;
   DateTime? _cardExpiryDate;
 
   Player(this._name, this._surname, this._position, this._goals, this._number,
-      this._age, this._teamName, this._numOfYellowCards, this._numOfRedCards,
+       this._teamName, this._numOfYellowCards, this._numOfRedCards,
       this._teamNameEnglish, this._cardExpiryDate, this._appearances, [this._id]);
 
   // Getters
@@ -24,7 +24,6 @@ class Player extends ChangeNotifier {
   int get numOfYellowCards => _numOfYellowCards;
   int get numOfRedCards => _numOfRedCards;
   int get position => _position;
-  int get age => _age;
   int get number => _number;
   int get appearances => _appearances;
   String get teamName => _teamName;
@@ -55,41 +54,49 @@ class Player extends ChangeNotifier {
   Future<void> playerPlayed() async {
     _appearances++;
     await _updatePlayerInBase();
+    notifyListeners();
   }
 
   Future<void> cancelPlayerPlayed() async {
     if (_appearances > 0) _appearances--;
     await _updatePlayerInBase();
+    notifyListeners();
   }
 
   Future<void> scoredGoal() async {
     _goals++;
     await _updatePlayerInBase();
+    notifyListeners();
   }
 
   Future<void> goalCancelled() async {
     if (_goals > 0) _goals--;
     await _updatePlayerInBase();
+    notifyListeners();
   }
 
   Future<void> gotYellowCard() async {
     _numOfYellowCards++;
     await _updatePlayerInBase();
+    notifyListeners();
   }
 
   Future<void> gotRedCard() async {
     _numOfRedCards++;
     await _updatePlayerInBase();
+    notifyListeners();
   }
 
   Future<void> cancelYellowCard() async {
     if (_numOfYellowCards > 0) _numOfYellowCards--;
     await _updatePlayerInBase();
+    notifyListeners();
   }
 
   Future<void> cancelRedCard() async {
     if (_numOfRedCards > 0) _numOfRedCards--;
     await _updatePlayerInBase();
+    notifyListeners();
   }
 
   Future<void> _updatePlayerInBase() async {
@@ -111,7 +118,6 @@ class Player extends ChangeNotifier {
         'numOfYellowCards': _numOfYellowCards,
         'numOfRedCards': _numOfRedCards,
         'Position': _position,
-        'Age': _age,
         'Number': _number,
         'TeamName': _teamName,
         'teamNameEnglish': _teamNameEnglish,
@@ -130,7 +136,6 @@ class Player extends ChangeNotifier {
       'numOfYellowCards': _numOfYellowCards,
       'numOfRedCards': _numOfRedCards,
       'Position': _position,
-      'Age': _age,
       'Number': _number,
       'TeamName': _teamName,
       'teamNameEnglish': _teamNameEnglish,

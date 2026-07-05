@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:untitled1/Team_Display_Page_Package/edit_team_page.dart';
 import 'package:untitled1/Team_Display_Page_Package/one_group_standings.dart';
 import '../Data_Classes/Team.dart';
 import '../Firebase_Handle/firebase_screen_stats_helper.dart';
@@ -30,7 +29,7 @@ class _TeamDetailsWidgetState extends State<TeamDetailsWidget> {
           Card(
               color: darkModeNotifier.value ? Color(0xFF1E1E1E) : Colors.white,
               margin: EdgeInsets.symmetric(
-                  horizontal: MediaQuery.of(context).size.width * 0.01,
+                  horizontal: MediaQuery.of(context).size.width * 0.02,
                   vertical: 15),
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(15)),
@@ -91,7 +90,7 @@ class _TeamDetailsWidgetState extends State<TeamDetailsWidget> {
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(15)),
               margin: EdgeInsets.symmetric(
-                  horizontal: MediaQuery.of(context).size.width * 0.01,
+                  horizontal: MediaQuery.of(context).size.width * 0.02,
                   vertical: 15),
               child: Column(
                 children: [

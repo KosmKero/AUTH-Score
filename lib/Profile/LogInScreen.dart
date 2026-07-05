@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:untitled1/Data_Classes/Team.dart';
 import 'package:untitled1/Firebase_Handle/user_handle_in_base.dart';
 import 'package:untitled1/globals.dart';
+import '../API/NotificationService.dart';
 import '../Data_Classes/AppUser.dart';
 import '../Firebase_Handle/firebase_screen_stats_helper.dart';
 import '../main.dart';
@@ -763,6 +764,9 @@ Future<void> checkBase(BuildContext context,emailText,passwordText) async
       passwordText.clear();
 
       loggedInNotifications.value = true;
+
+      await NotificationService.saveTokenToFirestore();
+
       //ΕΠΙΣΤΡΕΦΩ ΣΤΗΝ ΑΡΧΙΚΗ ΣΕΛΙΔΑ!!
       try
       {
@@ -830,6 +834,8 @@ Future<void> addInBase(BuildContext context,TextEditingController  emailText,Tex
     //AppUser currentUser = AppUser(_email,_password,_sxolh);
     isLoggedIn = true; //ΑΛΛΑΖΩ ΚΑΤΑΣΤΑΣΗ ΧΡΗΣΤΗ
     loggedInNotifications.value = true;
+
+    await NotificationService.saveTokenToFirestore();
 
     //ΚΑΘΑΡΙΖΩ ΤΑ ΠΕΔΙΑ ΟΤΑΝ ΠΑΤΗΣΕΙ ΤΟ ΚΟΥΜΠΙ ΕΓΓΡΑΦΗΣ
     emailText.clear();

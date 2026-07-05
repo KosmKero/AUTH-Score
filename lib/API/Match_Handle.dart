@@ -210,6 +210,12 @@ class MatchHandle {
 
         );
 
+        if (data.containsKey('facts')) {
+          final factsMap = Map<String, dynamic>.from(data['facts']);
+          // Χρησιμοποιούμε τη στατική μέθοδο που ήδη έχεις στον helper σου
+          match.matchFact.addAll(await MatchFactsStorageHelper.decodeMatchFacts(factsMap));
+        }
+
 
         return match;
       }).toList();

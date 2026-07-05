@@ -65,4 +65,5 @@ class DefaultFirebaseOptions {
     storageBucket: 'auth-score-742c5.firebasestorage.app',
     iosBundleId: 'com.uniteam.uniscore',
   );
+
 }

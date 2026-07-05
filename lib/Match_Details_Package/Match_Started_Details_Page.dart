@@ -5,6 +5,7 @@ import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:untitled1/Data_Classes/Player.dart';
 import 'package:untitled1/Firebase_Handle/user_handle_in_base.dart';
+import 'package:untitled1/Match_Details_Package/StatsPage.dart';
 import 'package:untitled1/Match_Details_Package/penalty_shootout_widget.dart';
 import 'package:untitled1/championship_details/StandingsPage.dart';
 import 'package:untitled1/globals.dart';
@@ -592,6 +593,8 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
       case 1:
         return LineupsDisplayTab(match: match);
       case 2:
+         return StatsPage(match: match,);
+      case 3:
         DateTime now = DateTime.now();
         int seasonYear = now.month > 8 ? now.year : now.year - 1;
         return OneGroupStandings(

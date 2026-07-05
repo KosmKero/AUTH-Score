@@ -157,11 +157,6 @@ class _searchDetailsState extends State<searchDetails> {
     cachedTeams[thisYearNow] = teams;
     cachedMatches[thisYearNow] = MatchHandle().getAllMatches();
 
-    searchPressed(widget.name);
-
-    cachedTeams[thisYearNow] = teams;
-    cachedMatches[thisYearNow] = MatchHandle().getAllMatches();
-
 
   }
   @override

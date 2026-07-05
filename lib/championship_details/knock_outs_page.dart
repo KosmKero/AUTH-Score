@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:untitled1/API/Match_Handle.dart';
 import '../Data_Classes/MatchDetails.dart';
 import '../Firebase_Handle/firebase_screen_stats_helper.dart';
 import '../Match_Details_Package/Match_Details_Page.dart';
@@ -49,7 +48,7 @@ class _KnockOutsPageState extends State<KnockOutsPage> {
                     8,
                         (index) => Padding(
                       padding: EdgeInsets.symmetric(vertical: 5),
-                      child: knockOutMatchUp(match: widget.playOffMatches[index]), // Παράδειγμα δεδομένων
+                      child: KnockOutMatchUp(match: widget.playOffMatches[index]), // Παράδειγμα δεδομένων
                     ),
                   ),
                 ),
@@ -95,7 +94,7 @@ class _KnockOutsPageState extends State<KnockOutsPage> {
                     4,
                         (index) => Padding(
                       padding: EdgeInsets.symmetric(vertical: 50),
-                      child: knockOutMatchUp(match:
+                      child: KnockOutMatchUp(match:
                       widget.playOffMatches[index+8]), // Παράδειγμα δεδομένων
                     ),
                   ),
@@ -137,7 +136,7 @@ class _KnockOutsPageState extends State<KnockOutsPage> {
                     2,
                         (index) => Padding(
                       padding: EdgeInsets.symmetric(vertical: 138),
-                      child: knockOutMatchUp(match:
+                      child: KnockOutMatchUp(match:
                       widget.playOffMatches[index+12]), // Παράδειγμα δεδομένων
                     ),
                   ),
@@ -176,7 +175,7 @@ class _KnockOutsPageState extends State<KnockOutsPage> {
                     SizedBox(
                       height: 313,
                     ),
-                    knockOutMatchUp(match: widget.playOffMatches[14])
+                    KnockOutMatchUp(match: widget.playOffMatches[14])
                   ],
                 ),
               ],
@@ -188,10 +187,10 @@ class _KnockOutsPageState extends State<KnockOutsPage> {
   }
 }
 
-class knockOutMatchUp extends StatelessWidget {
+class KnockOutMatchUp extends StatelessWidget {
   final MatchDetails? match;
 
-  const knockOutMatchUp({Key? key, required this.match}) : super(key: key);
+  const KnockOutMatchUp({super.key, required this.match});
 
   @override
   Widget build(BuildContext context) {
@@ -212,10 +211,10 @@ class knockOutMatchUpView extends StatefulWidget {
 
 
   @override
-  State<knockOutMatchUpView> createState() => _knockOutMatchUpState();
+  State<knockOutMatchUpView> createState() => _KnockOutMatchUpState();
 }
 
-class _knockOutMatchUpState extends State<knockOutMatchUpView> {
+class _KnockOutMatchUpState extends State<knockOutMatchUpView> {
 
   @override
   Widget build(BuildContext context) {
