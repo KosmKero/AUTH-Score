@@ -63,7 +63,7 @@ Future<void> updateAllUserStatistics() async {
   int lightCount = 0;
   int totalUsers = 0;
 
-  // 2. Η ΜΟΝΑΔΙΚΗ ανάγνωση από τη βάση! (Εδώ γλιτώνεις το 66% των Reads)
+  // 2. Η ΜΟΝΑΔΙΚΗ ανάγνωση από τη βάση!
   final snapshot = await firestore.collection('users').get();
 
   // 3. Επεξεργασία δεδομένων

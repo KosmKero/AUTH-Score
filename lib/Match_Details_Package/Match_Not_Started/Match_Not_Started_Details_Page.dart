@@ -12,6 +12,7 @@ import '../../globals.dart';
 import '../../main.dart';
 import '../Starting__11_Display_Card.dart';
 import '../../ad_manager.dart';
+import '../StatsPage.dart';
 
 //ΟΛΟ ΕΔΩ ΑΦΟΡΑ ΤΟ ΕΠΑΝΩ ΚΟΜΜΑΤΙ ΤΗΣ ΣΕΛΙΔΑΣ. ΓΙΑ ΤΗΝ ΩΡΑ =,ΜΕΡΑ ΚΙΑ ΤΙς ΟΜΑΔΕΣ. ΤΟ ΜΠΛΕ ΠΛΑΙΣΙΟ ΣΤΗΝ ΑΡΧΗ ΑΡΧΗ ΠΑΝΩ
 class MatchNotStartedDetails extends StatefulWidget {
@@ -169,7 +170,8 @@ class _NavigationButtonsState extends State<NavigationButtons> {
           _buildTextButton(greek ? "Λεπτομέρειες" : "Details", 0),
           if (globalUser.isUpperAdmin || globalUser.controlTheseTeamsFootball(widget.homeTeamName, widget.awayTeamName))
           _buildTextButton(greek?"Συνθέσεις":"Teams", 1),
-          _buildTextButton(greek ? "Βαθμολογία" : "Standing", 2),
+          _buildTextButton(greek? "Στατιστικά" : "Statistics", 2),
+          _buildTextButton(greek ? "Βαθμολογία" : "Standing", 3),
         ],
       ),
     );
@@ -327,6 +329,8 @@ Widget _sectionChooser(int selectedIndex, MatchDetails match) {
     case 1:
     return LineupsDisplayTab(match: match);
     case 2:
+      return StatsPage(match: match);
+    case 3:
       int year;
       if (match.month>8) {
         year=match.year;
