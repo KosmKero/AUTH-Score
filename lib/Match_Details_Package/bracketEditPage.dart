@@ -38,7 +38,11 @@ class _SlotPickerDialogState extends State<SlotPickerDialog> {
     math.min(widget.maxSlots * itemHeight, 380.0); // max 380 px
 
     return AlertDialog(
-      title: Text("Επιλογή θέσης (Φάση των ${widget.phase})"),
+      title: Text(
+        greek
+            ? "Επιλογή θέσης (Φάση των ${widget.phase})"
+            : "Select Slot (Round of ${widget.phase})",
+      ),
       content: SizedBox(
         width: double.maxFinite,
         height: computedHeight,
@@ -77,7 +81,7 @@ class _SlotPickerDialogState extends State<SlotPickerDialog> {
                         ),
                       ),
                       if (isSelected)
-                        Icon(Icons.check, color: Colors.white),
+                        const Icon(Icons.check, color: Colors.white),
                     ],
                   ),
                 ),
@@ -89,7 +93,7 @@ class _SlotPickerDialogState extends State<SlotPickerDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context), // επιστρέφει null
-          child: Text("Ακύρωση"),
+          child: Text(greek ? "Ακύρωση" : "Cancel"),
         ),
         ElevatedButton(
           onPressed: _saving
@@ -101,22 +105,30 @@ class _SlotPickerDialogState extends State<SlotPickerDialog> {
                   .collection("year")
                   .doc(thisYearNow.toString())
                   .collection("matches")
-                  .doc(widget.match.matchKey)
+                  .doc(widget.match.matchDocId)
                   .set({"slot": selectedSlot}, SetOptions(merge: true));
 
-
               // Επιστρέφουμε το νέο slot στον caller
-              Navigator.pop(context, selectedSlot);
+              if (mounted) Navigator.pop(context, selectedSlot);
             } catch (e) {
-              setState(() => _saving = false);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text("Σφάλμα αποθήκευσης: $e")),
-              );
+              if (mounted) {
+                setState(() => _saving = false);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(greek ? "Σφάλμα αποθήκευσης: $e" : "Save error: $e"),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
             }
           },
           child: _saving
-              ? SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-              : Text("Αποθήκευση"),
+              ? const SizedBox(
+              width: 18,
+              height: 18,
+              child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)
+          )
+              : Text(greek ? "Αποθήκευση" : "Save"),
         ),
       ],
     );

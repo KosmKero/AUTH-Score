@@ -22,12 +22,18 @@ class _FeedbackPageState extends State<FeedbackPage> {
 
     if (title.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Συμπλήρωσε και τον τίτλο και το μήνυμα.')),
+        SnackBar(
+            content: Text(greek
+                ? 'Συμπλήρωσε και τον τίτλο και το μήνυμα.'
+                : 'Please fill in both the title and the message.')),
       );
       return;
     } else if (message.length < 5) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Παρακαλώ γράψε τουλάχιστον 5 χαρακτήρες.')),
+        SnackBar(
+            content: Text(greek
+                ? 'Παρακαλώ γράψε τουλάχιστον 5 χαρακτήρες.'
+                : 'Please write at least 5 characters.')),
       );
       return;
     }
@@ -52,12 +58,20 @@ class _FeedbackPageState extends State<FeedbackPage> {
       _messageController.clear();
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Ευχαριστούμε για το feedback σου!')),
+        SnackBar(
+            content: Text(greek
+                ? 'Ευχαριστούμε για το feedback σου!'
+                : 'Thank you for your feedback!'),
+            backgroundColor: Colors.green),
       );
       Navigator.pop(context);
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Σφάλμα κατά την αποστολή')),
+        SnackBar(
+            content: Text(greek
+                ? 'Σφάλμα κατά την αποστολή'
+                : 'Error sending feedback'),
+            backgroundColor: Colors.red),
       );
     }
 
@@ -66,20 +80,16 @@ class _FeedbackPageState extends State<FeedbackPage> {
     });
   }
 
-
-
-
   @override
   Widget build(BuildContext context) {
-    logScreenViewSta(screenName: 'Send feedback page',screenClass: 'Send feedback page');
+    logScreenViewSta(screenName: 'Send feedback page', screenClass: 'Send feedback page');
 
     final inputBorderColor = darkModeNotifier.value ? Colors.white70 : Colors.grey;
-
     final textColor = darkModeNotifier.value ? Colors.white : Colors.black87;
 
     return Scaffold(
       appBar: AppBar(
-        title: Text("Αποστολή Feedback"),
+        title: Text(greek ? "Αποστολή Feedback" : "Send Feedback"),
         backgroundColor: darkModeNotifier.value ? Colors.black : null,
         foregroundColor: darkModeNotifier.value ? Colors.white : null,
       ),
@@ -92,7 +102,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
               controller: _titleController,
               style: TextStyle(color: textColor),
               decoration: InputDecoration(
-                labelText: "Τίτλος",
+                labelText: greek ? "Τίτλος" : "Title",
                 labelStyle: TextStyle(color: textColor),
                 border: OutlineInputBorder(
                   borderSide: BorderSide(color: inputBorderColor),
@@ -111,7 +121,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
               maxLines: 5,
               style: TextStyle(color: textColor),
               decoration: InputDecoration(
-                labelText: "Μήνυμα",
+                labelText: greek ? "Μήνυμα" : "Message",
                 labelStyle: TextStyle(color: textColor),
                 border: OutlineInputBorder(
                   borderSide: BorderSide(color: inputBorderColor),
@@ -127,8 +137,14 @@ class _FeedbackPageState extends State<FeedbackPage> {
             SizedBox(height: 20),
             ElevatedButton.icon(
               onPressed: _isSending ? null : submitFeedback,
-              icon: Icon(Icons.send),
-              label: Text("Αποστολή"),
+              icon: _isSending
+                  ? SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                      color: Colors.white, strokeWidth: 2))
+                  : Icon(Icons.send),
+              label: Text(greek ? "Αποστολή" : "Send"),
               style: ElevatedButton.styleFrom(
                 backgroundColor: darkModeNotifier.value ? Colors.blue[800] : Colors.blueGrey,
                 foregroundColor: Colors.white,
@@ -137,7 +153,6 @@ class _FeedbackPageState extends State<FeedbackPage> {
           ],
         ),
       ),
-
     );
   }
 }

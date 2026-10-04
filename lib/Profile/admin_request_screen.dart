@@ -5,6 +5,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:untitled1/globals.dart';
 import 'package:untitled1/Firebase_Handle/user_handle_in_base.dart';
 import '../Firebase_Handle/firebase_screen_stats_helper.dart';
+import 'package:cloud_functions/cloud_functions.dart';
+
 
 // Συνάρτηση παραγωγής τυχαίου PIN (5 χαρακτήρες, εύκολοι στην ανάγνωση)
 String generateNewPin() {
@@ -40,7 +42,6 @@ class _AdminRequestScreenState extends State<AdminRequestScreen> {
     String enteredPin = _pinController.text.trim().toUpperCase();
 
     if (userName.isNotEmpty && enteredPin.isNotEmpty) {
-      // 1. Δείχνουμε το Loading Spinner
       showDialog(
         context: context,
         barrierDismissible: false,
@@ -48,49 +49,26 @@ class _AdminRequestScreenState extends State<AdminRequestScreen> {
       );
 
       try {
-        // 2. ΤΟ ΜΑΓΙΚΟ QUERY: Ψάχνουμε αν υπάρχει κάποια ομάδα με αυτό το PIN
-        QuerySnapshot teamQuery = await _firestore
-            .collection("year")
-            .doc(thisYearNow.toString())
-            .collection("teams")
-            .where('secret_pin', isEqualTo: enteredPin)
-            .limit(1) // Φέρε μόνο μία, αφού το PIN είναι μοναδικό!
-            .get();
+        // Καλούμε το Cloud Function
+        HttpsCallable callable = FirebaseFunctions.instance.httpsCallable('verifyAdminPin');
+        final result = await callable.call({
+          'pin': enteredPin,
+          'userName': userName,
+          'year': thisYearNow.toString(),
+        });
 
-        // Αποθηκεύουμε τα εργαλεία περιήγησης πριν τα ασύγχρονα κενά
         if (!mounted) return;
         final navigator = Navigator.of(context);
         final messenger = ScaffoldMessenger.of(context);
 
-        if (teamQuery.docs.isNotEmpty) {
-          // ==== ΒΡΗΚΑΜΕ ΤΗΝ ΟΜΑΔΑ! ====
-          DocumentSnapshot teamDoc = teamQuery.docs.first;
-          String teamId = teamDoc.id; // Το όνομα της ομάδας
-
-          String uid = FirebaseAuth.instance.currentUser!.uid;
-          String newPin = generateNewPin(); // Φτιάχνουμε νέο PIN για ασφάλεια
-
-          // 3. Ενημερώνουμε την ομάδα
-          await teamDoc.reference.update({
-            'secret_pin': newPin,
-            'captains': FieldValue.arrayUnion([uid]),
-          });
-
-          // 4. Ενημερώνουμε το προφίλ του χρήστη
-          await _firestore.collection('users').doc(uid).set({
-            'role': 'admin',
-            'Controlled Teams': FieldValue.arrayUnion([teamId]),
-            'CaptainName': userName,
-          }, SetOptions(merge: true));
+        if (result.data['success'] == true) {
+          String teamId = result.data['teamId'];
 
           await UserHandleBase().refreshGlobalUserData();
 
-          // Κλείνουμε το Loading
-          navigator.pop();
-          // Κλείνουμε την οθόνη
-          navigator.pop();
+          navigator.pop(); // Κλείσιμο spinner
+          navigator.pop(); // Κλείσιμο οθόνης
 
-          // Μήνυμα Επιτυχίας
           messenger.hideCurrentSnackBar();
           messenger.showSnackBar(
             SnackBar(
@@ -101,34 +79,30 @@ class _AdminRequestScreenState extends State<AdminRequestScreen> {
               duration: const Duration(seconds: 4),
             ),
           );
-
-        } else {
-          // ==== ΛΑΘΟΣ PIN ====
-          navigator.pop(); // Κλείνουμε μόνο το Loading
-
-          messenger.hideCurrentSnackBar();
-          messenger.showSnackBar(
-            SnackBar(
-              content: Text(greek ? 'Λάθος PIN! Προσπαθήστε ξανά.' : 'Invalid PIN! Please try again.'),
-              backgroundColor: Colors.redAccent,
-            ),
-          );
         }
+      } on FirebaseFunctionsException catch (e) {
+        if (!mounted) return;
+        Navigator.pop(context); // Κλείσιμο spinner
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.message ?? 'Σφάλμα επαλήθευσης PIN'),
+            backgroundColor: Colors.redAccent,
+          ),
+        );
       } catch (e) {
         if (!mounted) return;
-        Navigator.pop(context); // Κλείνουμε το Loading
+        Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Σφάλμα: $e'), backgroundColor: Colors.red),
         );
       }
     } else {
-      // Μήνυμα λάθους αν ξέχασε κάτι
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(greek ? 'Παρακαλώ συμπληρώστε όλα τα πεδία' : 'Please fill in all fields')),
       );
     }
   }
-
   @override
   Widget build(BuildContext context) {
     logScreenViewSta(screenName: 'Admin request page', screenClass: 'Admin request page');

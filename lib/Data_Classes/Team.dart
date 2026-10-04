@@ -19,6 +19,8 @@ class Team {
   Team(
       this.name,
       this._nameEnglish,
+      this.displayGreek,
+      this.displayEnglish,
       this._matches,
       this._wins,
       this._losses,
@@ -36,14 +38,14 @@ class Team {
 
     //loadTeamImage();
   }
-
+  String displayGreek, displayEnglish;
   String _initials;
   int? _foundationYear;
   String name, _nameEnglish;
   String _coach;
   int _matches, _wins, _losses, _draws, _titles, _position;
   int _goalsFor = 0, _goalsAgainst = 0;
-  final int _group;
+  int _group;
   bool _isFavourite = false;
   static int n = 0;
 
@@ -70,9 +72,15 @@ class Team {
 
   String get coach => _coach;
 
+  String get displayName => greek ? displayGreek : displayEnglish;
+
   //Image get image {
   //    return _image;
   //}
+
+  void setGroup(int newGroup) {
+    _group = newGroup;
+  }
 
   // Method to add a player
   Future<void> addPlayer(Player player) async {
@@ -301,6 +309,24 @@ class Team {
     _position = pos;
   }
 
+  void updateTeamDetails(
+      String teamNameId,
+      String newDisplayName,
+      String newDisplayNameEnglish,
+      String newInitials,
+      String newCoach,
+      int newFoundationYear,
+      int newGroup,
+      int? newTitles) async {
+
+    displayGreek = newDisplayName;
+    displayEnglish = newDisplayNameEnglish;
+    _initials = newInitials;
+    _coach = newCoach;
+    _foundationYear = newFoundationYear;
+    _group = newGroup;
+
+  }
   //Future<void> loadTeamImage() async {
   //  try {
   //    // Προσπάθεια να φορτωθεί το αρχείο
@@ -379,7 +405,10 @@ class Team {
       'goalsFor': _goalsFor,
       'goalsAgainst': _goalsAgainst,
       'LastFive': last5Results,
-      'Players': playersMap, // Το Map των παικτών που φτιάξαμε παραπάνω
+      'Players': playersMap, // Το Map των παικτών που φτιάξαμε παραπάνω,
+      'displayGreek': displayGreek, // Μπορεί να αλλάξει!
+      'displayEnglish': displayEnglish,
+
     };
   }
 }

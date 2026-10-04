@@ -26,16 +26,21 @@ class _EditMatchFactModalState extends State<EditMatchFactModal> {
   String? errorMessage;
   late int half;
 
+  // Βοηθητικές μεταβλητές για διγλωσσία
+  String get otherString => greek ? "Άλλος" : "Other";
+  String get goalString => greek ? "Γκολ" : "Goal";
+  String get ownGoalSuffix => greek ? "(ΑΥΤ.)" : "(OG)";
+
   @override
   void initState() {
     super.initState();
     minuteController = TextEditingController(text: widget.fact.timeString);
     half = widget.fact.half;
 
-    isOwnGoal = widget.fact.name.contains("(ΑΥΤ.)");
+    isOwnGoal = widget.fact.name.contains(ownGoalSuffix);
 
     if (isOwnGoal) {
-      goalScorer = widget.fact.name.replaceAll(" (ΑΥΤ.)", "");
+      goalScorer = widget.fact.name.replaceAll(" $ownGoalSuffix", "");
     } else {
       goalScorer = widget.fact.name;
     }
@@ -66,36 +71,40 @@ class _EditMatchFactModalState extends State<EditMatchFactModal> {
     int? parsedMinute = int.tryParse(minuteController.text);
 
     if (parsedMinute == null) {
-      setState(() => errorMessage = "Παρακαλώ εισάγετε έγκυρο λεπτό.");
+      setState(() => errorMessage = greek ? "Παρακαλώ εισάγετε έγκυρο λεπτό." : "Please enter a valid minute.");
       return;
     }
 
     if (goalScorer == null) {
-      setState(() => errorMessage = "Παρακαλώ επιλέξτε σκόρερ.");
+      setState(() => errorMessage = greek ? "Παρακαλώ επιλέξτε σκόρερ." : "Please select a scorer.");
       return;
     }
 
     if (!isMinuteValidForHalf(parsedMinute, half)) {
-      setState(() => errorMessage = 'Το λεπτό $parsedMinute δεν αντιστοιχεί στο ${half == 0 ? '1ο ημίχρονο.' : half == 1 ? '2ο ημίχρονο.' : half == 2 ? '1ο ημίχρονο παράτασης.' : '2ο ημίχρονο παράτασης.'}');
+      String halfName = "";
+      if (greek) {
+        halfName = half == 0 ? '1ο ημίχρονο.' : half == 1 ? '2ο ημίχρονο.' : half == 2 ? '1ο ημίχρονο παράτασης.' : '2ο ημίχρονο παράτασης.';
+        setState(() => errorMessage = 'Το λεπτό $parsedMinute δεν αντιστοιχεί στο $halfName');
+      } else {
+        halfName = half == 0 ? '1st half.' : half == 1 ? '2nd half.' : half == 2 ? '1st half ET.' : '2nd half ET.';
+        setState(() => errorMessage = 'Minute $parsedMinute does not match $halfName');
+      }
       return;
     }
 
     int rawSeconds = (parsedMinute - 1) * 60;
 
-    // 👇 Η ΔΙΟΡΘΩΣΗ ΕΙΝΑΙ ΕΔΩ 👇
     String finalName;
-    if (goalScorer == "Άλλος" || goalScorer == "Γκολ") {
-      finalName = "Άλλος";
+    if (goalScorer == otherString || goalScorer == goalString) {
+      finalName = otherString;
     } else if (goalScorer!.contains(" - ")) {
-      // Αν ο χρήστης άλλαξε το dropdown (οπότε η μορφή είναι "10 - Γ. Παπαδόπουλος")
       finalName = goalScorer!.split(" - ")[1];
     } else {
-      // Αν ο χρήστης δεν το άλλαξε, το goalScorer είναι ήδη το καθαρό όνομα!
       finalName = goalScorer!;
     }
 
-    if (isOwnGoal && finalName != "Άλλος") {
-      finalName = "$finalName (ΑΥΤ.)";
+    if (isOwnGoal && finalName != otherString) {
+      finalName = "$finalName $ownGoalSuffix";
     }
 
     Goal newGoal = Goal(
@@ -110,12 +119,10 @@ class _EditMatchFactModalState extends State<EditMatchFactModal> {
 
     Navigator.pop(context);
     widget.match.editGoal(widget.fact, newGoal);
-
   }
 
   @override
   Widget build(BuildContext context) {
-    // --- ΠΑΛΕΤΑ ΧΡΩΜΑΤΩΝ ΓΙΑ ΤΕΛΕΙΟ DARK MODE ---
     bool isDark = darkModeNotifier.value;
     Color bgColor = isDark ? const Color(0xFF1A1A1A) : Colors.white;
     Color fieldColor = isDark ? const Color(0xFF2C2C2C) : Colors.grey[100]!;
@@ -148,17 +155,17 @@ class _EditMatchFactModalState extends State<EditMatchFactModal> {
       return itemString;
     }).toList();
 
-    dropdownItems.add("Άλλος");
-    playerActiveStatus["Άλλος"] = false;
+    dropdownItems.add(otherString);
+    playerActiveStatus[otherString] = false;
 
     String? initialSelectedItem;
-    if (goalScorer == "Άλλος" || goalScorer == "Γκολ") {
-      initialSelectedItem = "Άλλος";
+    if (goalScorer == otherString || goalScorer == goalString) {
+      initialSelectedItem = otherString;
     } else {
       try {
         initialSelectedItem = dropdownItems.firstWhere((item) => item.contains(goalScorer!));
       } catch (e) {
-        initialSelectedItem = "Άλλος";
+        initialSelectedItem = otherString;
       }
     }
 
@@ -180,7 +187,6 @@ class _EditMatchFactModalState extends State<EditMatchFactModal> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // 🌟 ΝΕΟ: Drag Handle (η μικρή γκρι μπάρα στην κορυφή)
             Container(
               width: 40,
               height: 5,
@@ -192,7 +198,9 @@ class _EditMatchFactModalState extends State<EditMatchFactModal> {
             ),
 
             Text(
-              isOwnGoal ? "Επεξεργασία Αυτογκόλ" : "Επεξεργασία Γκολ",
+              isOwnGoal
+                  ? (greek ? "Επεξεργασία Αυτογκόλ" : "Edit Own Goal")
+                  : (greek ? "Επεξεργασία Γκολ" : "Edit Goal"),
               style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -203,7 +211,7 @@ class _EditMatchFactModalState extends State<EditMatchFactModal> {
 
             SwitchListTile(
               contentPadding: EdgeInsets.zero,
-              title: Text("Είναι Αυτογκόλ;", style: TextStyle(color: isDark ? Colors.white70 : Colors.black87, fontWeight: FontWeight.w500)),
+              title: Text(greek ? "Είναι Αυτογκόλ;" : "Is it an Own Goal?", style: TextStyle(color: isDark ? Colors.white70 : Colors.black87, fontWeight: FontWeight.w500)),
               value: isOwnGoal,
               activeColor: Colors.redAccent,
               onChanged: (bool value) {
@@ -221,7 +229,7 @@ class _EditMatchFactModalState extends State<EditMatchFactModal> {
                 searchFieldProps: TextFieldProps(
                   style: TextStyle(color: textColor),
                   decoration: InputDecoration(
-                    hintText: "Αναζήτηση...",
+                    hintText: greek ? "Αναζήτηση..." : "Search...",
                     hintStyle: const TextStyle(color: Colors.grey),
                     border: InputBorder.none,
                   ),
@@ -231,10 +239,10 @@ class _EditMatchFactModalState extends State<EditMatchFactModal> {
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
                 itemBuilder: (context, item, isSelected) {
-                  bool isOther = item == "Άλλος";
+                  bool isOther = item == otherString;
                   bool isActive = playerActiveStatus[item] ?? false;
                   String number = isOther ? "" : item.split(" - ")[0];
-                  String name = isOther ? "Άλλος" : item.split(" - ")[1];
+                  String name = isOther ? otherString : item.split(" - ")[1];
 
                   return ListTile(
                     dense: true,
@@ -255,7 +263,9 @@ class _EditMatchFactModalState extends State<EditMatchFactModal> {
               items: dropdownItems,
               dropdownDecoratorProps: DropDownDecoratorProps(
                 dropdownSearchDecoration: InputDecoration(
-                  labelText: isOwnGoal ? "Παίκτης που έβαλε το αυτογκόλ:" : "Σκόρερ:",
+                  labelText: isOwnGoal
+                      ? (greek ? "Παίκτης που έβαλε το αυτογκόλ:" : "Player who scored OG:")
+                      : (greek ? "Σκόρερ:" : "Scorer:"),
                   labelStyle: TextStyle(color: labelColor),
                   filled: true,
                   fillColor: fieldColor,
@@ -273,7 +283,6 @@ class _EditMatchFactModalState extends State<EditMatchFactModal> {
 
             Row(
               children: [
-                // ΠΕΔΙΟ ΛΕΠΤΟΥ
                 Expanded(
                   flex: 1,
                   child: TextField(
@@ -284,7 +293,7 @@ class _EditMatchFactModalState extends State<EditMatchFactModal> {
                       if (errorMessage != null) setState(() => errorMessage = null);
                     },
                     decoration: InputDecoration(
-                      labelText: "Λεπτό",
+                      labelText: greek ? "Λεπτό" : "Minute",
                       labelStyle: TextStyle(color: labelColor),
                       filled: true,
                       fillColor: fieldColor,
@@ -295,7 +304,6 @@ class _EditMatchFactModalState extends State<EditMatchFactModal> {
                 ),
                 const SizedBox(width: 10),
 
-                // ΠΕΔΙΟ ΗΜΙΧΡΟΝΟΥ
                 Expanded(
                   flex: 2,
                   child: DropdownButtonFormField<int>(
@@ -303,19 +311,19 @@ class _EditMatchFactModalState extends State<EditMatchFactModal> {
                     dropdownColor: isDark ? const Color(0xFF2C2C2C) : Colors.white,
                     style: TextStyle(color: textColor, fontWeight: FontWeight.w500),
                     decoration: InputDecoration(
-                      labelText: "Ημίχρονο",
+                      labelText: greek ? "Ημίχρονο" : "Half",
                       labelStyle: TextStyle(color: labelColor),
                       filled: true,
                       fillColor: fieldColor,
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
                     ),
                     items: [
-                      const DropdownMenuItem(value: 0, child: Text('1ο Ημίχρονο')),
-                      const DropdownMenuItem(value: 1, child: Text('2ο Ημίχρονο')),
+                      DropdownMenuItem(value: 0, child: Text(greek ? '1ο Ημίχρονο' : '1st Half')),
+                      DropdownMenuItem(value: 1, child: Text(greek ? '2ο Ημίχρονο' : '2nd Half')),
                       if (widget.match.hasExtraTimeStarted)
-                        const DropdownMenuItem(value: 2, child: Text('1ο Ημ. Παράτασης')),
+                        DropdownMenuItem(value: 2, child: Text(greek ? '1ο Ημ. Παράτασης' : '1st Half ET')),
                       if (widget.match.hasSecondHalfExtraTimeStarted)
-                        const DropdownMenuItem(value: 3, child: Text('2ο Ημ. Παράτασης')),
+                        DropdownMenuItem(value: 3, child: Text(greek ? '2ο Ημ. Παράτασης' : '2nd Half ET')),
                     ],
                     onChanged: (value) {
                       setState(() {
@@ -356,12 +364,15 @@ class _EditMatchFactModalState extends State<EditMatchFactModal> {
                       builder: (ctx) => AlertDialog(
                         backgroundColor: isDark ? const Color(0xFF2C2C2C) : Colors.white,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                        title: Text('Επιβεβαίωση', style: TextStyle(color: textColor)),
-                        content: Text('Είσαι σίγουρος ότι θέλεις να διαγράψεις αυτό το Γκολ;', style: TextStyle(color: isDark ? Colors.white70 : Colors.black87)),
+                        title: Text(greek ? 'Επιβεβαίωση' : 'Confirmation', style: TextStyle(color: textColor)),
+                        content: Text(
+                            greek ? 'Είσαι σίγουρος ότι θέλεις να διαγράψεις αυτό το Γκολ;' : 'Are you sure you want to delete this Goal?',
+                            style: TextStyle(color: isDark ? Colors.white70 : Colors.black87)
+                        ),
                         actions: [
                           TextButton(
                             onPressed: () => Navigator.of(ctx).pop(),
-                            child: const Text('Ακύρωση', style: TextStyle(color: Colors.grey)),
+                            child: Text(greek ? 'Ακύρωση' : 'Cancel', style: const TextStyle(color: Colors.grey)),
                           ),
                           TextButton(
                             onPressed: () {
@@ -369,13 +380,13 @@ class _EditMatchFactModalState extends State<EditMatchFactModal> {
                               Navigator.of(context).pop();
                               widget.match.cancelGoal(widget.fact);
                             },
-                            child: const Text('Διαγραφή', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+                            child: Text(greek ? 'Διαγραφή' : 'Delete', style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
                           ),
                         ],
                       ),
                     );
                   },
-                  child: Text("Διαγραφή", style: TextStyle(color: Colors.red[600], fontWeight: FontWeight.bold, fontSize: 16)),
+                  child: Text(greek ? "Διαγραφή" : "Delete", style: TextStyle(color: Colors.red[600], fontWeight: FontWeight.bold, fontSize: 16)),
                 ),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
@@ -384,7 +395,7 @@ class _EditMatchFactModalState extends State<EditMatchFactModal> {
                       padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 12)
                   ),
                   onPressed: save,
-                  child: const Text("Αποθήκευση", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+                  child: Text(greek ? "Αποθήκευση" : "Save", style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
                 ),
               ],
             ),

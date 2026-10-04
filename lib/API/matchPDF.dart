@@ -1,9 +1,9 @@
 import 'dart:typed_data';
+import 'package:flutter/services.dart'; // 💡 ΠΡΟΣΤΕΘΗΚΕ: Για το rootBundle (Τοπικά αρχεία)
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 
-// Πρόσθεσε εδώ τα δικά σου imports ανάλογα με το πού βρίσκονται τα αρχεία σου
 import '../Data_Classes/MatchDetails.dart';
 import '../Data_Classes/Team.dart';
 import '../Data_Classes/match_facts.dart';
@@ -18,26 +18,38 @@ class MatchReportGenerator {
   }) async {
     final pdf = pw.Document();
 
-    // Φορτώνουμε ελληνικές γραμματοσειρές on the fly (απαραίτητο για τα Ελληνικά)
-    // Φορτώνουμε ελληνικές γραμματοσειρές on the fly (απαραίτητο για τα Ελληνικά)
-    final font = await PdfGoogleFonts.robotoRegular();
-    final boldFont = await PdfGoogleFonts.robotoBold();
-    final italicFont = await PdfGoogleFonts.robotoItalic();
+    // ΑΛΛΑΓΗ: Φορτώνουμε τις γραμματοσειρές ΤΟΠΙΚΑ, όχι από το ίντερνετ!
+    final regularFontData = await rootBundle.load('assets/fonts/Roboto-Regular.ttf');
+    final boldFontData = await rootBundle.load('assets/fonts/Roboto-Bold.ttf');
 
-    final formattedHomeStarters =
-        _formatPlayerList(match.homeStarters, match.homeTeam, match);
-    final formattedHomeSubs =
-        _formatPlayerList(match.homeSubsIn, match.homeTeam, match);
-    final formattedAwayStarters =
-        _formatPlayerList(match.awayStarters, match.awayTeam, match);
-    final formattedAwaySubs =
-        _formatPlayerList(match.awaySubsIn, match.awayTeam, match);
+    final italicFontData = await rootBundle.load('assets/fonts/Roboto-Regular.ttf');
+
+    final font = pw.Font.ttf(regularFontData);
+    final boldFont = pw.Font.ttf(boldFontData);
+    final italicFont = pw.Font.ttf(italicFontData);
+
+    // Βρίσκουμε τον πάγκο αφαιρώντας τους βασικούς από το συνολικό ρόστερ του αγώνα
+    final List<String> homeBenchKeys = match.homeSquad.where((key) => !match.homeStarters.contains(key)).toList();
+    final List<String> awayBenchKeys = match.awaySquad.where((key) => !match.awayStarters.contains(key)).toList();
+
+    // Φορμάρουμε τις λίστες με τα ονόματα (και το (C) για τους αρχηγούς)
+    final formattedHomeStarters = _formatPlayerList(match.homeStarters, match.homeTeam, match, match.homeCaptain);
+    final formattedHomeBench = _formatPlayerList(homeBenchKeys, match.homeTeam, match, match.homeCaptain);
+    final formattedAwayStarters = _formatPlayerList(match.awayStarters, match.awayTeam, match, match.awayCaptain);
+    final formattedAwayBench = _formatPlayerList(awayBenchKeys, match.awayTeam, match, match.awayCaptain);
+
 
     // Χρησιμοποιούμε MultiPage ώστε αν γεμίσει η σελίδα, να αλλάξει σελίδα αυτόματα
     pdf.addPage(
       pw.MultiPage(
         pageFormat: PdfPageFormat.a4,
         margin: const pw.EdgeInsets.all(32),
+        // 💡 Βάζουμε το Theme για ασφάλεια
+        theme: pw.ThemeData.withFont(
+          base: font,
+          bold: boldFont,
+          italic: italicFont,
+        ),
         build: (pw.Context context) {
           return [
             // --- 1. HEADER (ΒΙΤΡΙΝΑ) ---
@@ -102,30 +114,34 @@ class MatchReportGenerator {
             pw.SizedBox(height: 30),
 
             // --- 3. ΡΟΣΤΕΡ (ΤΟ ΔΙΣΤΗΛΟ) ---
-            pw.Row(
-              crossAxisAlignment: pw.CrossAxisAlignment.start,
+            pw.Partitions(
               children: [
                 // Αριστερή Στήλη: Γηπεδούχος
-                pw.Expanded(
-                  child: _buildTeamColumn(
-                    teamName: match.homeTeam.name,
-                    captain: match.awayCaptain,
-                    starters: formattedHomeStarters,
-                    subs: formattedHomeSubs,
-                    font: font,
-                    boldFont: boldFont,
+                pw.Partition(
+                  child: pw.Container(
+                    padding: const pw.EdgeInsets.only(right: 10),
+                    child: _buildTeamColumn(
+                      teamName: match.homeTeam.name,
+                      captain: match.homeCaptain,
+                      starters: formattedHomeStarters,
+                      subs: formattedHomeBench,
+                      font: font,
+                      boldFont: boldFont,
+                    ),
                   ),
                 ),
-                pw.SizedBox(width: 20), // Κενό ανάμεσα στις ομάδες
                 // Δεξιά Στήλη: Φιλοξενούμενος
-                pw.Expanded(
-                  child: _buildTeamColumn(
-                    teamName: match.awayTeam.name,
-                    captain: match.awayCaptain,
-                    starters: formattedAwayStarters,
-                    subs: formattedAwaySubs,
-                    font: font,
-                    boldFont: boldFont,
+                pw.Partition(
+                  child: pw.Container(
+                    padding: const pw.EdgeInsets.only(left: 10),
+                    child: _buildTeamColumn(
+                      teamName: match.awayTeam.name,
+                      captain: match.awayCaptain,
+                      starters: formattedAwayStarters,
+                      subs: formattedAwayBench,
+                      font: font,
+                      boldFont: boldFont,
+                    ),
                   ),
                 ),
               ],
@@ -170,7 +186,6 @@ class MatchReportGenerator {
             pw.SizedBox(height: 40),
 
             // --- 6. ΥΠΟΓΡΑΦΕΣ ---
-            // Χρησιμοποιούμε Wrap ή απλό Row ανάλογα με το χώρο
             pw.Row(
               mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
               crossAxisAlignment: pw.CrossAxisAlignment.end,
@@ -193,7 +208,6 @@ class MatchReportGenerator {
   // ============================================================================
   // ΒΟΗΘΗΤΙΚΑ WIDGETS
 
-  // 1. Στήλη Ομάδας (Ρόστερ)
   static pw.Widget _buildTeamColumn({
     required String teamName,
     required String? captain,
@@ -212,22 +226,17 @@ class MatchReportGenerator {
           child: pw.Text(teamName,
               style: pw.TextStyle(font: boldFont, fontSize: 14)),
         ),
-        if (captain != null && captain.isNotEmpty)
-          pw.Padding(
-            padding: const pw.EdgeInsets.only(top: 4, bottom: 8),
-            child: pw.Text("Αρχηγός: $captain",
-                style: pw.TextStyle(
-                    font: font, fontSize: 10, color: PdfColors.grey700)),
-          ),
         pw.Text("Βασική Ενδεκάδα:",
             style: pw.TextStyle(font: boldFont, fontSize: 11)),
         ...starters.map((p) =>
             pw.Text("• $p", style: pw.TextStyle(font: font, fontSize: 10))),
+        // ... (προηγούμενος κώδικας βασικής ενδεκάδας) ...
         pw.SizedBox(height: 10),
-        pw.Text("Αλλαγές (Μπήκαν):",
+
+        pw.Text("Αναπληρωματικοί:",
             style: pw.TextStyle(font: boldFont, fontSize: 11)),
         if (subs.isEmpty)
-          pw.Text("Καμία",
+          pw.Text("Κανείς",
               style: pw.TextStyle(
                   font: font, fontSize: 10, color: PdfColors.grey600)),
         ...subs.map((p) =>
@@ -236,16 +245,14 @@ class MatchReportGenerator {
     );
   }
 
-  // 2. Χρονολόγιο Γεγονότων (Timeline)
   static pw.Widget _buildEventsTimeline(
       MatchDetails match, pw.Font font, pw.Font boldFont, pw.Font italicFont) {
     List<pw.Widget> eventWidgets = [];
 
-    // Διασχίζουμε όλα τα ημίχρονα (0: 1ο, 1: 2ο, 2: 1ο Παράτασης, 3: 2ο Παράτασης)
     for (int half = 0; half < 4; half++) {
       if (match.matchFact.containsKey(half) &&
           match.matchFact[half]!.isNotEmpty) {
-        // Επικεφαλίδα Ημιχρόνου
+
         String halfName = "";
         if (half == 0) halfName = "1ο Ημίχρονο";
         if (half == 1) halfName = "2ο Ημίχρονο";
@@ -259,25 +266,24 @@ class MatchReportGenerator {
                   font: boldFont, fontSize: 12, color: PdfColors.blueGrey800)),
         ));
 
-        // Για κάθε γεγονός σε αυτό το ημίχρονο
         for (var fact in match.matchFact[half]!) {
           String timePrefix = "[${fact.timeString}']";
           String description = "";
 
-          // Βρίσκουμε το όνομα της ομάδας
           String teamName =
-              fact.isHomeTeam ? match.homeTeam.name : match.awayTeam.name;
+          fact.isHomeTeam ? match.homeTeam.name : match.awayTeam.name;
 
-          // Ελέγχουμε τον τύπο του MatchFact
           if (fact is Goal) {
             description =
-                "ΓΚΟΛ ($teamName) - ${fact.name} | Σκορ: ${fact.homeScore}-${fact.awayScore}";
+            "ΓΚΟΛ ($teamName) - ${fact.name} | Σκορ: ${fact.homeScore}-${fact.awayScore}";
           } else if (fact is CardP) {
-            String cardType = fact.isYellow ? "ΚΙΤΡΙΝΗ ΚΑΡΤΑ" : "ΚΟΚΚΙΝΗ ΚΑΡΤΑ";
+            String cardType = fact.isYellow
+                ? (fact.isSecondYellow ? "2η Κίτρινη (Κόκκινη)" : "Κίτρινη")
+                : "Απευθείας Κόκκινη";
             description = "$cardType ($teamName) - ${fact.name}";
           } else if (fact is Substitution) {
             description =
-                "ΑΛΛΑΓΗ ($teamName) - Μπήκε: ${fact.playerInName}, Βγήκε: ${fact.playerOutName}";
+            "ΑΛΛΑΓΗ ($teamName) - Μπήκε: ${fact.playerInName}, Βγήκε: ${fact.playerOutName}";
           }
 
           eventWidgets.add(pw.Padding(
@@ -309,7 +315,6 @@ class MatchReportGenerator {
     );
   }
 
-  // 3. Κουτάκι Υπογραφής
   static pw.Widget _buildSignatureBlock(
       String title, Uint8List signatureBytes, pw.Font font) {
     return pw.Column(
@@ -321,7 +326,7 @@ class MatchReportGenerator {
               border: pw.Border(
                   bottom: pw.BorderSide(color: PdfColors.black, width: 1))),
           child:
-              pw.Image(pw.MemoryImage(signatureBytes), fit: pw.BoxFit.contain),
+          pw.Image(pw.MemoryImage(signatureBytes), fit: pw.BoxFit.contain),
         ),
         pw.SizedBox(height: 5),
         pw.Text(title, style: pw.TextStyle(font: font, fontSize: 10)),
@@ -329,18 +334,20 @@ class MatchReportGenerator {
     );
   }
 
-  //Βοηθητική συνάρτηση που μετατρέπει τα keys σε κανονικά ονόματα ---
   static List<String> _formatPlayerList(
-      List<String> keys, Team team, MatchDetails match) {
+      List<String> keys, Team team, MatchDetails match, String? captainKey) {
     return keys.map((key) {
       try {
-        final player =
-            team.players.firstWhere((p) => p.uniqueKey == key);
+        final player = team.players.firstWhere((p) => p.uniqueKey == key);
+        String playerText = "${match.getDisplayNumber(player)} - ${player.surname} ${player.name}";
 
-        return "${match.getDisplayNumber(player)} - ${player.name} ${player.surname}";
+        if (key == captainKey) {
+          playerText += " (C)";
+        }
+
+        return playerText;
       } catch (e) {
-        // Αν για κάποιο λόγο δεν βρεθεί ο παίκτης (π.χ. διαγράφηκε), επιστρέφουμε το κλειδί ως έχει
-        return key;
+        return key; // Fallback αν δεν βρεθεί ο παίκτης
       }
     }).toList();
   }

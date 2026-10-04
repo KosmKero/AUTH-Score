@@ -8,6 +8,7 @@ import 'package:untitled1/API/top_players_handle.dart';
 import 'package:untitled1/Data_Classes/Player.dart';
 import 'package:untitled1/Firebase_Handle/TeamsHandle.dart';
 
+import '../Match_Details_Package/StatsPage.dart';
 import '../globals.dart';
 import '../globals.dart' as global;
 import 'Penaltys.dart';
@@ -18,6 +19,8 @@ class MatchDetails extends ChangeNotifier {
   //με το _ γινεται private
 
   late PenaltyShootout penaltyShootout;
+
+  final String matchId;
 
   ValueNotifier<bool> _notify = ValueNotifier<bool>(false);
   bool _hasMatchStarted = false;
@@ -94,7 +97,8 @@ class MatchDetails extends ChangeNotifier {
   String? pdfReportUrl;
 
   MatchDetails(
-      {required Team homeTeam,
+      {required this.matchId,
+      required Team homeTeam,
       required Team awayTeam,
       required bool hasMatchStarted,
       required bool hasMatchFinished,
@@ -228,9 +232,20 @@ class MatchDetails extends ChangeNotifier {
     _slot = slot;
 
 
-    _notify = ValueNotifier<bool>((globalUser.matchKeys[matchKey] ??
-        (globalUser.favoriteList.contains(homeTeam.name) ||
-            globalUser.favoriteList.contains(awayTeam.name))));
+    // Έλεγχος για ρητό override (true/false) από τον χρήστη
+    bool? explicitPreference = globalUser.matchKeys[matchDocId];
+
+    if (explicitPreference != null) {
+      _notify = ValueNotifier<bool>(explicitPreference);
+    } else {
+      // Αν δεν υπάρχει override, ελέγχουμε αν είναι Favorite Team Ή αν είναι ενεργό το Γενικό Καμπανάκι Ποδοσφαίρου
+      bool isFavoriteTeam = globalUser.favoriteList.contains(homeTeam.name) ||
+          globalUser.favoriteList.contains(awayTeam.name);
+
+      bool notifyAllFootball = globalUser.notifyAllMatches.value;
+
+      _notify = ValueNotifier<bool>(isFavoriteTeam || notifyAllFootball);
+    }
 
     startListeningForUpdates();
   }
@@ -253,9 +268,6 @@ class MatchDetails extends ChangeNotifier {
   int get slot => _slot;
   ValueNotifier<bool> get notify => _notify;
 
-  String get matchKey =>
-      '${homeTeam.nameEnglish}$day$month$year$game${awayTeam.nameEnglish}';
-
   bool get hasFirstHalfExtraTimeFinished => _hasFirstHalfExtraTimeFinished;
   bool get hasExtraTimeFinished => _hasExtraTimeFinished;
   bool get hasExtraTimeStarted => _hasExtraTimeStarted;
@@ -264,6 +276,11 @@ class MatchDetails extends ChangeNotifier {
   DateTime get matchDateTime2 {
     return DateTime.utc(_year, _month, _day, hour, minute).subtract(const Duration(hours: 3));
   }
+
+
+
+  String get matchDocId => matchId;
+
 
   int get homeScore => _scoreHome + _scoreHomeExtraTime;
   int get awayScore => _scoreAway + _scoreAwayExtraTime;
@@ -369,8 +386,6 @@ class MatchDetails extends ChangeNotifier {
     await FirebaseFirestore.instance.collection('year').doc(global.thisYearNow.toString()).collection("matches").doc(matchDocId).set(
         {'hasMatchFinished': progress},
         SetOptions(merge: true)); // ώστε να μη διαγράψει άλλα πεδία // τελειωσε το ματς
-    String matchKey =
-        '${homeTeam.nameEnglish}${awayTeam.nameEnglish}${dateString}';
 
     String correctChoice;
     (scoreHome > scoreAway)
@@ -379,7 +394,7 @@ class MatchDetails extends ChangeNotifier {
             ? correctChoice = "X"
             : correctChoice = "2";
 
-    await FirebaseFirestore.instance.collection('votes').doc(matchKey).set({  // ανανεωση του ματς στο στοιχημα
+    await FirebaseFirestore.instance.collection('votes').doc(matchDocId).set({  // ανανεωση του ματς στο στοιχημα
       'hasMatchFinished': progress,
       'correctChoice': correctChoice,
       'statsUpdated': false,
@@ -398,9 +413,9 @@ class MatchDetails extends ChangeNotifier {
 
     await FirebaseFirestore.instance
         .collection("year")
-        .doc(thisYearNow.toString()) // Ή thisYearNow.toString() ανάλογα πώς το έχεις στο αρχείο
+        .doc(thisYearNow.toString())
         .collection("matches")
-        .doc(matchKey) // Το ID του αγώνα
+        .doc(matchDocId) // Το ID του αγώνα
         .set({
       'temporaryNumbers': temporaryNumbers,
     }, SetOptions(merge: true)); // Το merge: true απλά προσθέτει το πεδίο χωρίς να σβήσει τα υπόλοιπα!
@@ -611,7 +626,7 @@ class MatchDetails extends ChangeNotifier {
         ? correctChoice = "X"
         : correctChoice = "2";
 
-    await FirebaseFirestore.instance.collection('votes').doc(matchKey).set({  // ανανεωση του ματς στο στοιχημα
+    await FirebaseFirestore.instance.collection('votes').doc(matchDocId).set({  // ανανεωση του ματς στο στοιχημα
       'hasMatchFinished': true,
       'correctChoice': correctChoice,
       'statsUpdated': false,
@@ -630,12 +645,82 @@ class MatchDetails extends ChangeNotifier {
           homeTeam.applyMatchResult(scoreHome, scoreAway, isGroupPhase),
           awayTeam.applyMatchResult(awayScore, homeScore, isGroupPhase)
         ]);
+
+        if (isGroupPhase) {
+          await FirebaseFirestore.instance
+              .collection('year')
+              .doc(global.thisYearNow.toString())
+              .collection('stats')
+              .doc('league')
+              .set({
+            'totalMatches': FieldValue.increment(1),
+            'totalGoals': FieldValue.increment(scoreHome + scoreAway),
+          }, SetOptions(merge: true));
+        }
+
+        final matchMonth = month;
+        final matchCalendarYear = year;
+        final seasonYear = matchMonth >= 8 ? matchCalendarYear + 1 : matchCalendarYear;
+
+        // Κατεβάζουμε τα περσινά δεδομένα για τον αλγόριθμο
+        final pastA = await WinProbabilityCalculator.getLastYearStats(homeTeam.name, seasonYear);
+        final pastB = await WinProbabilityCalculator.getLastYearStats(awayTeam.name, seasonYear);
+        await WinProbabilityCalculator.loadLeagueAverages(seasonYear);
+
+        // Τρέχουμε τον αλγόριθμο
+        final prediction = WinProbabilityCalculator.calculateProbabilities(
+          teamA: homeTeam,
+          teamB: awayTeam,
+          pastStatsA: pastA,
+          pastStatsB: pastB,
+          isGroupPhase: isGroupPhase,
+        );
+
+        await FirebaseFirestore.instance
+            .collection('year')
+            .doc(global.thisYearNow.toString()) // Ή seasonYear αν προτιμάς
+            .collection('matches')
+            .doc(matchId)
+            .update({
+          // Κλειδωμένες Πιθανότητες από το prediction που μόλις υπολογίσαμε!
+          'lockedProb1': prediction.prob1,
+          'lockedProbX': prediction.probX,
+          'lockedProb2': prediction.prob2,
+          'lockedScore': prediction.exactScore,
+          'lockedScoreProb': prediction.exactProb,
+
+          // Κλειδωμένα Στατιστικά Γηπεδούχου (Παίρνει τη φόρμα όπως είναι σήμερα)
+          'lockedHomeMatches': homeTeam.matches,
+          'lockedHomeGoalsFor': homeTeam.goalsFor,
+          'lockedHomeGoalsAgainst': homeTeam.goalsAgainst,
+
+          // Κλειδωμένα Στατιστικά Φιλοξενούμενου
+          'lockedAwayMatches': awayTeam.matches,
+          'lockedAwayGoalsFor': awayTeam.goalsFor,
+          'lockedAwayGoalsAgainst': awayTeam.goalsAgainst,
+        });
+
+
       } else {
 
         await Future.wait([
           homeTeam.revertMatchResult(scoreHome, scoreAway, isGroupPhase),
           awayTeam.revertMatchResult(awayScore, homeScore, isGroupPhase)
         ]);
+
+        if (isGroupPhase) {
+          await FirebaseFirestore.instance
+              .collection('year')
+              .doc(global.thisYearNow.toString())
+              .collection('stats')
+              .doc('league')
+              .set({
+            'totalMatches': FieldValue.increment(-1),
+            'totalGoals': FieldValue.increment(-(scoreHome + scoreAway)),
+          }, SetOptions(merge: true));
+        }
+
+
     }
       if (isGroupPhase) {
         TeamsHandle().sortTeams(homeTeam.group);
@@ -877,7 +962,7 @@ class MatchDetails extends ChangeNotifier {
   Future<void> cancelPenalty() async {
 
 
-    await penaltyShootout.removeLastPenalty(matchKey);
+    await penaltyShootout.removeLastPenalty(matchDocId);
 
     if (!isShootoutOver) {
       MatchHandle().matchNotFinished(this);
@@ -889,7 +974,6 @@ class MatchDetails extends ChangeNotifier {
     notifyListeners();
   }
 
-//ετοιμο
 //ετοιμο
   Future<void> cancelCard(CardP card1) async {
     if ((!hasMatchFinished || (isExtraTimeTime && !hasExtraTimeFinished)) &&
@@ -954,30 +1038,37 @@ class MatchDetails extends ChangeNotifier {
     });
   }
   Future<void> cancelSubstitution(String playerKey, bool isHome) async {
-    // 1. Ψάχνουμε να βρούμε το ζευγάρι της αλλαγής στα facts
-    Substitution? targetSub;
+    // 1. Μαζεύουμε όλες τις αλλαγές του αγώνα
+    List<Substitution> allSubs = [];
     for (int i = 0; i < 4; i++) {
       if (_matchFacts.containsKey(i)) {
-        for (var fact in _matchFacts[i]!) {
-          if (fact is Substitution && (fact.playerIn == playerKey || fact.playerOut == playerKey)) {
-            targetSub = fact;
-            break;
-          }
-        }
+        allSubs.addAll(_matchFacts[i]!.whereType<Substitution>());
       }
-      if (targetSub != null) break;
+    }
+
+    // 2. Τις ταξινομούμε βάσει λεπτού (όπως ακριβώς κάναμε και στο UI)
+    allSubs.sort((a, b) => a.minute.compareTo(b.minute));
+
+    // 3. Βρίσκουμε την ΤΕΛΕΥΤΑΙΑ αλλαγή στην οποία εμπλέκεται ο παίκτης
+    Substitution? targetSub;
+    for (var sub in allSubs.reversed) {
+      if (sub.playerIn == playerKey || sub.playerOut == playerKey) {
+        targetSub = sub;
+        break;
+      }
     }
 
     if (targetSub != null) {
       String keyIn = targetSub.playerIn;
       String keyOut = targetSub.playerOut;
 
-      // 2. Διαγράφουμε την αλλαγή από το Φύλλο Αγώνα (Timeline)
+      // 4. Διαγράφουμε τη σωστή αλλαγή από το Φύλλο Αγώνα (Timeline)
       _matchFacts[targetSub.half]!.remove(targetSub);
       await syncFactsWithFirestore();
 
       String teamPrefix = isHome ? 'home' : 'away';
 
+      // 5. Επαναφέρουμε τις λίστες στο Firebase
       await FirebaseFirestore.instance.collection("year").doc(global.thisYearNow.toString()).collection("matches").doc(matchDocId).update({
         '${teamPrefix}Starters': FieldValue.arrayRemove([keyIn]),
         '${teamPrefix}SubsIn': FieldValue.arrayRemove([keyIn]),
@@ -1075,7 +1166,7 @@ class MatchDetails extends ChangeNotifier {
       // Update match facts only if present
       if (data.containsKey('facts')) {
         final factsMap = Map<String, dynamic>.from(data['facts']);
-        final decodedFacts = await MatchFactsStorageHelper.decodeMatchFacts(factsMap);
+        final decodedFacts = await MatchFactsStorageHelper.decodeMatchFacts(factsMap, homeTeam, awayTeam);
 
         if (!mapEquals(_matchFacts, decodedFacts)) {
           _matchFacts = decodedFacts;
@@ -1120,14 +1211,6 @@ class MatchDetails extends ChangeNotifier {
     _matchSubscription = null;
   }
 
-  String get matchDocId {
-    return homeTeam.nameEnglish +
-        _day.toString() +
-        _month.toString() +
-        _year.toString() +
-        _game.toString() +
-        awayTeam.nameEnglish;
-  }
 
   @override
   void dispose() {
@@ -1268,23 +1351,23 @@ class MatchFactsStorageHelper {
   // Μετατρέπει τα δεδομένα από Firestore πίσω σε Map<int, List<MatchFact>>
   // Κάνουμε την decodeMatchFacts async
   static Future<Map<int, List<MatchFact>>> decodeMatchFacts(
-    Map<String, dynamic> firestoreMap,
-  ) async {
+      Map<String, dynamic> firestoreMap,
+      Team homeTeam,
+      Team awayTeam,
+      ) async {
     final Map<int, List<MatchFact>> result = {};
 
-    // Για κάθε μισό του παιχνιδιού
+    // Για κάθε ημίχρονο του παιχνιδιού
     for (var halfKey in firestoreMap.keys) {
       int half = int.parse(halfKey);
       List<dynamic> factList = firestoreMap[halfKey] as List<dynamic>;
 
-      // Χρησιμοποιούμε await για να πάρουμε την ομάδα
-      List<MatchFact> matchFacts =
-          await Future.wait(factList.map<Future<MatchFact>>((item) async {
+      List<MatchFact> matchFacts = factList.map<MatchFact>((item) {
         final Map<String, dynamic> map = Map<String, dynamic>.from(item);
         final String type = map['type'];
 
-        // Περιμένουμε την ομάδα πριν προχωρήσουμε με τα υπόλοιπα
-        final Team team = await TeamsHandle().getTeam(map['team']) as Team;
+        String factTeamName = map['team'];
+        Team team = (factTeamName == homeTeam.name) ? homeTeam : awayTeam;
 
         if (type == 'goal') {
           return Goal.fromMap(map, team);
@@ -1295,12 +1378,10 @@ class MatchFactsStorageHelper {
         } else {
           throw Exception('Unknown type: $type');
         }
-      }));
+      }).toList();
 
-      // Προσθέτουμε τα γεγονότα για το συγκεκριμένο μισό
       result[half] = matchFacts;
-
-      // Ταξινομούμε ανά λεπτό (αν χρειάζεται)
+      // Ταξινομούμε ανά λεπτό
       result[half]?.sort((a, b) => a.minute.compareTo(b.minute));
     }
 

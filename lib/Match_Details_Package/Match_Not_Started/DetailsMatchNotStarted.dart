@@ -81,7 +81,7 @@ class DetailsMatchNotStarted extends StatelessWidget {
 
 Future<List<num>> loadPercentages(MatchDetails match) async {
   TeamsHandle teamsHandle = TeamsHandle();
-  return teamsHandle.getPercentages('${match.homeTeam.nameEnglish}${match.awayTeam.nameEnglish}${match.dateString}');
+  return teamsHandle.getPercentages(match.matchDocId);
 }
 
 Future<List<String>> getFinalFive(String teamName) async{
@@ -89,7 +89,7 @@ Future<List<String>> getFinalFive(String teamName) async{
   return teamsHandle.getPreviousResults(teamName);
 }
 
-// 🌟 2. Το TeamFormWidget έγινε StatefulWidget!
+//  Το TeamFormWidget έγινε StatefulWidget!
 class TeamFormWidget extends StatefulWidget {
   final Team team;
 
@@ -154,7 +154,7 @@ class _TeamFormWidgetState extends State<TeamFormWidget> {
                         const SizedBox(width: 5),
                         Flexible(
                           child: Text(
-                            widget.team.name,
+                            widget.team.displayName,
                             style: TextStyle(
                               fontSize: screenWidth * 0.036, // Responsive font size
                               fontWeight: FontWeight.w600,

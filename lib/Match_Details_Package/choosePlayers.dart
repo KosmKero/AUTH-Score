@@ -74,7 +74,6 @@ class _LiveLineupScreenState extends State<LiveLineupScreen> {
     Set<String> currentStarters = showHomeTeam ? homeStarters : awayStarters;
 
     List<Player> filteredList = currentList.where((p) {
-
       if (widget.match.hasMatchStarted && !currentSquad.contains(p.uniqueKey)) {
         return false;
       }
@@ -88,10 +87,10 @@ class _LiveLineupScreenState extends State<LiveLineupScreen> {
 
     return Scaffold(
       backgroundColor:
-          darkModeNotifier.value ? const Color(0xFF121212) : Colors.grey[100],
+      darkModeNotifier.value ? const Color(0xFF121212) : Colors.grey[100],
       appBar: AppBar(
         backgroundColor:
-            darkModeNotifier.value ? Colors.grey[900] : Colors.blue[800],
+        darkModeNotifier.value ? Colors.grey[900] : Colors.blue[800],
         title: Text(greek ? "Επεξεργασία Αποστολής" : "Edit Squad",
             style: const TextStyle(
                 color: Colors.white,
@@ -123,7 +122,7 @@ class _LiveLineupScreenState extends State<LiveLineupScreen> {
                             initiallyExpanded: !widget.match.hasMatchStarted,
                             leading: const Icon(Icons.shield,
                                 color: Colors.blueAccent),
-                            title: Text("Επιτελείο Ομάδας & Αρχηγός",
+                            title: Text(greek ? "Επιτελείο Ομάδας & Αρχηγός" : "Team Staff & Captain",
                                 style: TextStyle(
                                     fontWeight: FontWeight.bold,
                                     color: darkModeNotifier.value
@@ -134,14 +133,12 @@ class _LiveLineupScreenState extends State<LiveLineupScreen> {
                               // --- 1. DROPDOWN ΑΡΧΗΓΟΥ ---
                               Builder(
                                 builder: (context) {
-                                  // 1. Μαζεύουμε τα κλειδιά για να αποφύγουμε τα διπλότυπα
                                   Set<String> validKeys = {};
                                   List<DropdownMenuItem<String>> dropdownItems = [];
 
                                   for (var player in currentList) {
                                     String pKey = player.uniqueKey;
 
-                                    // 🌟 Η ΜΑΓΕΙΑ: Τον βάζουμε στη λίστα ΑΝ είναι βασικός Ή ΑΝ είναι ο ήδη επιλεγμένος αρχηγός (ακόμα κι αν βγήκε αλλαγή)
                                     if (currentStarters.contains(pKey) || pKey == selectedCaptain) {
                                       if (!validKeys.contains(pKey)) {
                                         validKeys.add(pKey);
@@ -166,7 +163,6 @@ class _LiveLineupScreenState extends State<LiveLineupScreen> {
                                                   child: Text(
                                                     "${player.surname} ${player.name}",
                                                     overflow: TextOverflow.ellipsis,
-                                                    // Αν έχει βγει αλλαγή, δείξτο με γκρι γράμματα στο Dropdown!
                                                     style: TextStyle(
                                                       color: (!currentStarters.contains(pKey) && widget.match.hasMatchStarted)
                                                           ? Colors.grey
@@ -182,12 +178,11 @@ class _LiveLineupScreenState extends State<LiveLineupScreen> {
                                     }
                                   }
 
-                                  // 2. Δικλείδα Ασφαλείας: Αν ο selectedCaptain για κάποιο λόγο διαγράφηκε τελείως, κάντον null
                                   String? safeCaptain = validKeys.contains(selectedCaptain) ? selectedCaptain : null;
 
                                   return DropdownButtonFormField<String>(
                                     decoration: InputDecoration(
-                                      labelText: greek ? "Αρχηγός Ομάδας (C)" : "Captain",
+                                      labelText: greek ? "Αρχηγός Ομάδας (C)" : "Team Captain (C)",
                                       labelStyle: TextStyle(
                                           color: darkModeNotifier.value ? Colors.blue[200] : Colors.blue[800]),
                                       filled: true,
@@ -197,9 +192,9 @@ class _LiveLineupScreenState extends State<LiveLineupScreen> {
                                     ),
                                     dropdownColor: darkModeNotifier.value ? Colors.grey[800] : Colors.white,
 
-                                    value: safeCaptain, // 🌟 Βάζουμε το Safe Value
+                                    value: safeCaptain,
                                     isExpanded: true,
-                                    items: dropdownItems, // 🌟 Βάζουμε τη λίστα που φτιάξαμε
+                                    items: dropdownItems,
 
                                     style: TextStyle(
                                         color: widget.match.hasMatchStarted
@@ -214,13 +209,14 @@ class _LiveLineupScreenState extends State<LiveLineupScreen> {
                                     },
                                   );
                                 },
-                              ),                              const SizedBox(height: 15),
+                              ),
+                              const SizedBox(height: 15),
                               TextField(
                                 controller: coachController,
-                                readOnly: widget.match.hasMatchStarted, // 🌟 ΚΛΕΙΔΩΜΑ
+                                readOnly: widget.match.hasMatchStarted,
                                 style: TextStyle(color: widget.match.hasMatchStarted ? Colors.grey : (darkModeNotifier.value ? Colors.white : Colors.black)),
                                 decoration: InputDecoration(
-                                    labelText: "Προπονητής",
+                                    labelText: greek ? "Προπονητής" : "Coach",
                                     labelStyle: TextStyle(color: darkModeNotifier.value ? Colors.grey[400] : Colors.grey[700]),
                                     filled: true,
                                     fillColor: darkModeNotifier.value ? Colors.grey[900] : Colors.grey[100],
@@ -229,10 +225,10 @@ class _LiveLineupScreenState extends State<LiveLineupScreen> {
                               const SizedBox(height: 10),
                               TextField(
                                 controller: assistantController,
-                                readOnly: widget.match.hasMatchStarted, // 🌟 ΚΛΕΙΔΩΜΑ
+                                readOnly: widget.match.hasMatchStarted,
                                 style: TextStyle(color: widget.match.hasMatchStarted ? Colors.grey : (darkModeNotifier.value ? Colors.white : Colors.black)),
                                 decoration: InputDecoration(
-                                    labelText: "Βοηθός Προπονητή",
+                                    labelText: greek ? "Βοηθός Προπονητή" : "Assistant Coach",
                                     labelStyle: TextStyle(color: darkModeNotifier.value ? Colors.grey[400] : Colors.grey[700]),
                                     filled: true,
                                     fillColor: darkModeNotifier.value ? Colors.grey[900] : Colors.grey[100],
@@ -241,10 +237,10 @@ class _LiveLineupScreenState extends State<LiveLineupScreen> {
                               const SizedBox(height: 10),
                               TextField(
                                 controller: kitmanController,
-                                readOnly: widget.match.hasMatchStarted, // 🌟 ΚΛΕΙΔΩΜΑ
+                                readOnly: widget.match.hasMatchStarted,
                                 style: TextStyle(color: widget.match.hasMatchStarted ? Colors.grey : (darkModeNotifier.value ? Colors.white : Colors.black)),
                                 decoration: InputDecoration(
-                                    labelText: "Φροντιστής / Ιατρός",
+                                    labelText: greek ? "Φροντιστής / Ιατρός" : "Kitman / Medic",
                                     labelStyle: TextStyle(color: darkModeNotifier.value ? Colors.grey[400] : Colors.grey[700]),
                                     filled: true,
                                     fillColor: darkModeNotifier.value ? Colors.grey[900] : Colors.grey[100],
@@ -270,14 +266,14 @@ class _LiveLineupScreenState extends State<LiveLineupScreen> {
                                 : "Search by name or number...",
                             hintStyle: const TextStyle(color: Colors.grey),
                             prefixIcon:
-                                const Icon(Icons.search, color: Colors.grey),
+                            const Icon(Icons.search, color: Colors.grey),
                             suffixIcon: searchQuery.isNotEmpty
                                 ? IconButton(
-                                    icon: const Icon(Icons.clear),
-                                    onPressed: () {
-                                      _searchController.clear();
-                                      setState(() => searchQuery = "");
-                                    })
+                                icon: const Icon(Icons.clear),
+                                onPressed: () {
+                                  _searchController.clear();
+                                  setState(() => searchQuery = "");
+                                })
                                 : null,
                             filled: true,
                             fillColor: darkModeNotifier.value
@@ -294,7 +290,7 @@ class _LiveLineupScreenState extends State<LiveLineupScreen> {
                 ),
                 SliverList(
                   delegate: SliverChildBuilderDelegate(
-                    (context, index) {
+                        (context, index) {
                       final player = filteredList[index];
                       String playerKey = player.uniqueKey;
                       bool isInRoster = currentSquad.contains(playerKey);
@@ -312,20 +308,19 @@ class _LiveLineupScreenState extends State<LiveLineupScreen> {
       ),
       bottomNavigationBar: (!widget.match.hasMatchStarted)
           ? _buildBottomStickyActions(
-              currentSquad.length, currentStarters.length)
+          currentSquad.length, currentStarters.length)
           : null,
     );
   }
 
   Widget _buildTeamSelectionButtons() {
     bool canEditHome = globalUser.controlTheseTeamsFootball(
-            widget.match.homeTeam.name, null) ||
+        widget.match.homeTeam.name, null) ||
         globalUser.isUpperAdmin;
     bool canEditAway = globalUser.controlTheseTeamsFootball(
-            widget.match.awayTeam.name, null) ||
+        widget.match.awayTeam.name, null) ||
         globalUser.isUpperAdmin;
 
-    // 🌟 Αν είναι Admin και ελέγχει ΚΑΙ ΤΙΣ 2 ΟΜΑΔΕΣ, δείξε τα κουμπιά εναλλαγής
     if (canEditHome && canEditAway) {
       return Padding(
         padding: const EdgeInsets.all(12.0),
@@ -333,19 +328,18 @@ class _LiveLineupScreenState extends State<LiveLineupScreen> {
           children: [
             Expanded(
                 child: _teamBtn(
-                    widget.match.homeTeam.name, true, Colors.blue[800]!)),
+                    widget.match.homeTeam.displayName, true, Colors.blue[800]!)),
             const SizedBox(width: 10),
             Expanded(
                 child: _teamBtn(
-                    widget.match.awayTeam.name, false, Colors.red[800]!)),
+                    widget.match.awayTeam.displayName, false, Colors.red[800]!)),
           ],
         ),
       );
     }
 
-    // Δείξε του απλά έναν ωραίο, ξεκάθαρο τίτλο με το όνομα της ομάδας του.
     String teamName =
-        showHomeTeam ? widget.match.homeTeam.name : widget.match.awayTeam.name;
+    showHomeTeam ? widget.match.homeTeam.name : widget.match.awayTeam.name;
     Color teamColor = showHomeTeam ? Colors.blue[800]! : Colors.red[800]!;
 
     return Padding(
@@ -360,7 +354,7 @@ class _LiveLineupScreenState extends State<LiveLineupScreen> {
         ),
         child: Center(
           child: Text(
-            "Ρόστερ: $teamName",
+            greek ? "Ρόστερ: $teamName" : "Roster: $teamName",
             style: TextStyle(
                 color: darkModeNotifier.value ? Colors.white : teamColor,
                 fontWeight: FontWeight.bold,
@@ -371,7 +365,6 @@ class _LiveLineupScreenState extends State<LiveLineupScreen> {
     );
   }
 
-  // Αυτό το κουμπί τώρα θα χρησιμοποιείται ΜΟΝΟ από τους Admins
   Widget _teamBtn(String name, bool isHome, Color color) {
     bool active = showHomeTeam == isHome;
     return ElevatedButton(
@@ -397,9 +390,9 @@ class _LiveLineupScreenState extends State<LiveLineupScreen> {
   Widget _buildPlayerCard(
       Player player, bool isInRoster, bool isStarter, String playerKey) {
     List<String> currentSubsOut =
-        showHomeTeam ? widget.match.homeSubsOut : widget.match.awaySubsOut;
+    showHomeTeam ? widget.match.homeSubsOut : widget.match.awaySubsOut;
     List<String> currentSubsIn =
-        showHomeTeam ? widget.match.homeSubsIn : widget.match.awaySubsIn;
+    showHomeTeam ? widget.match.homeSubsIn : widget.match.awaySubsIn;
 
     bool isSubbedOut = currentSubsOut.contains(playerKey);
     bool isSubbedIn = currentSubsIn.contains(playerKey);
@@ -423,15 +416,15 @@ class _LiveLineupScreenState extends State<LiveLineupScreen> {
             } else {
               _showErrorSnackbar(greek
                   ? "Το ματς έχει ήδη ξεκινήσει! Η αλλαγή φανέλας πάει στις παρατηρήσεις."
-                  : "Match started!");
+                  : "Match has already started! Number changes go to notes.");
             }
           },
           child: CircleAvatar(
             backgroundColor: isSubbedOut
                 ? Colors.grey[600]
                 : (isStarter ? Colors.green :
-                  (isInRoster ? Colors.blue :
-                                Colors.grey[300])),
+            (isInRoster ? Colors.blue :
+            Colors.grey[300])),
             child: Text(widget.match.getDisplayNumber(player).toString(),
                 style: TextStyle(
                     color: isInRoster ? Colors.white : Colors.black87,
@@ -445,12 +438,12 @@ class _LiveLineupScreenState extends State<LiveLineupScreen> {
                     style: TextStyle(
                         fontSize: 15,
                         fontWeight:
-                            isInRoster ? FontWeight.bold : FontWeight.normal,
+                        isInRoster ? FontWeight.bold : FontWeight.normal,
                         color: isSubbedOut
                             ? Colors.grey
                             : (darkModeNotifier.value
-                                ? Colors.white
-                                : Colors.black)),
+                            ? Colors.white
+                            : Colors.black)),
                     overflow: TextOverflow.ellipsis)),
             const SizedBox(width: 8),
           ],
@@ -459,18 +452,18 @@ class _LiveLineupScreenState extends State<LiveLineupScreen> {
             isSubbedOut
                 ? (greek ? "Βγήκε Αλλαγή" : "Subbed Out")
                 : isSubbedIn
-                    ? (greek ? "Μπήκε Αλλαγή" : "Subbed In")
-                    : isStarter
-                        ? (greek ? "Βασικός" : "Starter")
-                        : isInRoster
-                            ? (greek ? "Πάγκος" : "Bench")
-                            : (greek ? "Εκτός" : "Out"),
+                ? (greek ? "Μπήκε Αλλαγή" : "Subbed In")
+                : isStarter
+                ? (greek ? "Βασικός" : "Starter")
+                : isInRoster
+                ? (greek ? "Πάγκος" : "Bench")
+                : (greek ? "Εκτός" : "Out"),
             style: TextStyle(
                 color: isSubbedOut
                     ? Colors.grey
                     : isStarter
-                        ? Colors.green
-                        : (isInRoster ? Colors.blue : Colors.grey),
+                    ? Colors.green
+                    : (isInRoster ? Colors.blue : Colors.grey),
                 fontSize: 12)),
         trailing: _buildTrailingActions(
             player, isInRoster, isStarter, playerKey, isSubbedOut),
@@ -478,24 +471,42 @@ class _LiveLineupScreenState extends State<LiveLineupScreen> {
     );
   }
 
-  Widget _buildTrailingActions(Player player, bool isInRoster, bool isStarter,
-      String playerKey, bool isSubbedOut) {
+  Widget _buildTrailingActions(Player player, bool isInRoster, bool isStarter, String playerKey, bool isSubbedOut) {
     if (widget.match.hasMatchStarted) {
-      List<String> currentSubsIn =
-          showHomeTeam ? widget.match.homeSubsIn : widget.match.awaySubsIn;
+      List<String> currentSubsIn = showHomeTeam ? widget.match.homeSubsIn : widget.match.awaySubsIn;
       bool isSubbedIn = currentSubsIn.contains(playerKey);
+
+      List<Widget> actions = [];
+
+      // 1. Κουμπί UNDO: Εμφανίζεται αν ο παίκτης εμπλέκεται σε αλλαγή (μπήκε ή βγήκε)
       if (isSubbedOut || isSubbedIn) {
-        return IconButton(
-            icon: const Icon(Icons.undo, color: Colors.orange, size: 24),
-            tooltip: greek ? "Ακύρωση Αλλαγής" : "Undo Sub",
-            onPressed: () => _undoSubDialog(player, isSubbedOut, isSubbedIn));
+        actions.add(
+            IconButton(
+              icon: const Icon(Icons.undo, color: Colors.orange, size: 24),
+              tooltip: greek ? "Ακύρωση Αλλαγής" : "Undo Sub",
+              onPressed: () => _undoSubDialog(player, isSubbedOut, isSubbedIn),
+            )
+        );
       }
-      return (isStarter && !isSubbedOut)
-          ? IconButton(
+
+      // 2. Κουμπί ΑΛΛΑΓΗΣ: Εμφανίζεται αν ο παίκτης παίζει ΤΩΡΑ (είναι Starter ΚΑΙ ΔΕΝ έχει βγει)
+      if (isStarter && !isSubbedOut) {
+        actions.add(
+            IconButton(
               icon: const Icon(Icons.swap_horiz, color: Colors.blue, size: 28),
-              onPressed: () => _showSubDialog(player))
-          : const SizedBox.shrink();
+              onPressed: () => _showSubDialog(player),
+            )
+        );
+      }
+
+      // Επιστρέφουμε και τα δύο κουμπιά μαζί (αν ισχύουν και τα δύο)
+      return Row(
+        mainAxisSize: MainAxisSize.min,
+        children: actions,
+      );
     }
+
+    // Πριν την έναρξη του ματς
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -548,9 +559,9 @@ class _LiveLineupScreenState extends State<LiveLineupScreen> {
             ElevatedButton(
               style: ElevatedButton.styleFrom(
                   backgroundColor:
-                      (startersCount == 11) ? Colors.green : Colors.grey,
+                  (startersCount == 11) ? Colors.green : Colors.grey,
                   padding:
-                      const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
+                  const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10))),
               onPressed: () => _saveStuffToFirebase(startersCount),
@@ -579,8 +590,8 @@ class _LiveLineupScreenState extends State<LiveLineupScreen> {
                 color: (current == max)
                     ? color
                     : (darkModeNotifier.value
-                        ? Colors.white
-                        : Colors.black87))),
+                    ? Colors.white
+                    : Colors.black87))),
       ],
     );
   }
@@ -609,23 +620,23 @@ class _LiveLineupScreenState extends State<LiveLineupScreen> {
 
     if (player.cardExpiryDate == null) {
       messageGreek =
-          "Ο παίκτης ${player.surname} δεν έχει κάρτα υγείας. Θέλετε να καταχωρήσετε νέα;";
+      "Ο παίκτης ${player.surname} δεν έχει κάρτα υγείας. Θέλετε να καταχωρήσετε νέα;";
       messageEnglish =
-          "Player ${player.surname} has no health card. Add a new one?";
+      "Player ${player.surname} has no health card. Add a new one?";
     } else {
       final expiration = DateTime(player.cardExpiryDate!.year + 1,
           player.cardExpiryDate!.month, player.cardExpiryDate!.day);
       final today = DateTime.now();
       if (expiration.isBefore(today)) {
         messageGreek =
-            "Η κάρτα του/της ${player.surname} έχει λήξει. Θέλετε να την ανανεώσετε;";
+        "Η κάρτα του/της ${player.surname} έχει λήξει. Θέλετε να την ανανεώσετε;";
         messageEnglish =
-            "The card for ${player.surname} has expired. Renew it?";
+        "The card for ${player.surname} has expired. Renew it?";
       } else {
         messageGreek =
-            "Ο παίκτης ${player.surname} έχει ενεργή κάρτα. Θέλετε να την ανανεώσετε με νέα ημερομηνία έκδοσης;";
+        "Ο παίκτης ${player.surname} έχει ενεργή κάρτα. Θέλετε να την ανανεώσετε με νέα ημερομηνία έκδοσης;";
         messageEnglish =
-            "${player.surname} has an active card. Renew with a new issue date?";
+        "${player.surname} has an active card. Renew with a new issue date?";
       }
     }
 
@@ -635,7 +646,7 @@ class _LiveLineupScreenState extends State<LiveLineupScreen> {
           return StatefulBuilder(builder: (context, setStateDialog) {
             return AlertDialog(
               backgroundColor:
-                  darkModeNotifier.value ? Colors.grey[900] : Colors.white,
+              darkModeNotifier.value ? Colors.grey[900] : Colors.white,
               title: Text(greek ? "Κάρτα Υγείας" : "Health Card",
                   style: TextStyle(
                       color: darkModeNotifier.value
@@ -703,7 +714,7 @@ class _LiveLineupScreenState extends State<LiveLineupScreen> {
                         style: const TextStyle(color: Colors.grey))),
                 ElevatedButton(
                   style:
-                      ElevatedButton.styleFrom(backgroundColor: Colors.green),
+                  ElevatedButton.styleFrom(backgroundColor: Colors.green),
                   onPressed: () {
                     Navigator.pop(context);
                     _updateHealthCardInFirebase(player, selectedDate);
@@ -725,7 +736,7 @@ class _LiveLineupScreenState extends State<LiveLineupScreen> {
       _showErrorSnackbar(
           greek ? "Η κάρτα υγείας ενημερώθηκε!" : "Health card updated!");
     } catch (e) {
-      _showErrorSnackbar("Error updating health card: $e");
+      _showErrorSnackbar(greek ? "Σφάλμα: $e" : "Error: $e");
     }
   }
 
@@ -765,7 +776,7 @@ class _LiveLineupScreenState extends State<LiveLineupScreen> {
         content: Text(message),
         duration: const Duration(milliseconds: 1500),
         shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))));
+        RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))));
   }
 
   Future<void> _saveStuffToFirebase(int startersCount) async {
@@ -786,7 +797,7 @@ class _LiveLineupScreenState extends State<LiveLineupScreen> {
         isHomeTeam: showHomeTeam,
         newSquad: showHomeTeam ? homeSquad.toList() : awaySquad.toList(),
         newStarters:
-            showHomeTeam ? homeStarters.toList() : awayStarters.toList(),
+        showHomeTeam ? homeStarters.toList() : awayStarters.toList(),
         captain: selectedCaptain,
         coach: coachController.text.trim().isEmpty
             ? null
@@ -804,7 +815,7 @@ class _LiveLineupScreenState extends State<LiveLineupScreen> {
           duration: const Duration(milliseconds: 1700)));
       Navigator.pop(context);
     } catch (e) {
-      _showErrorSnackbar("Error saving: $e");
+      _showErrorSnackbar(greek ? "Σφάλμα: $e" : "Error: $e");
     }
   }
 
@@ -812,7 +823,7 @@ class _LiveLineupScreenState extends State<LiveLineupScreen> {
     Set<String> currentSquad = showHomeTeam ? homeSquad : awaySquad;
     Set<String> currentStarters = showHomeTeam ? homeStarters : awayStarters;
     List<String> currentSubsOut =
-        showHomeTeam ? widget.match.homeSubsOut : widget.match.awaySubsOut;
+    showHomeTeam ? widget.match.homeSubsOut : widget.match.awaySubsOut;
     List<Player> teamRoster = showHomeTeam
         ? widget.match.homeTeam.players
         : widget.match.awayTeam.players;
@@ -838,7 +849,7 @@ class _LiveLineupScreenState extends State<LiveLineupScreen> {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor:
-            darkModeNotifier.value ? Colors.grey[900] : Colors.white,
+        darkModeNotifier.value ? Colors.grey[900] : Colors.white,
         title: Text(
             greek
                 ? "Αλλαγή (Βγαίνει: ${playerOut.surname})"
@@ -898,66 +909,91 @@ class _LiveLineupScreenState extends State<LiveLineupScreen> {
       _showErrorSnackbar(
           greek ? "Η αλλαγή ολοκληρώθηκε!" : "Substitution Complete!");
     } catch (e) {
-      _showErrorSnackbar("Error: $e");
+      _showErrorSnackbar(greek ? "Σφάλμα: $e" : "Error: $e");
     }
   }
 
   void _undoSubDialog(Player player, bool isSubbedOut, bool isSubbedIn) {
     String pKey = player.uniqueKey;
-    String pairedPlayerName = "Άγνωστος";
+
+    // 1. Μαζεύουμε όλες τις αλλαγές του αγώνα
+    List<Substitution> allSubs = [];
     for (int i = 0; i < 4; i++) {
       if (widget.match.matchFact.containsKey(i)) {
-        for (var fact in widget.match.matchFact[i]!) {
-          if (fact is Substitution) {
-            if (fact.playerOut == pKey) {
-              pairedPlayerName = fact.playerInName;
-              break;
-            } else if (fact.playerIn == pKey) {
-              pairedPlayerName = fact.playerOutName;
-              break;
-            }
-          }
-        }
+        allSubs.addAll(widget.match.matchFact[i]!.whereType<Substitution>());
       }
-      if (pairedPlayerName != "Άγνωστος") break;
     }
 
+    // Ταξινομούμε χρονολογικά (για να ξέρουμε ποια έγινε πρώτη και ποια τελευταία)
+    allSubs.sort((a, b) => a.minute.compareTo(b.minute));
+
+    // 2. Βρίσκουμε την ΤΕΛΕΥΤΑΙΑ αλλαγή στην οποία εμπλέκεται αυτός ο παίκτης
+    Substitution? targetSub;
+    for (var sub in allSubs.reversed) {
+      if (sub.playerOut == pKey || sub.playerIn == pKey) {
+        targetSub = sub;
+        break;
+      }
+    }
+
+    if (targetSub == null) return;
+
+    // 3. 🚨 ΕΛΕΓΧΟΣ ΑΣΦΑΛΕΙΑΣ (Το Fix για τους 12 παίκτες) 🚨
+    // Ποιος είναι ο παρτενέρ του σε αυτή την αλλαγή;
+    String pairedKey = (targetSub.playerOut == pKey) ? targetSub.playerIn : targetSub.playerOut;
+    String pairedPlayerName = (targetSub.playerOut == pKey) ? targetSub.playerInName : targetSub.playerOutName;
+
+    // Ψάχνουμε αν ο ΠΑΡΤΕΝΕΡ έκανε ΑΛΛΗ αλλαγή ΜΕΤΑ από αυτή
+    int targetIndex = allSubs.indexOf(targetSub);
+    bool hasNewerSubForPartner = false;
+    for (int i = targetIndex + 1; i < allSubs.length; i++) {
+      if (allSubs[i].playerOut == pairedKey || allSubs[i].playerIn == pairedKey) {
+        hasNewerSubForPartner = true;
+        break;
+      }
+    }
+
+    // Αν υπάρχει νεότερη αλλαγή, ΜΠΛΟΚΑΡΟΥΜΕ ΤΟ UNDO!
+    if (hasNewerSubForPartner) {
+      _showErrorSnackbar(
+          greek
+              ? "Αδύνατη ακύρωση! Ο $pairedPlayerName συμμετέχει σε νεότερη αλλαγή. Ακυρώστε πρώτα εκείνη!"
+              : "Cannot undo! $pairedPlayerName is involved in a newer substitution. Undo that first!"
+      );
+      return;
+    }
+
+    // 4. Αν όλα είναι ασφαλή, εμφανίζουμε το Dialog
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor:
-            darkModeNotifier.value ? Colors.grey[900] : Colors.white,
+        backgroundColor: darkModeNotifier.value ? Colors.grey[900] : Colors.white,
         title: Text(greek ? "Ακύρωση Λάθους" : "Undo Mistake",
-            style: TextStyle(
-                color: darkModeNotifier.value ? Colors.white : Colors.black)),
+            style: TextStyle(color: darkModeNotifier.value ? Colors.white : Colors.black)),
         content: Text(
             isSubbedOut
                 ? (greek
-                    ? "Να επιστρέψει ο ${player.surname} στο γήπεδο;\n\n(Θα ακυρωθεί η είσοδος: $pairedPlayerName)"
-                    : "Return ${player.surname} to the pitch?\n\n(Will cancel entry for $pairedPlayerName)")
+                ? "Να επιστρέψει ο ${player.surname} στο γήπεδο;\n\n(Θα ακυρωθεί η είσοδος: $pairedPlayerName)"
+                : "Return ${player.surname} to the pitch?\n\n(Will cancel entry for $pairedPlayerName)")
                 : (greek
-                    ? "Να ακυρωθεί η είσοδος του ${player.surname};\n\n(Θα επιστρέψει στο γήπεδο: $pairedPlayerName)"
-                    : "Cancel entry for ${player.surname}?\n\n(Will return $pairedPlayerName to the pitch)"),
-            style: TextStyle(
-                color:
-                    darkModeNotifier.value ? Colors.white70 : Colors.black87)),
+                ? "Να ακυρωθεί η είσοδος του ${player.surname};\n\n(Θα επιστρέψει στο γήπεδο: $pairedPlayerName)"
+                : "Cancel entry for ${player.surname}?\n\n(Will return $pairedPlayerName to the pitch)"),
+            style: TextStyle(color: darkModeNotifier.value ? Colors.white70 : Colors.black87)),
         actions: [
           TextButton(
               onPressed: () => Navigator.pop(context),
-              child: Text(greek ? "Άκυρο" : "Cancel")),
+              child: Text(greek ? "Άκυρο" : "Cancel", style: const TextStyle(color: Colors.grey))),
           ElevatedButton(
               style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
               onPressed: () {
                 Navigator.pop(context);
                 _performUndoSub(player, isSubbedOut, isSubbedIn);
               },
-              child: Text(greek ? "Επιστροφή" : "Return",
-                  style: const TextStyle(color: Colors.white))),
+              child: Text(greek ? "Επιστροφή" : "Return", style: const TextStyle(color: Colors.white))),
         ],
       ),
     );
   }
-
   Future<void> _performUndoSub(
       Player player, bool wasSubbedOut, bool wasSubbedIn) async {
     String pKey = player.uniqueKey;
@@ -971,19 +1007,19 @@ class _LiveLineupScreenState extends State<LiveLineupScreen> {
       });
       _showErrorSnackbar(greek ? "Η αλλαγή ακυρώθηκε!" : "Undo Complete!");
     } catch (e) {
-      _showErrorSnackbar("Error: $e");
+      _showErrorSnackbar(greek ? "Σφάλμα: $e" : "Error: $e");
     }
   }
 
   void _showEditNumberDialog(
       BuildContext context, Player player, MatchDetails match) {
     TextEditingController numController =
-        TextEditingController(text: match.getDisplayNumber(player).toString());
+    TextEditingController(text: match.getDisplayNumber(player).toString());
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor:
-            darkModeNotifier.value ? Colors.grey[900] : Colors.white,
+        darkModeNotifier.value ? Colors.grey[900] : Colors.white,
         title: Text(
             greek ? "Νούμερο: ${player.surname}" : "Number: ${player.surname}",
             style: TextStyle(
@@ -1034,7 +1070,7 @@ class _LiveLineupScreenState extends State<LiveLineupScreen> {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final expiration =
-        DateTime(issueDate.year + 1, issueDate.month, issueDate.day);
+    DateTime(issueDate.year + 1, issueDate.month, issueDate.day);
     final daysLeft = expiration.difference(today).inDays;
     if (daysLeft < 0) {
       return const Icon(Icons.cancel, color: Colors.red, size: 22);

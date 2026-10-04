@@ -1,16 +1,26 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
+
+// --- FOOTBALL IMPORTS ---
 import 'package:untitled1/API/Match_Handle.dart';
 import 'Data_Classes/MatchDetails.dart';
 import 'Data_Classes/Player.dart';
 import 'Data_Classes/Team.dart';
 import 'Firebase_Handle/TeamsHandle.dart';
+
+// --- BASKETBALL IMPORTS ---
+import 'Data_Classes/basketball/basketMatch.dart';
+import 'Data_Classes/basketball/basketTeam.dart';
+import 'Firebase_Handle/BasketTeamsHandle.dart';
+import 'API/BasketballMatchHandle.dart';
+
+// --- UI & GLOBALS IMPORTS ---
 import 'Firebase_Handle/firebase_screen_stats_helper.dart';
+import 'Team_Basket_Display_Package/Basket_Team_Display_Page.dart';
 import 'Team_Display_Page_Package/TeamDisplayPage.dart';
 import 'globals.dart';
+import 'mContainers/BasketballContainer.dart';
 import 'matchesContainer.dart';
-import 'dart:async';
-import 'package:untitled1/Match_Details_Package/add_match_page.dart';
-import 'package:untitled1/ad_manager.dart';
 
 class SearchPage extends StatefulWidget {
   const SearchPage({super.key});
@@ -22,11 +32,12 @@ class SearchPage extends StatefulWidget {
 class _SearchPageState extends State<SearchPage> {
   final TextEditingController _searchController = TextEditingController();
   int selectedIndex = 0;
-
+  late String localSport;
 
   @override
   void initState() {
     super.initState();
+    localSport = selectedSport.value;
   }
 
   void onSectionChange(int index) {
@@ -38,15 +49,14 @@ class _SearchPageState extends State<SearchPage> {
   @override
   Widget build(BuildContext context) {
     logScreenViewSta(screenName: 'Search page', screenClass: 'Search page');
+    bool isDark = darkModeNotifier.value;
 
     return Scaffold(
-      backgroundColor:
-          darkModeNotifier.value ? Color(0xFF121212) : lightModeBackGround,
+      backgroundColor: isDark ? const Color(0xFF121212) : lightModeBackGround,
       appBar: AppBar(
-        backgroundColor:
-            darkModeNotifier.value ? Color(0xFF121212) : lightModeBackGround,
+        backgroundColor: isDark ? const Color(0xFF121212) : lightModeBackGround,
         iconTheme: IconThemeData(
-          color: darkModeNotifier.value ? Colors.white : Colors.black,
+          color: isDark ? Colors.white : Colors.black,
         ),
         title: TextField(
           controller: _searchController,
@@ -54,15 +64,37 @@ class _SearchPageState extends State<SearchPage> {
             hintText: greek ? "Αναζήτηση..." : 'Search...',
             border: InputBorder.none,
             hintStyle: TextStyle(
-              color: darkModeNotifier.value ? Colors.white : Colors.black,
+              color: isDark ? Colors.white54 : Colors.black54,
             ),
           ),
-          style: TextStyle(
-              color: darkModeNotifier.value ? Colors.white : Colors.black),
+          style: TextStyle(color: isDark ? Colors.white : Colors.black),
           onChanged: (text) {
-            setState(() {}); // Rerender to pass updated text
+            setState(() {});
           },
         ),
+        actions: [
+          /*
+          IconButton(
+            tooltip: greek ? "Εναλλαγή Αθλήματος" : "Switch Sport",
+            icon: Icon(
+              localSport == 'football'
+                  ? Icons.sports_soccer
+                  : Icons.sports_basketball,
+              color: localSport == 'football' ? Colors.blue : Colors.orange,
+              size: 28,
+            ),
+            onPressed: () {
+              setState(() {
+                localSport =
+                    localSport == 'football' ? 'basketball' : 'football';
+                _searchController.clear();
+              });
+            },
+          ),
+          const SizedBox(width: 10),
+
+           */
+        ],
       ),
       body: Column(
         children: [
@@ -78,8 +110,47 @@ class _SearchPageState extends State<SearchPage> {
               ],
             ),
           ),
-          Expanded(child: searchDetails(selectedIndex, _searchController.text)),
+          Expanded(
+              child: searchDetails(
+                  selectedIndex, _searchController.text, localSport)),
         ],
+      ),
+    );
+  }
+
+  Widget _buildTextButton(String text, int index) {
+    bool isSelected = selectedIndex == index;
+    bool isDark = darkModeNotifier.value;
+    Color activeColor = localSport == 'football' ? Colors.blue : Colors.orange;
+
+    return GestureDetector(
+      onTap: () => _onButtonPressed(index),
+      child: Container(
+        color: Colors.transparent,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 10),
+            Text(
+              text,
+              style: TextStyle(
+                fontSize: 16,
+                color: isSelected
+                    ? activeColor
+                    : (isDark ? Colors.white : Colors.black),
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                fontFamily: "Arial",
+              ),
+            ),
+            const SizedBox(height: 4),
+            if (isSelected)
+              Container(
+                width: 60,
+                height: 3,
+                color: activeColor,
+              ),
+          ],
+        ),
       ),
     );
   }
@@ -90,44 +161,17 @@ class _SearchPageState extends State<SearchPage> {
     });
     onSectionChange(index);
   }
-
-  Widget _buildTextButton(String text, int index) {
-    bool isSelected = selectedIndex == index;
-
-    return GestureDetector(
-      onTap: () => _onButtonPressed(index),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          SizedBox(height: 10),
-          Text(
-            text,
-            style: TextStyle(
-              fontSize: 16,
-              color: isSelected
-                  ? Colors.blue
-                  : (darkModeNotifier.value ? Colors.white : Colors.black),
-              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-              fontFamily: "Arial",
-            ),
-          ),
-          SizedBox(height: 4),
-          if (isSelected)
-            Container(
-              width: 60,
-              height: 3,
-              color: Colors.blue,
-            ),
-        ],
-      ),
-    );
-  }
 }
 
+// ==========================================
+// SEARCH DETAILS WIDGET (RACE-CONDITION PROOF)
+// ==========================================
 class searchDetails extends StatefulWidget {
-  const searchDetails(this.selectedIndex, this.name, {super.key});
+  const searchDetails(this.selectedIndex, this.name, this.sport, {super.key});
+
   final int selectedIndex;
   final String name;
+  final String sport;
 
   @override
   State<searchDetails> createState() => _searchDetailsState();
@@ -135,126 +179,233 @@ class searchDetails extends StatefulWidget {
 
 class _searchDetailsState extends State<searchDetails> {
   List<Team> teamSearchList = [];
-  List<Player> playerSearchList = [];
   List<MatchDetails> matchSearchList = [];
   Map<int, List<MatchDetails>> cachedMatches = {};
   Map<int, List<Team>> cachedTeams = {};
 
+  List<basketTeam> basketTeamSearchList = [];
+  List<BasketMatch> basketMatchSearchList = [];
+  Map<int, List<BasketMatch>> cachedBasketMatches = {};
+  Map<int, List<basketTeam>> cachedBasketTeams = {};
 
   Timer? _debounce;
-
-  // seasons (πρόσθεσε όσες θέλεις)
   List<int> seasons = [2026, 2025];
   int selectedSeason = 2026;
 
+  bool isLoading = true;
 
   @override
   void initState() {
     super.initState();
-
-    searchPressed(widget.name);
+    selectedSeason = thisYearNow;
 
     cachedTeams[thisYearNow] = teams;
     cachedMatches[thisYearNow] = MatchHandle().getAllMatches();
 
+    cachedBasketTeams[thisYearNow] = basketTeams;
+    cachedBasketMatches[thisYearNow] = BasketballMatchHandle().getAllMatches();
 
+    searchPressed(widget.name);
   }
-  @override
-
 
   @override
   void didUpdateWidget(covariant searchDetails oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.name != oldWidget.name ||
-        widget.selectedIndex != oldWidget.selectedIndex) {
+        widget.selectedIndex != oldWidget.selectedIndex ||
+        widget.sport != oldWidget.sport) {
       _debounceSearch(widget.name);
     }
   }
 
   void _debounceSearch(String name) {
     if (_debounce?.isActive ?? false) _debounce!.cancel();
-    _debounce = Timer(Duration(milliseconds: 300), () {
+    _debounce = Timer(const Duration(milliseconds: 300), () {
       searchPressed(name);
     });
   }
 
   Future<void> searchPressed(String name) async {
-    if (name.length < 2 && widget.selectedIndex != 2) {
-      // clear μόνο για Team/Match, όχι για ιστορικό
-      setState(() {
-        teamSearchList.clear();
-        matchSearchList.clear();
-        playerSearchList.clear();
-      });
+    setState(() {
+      isLoading = true;
+    });
+
+    String query = name.trim().toLowerCase();
+
+    final currentTab = widget.selectedIndex;
+    final currentSport = widget.sport;
+    final currentSeason = selectedSeason;
+
+    if (query.isNotEmpty && query.length < 2 && currentTab != 2) {
+      if (mounted &&
+          widget.selectedIndex == currentTab &&
+          widget.sport == currentSport) {
+        setState(() {
+          if (currentSport == 'football') {
+            teamSearchList.clear();
+            matchSearchList.clear();
+          } else {
+            basketTeamSearchList.clear();
+            basketMatchSearchList.clear();
+          }
+          isLoading = false;
+        });
+      }
       return;
     }
-    List<MatchDetails> matchList = [];
-    switch (widget.selectedIndex) {
-      case 1:
-        matchList = await matchSearch(name, onlyCurrentSeason: true);
-        break;
-      case 2:
-        matchList = await matchSearch(name,
-            onlyCurrentSeason: false, season: selectedSeason);
-        break;
-    }
 
-    setState(() {
-      switch (widget.selectedIndex) {
-        case 0:
-          teamSearchList = teamSearch(name);
-          break;
-        case 1:
-          matchSearchList = matchList;
-          break;
-        case 2:
-          matchSearchList = matchList;
-          break;
+    if (currentSport == 'football') {
+      if (currentTab == 0) {
+        List<Team> tList = teamSearch(query);
+        if (mounted &&
+            widget.selectedIndex == currentTab &&
+            widget.sport == currentSport) {
+          setState(() {
+            teamSearchList = tList;
+            isLoading = false;
+          });
+        }
+      } else {
+        List<MatchDetails> mList = await matchSearch(query,
+            onlyCurrentSeason: currentTab == 1,
+            season: currentTab == 2 ? currentSeason : null);
+
+        if (mounted &&
+            widget.selectedIndex == currentTab &&
+            widget.sport == currentSport &&
+            selectedSeason == currentSeason) {
+          setState(() {
+            matchSearchList = mList;
+            isLoading = false;
+          });
+        }
       }
-    });
+    } else {
+      // --- BASKETBALL ---
+      if (currentTab == 0) {
+        List<basketTeam> btList = basketTeamSearch(query);
+        if (mounted &&
+            widget.selectedIndex == currentTab &&
+            widget.sport == currentSport) {
+          setState(() {
+            basketTeamSearchList = btList;
+            isLoading = false;
+          });
+        }
+      } else {
+        List<BasketMatch> bmList = await basketMatchSearch(query,
+            onlyCurrentSeason: currentTab == 1,
+            season: currentTab == 2 ? currentSeason : null);
+
+        if (mounted &&
+            widget.selectedIndex == currentTab &&
+            widget.sport == currentSport &&
+            selectedSeason == currentSeason) {
+          setState(() {
+            basketMatchSearchList = bmList;
+            isLoading = false;
+          });
+        }
+      }
+    }
   }
 
-  List<Team> teamSearch(String name) {
+  // ΕΞΥΠΝΗ ΑΝΑΖΗΤΗΣΗ FOOTBALL TEAM
+  List<Team> teamSearch(String query) {
+    if (query.isEmpty) return teams;
     return teams
-        .where((team) => team.name.toLowerCase().contains(name.toLowerCase()))
+        .where((team) =>
+            team.name.toLowerCase().contains(query) ||
+            team.displayGreek.toLowerCase().contains(query) ||
+            team.displayEnglish.toLowerCase().contains(query))
         .toList();
   }
 
-  Future<List<MatchDetails>> matchSearch(String name,
+  //  ΕΞΥΠΝΗ ΑΝΑΖΗΤΗΣΗ FOOTBALL MATCHES
+  Future<List<MatchDetails>> matchSearch(String query,
       {bool onlyCurrentSeason = false, int? season}) async {
     List<MatchDetails> matches;
     List<Team> list = teams;
+
     if (onlyCurrentSeason) {
-      matches = MatchHandle()
-          .getAllMatches(); //MatchHandle().getMatchesBySeason(2025); // ή τρέχουσα σεζόν
+      matches = MatchHandle().getAllMatches();
     } else if (season != null) {
-      if (cachedTeams.containsKey(season)) {
-        list = cachedTeams[season]!;
+      if (cachedMatches.containsKey(season)) {
         matches = cachedMatches[season]!;
       } else {
         list = await TeamsHandle().getAllTeamsByYear(season);
         matches = await MatchHandle().getMatchesByYear(season, list);
-
-        setState(() {
-          cachedTeams[season] = list;
-          cachedMatches[season] = matches;
-        });
+        cachedTeams[season] = list;
+        cachedMatches[season] = matches;
       }
     } else {
       matches = MatchHandle().getAllMatches();
     }
 
+    if (query.isEmpty) return matches;
     return matches
         .where((match) =>
-    match.homeTeam.name.toLowerCase().contains(name.toLowerCase()) ||
-        match.awayTeam.name.toLowerCase().contains(name.toLowerCase()))
+            match.homeTeam.name.toLowerCase().contains(query) ||
+            match.homeTeam.displayGreek.toLowerCase().contains(query) ||
+            match.homeTeam.displayEnglish.toLowerCase().contains(query) ||
+            match.awayTeam.name.toLowerCase().contains(query) ||
+            match.awayTeam.displayGreek.toLowerCase().contains(query) ||
+            match.awayTeam.displayEnglish.toLowerCase().contains(query))
+        .toList();
+  }
+
+  //  ΕΞΥΠΝΗ ΑΝΑΖΗΤΗΣΗ BASKET TEAM (Αν δεν έχει displayGreek στο BasketTeam ακόμα)
+  List<basketTeam> basketTeamSearch(String query) {
+    if (query.isEmpty) return basketTeams;
+    return basketTeams
+        .where((team) =>
+            team.name.toLowerCase().contains(query) ||
+            team.name.toLowerCase().contains(query) ||
+            team.name.toLowerCase().contains(query))
+        .toList();
+  }
+
+  //ΕΞΥΠΝΗ ΑΝΑΖΗΤΗΣΗ BASKET MATCHES
+  Future<List<BasketMatch>> basketMatchSearch(String query,
+      {bool onlyCurrentSeason = false, int? season}) async {
+    List<BasketMatch> matches;
+    List<basketTeam> list = basketTeams;
+
+    if (onlyCurrentSeason) {
+      matches = BasketballMatchHandle().getAllMatches();
+    } else if (season != null) {
+      if (cachedBasketMatches.containsKey(season)) {
+        matches = cachedBasketMatches[season]!;
+      } else {
+        list = await BasketTeamsHandle().getAllTeamsByYear(season);
+        matches = await BasketTeamsHandle().getMatchesByYear(season, list);
+        cachedBasketTeams[season] = list;
+        cachedBasketMatches[season] = matches;
+      }
+    } else {
+      matches = BasketballMatchHandle().getAllMatches();
+    }
+
+    if (query.isEmpty) return matches;
+    return matches
+        .where((match) =>
+            match.homeTeam.name.toLowerCase().contains(query) ||
+            match.homeTeam.name.toLowerCase().contains(query) ||
+            match.homeTeam.name.toLowerCase().contains(query) ||
+            match.awayTeam.name.toLowerCase().contains(query) ||
+            match.awayTeam.name.toLowerCase().contains(query) ||
+            match.awayTeam.name.toLowerCase().contains(query))
         .toList();
   }
 
   Widget _buildSeasonChips() {
+    bool isDark = darkModeNotifier.value;
+    Color activeColor =
+        widget.sport == 'football' ? Colors.blue : Colors.orange;
+
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
-      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
       child: Row(
         children: seasons.map((season) {
           return Padding(
@@ -262,14 +413,20 @@ class _searchDetailsState extends State<searchDetails> {
             child: ChoiceChip(
               label: Text("${season - 1}-$season"),
               selected: selectedSeason == season,
+              selectedColor: activeColor.withOpacity(0.2),
+              labelStyle: TextStyle(
+                color: selectedSeason == season
+                    ? activeColor
+                    : (isDark ? Colors.black : Colors.black),
+                fontWeight: selectedSeason == season
+                    ? FontWeight.bold
+                    : FontWeight.normal,
+              ),
               onSelected: (_) async {
-                List<MatchDetails> m =
-                await matchSearch(widget.name, season: season);
-
                 setState(() {
                   selectedSeason = season;
-                  matchSearchList = m;
                 });
+                searchPressed(widget.name);
               },
             ),
           );
@@ -278,89 +435,153 @@ class _searchDetailsState extends State<searchDetails> {
     );
   }
 
+  Widget _buildEmptyState(bool isDark) {
+    return Center(
+      child: Text(
+        greek ? "Δεν βρέθηκαν αποτελέσματα" : "No results found",
+        style: TextStyle(
+            color: isDark ? Colors.white70 : Colors.black54, fontSize: 16),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    bool isDark = darkModeNotifier.value;
+    Color bgColor = isDark ? const Color(0xFF121212) : lightModeBackGround;
+
+    if (isLoading) {
+      return Scaffold(
+        backgroundColor: bgColor,
+        body: Center(
+          child: CircularProgressIndicator(
+            color: widget.sport == 'football' ? Colors.blue : Colors.orange,
+          ),
+        ),
+      );
+    }
+
+    // --- TAB 0: ΟΜΑΔΕΣ ---
     if (widget.selectedIndex == 0) {
-      // Ομάδες
       return Scaffold(
-        backgroundColor:
-        darkModeNotifier.value ? Color(0xFF121212) : lightModeBackGround,
-        body: ListView.builder(
-          itemCount: teamSearchList.length,
-          itemBuilder: (context, index) {
-            return ListTile(
-              title: Text(
-                teamSearchList[index].name,
-                style: TextStyle(
-                  color: darkModeNotifier.value ? Colors.white : Colors.black,
-                  fontFamily: "Arial",
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) =>
-                          TeamDisplayPage(teamSearchList[index])),
-                );
-              },
-            );
-          },
-        ),
+        backgroundColor: bgColor,
+        body: widget.sport == 'football'
+            ? (teamSearchList.isEmpty
+                ? _buildEmptyState(isDark)
+                : ListView.builder(
+                    itemCount: teamSearchList.length,
+                    itemBuilder: (context, index) {
+                      return ListTile(
+                        leading: SizedBox(
+                            height: 30,
+                            width: 30,
+                            child: teamSearchList[index].image),
+                        title: Text(
+                          greek
+                              ? teamSearchList[index].displayGreek
+                              : teamSearchList[index].displayEnglish,
+                          style: TextStyle(
+                              color: isDark ? Colors.white : Colors.black,
+                              fontFamily: "Arial",
+                              fontWeight: FontWeight.w600),
+                        ),
+                        onTap: () async {
+                          // 1. Περιμένουμε το αποτέλεσμα (το true που στέλνουμε με το pop)
+                          bool? didChange = await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  TeamDisplayPage(teamSearchList[index]),
+                            ),
+                          );
+
+                          // 2. Αν διαγράφηκε η ομάδα (ή έγινε edit), κάνουμε ΑΜΕΣΟ refresh!
+                          if (didChange == true) {
+                            setState(() {
+                              // Τη σβήνουμε ακαριαία από την τοπική λίστα!
+                              // Το UI θα την εξαφανίσει χωρίς το παραμικρό lag.
+                              teamSearchList.removeAt(index);
+                            });
+
+                            searchPressed(widget.name);
+                          }
+                        },
+                      );
+                    },
+                  ))
+            : (basketTeamSearchList.isEmpty
+                ? _buildEmptyState(isDark)
+                : ListView.builder(
+                    itemCount: basketTeamSearchList.length,
+                    itemBuilder: (context, index) {
+                      return ListTile(
+                        leading: SizedBox(
+                            height: 30,
+                            width: 30,
+                            child: basketTeamSearchList[index].image),
+                        title: Text(
+                          basketTeamSearchList[index].name,
+                          style: TextStyle(
+                              color: isDark ? Colors.white : Colors.black,
+                              fontFamily: "Arial",
+                              fontWeight: FontWeight.w600),
+                        ),
+                        onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => BasketballTeamDisplayPage(
+                                    basketTeamSearchList[index]))),
+                      );
+                    },
+                  )),
       );
-    } else if (widget.selectedIndex == 1) {
-      // Αγώνες
+    }
+    // --- TAB 1: ΑΓΩΝΕΣ ---
+    else if (widget.selectedIndex == 1) {
       return Scaffold(
-        backgroundColor:
-        darkModeNotifier.value ? Color(0xFF121212) : lightModeBackGround,
-        body: FutureBuilder<List<MatchDetails>>(
-          future: matchSearch(widget.name, onlyCurrentSeason: true),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return Center(child: CircularProgressIndicator());
-            }
-            if (!snapshot.hasData || snapshot.data!.isEmpty) {
-              return Center(child: Text("Δεν βρέθηκαν αγώνες"));
-            }
-            final matches = snapshot.data!;
-            return ListView.builder(
-              itemCount: matches.length,
-              itemBuilder: (context, index) {
-                return eachMatchContainer(matches[index]);
-              },
-            );
-          },
-        ),
+        backgroundColor: bgColor,
+        body: widget.sport == 'football'
+            ? (matchSearchList.isEmpty
+                ? _buildEmptyState(isDark)
+                : ListView.builder(
+                    itemCount: matchSearchList.length,
+                    itemBuilder: (context, index) => eachMatchContainer(
+                        matchSearchList[
+                            index]), // 💡 Το eachMatchContainer ήδη χειρίζεται το display name εσωτερικά!
+                  ))
+            : (basketMatchSearchList.isEmpty
+                ? _buildEmptyState(isDark)
+                : ListView.builder(
+                    itemCount: basketMatchSearchList.length,
+                    itemBuilder: (context, index) =>
+                        eachMatchContainerBasket(basketMatchSearchList[index]),
+                  )),
       );
-    } else {
-      // Ιστορικό
+    }
+    // --- TAB 2: ΙΣΤΟΡΙΚΟ ---
+    else {
       return Scaffold(
-        backgroundColor:
-        darkModeNotifier.value ? Color(0xFF121212) : lightModeBackGround,
+        backgroundColor: bgColor,
         body: Column(
           children: [
             _buildSeasonChips(),
             Expanded(
-              child: FutureBuilder<List<MatchDetails>>(
-                future: matchSearch(widget.name,
-                    onlyCurrentSeason: false, season: selectedSeason),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Center(child: CircularProgressIndicator());
-                  }
-                  if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    return Center(child: Text("Δεν βρέθηκαν αγώνες"));
-                  }
-                  final matches = snapshot.data!;
-                  return ListView.builder(
-                    itemCount: matches.length,
-                    itemBuilder: (context, index) {
-                      return eachMatchContainer(matches[index]);
-                    },
-                  );
-                },
-              ),
+              child: widget.sport == 'football'
+                  ? (matchSearchList.isEmpty
+                      ? _buildEmptyState(isDark)
+                      : ListView.builder(
+                          itemCount: matchSearchList.length,
+                          itemBuilder: (context, index) =>
+                              eachMatchContainer(matchSearchList[index]),
+                        ))
+                  : (basketMatchSearchList.isEmpty
+                      ? _buildEmptyState(isDark)
+                      : ListView.builder(
+                          itemCount: basketMatchSearchList.length,
+                          itemBuilder: (context, index) =>
+                              eachMatchContainerBasket(
+                                  basketMatchSearchList[index]),
+                        )),
             ),
           ],
         ),
@@ -368,6 +589,3 @@ class _searchDetailsState extends State<searchDetails> {
     }
   }
 }
-
-
-

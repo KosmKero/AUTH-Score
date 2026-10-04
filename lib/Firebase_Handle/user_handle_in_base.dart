@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:untitled1/Data_Classes/MatchDetails.dart';
 
 import '../Data_Classes/AppUser.dart';
+import '../Data_Classes/basketball/basketMatch.dart';
 import '../globals.dart';
 
 class UserHandleBase {
@@ -46,18 +47,20 @@ class UserHandleBase {
             'email': email,
             "University": uni,
             "Favourite Teams": [],
+            'Favourite Teams Basket': [],
             "Controlled Teams": [],
             "darkMode": false,
             "Language": true,
             'role': 'user',
             "fcmToken": " ",
             'matchKeys': {},
-            'moderator': false
+            'moderator': false,
+             'notifyAllMatchesBasket' : false
           });
 
 
 
-          globalUser = AppUser(username, uni, [], [], [], "user", {}, "", false, false, false);
+          globalUser = AppUser(username, uni, [], [], [],[], "user", {}, "", false, false, false,false);
           globalUser.loggedIn();
 
           //await user?.sendEmailVerification();
@@ -202,6 +205,9 @@ class UserHandleBase {
           (data['Favourite Teams'] as List<dynamic>)
               .map((e) => e.toString())
               .toList(),
+            (data['Favourite Teams Basket'] as List<dynamic>? ?? [])
+                .map((e) => e.toString())
+                .toList(),
           (data['Controlled Teams'] as List<dynamic>)
               .map((e) => e.toString())
               .toList(),
@@ -213,7 +219,8 @@ class UserHandleBase {
           data['email'],
           (data['moderator'] as bool?) ?? false,
             isSuper,
-            (data['notifyAllMatches'] as bool?) ?? false
+            (data['notifyAllMatches'] as bool?) ?? false,
+            (data['notifyAllMatchesBasket'] as bool?) ??false
 
         );
 
@@ -269,6 +276,9 @@ class UserHandleBase {
             data["username"].toString(),
             data["University"].toString(),
             (data['Favourite Teams'] as List<dynamic>).map((e) => e.toString()).toList(),
+            (data['Favourite Teams Basket'] as List<dynamic>? ?? [])
+                .map((e) => e.toString())
+                .toList(),
             (data['Controlled Teams'] as List<dynamic>).map((e) => e.toString()).toList(),
             (data['Main Teams'] as List<dynamic>? ?? []).map((e) => e.toString()).toList(),
             data['role'],
@@ -276,7 +286,8 @@ class UserHandleBase {
             data['email'],
             (data['moderator'] as bool?) ?? false,
             isSuper,
-            (data['notifyAllMatches'] as bool?) ?? false
+            (data['notifyAllMatches'] as bool?) ?? false,
+            (data['notifyAllMatchesBasket'] as bool?) ??false
         );
       }
     } catch (e) {
@@ -454,6 +465,9 @@ class UserHandleBase {
         (data['Favourite Teams'] as List<dynamic>? ?? [])
             .map((e) => e.toString())
             .toList(),
+          (data['Favourite Teams Basket'] as List<dynamic>? ?? [])
+              .map((e) => e.toString())
+              .toList(),
         (data['Controlled Teams'] as List<dynamic>? ?? [])
             .map((e) => e.toString())
             .toList(),
@@ -465,7 +479,8 @@ class UserHandleBase {
         data['email'],
         (data['moderator'] as bool?) ?? false,
         isSuper,
-        (data['notifyAllMatches'] as bool?) ?? false
+        (data['notifyAllMatches'] as bool?) ?? false,
+        (data['notifyAllMatchesBasket'] as bool?) ??false
       );
 
       globalUser.loggedIn();
@@ -517,6 +532,58 @@ class UserHandleBase {
   }
 
 
+  Future<void> smartToggleMatchNotification(String matchKey, bool isFavorite, bool isGlobalSport) async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) return;
+
+    // 1. Ποια θα ήταν η κατάσταση του καμπανιού ΑΝ ΔΕΝ υπήρχε ρητή επιλογή; (Default State)
+    bool defaultState = isFavorite || isGlobalSport;
+
+    // 2. Ποια είναι η ΤΩΡΙΝΗ του κατάσταση;
+    bool currentState = globalUser.matchKeys.containsKey(matchKey)
+        ? globalUser.matchKeys[matchKey]!
+        : defaultState;
+
+    // 3. Τι θέλει να κάνει ο χρήστης πατώντας το κουμπί;
+    bool desiredState = !currentState;
+
+    // 4. Η μαγεία: Αν αυτό που θέλει να κάνει ταυτίζεται με το default, απλά ΔΙΑΓΡΑΦΟΥΜΕ το override!
+    if (desiredState == defaultState) {
+      await FirebaseFirestore.instance.collection('users').doc(uid).update({
+        'matchKeys.$matchKey': FieldValue.delete()
+      });
+      globalUser.matchKeys.remove(matchKey);
+      print("🔔 To $matchKey διαγράφηκε από τα matchKeys (Επέστρεψε στο default)");
+    } else {
+      // Αλλιώς, γράφουμε ρητά το true ή false για να υπερισχύσει
+      await FirebaseFirestore.instance.collection('users').doc(uid).set({
+        'matchKeys': {matchKey: desiredState}
+      }, SetOptions(merge: true));
+      globalUser.matchKeys[matchKey] = desiredState;
+      print("🔔 To $matchKey ορίστηκε ρητά σε $desiredState");
+    }
+  }
+
+  Future<void> setNotifyAllBasketMatches(bool notify) async {
+    try {
+      QuerySnapshot userSnapshot = await FirebaseFirestore.instance
+          .collection("users")
+          .where("username", isEqualTo: globalUser.username)
+          .get();
+
+      if (userSnapshot.docs.isNotEmpty) {
+        DocumentReference userDocRef = userSnapshot.docs.first.reference;
+        // Σώζει την προτίμηση για τα ALL basket matches
+        await userDocRef.update({
+          "notifyAllMatchesBasket": notify,
+        });
+      }
+    } catch (e) {
+      print("Error setting notify all basket matches: $e");
+    }
+  }
+
+
   Future<void> addNotifyMatch(MatchDetails match) async {
     bool value;
     if (globalUser.favoriteList.contains(match.homeTeam.name) ||
@@ -530,11 +597,47 @@ class UserHandleBase {
         .collection('users')
         .doc(FirebaseAuth.instance.currentUser!.uid)
         .set({
-      'matchKeys': {match.matchKey: value}
+      'matchKeys': {match.matchDocId: value}
     }, SetOptions(merge: true));
   }
 
   Future<void> deleteNotifyMatch(MatchDetails match) async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+
+    if (uid == null) {
+      print('User not logged in');
+      return;
+    }
+
+    final key = 'matchKeys.${match.matchDocId}';
+
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .update({key: FieldValue.delete()});
+
+    print('Deleted $key successfully');
+  }
+
+  Future<void> addNotifyBasketMatch(BasketMatch match) async {
+    bool value;
+    // Εδώ προσέχουμε να τσεκάρει τη λίστα των αγαπημένων ομάδων ΜΠΑΣΚΕΤ
+    if (globalUser.favoriteListBasket.contains(match.homeTeam.name) ||
+        globalUser.favoriteListBasket.contains(match.awayTeam.name)) {
+      value = false;
+    } else {
+      value = true;
+    }
+
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(FirebaseAuth.instance.currentUser!.uid)
+        .set({
+      'matchKeys': {match.matchKey: value}
+    }, SetOptions(merge: true));
+  }
+
+  Future<void> deleteNotifyBasketMatch(BasketMatch match) async {
     final uid = FirebaseAuth.instance.currentUser?.uid;
 
     if (uid == null) {
@@ -549,6 +652,7 @@ class UserHandleBase {
         .doc(uid)
         .update({key: FieldValue.delete()});
 
-    print('Deleted $key successfully');
+    print('Deleted basketball $key successfully');
   }
+
 }

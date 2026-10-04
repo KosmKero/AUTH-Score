@@ -5,6 +5,7 @@ import 'package:untitled1/Data_Classes/MatchDetails.dart';
 import '../Data_Classes/Team.dart';
 import '../globals.dart';
 import '../main.dart';
+import 'Standings_Preview_Screen.dart';
 import 'TeamDisplayPage.dart';
 
 class OneGroupStandings extends StatefulWidget {
@@ -158,11 +159,36 @@ class _OneGroupStandingsState extends State<OneGroupStandings> {
           mainAxisSize: MainAxisSize.min, // Αποτρέπει το overflow
           children: [
             // ΤΙΤΛΟΣ ΟΜΙΛΟΥ
+            // ΤΙΤΛΟΣ ΟΜΙΛΟΥ ΚΑΙ ΚΟΥΜΠΙ STORY
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 4.0),
-              child: Text(
-                greek ? "Όμιλος ${widget.group}" : "Group ${widget.group}",
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: textColor),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    greek ? "Όμιλος ${widget.group}" : "Group ${widget.group}",
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: textColor),
+                  ),
+
+                    /*
+                    IconButton(
+                      icon: const Icon(Icons.camera_alt, color: Colors.pinkAccent),
+                      tooltip: greek ? "Δημιουργία IG Story" : "Create IG Story",
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => StandingsStoryPreviewScreen(
+                              group: widget.group,
+                              teams: sortedGroupTeams, // Στέλνουμε τις ήδη ταξινομημένες ομάδες
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                     */
+
+                ],
               ),
             ),
             const SizedBox(height: 8),
@@ -196,9 +222,17 @@ class _OneGroupStandingsState extends State<OneGroupStandings> {
 
               return InkWell(
                 onTap: () async {
-                  if (!mounted) return;
-                  await Navigator.push(context, MaterialPageRoute(builder: (context) => TeamDisplayPage(team)));
-                  if (mounted) _calculateStandings();
+                  //Περιμένουμε το αποτέλεσμα από την TeamDisplayPage
+                  bool? didChange = await Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => TeamDisplayPage(team))
+                  );
+
+                  //Αν έγινε διαγραφή ή επεξεργασία (γύρισε true)
+                  if (didChange == true && mounted) {
+                    // Ξανατρέχει τον υπολογισμό. Η συνάρτηση διαβάζει τη νέα global λίστα (teams)
+                    _calculateStandings();
+                  }
                 },
                 child: Container(
                   color: rowColor,
@@ -231,7 +265,7 @@ class _OneGroupStandingsState extends State<OneGroupStandings> {
                       // Όνομα Ομάδας
                       Expanded(
                         child: Text(
-                          team.name,
+                          greek ? team.displayGreek : team.displayEnglish,
                           style: TextStyle(fontWeight: FontWeight.w600, color: textColor, fontSize: 13),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,

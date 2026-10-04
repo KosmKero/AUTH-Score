@@ -6,7 +6,7 @@ import 'package:untitled1/Firebase_Handle/TeamsHandle.dart';
 import 'package:untitled1/Team_Display_Page_Package/Team_Details_Widget.dart';
 import 'package:untitled1/Team_Display_Page_Package/Team_Matches_Widget.dart';
 import 'package:untitled1/Team_Display_Page_Package/Team_Players_Display_Widget.dart';
-import 'package:untitled1/championship_details/top_players_page.dart';
+import 'package:untitled1/championship_details/football/football_top_players_page.dart';
 import 'package:untitled1/globals.dart';
 import 'package:untitled1/main.dart';
 
@@ -14,6 +14,7 @@ import '../Data_Classes/Player.dart';
 import '../Data_Classes/Team.dart';
 import '../Firebase_Handle/firebase_screen_stats_helper.dart';
 import 'editTeamPage.dart';
+import '../Firebase_Handle/TeamsHandle.dart';
 
 class TeamDisplayPage extends StatefulWidget {
   const TeamDisplayPage(this.team, {super.key});
@@ -54,26 +55,26 @@ class _TeamDisplayPageState extends State<TeamDisplayPage> {
 
 
     return Scaffold(
-        //ΑΦΟΡΑ ΤΟ ΟΝΟΜΑ ΠΑΝΩ ΣΤΗΝ ΣΕΛΙΔΑ
+      //ΑΦΟΡΑ ΤΟ ΟΝΟΜΑ ΠΑΝΩ ΣΤΗΝ ΣΕΛΙΔΑ
         appBar: AppBar(
             backgroundColor: darkModeNotifier.value
-                ? Color(0xFF121212)
+                ? const Color(0xFF121212)
                 : const Color.fromARGB(250, 46, 90, 136),
-            iconTheme: IconThemeData(color: Colors.white),
+            iconTheme: const IconThemeData(color: Colors.white),
             title: Row(
               children: [
                 SizedBox(height: 33, width: 33, child: team.image),
-                SizedBox(
+                const SizedBox(
                   width: 10,
                 ),
                 Flexible(
                   child: Text(
-                    team.name,
+                    greek ? team.displayGreek : team.displayEnglish,
                     maxLines: 2,
                     softWrap: true,
                     overflow: TextOverflow
                         .ellipsis, // για ασφάλεια αν είναι πολύ μεγάλο
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 21,
                       fontWeight: FontWeight.bold,
                       fontFamily: 'Arial',
@@ -102,7 +103,7 @@ class _TeamDisplayPageState extends State<TeamDisplayPage> {
                         await loadTeams();
 
                         Team? updatedTeam =
-                            TeamsHandle().getTeamFromList(team.name, teams);
+                        TeamsHandle().getTeamFromList(team.name, teams);
 
                         if (!context.mounted) return;
 
@@ -116,6 +117,14 @@ class _TeamDisplayPageState extends State<TeamDisplayPage> {
                         }
                       }
                     }),
+
+              if (TeamsHandle().canDeleteTeam(team))
+                IconButton(
+                  icon: const Icon(Icons.delete_sweep_rounded, color: Colors.white),
+                  tooltip: greek ? "Διαγραφή Ομάδας" : "Delete Team",
+                  onPressed: () => _showDeleteTeamDialog(context, team),
+                ),
+
               isFavourite(
                 team: team,
               ),
@@ -123,7 +132,7 @@ class _TeamDisplayPageState extends State<TeamDisplayPage> {
             ]),
         body: Scaffold(
             backgroundColor: darkModeNotifier.value
-                ? Color(0xFF121212)
+                ? const Color(0xFF121212)
                 : lightModeBackGround,
             body: Column(
               children: [
@@ -136,6 +145,92 @@ class _TeamDisplayPageState extends State<TeamDisplayPage> {
               ],
             )));
   }
+
+
+  void _showDeleteTeamDialog(BuildContext context, Team team) {
+    bool isDark = darkModeNotifier.value;
+
+    showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) => AlertDialog(
+        backgroundColor: isDark ? const Color(0xFF2C2C2C) : Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+        title: Text(
+          greek ? "⚠️ Διαγραφή Ομάδας" : "⚠️ Delete Team",
+          style: TextStyle(color: isDark ? Colors.white : Colors.black, fontWeight: FontWeight.bold),
+        ),
+        content: Text(
+          greek
+              ? "Είστε σίγουρος ότι θέλετε να διαγράψετε την ομάδα '${team.displayName}'; Αυτή η ενέργεια είναι μόνιμη."
+              : "Are you sure you want to delete '${team.displayName}'? This action is permanent.",
+          style: TextStyle(color: isDark ? Colors.white70 : Colors.black87),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: Text(greek ? "Ακύρωση" : "Cancel", style: const TextStyle(color: Colors.grey)),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red[700],
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            ),
+            onPressed: () async {
+              // 💡 1. Αποθηκεύουμε τα εργαλεία πλοήγησης ΠΡΙΝ τα await!
+              // Έτσι δεν μας νοιάζει αν θα αλλάξει το context αργότερα.
+              final navigator = Navigator.of(context);
+              final messenger = ScaffoldMessenger.of(context);
+
+              navigator.pop(); // 2. Κλείνει το Dialog επιβεβαίωσης
+
+              // 3. Εμφανίζουμε το Loading
+              showDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (BuildContext loadingCtx) => const Center(child: CircularProgressIndicator(color: Colors.redAccent)),
+              );
+
+              try {
+                // 4. Διαγραφή από τη Βάση
+                await TeamsHandle().deleteTeamCompletely(team);
+
+                // 5. Ξαναφορτώνουμε τα δεδομένα (εδώ χανόταν το context πριν!)
+                await loadTeams();
+
+                // 6. Κλείνουμε το κυκλάκι (χρησιμοποιώντας τον αποθηκευμένο navigator)
+                navigator.pop();
+
+                // 7. Μήνυμα Επιτυχίας
+                messenger.showSnackBar(
+                  SnackBar(
+                    content: Text(greek ? "Η ομάδα διαγράφηκε επιτυχώς." : "Team deleted successfully."),
+                    backgroundColor: Colors.green,
+                  ),
+                );
+
+                // 8. Επιστροφή στην προηγούμενη σελίδα (του Navigator της σελίδας)
+                navigator.pop(true);
+
+              } catch (e) {
+                // Αν γίνει λάθος, κλείνουμε το κυκλάκι με ασφάλεια
+                navigator.pop();
+
+                messenger.showSnackBar(
+                  SnackBar(
+                    content: Text("Σφάλμα διαγραφής: $e"),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
+            },
+            child: Text(greek ? "Διαγραφή" : "Delete", style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+  }
+
+
 }
 
 //ΑΦΟΡΑ ΤΑ 3 ΚΟΥΜΠΙΑ ΚΑΤΩ ΑΠΟ ΤΟ ΟΝΟΜΑ!!
@@ -170,15 +265,15 @@ class _NavigationButtonsState extends State<_NavigationButtons> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            SizedBox(width: 10),
-            _buildTextButton("Λεπτομέρειες", 0),
-            SizedBox(width: 15),
-            _buildTextButton("Αγώνες", 1),
-            SizedBox(width: 15),
-            _buildTextButton("Παίχτες", 2),
-            SizedBox(width: 15),
-            _buildTextButton("Κορυφαίοι Παίχτες", 3),
-            SizedBox(width: 10),
+            const SizedBox(width: 10),
+            _buildTextButton(greek ? "Λεπτομέρειες" : "Details", 0),
+            const SizedBox(width: 15),
+            _buildTextButton(greek ? "Αγώνες" : "Matches", 1),
+            const SizedBox(width: 15),
+            _buildTextButton(greek ? "Παίχτες" : "Players", 2),
+            const SizedBox(width: 15),
+            _buildTextButton(greek ? "Κορυφαίοι Παίχτες" : "Top Players", 3),
+            const SizedBox(width: 10),
           ],
         ),
       ),
@@ -201,20 +296,20 @@ class _NavigationButtonsState extends State<_NavigationButtons> {
             style: TextStyle(
               fontSize: 17,
               color: isSelected
-                  ? Color.fromARGB(250, 46, 90, 136)
+                  ? const Color.fromARGB(250, 46, 90, 136)
                   : darkModeNotifier.value
-                      ? Colors.white
-                      : Colors.white,
+                  ? Colors.white
+                  : Colors.white,
               fontWeight: isSelected ? FontWeight.bold : FontWeight.w700,
               //backgroundColor: darkModeNotifier.value==true?Colors.black87: lightModeBackGround
             ),
           ),
-          SizedBox(height: 3), // Απόσταση μεταξύ κειμένου και γραμμής
+          const SizedBox(height: 3), // Απόσταση μεταξύ κειμένου και γραμμής
           if (isSelected)
             Container(
               width: 60, // Μήκος γραμμής
               height: 3, // Πάχος γραμμής
-              color: Color.fromARGB(250, 46, 90, 136), // Χρώμα γραμμής
+              color: const Color.fromARGB(250, 46, 90, 136), // Χρώμα γραμμής
             ),
         ],
       ),
@@ -260,10 +355,10 @@ class _isFavouriteState extends State<isFavourite> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: greek
-                  ? Text('Πρέπει να συνδεθείς για να έχεις αγαπημένες ομάδες!')
-                  : Text('You have to log in to have favourite teams!'),
+                  ? const Text('Πρέπει να συνδεθείς για να έχεις αγαπημένες ομάδες!')
+                  : const Text('You have to log in to have favourite teams!'),
               backgroundColor: Colors.red,
-              duration: Duration(seconds: 3),
+              duration: const Duration(seconds: 3),
             ),
           );
           return;
@@ -277,12 +372,14 @@ class _isFavouriteState extends State<isFavourite> {
         try {
           if (isFavourite) {
             await teamsHandle.addFavouriteTeam(widget.team.name);
-            globalUser.addFavoriteTeam(widget.team);
+            // Κλήση της νέας έξυπνης μεθόδου αντί της addFavoriteTeam
+            globalUser.updateFootballMatchesNotificationsOnFavoriteChange(widget.team.name, true);
           } else {
             await teamsHandle.removeFavouriteTeam(widget.team.name);
-            globalUser.removeFavoriteTeam(widget.team);
+            // Κλήση της νέας έξυπνης μεθόδου αντί της removeFavoriteTeam
+            globalUser.updateFootballMatchesNotificationsOnFavoriteChange(widget.team.name, false);
           }
-        } catch (e) {
+        }catch (e) {
           // 2. Αν υπάρξει σφάλμα, κάνε revert το UI
           setState(() {
             isFavourite = !isFavourite; // γύρνα το πίσω
@@ -291,10 +388,10 @@ class _isFavouriteState extends State<isFavourite> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: greek
-                  ? Text('Κάτι πήγε στραβά. Προσπάθησε ξανά.')
-                  : Text('Something went wrong. Please try again.'),
+                  ? const Text('Κάτι πήγε στραβά. Προσπάθησε ξανά.')
+                  : const Text('Something went wrong. Please try again.'),
               backgroundColor: Colors.red,
-              duration: Duration(seconds: 3),
+              duration: const Duration(seconds: 3),
             ),
           );
         }

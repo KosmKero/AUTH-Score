@@ -10,9 +10,10 @@ import '../Firebase_Handle/firebase_screen_stats_helper.dart';
 import '../main.dart';
 
 
-// Remove the global variables since we're moving them to the state class
 bool secure = true;
+
 List<String> allItems = [
+  'Erasmus',
   'Αγγλικής Γλώσσας και Φιλολογίας',
   'Αγροτικής Ανάπτυξης',
   'Αρχιτεκτόνων Μηχανικών',
@@ -99,7 +100,7 @@ class _LogInScreen extends State<LogInScreen> {
 
     return Scaffold(
       appBar: CreateAppBar(
-          signIn: signIn,
+        signIn: signIn,
 
       ), // Pass signIn to AppBar
       body: SingleChildScrollView(
@@ -136,7 +137,7 @@ class _createAppBarState extends State<CreateAppBar> {
   Widget build(BuildContext context) {
     return AppBar(
       backgroundColor: const Color.fromARGB(250, 46, 90, 136),
-      iconTheme: IconThemeData(color: Colors.white),
+      iconTheme: const IconThemeData(color: Colors.white),
     );
   }
 
@@ -166,19 +167,19 @@ class _CreateSignIn extends State<CreateSignIn> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: EdgeInsets.only(left: 5, top: 10),
+          padding: const EdgeInsets.only(left: 5, top: 10),
           child: Text(
             greek?"Σύνδεση":"Sign in",
-            style: TextStyle(
-              fontSize: 26,
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
-              fontFamily: "Arial"
+            style: const TextStyle(
+                fontSize: 26,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+                fontFamily: "Arial"
             ),
           ),
         ),
-        SizedBox(height: 50),
-        Padding(
+        const SizedBox(height: 50),
+        const Padding(
           padding: EdgeInsets.only(left: 5),
           child: Text(
             'Email',
@@ -189,40 +190,40 @@ class _CreateSignIn extends State<CreateSignIn> {
           ),
         ),
 
-        SizedBox(height: 10),
+        const SizedBox(height: 10),
         Padding(
-          padding: EdgeInsets.only(left: 5, right: 55),
+          padding: const EdgeInsets.only(left: 5, right: 55),
           child: TextField(
             controller: _textController4,
             decoration: InputDecoration(
               prefixIcon: Icon(Icons.person, color: Colors.blue[700]),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(15),
-                borderSide: BorderSide(color: Colors.black87, width: 3),
+                borderSide: const BorderSide(color: Colors.black87, width: 3),
               ),
               hintText: 'Enter your email',
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(15),
-                borderSide: BorderSide(color: Colors.blue, width: 2),
+                borderSide: const BorderSide(color: Colors.blue, width: 2),
               ),
             ),
           ),
         ),
-        SizedBox(height: 40),
+        const SizedBox(height: 40),
 
         Padding(
-          padding: EdgeInsets.only(left: 5),
+          padding: const EdgeInsets.only(left: 5),
           child: Text(
             greek?"Κωδικός πρόσβασης":"Password",
-            style: TextStyle(
+            style: const TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold
             ),
           ),
         ),
-        SizedBox(height: 10),
+        const SizedBox(height: 10),
         Padding(
-          padding: EdgeInsets.only(left: 5, right: 55),
+          padding: const EdgeInsets.only(left: 5, right: 55),
           child: TextField(
             controller: _textController5,
             obscureText: passwordVisible,
@@ -241,19 +242,19 @@ class _CreateSignIn extends State<CreateSignIn> {
               ),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(15),
-                borderSide: BorderSide(color: Colors.black87, width: 3),
+                borderSide: const BorderSide(color: Colors.black87, width: 3),
               ),
               hintText: 'Enter your Password',
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(15),
-                borderSide: BorderSide(color: Colors.blue, width: 2),
+                borderSide: const BorderSide(color: Colors.blue, width: 2),
               ),
             ),
           ),
         ),
-        SizedBox(height: 7),
+        const SizedBox(height: 7),
         Padding(
-          padding: EdgeInsets.only(left: 10),
+          padding: const EdgeInsets.only(left: 10),
           child: TextButton(
             onPressed: () {
 
@@ -261,26 +262,26 @@ class _CreateSignIn extends State<CreateSignIn> {
             },
             child: Text(
               greek?"Ξέχασα τον κωδικό":"Forgot my password?",
-              style: TextStyle(
+              style: const TextStyle(
                   fontSize: 15,
                   color: Colors.blueAccent
               ),
             ),
           ),
         ),
-        SizedBox(height: 13),
+        const SizedBox(height: 13),
         CreateButton(
           signIn: true,
           emailText: _textController4,
           passwordText: _textController5,
         ),
-        SizedBox(height: 15),
+        const SizedBox(height: 15),
         Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
                 greek?"Δεν έχεις λογαριασμό;":"If you don't have an account:",
-                style: TextStyle(
+                style: const TextStyle(
                     fontSize: 16,
                     color: Colors.black,
                     fontWeight: FontWeight.w500
@@ -293,7 +294,7 @@ class _CreateSignIn extends State<CreateSignIn> {
                   },
                   child: Text(
                     greek?"Πάτα εδώ":"Click here",
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: Colors.blueAccent,
                       fontSize: 16,
                     ),
@@ -311,7 +312,6 @@ class CreateSignUp extends StatefulWidget {
   // Add the toggle function parameter
   final Function toggleSignIn;
   const CreateSignUp({super.key, required this.toggleSignIn});
-  static const sxoles = ["s1","s2","s3","s4"];
 
   @override
   State<CreateSignUp> createState() => _CreateSignUp();
@@ -328,102 +328,102 @@ class _CreateSignUp extends State<CreateSignUp> {
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SizedBox(height: 10,),
+        const SizedBox(height: 10,),
         Padding(
           padding: const EdgeInsets.only(left: 5.0),
           child: Text(
-              greek?"Δημιουργία λογαριασμού":"Create an account",
-              style: TextStyle(
-                fontSize: 25,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-              ),
+            greek?"Δημιουργία λογαριασμού":"Create an account",
+            style: const TextStyle(
+              fontSize: 25,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
             ),
+          ),
         ),
-        SizedBox(height: 40),
+        const SizedBox(height: 40),
         Padding(
-          padding: EdgeInsets.only(left: 5),
+          padding: const EdgeInsets.only(left: 5),
           child: Text(
-            greek? "Email" : "Username",
-            style: TextStyle(
+            greek? "Email" : "Email",
+            style: const TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold
             ),
           ),
         ),
-        SizedBox(height: 10),
+        const SizedBox(height: 10),
 
         //TEXTFIELD 1!!!
         Padding(
-          padding: EdgeInsets.only(left: 5, right: 30),
+          padding: const EdgeInsets.only(left: 5, right: 30),
           child: TextField(
             controller: _emailText,
             decoration: InputDecoration(
-              prefixIcon: Icon(Icons.person, color: Colors.blue[700]),
+              prefixIcon: Icon(Icons.email, color: Colors.blue[700]), // 💡 Άλλαξα το εικονίδιο σε email
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(15),
-                borderSide: BorderSide(color: Colors.black87, width: 3),
+                borderSide: const BorderSide(color: Colors.black87, width: 3),
               ),
               hintText: 'Enter your email',
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(15),
-                borderSide: BorderSide(color: Colors.blue, width: 2),
+                borderSide: const BorderSide(color: Colors.blue, width: 2),
               ),
             ),
           ),
         ),
 
-        SizedBox(height: 20),
+        const SizedBox(height: 20),
 
         Padding(
-          padding: EdgeInsets.only(left: 5),
+          padding: const EdgeInsets.only(left: 5),
           child: Text(
             greek? "Όνομα χρήστη" : "Username",
-            style: TextStyle(
+            style: const TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold
             ),
           ),
         ),
 
-        SizedBox(height: 10),
+        const SizedBox(height: 10),
 
         //TEXTFIELD 1!!!
         Padding(
-          padding: EdgeInsets.only(left: 5, right: 30),
+          padding: const EdgeInsets.only(left: 5, right: 30),
           child: TextField(
             controller: _usernameText,
             decoration: InputDecoration(
               prefixIcon: Icon(Icons.person, color: Colors.blue[700]),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(15),
-                borderSide: BorderSide(color: Colors.black87, width: 3),
+                borderSide: const BorderSide(color: Colors.black87, width: 3),
               ),
               hintText: 'Enter your username',
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(15),
-                borderSide: BorderSide(color: Colors.blue, width: 2),
+                borderSide: const BorderSide(color: Colors.blue, width: 2),
               ),
             ),
           ),
         ),
-        SizedBox(height: 20),
+        const SizedBox(height: 20),
 
         Padding(
-          padding: EdgeInsets.only(left: 5),
+          padding: const EdgeInsets.only(left: 5),
           child: Text(
             greek?"Κωδικός πρόσβασης":"Password",
-            style: TextStyle(
+            style: const TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold
             ),
           ),
         ),
-        SizedBox(height: 10),
+        const SizedBox(height: 10),
 
         //TEXTFIELD 2
         Padding(
-          padding: EdgeInsets.only(left: 5, right: 30),
+          padding: const EdgeInsets.only(left: 5, right: 30),
           child: TextField(
             controller: _passwordText,
             obscureText: passwordVisible,
@@ -442,60 +442,59 @@ class _CreateSignUp extends State<CreateSignUp> {
               ),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(15),
-                borderSide: BorderSide(color: Colors.black87, width: 3),
+                borderSide: const BorderSide(color: Colors.black87, width: 3),
               ),
               hintText: 'Create password',
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(15),
-                borderSide: BorderSide(color: Colors.blue, width: 2),
+                borderSide: const BorderSide(color: Colors.blue, width: 2),
               ),
             ),
           ),
         ),
-        SizedBox(height: 20),
+        const SizedBox(height: 20),
 
         Padding(
-          padding: EdgeInsets.only(left: 5), // το έφερα λίγο πιο μέσα
+          padding: const EdgeInsets.only(left: 5),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-             Text(
-                  greek ? "Σχολή" : "University",
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
-                  ),
-              ),
-              SizedBox(width: 7),
-             Text(
-                  greek ? "(Προαιρετικό)" : "(Optional)",
-                  style: TextStyle(
-                    //fontSize: 16,
-                    fontStyle: FontStyle.italic,
-                    color: Colors.grey[600],
-                  ),
+              const Text(
+                // greek ? "Σχολή" : "University", // Αφαιρέθηκε για να είναι hardcoded
+                "Σχολή",
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
                 ),
+              ),
+              const SizedBox(width: 7),
+              Text(
+                greek ? "(Προαιρετικό)" : "(Optional)",
+                style: TextStyle(
+                  fontStyle: FontStyle.italic,
+                  color: Colors.grey[600],
+                ),
+              ),
 
             ],
           ),
         ),
-        SizedBox(height: 10),
+        const SizedBox(height: 10),
 
         Padding(
-          padding: EdgeInsets.only(left: 5, right: 25),
+          padding: const EdgeInsets.only(left: 5, right: 25),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               TextField(
-                //controller: _textController3,
                 controller: searchController,
                 decoration: InputDecoration(
                   prefixIcon: Icon(Icons.search, color: Colors.blue[700]),
                   suffixIcon: searchController.text.isNotEmpty
                       ? IconButton(
-                    icon: Icon(Icons.clear, color: Colors.grey),
+                    icon: const Icon(Icons.clear, color: Colors.grey),
                     onPressed: () {
                       setState(() {
                         searchController.clear();
@@ -507,12 +506,12 @@ class _CreateSignUp extends State<CreateSignUp> {
                       : null,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(15),
-                    borderSide: BorderSide(color: Colors.black87, width: 3),
+                    borderSide: const BorderSide(color: Colors.black87, width: 3),
                   ),
                   hintText: 'Αναζήτηση σχολής...',
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(15),
-                    borderSide: BorderSide(color: Colors.blue, width: 2),
+                    borderSide: const BorderSide(color: Colors.blue, width: 2),
                   ),
                 ),
                 onChanged: (value) {
@@ -521,18 +520,15 @@ class _CreateSignUp extends State<CreateSignUp> {
                       filteredItems = [];
                       showSuggestions = false;
                     } else {
-                      // Filter items that start with the entered text
                       filteredItems = allItems
                           .where((item) => item.toLowerCase().startsWith(value.toLowerCase()))
                           .toList();
 
-                      // If no exact matches found, then show items containing the text
                       if (filteredItems.isEmpty) {
                         filteredItems = allItems
                             .where((item) => item.toLowerCase().contains(value.toLowerCase()))
                             .toList();
                       }
-
                       showSuggestions = true;
                     }
                   });
@@ -543,7 +539,7 @@ class _CreateSignUp extends State<CreateSignUp> {
               if (showSuggestions && filteredItems.isNotEmpty)
                 Container(
                   width: double.infinity,
-                  constraints: BoxConstraints(maxHeight: 200),
+                  constraints: const BoxConstraints(maxHeight: 200),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(10),
@@ -552,7 +548,7 @@ class _CreateSignUp extends State<CreateSignUp> {
                         color: Colors.grey.withOpacity(0.3),
                         spreadRadius: 1,
                         blurRadius: 3,
-                        offset: Offset(0, 2),
+                        offset: const Offset(0, 2),
                       ),
                     ],
                   ),
@@ -577,18 +573,18 @@ class _CreateSignUp extends State<CreateSignUp> {
                             children: [
                               TextSpan(
                                 text: beforeMatch,
-                                style: TextStyle(color: Colors.black),
+                                style: const TextStyle(color: Colors.black),
                               ),
                               TextSpan(
                                 text: match,
-                                style: TextStyle(
+                                style: const TextStyle(
                                   color: Colors.blue,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
                               TextSpan(
                                 text: afterMatch,
-                                style: TextStyle(color: Colors.black),
+                                style: const TextStyle(color: Colors.black),
                               ),
                             ],
                           ),
@@ -598,7 +594,6 @@ class _CreateSignUp extends State<CreateSignUp> {
                             searchController.text = item;
                             showSuggestions = false;
                           });
-                          // You can also save the selected school to a variable here
                         },
                       );
                     },
@@ -607,7 +602,7 @@ class _CreateSignUp extends State<CreateSignUp> {
             ],
           ),
         ),
-        SizedBox(height: 50),
+        const SizedBox(height: 50),
 
         CreateButton(
           signIn: false,
@@ -617,14 +612,14 @@ class _CreateSignUp extends State<CreateSignUp> {
           sxolhText: searchController,
         ),
 
-        SizedBox(height:15),
+        const SizedBox(height:15),
 
         Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
                 greek?"Έχεις ήδη λογαριασμό?" :"Already have an account?",
-                style: TextStyle(
+                style: const TextStyle(
                     fontSize: 16,
                     color: Colors.black,
                     fontWeight: FontWeight.w500
@@ -637,7 +632,7 @@ class _CreateSignUp extends State<CreateSignUp> {
                   },
                   child: Text(
                     greek?"Σύνδεση":"Sign in",
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: Colors.blueAccent,
                       fontSize: 16,
                     ),
@@ -672,38 +667,32 @@ class CreateButton extends StatefulWidget {
 }
 
 class _CreateButtonState extends State<CreateButton> {
-  // 1. Δημιουργούμε τη μεταβλητή για το loading
   bool isLoading = false;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.only(left: 25, right: 25),
-      child: Container(
+      padding: const EdgeInsets.only(left: 25, right: 25),
+      child: SizedBox(
         width: double.infinity,
         height: 50,
         child: ElevatedButton(
-          // 2. Αν φορτώνει, κάνουμε το onPressed null (απενεργοποιεί το κουμπί)
           onPressed: isLoading
               ? null
               : () async {
-            // Ξεκινάει το loading
             setState(() {
               isLoading = true;
             });
 
-            // Τρέχουμε τη συνάρτηση (πρόσεξε το await που προστέθηκε)
             if (widget.signIn) {
               await checkBase(context, widget.emailText, widget.passwordText);
             } else {
               await addInBase(context, widget.emailText, widget.passwordText, widget.sxolhText, widget.usernameText);
             }
 
-            // 3. Ελέγχουμε αν το Widget υπάρχει ακόμα στην οθόνη πριν αλλάξουμε το state
-            // (Σε περίπτωση που το checkBase/addInBase έκανε Navigator.pop)
             if (mounted) {
               setState(() {
-                isLoading = false; // Σταματάει το loading
+                isLoading = false;
               });
             }
           },
@@ -715,9 +704,8 @@ class _CreateButtonState extends State<CreateButton> {
             ),
             elevation: 3,
           ),
-          // 4. Ανάλογα με το isLoading, δείχνουμε το κυκλάκι ή το κείμενο
           child: isLoading
-              ? SizedBox(
+              ? const SizedBox(
             height: 24,
             width: 24,
             child: CircularProgressIndicator(
@@ -729,7 +717,7 @@ class _CreateButtonState extends State<CreateButton> {
             widget.signIn
                 ? (greek ? "Σύνδεση" : "SIGN IN")
                 : (greek ? "Εγγραφή" : "SIGN UP"),
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
               letterSpacing: 1.2,
@@ -743,22 +731,13 @@ class _CreateButtonState extends State<CreateButton> {
 
 Future<void> checkBase(BuildContext context,emailText,passwordText) async
 {
-
   try
   {
     String username = emailText.text;
     String password = passwordText.text;
 
-    /*print('Attempting login with:');
-    print('Username: $username');
-    print('Password: $text2');
-
-     */
-
     bool loginSuccess = await UserHandleBase().login(username, password);
     if (loginSuccess) {
-
-      print('✅ ton brhkameeee!'); //ΥΠΑΡΧΕΙ ΑΝΤΙΣΤΟΙΧΙΑ ΔΕΔΟΜΕΝΩΝ
       isLoggedIn = true;
       emailText.clear();
       passwordText.clear();
@@ -771,80 +750,93 @@ Future<void> checkBase(BuildContext context,emailText,passwordText) async
       try
       {
         greek = await getValue(globalUser.username,"Language");
-        Navigator.pop(context, true); // Ενημερώνει ότι έγινε επιτυχές login
-
+        if(context.mounted) {
+          Navigator.pop(context, true); // Ενημερώνει ότι έγινε επιτυχές login
+        }
       } catch (navError) {
         print('🚨 Navigation Error: $navError');
       }
     }
     else
     {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar( //ΕΜΦΑΝΙΖΩ ΜΗΝΥΜΑ ΛΑΘΟΥΣ ΑΝ ΕΧΕΙ ΚΑΠΟΙΟ ΠΕΔΙΟ ΚΕΝΟ
-          content: Text('The username or the password is incorrect!'),
-          backgroundColor: Colors.red,
-          duration: Duration(seconds: 2),
-        ),
-      );
+      if(context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(greek ? 'Λάθος email ή κωδικός!' : 'The username or the password is incorrect!'), // 💡 Διόρθωση εδώ
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
     }
   }
   catch (e)
   {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar( //ΕΜΦΑΝΙΖΩ ΜΗΝΥΜΑ ΛΑΘΟΥΣ ΑΝ ΕΧΕΙ ΚΑΠΟΙΟ ΠΕΔΙΟ ΚΕΝΟ
-        content: Text('Something went wrong!'),
-        backgroundColor: Colors.red,
-        duration: Duration(seconds: 2),
-      ),
-    );
+    if(context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(greek ? 'Κάτι πήγε στραβά!' : 'Something went wrong!'), // 💡 Διόρθωση εδώ
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
   }
 }
-
 
 Future<void> addInBase(BuildContext context,TextEditingController  emailText,TextEditingController  passwordText, sxolhText, usernameText) async
 {
   //ΠΑΙΡΝΩ ΤΙΣ ΤΙΜΕΣ ΤΩΝ ΠΕΔΙΩΝ!!
-  String email = emailText.text;
+  String email = emailText.text.trim();
   String password = passwordText.text;
-  String sxolh = sxolhText.text;
-  String username = usernameText.text;
-
-
+  String sxolh = sxolhText.text.trim();
+  String username = usernameText.text.trim();
 
 
   if(email.isEmpty || password.isEmpty || username.isEmpty)
   {
-    // Show SnackBar with error message
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar( //ΕΜΦΑΝΙΖΩ ΜΗΝΥΜΑ ΛΑΘΟΥΣ ΑΝ ΕΧΕΙ ΚΑΠΟΙΟ ΠΕΔΙΟ ΚΕΝΟ
-        content: Text('Please fill in all fields'),
+      SnackBar(
+        content: Text(greek ? 'Παρακαλώ συμπλήρωσε όλα τα υποχρεωτικά πεδία' : 'Please fill in all fields'),
         backgroundColor: Colors.red,
-        duration: Duration(seconds: 2),
+        duration: const Duration(seconds: 2),
       ),
     );
     return;
   }
+
+  // 2. VALIDATION ΣΧΟΛΗΣ: Αν έγραψε κάτι, ΠΡΕΠΕΙ να υπάρχει στη λίστα allItems
+  if (sxolh.isNotEmpty && !allItems.contains(sxolh)) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(greek
+            ? 'Παρακαλώ επέλεξε μια έγκυρη σχολή από τη λίστα ή άφησέ το κενό.'
+            : 'Please select a valid university from the list or leave it empty.'),
+        backgroundColor: Colors.orange[800], // Πορτοκαλί γιατί είναι user-error, όχι system crash
+        duration: const Duration(seconds: 3),
+      ),
+    );
+    return;
+  }
+
   bool found = await UserHandleBase().signUpWithEmail(email,username,password,sxolh,context);
   if(!found)
   {
-    //κενη για τωρα για να εμφανιζουμε σωστο μηνυμα λαθους ρε
+    // Το σφάλμα (π.χ. email exists) το διαχειρίζεται ήδη η signUpWithEmail
   }
   else
   {
-    //AppUser currentUser = AppUser(_email,_password,_sxolh);
-    isLoggedIn = true; //ΑΛΛΑΖΩ ΚΑΤΑΣΤΑΣΗ ΧΡΗΣΤΗ
+    isLoggedIn = true;
     loggedInNotifications.value = true;
 
     await NotificationService.saveTokenToFirestore();
 
-    //ΚΑΘΑΡΙΖΩ ΤΑ ΠΕΔΙΑ ΟΤΑΝ ΠΑΤΗΣΕΙ ΤΟ ΚΟΥΜΠΙ ΕΓΓΡΑΦΗΣ
     emailText.clear();
     passwordText.clear();
     sxolhText.clear();
 
-    username = email;
-    print("Data successfully added!");
-    Navigator.pop(context, true); // Ενημερώνει ότι έγινε επιτυχές login
-
+    if(context.mounted) {
+      Navigator.pop(context, true);
+    }
   }
 }

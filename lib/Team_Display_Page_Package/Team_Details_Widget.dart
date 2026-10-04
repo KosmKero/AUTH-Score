@@ -3,7 +3,7 @@ import 'package:untitled1/Team_Display_Page_Package/one_group_standings.dart';
 import '../Data_Classes/Team.dart';
 import '../Firebase_Handle/firebase_screen_stats_helper.dart';
 import '../Match_Details_Package/Match_Not_Started/DetailsMatchNotStarted.dart';
-import '../championship_details/StandingsPage.dart';
+import '../championship_details/football/football_StandingsPage.dart';
 import '../globals.dart';
 
 //ΟΛΗ Η ΚΛΑΣΗ ΑΦΟΡΑ ΤΗΝ ΚΑΤΑΣΚΕΥΗ ΤΟΥ ΠΩΣ ΘΑ ΕΜΦΑΝΙΖΕΤΑΙ ΤΑ ΚΥΚΛΑΚΙΑ ΜΕ ΤΗΝ ΝΙΚΗ , ΙΣΟΠΑΛΙΑ, ΗΤΤΑ.
@@ -24,208 +24,204 @@ class _TeamDetailsWidgetState extends State<TeamDetailsWidget> {
 
     return Expanded(
         child: SingleChildScrollView(
-      child: Column(
-        children: [
-          Card(
-              color: darkModeNotifier.value ? Color(0xFF1E1E1E) : Colors.white,
-              margin: EdgeInsets.symmetric(
-                  horizontal: MediaQuery.of(context).size.width * 0.02,
-                  vertical: 15),
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15)),
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
+          child: Column(
+            children: [
+              Card(
+                  color: darkModeNotifier.value ? const Color(0xFF1E1E1E) : Colors.white,
+                  margin: EdgeInsets.symmetric(
+                      horizontal: MediaQuery.of(context).size.width * 0.02,
+                      vertical: 15),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15)),
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Column(
+                      children: [
+                        Center(
+                          child: Text(
+                            greek ? "Αποτελέσματα τελευταίων αγωνιστικών" : "Last match results",
+                            style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: darkModeNotifier.value
+                                    ? Colors.white
+                                    : Colors.black),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 10.0),
+                          child: TeamFormWidget(
+                            team: widget.team,
+                          ),
+                        ),
+                        const SizedBox(
+                          height: 10,
+                        )
+                      ],
+                    ),
+                  )),
+              const SizedBox(height: 10),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 0),
                 child: Column(
                   children: [
-                    Center(
-                      child: Text(
-                        "Αποτελέσματα τελευταίων αγωνιστικών",
+                    Text(greek ? "Βαθμολογία" : "Standings",
                         style: TextStyle(
-                            fontSize: 18,
+                            fontSize: 22,
                             fontWeight: FontWeight.bold,
                             color: darkModeNotifier.value
                                 ? Colors.white
-                                : Colors.black),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 10.0),
-                      child: TeamFormWidget(
-                        team: widget.team,
-                      ),
-                    ),
-                    SizedBox(
-                      height: 10,
-                    )
+                                : Colors.white)),
+                    const SizedBox(height: 3),
+                    GroupStandingsWidget(group: widget.team.group),
                   ],
                 ),
-              )),
-          SizedBox(height: 10),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 0),
-            child: Column(
-              children: [
-                Text("Βαθμολογία",
-                    style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                        color: darkModeNotifier.value
-                            ? Colors.white
-                            : Colors.white)),
-                SizedBox(height: 3),
-                GroupStandingsWidget(group: widget.team.group),
-              ],
-            ),
-          ),
-          SizedBox(
-            height: 1,
-          ),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 0),
-            child: Card(
-              shadowColor: Colors.black,
-              color: darkModeNotifier.value ? Color(0xFF1E1E1E) : Colors.white,
-              //ΑΦΟΡΑ ΤΙΣ ΠΛΗΡΟΦΟΡΙΕΣ ΣΤΟ ΚΑΤΩ ΜΕΡΟΣ ΤΗΝ ΟΘΟΝΗΣ
-              elevation: 8,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15)),
-              margin: EdgeInsets.symmetric(
-                  horizontal: MediaQuery.of(context).size.width * 0.02,
-                  vertical: 15),
-              child: Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment
-                        .spaceBetween, // Στοίχιση αριστερά-δεξιά
-                    children: [
-                      Row(
-                        children: [
-                          Padding(
-                            padding: EdgeInsets.only(left: 2),
-                            child: Icon(Icons.event, color: Colors.blueAccent),
-                          ),
-                          Padding(
-                            padding: EdgeInsets.only(left: 10),
-                            child: Text(
-                              'Έτος ίδρυσης:',
-                              style: TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.w600,
-                                  fontFamily: "Arial",
-                                  letterSpacing: 0.3,
-                                  color: darkModeNotifier.value
-                                      ? Colors.white
-                                      : Colors.black),
-                            ),
-                          ),
-                        ],
-                      ),
-                      Padding(
-                          padding: EdgeInsets.only(right: 7),
-                          child: Text(
-                            '${widget.team.foundationYear}',
-                            style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                                color: darkModeNotifier.value
-                                    ? Colors.white
-                                    : Colors.black),
-                          )),
-                    ],
-                  ),
-                  SizedBox(height: 10),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment
-                        .spaceBetween, // Στοίχιση αριστερά-δεξιά
-                    children: [
-                      Row(
-                        children: [
-                          Padding(
-                            padding: EdgeInsets.only(left: 4),
-                            child: Icon(
-                              Icons.emoji_events,
-                              color: Color.fromARGB(255, 202, 188, 0),
-                            ),
-                          ),
-                          Padding(
-                            padding: EdgeInsets.only(left: 9),
-                            child: Text(
-                              'Τίτλοι:',
-                              style: TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.w600,
-                                  fontFamily: "Arial",
-                                  color: darkModeNotifier.value
-                                      ? Colors.white
-                                      : Colors.black),
-                            ),
-                          ),
-                        ],
-                      ),
-                      Padding(
-                          padding: EdgeInsets.only(right: 7),
-                          child: Text(
-                            '${widget.team.titles}',
-                            style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                                color: darkModeNotifier.value
-                                    ? Colors.white
-                                    : Colors.black),
-                          )),
-                    ],
-                  ),
-                  SizedBox(height: 10),
-                  //ΓΙΑ ΤΟΝ ΠΡΟΠΟΝΗΤΗ!!
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: [
-                          Padding(
-                            padding: EdgeInsets.only(left: 2),
-                            child: Icon(Icons.person, color: Colors.blueAccent),
-                          ),
-                          Padding(
-                            padding: EdgeInsets.only(left: 10),
-                            child: Text(
-                              'Προπονητής:',
-                              style: TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.w600,
-                                  fontFamily: "Arial",
-                                  color: darkModeNotifier.value
-                                      ? Colors.white
-                                      : Colors.black),
-                            ),
-                          ),
-                        ],
-                      ),
-                      // Εδώ χρησιμοποιούμε Flexible σωστά, απευθείας στο εξωτερικό Row
-                      Flexible(
-                        child: Padding(
-                            padding: EdgeInsets.only(right: 7, left: 10),
-                            child: Text(
-                              widget.team.coach,
-                              textAlign: TextAlign.right,
-                              overflow: TextOverflow.ellipsis, // Βάζει ... αν το όνομα είναι τεράστιο
-                              style: TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                  color: darkModeNotifier.value
-                                      ? Colors.white
-                                      : Colors.black),
-                            )),
-                      ),
-                    ],
-                  ),
-                ],
               ),
-            ),
-          )
-        ],
-      ),
-    ));
+              const SizedBox(
+                height: 1,
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 0),
+                child: Card(
+                  shadowColor: Colors.black,
+                  color: darkModeNotifier.value ? const Color(0xFF1E1E1E) : Colors.white,
+                  elevation: 8,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15)),
+                  margin: EdgeInsets.symmetric(
+                      horizontal: MediaQuery.of(context).size.width * 0.02,
+                      vertical: 15),
+                  child: Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              const Padding(
+                                padding: EdgeInsets.only(left: 2),
+                                child: Icon(Icons.event, color: Colors.blueAccent),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(left: 10),
+                                child: Text(
+                                  greek ? 'Έτος ίδρυσης:' : 'Founded:',
+                                  style: TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.w600,
+                                      fontFamily: "Arial",
+                                      letterSpacing: 0.3,
+                                      color: darkModeNotifier.value
+                                          ? Colors.white
+                                          : Colors.black),
+                                ),
+                              ),
+                            ],
+                          ),
+                          Padding(
+                              padding: const EdgeInsets.only(right: 7),
+                              child: Text(
+                                '${widget.team.foundationYear}',
+                                style: TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                    color: darkModeNotifier.value
+                                        ? Colors.white
+                                        : Colors.black),
+                              )),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              const Padding(
+                                padding: EdgeInsets.only(left: 4),
+                                child: Icon(
+                                  Icons.emoji_events,
+                                  color: Color.fromARGB(255, 202, 188, 0),
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(left: 9),
+                                child: Text(
+                                  greek ? 'Τίτλοι:' : 'Titles:',
+                                  style: TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.w600,
+                                      fontFamily: "Arial",
+                                      color: darkModeNotifier.value
+                                          ? Colors.white
+                                          : Colors.black),
+                                ),
+                              ),
+                            ],
+                          ),
+                          Padding(
+                              padding: const EdgeInsets.only(right: 7),
+                              child: Text(
+                                '${widget.team.titles}',
+                                style: TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                    color: darkModeNotifier.value
+                                        ? Colors.white
+                                        : Colors.black),
+                              )),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      //ΓΙΑ ΤΟΝ ΠΡΟΠΟΝΗΤΗ!!
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              const Padding(
+                                padding: EdgeInsets.only(left: 2),
+                                child: Icon(Icons.person, color: Colors.blueAccent),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(left: 10),
+                                child: Text(
+                                  greek ? 'Προπονητής:' : 'Coach:',
+                                  style: TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.w600,
+                                      fontFamily: "Arial",
+                                      color: darkModeNotifier.value
+                                          ? Colors.white
+                                          : Colors.black),
+                                ),
+                              ),
+                            ],
+                          ),
+                          Flexible(
+                            child: Padding(
+                                padding: const EdgeInsets.only(right: 7, left: 10),
+                                child: Text(
+                                  widget.team.coach,
+                                  textAlign: TextAlign.right,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                      color: darkModeNotifier.value
+                                          ? Colors.white
+                                          : Colors.black),
+                                )),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              )
+            ],
+          ),
+        ));
   }
 }
 
@@ -253,25 +249,25 @@ class _TeamFormWidgetState extends State<TeamFormWidget> {
     final screenWidth = MediaQuery.of(context).size.width;
 
     return FutureBuilder<List<String>>(
-      future: _formFuture, // Χρησιμοποιούμε τη μεταβλητή, όχι τη συνάρτηση
+      future: _formFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const CircularProgressIndicator();
         } else if (snapshot.hasError) {
-          return const Text("Σφάλμα φόρτωσης");
+          return Text(greek ? "Σφάλμα φόρτωσης" : "Loading Error");
         } else {
           final results = snapshot.data ?? [];
           final displayResults =
-              results.length == 6 ? results.sublist(1) : results;
+          results.length == 6 ? results.sublist(1) : results;
 
           return Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: displayResults
                 .map((result) => Padding(
-                      padding:
-                          EdgeInsets.symmetric(horizontal: screenWidth * 0.015),
-                      child: _buildResultIcon(result, screenWidth),
-                    ))
+              padding:
+              EdgeInsets.symmetric(horizontal: screenWidth * 0.015),
+              child: _buildResultIcon(result, screenWidth),
+            ))
                 .toList(),
           );
         }

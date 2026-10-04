@@ -115,7 +115,7 @@ class _TeamPlayersDisplayWidgetState extends State<TeamPlayersDisplayWidget> {
   }
 
   Widget _buildPositionSection(int position, List<Player> players) {
-    if (players.isEmpty) return const SizedBox.shrink(); // Αν δεν έχει παίκτες, μην δείχνεις άδειο κουτί
+    if (players.isEmpty) return const SizedBox.shrink();
 
     String pos;
     if (position == 0) {
@@ -201,7 +201,6 @@ class _TeamPlayersDisplayWidgetState extends State<TeamPlayersDisplayWidget> {
           children: [
             Row(
               children: [
-                // Κυκλικό Avatar με το νούμερο της φανέλας μέσα
                 CircleAvatar(
                   radius: 18,
                   backgroundColor: isDark ? Colors.grey[700] : Colors.blue[100],
@@ -234,7 +233,6 @@ class _TeamPlayersDisplayWidgetState extends State<TeamPlayersDisplayWidget> {
                 padding: const EdgeInsets.only(left: 48.0, top: 6.0),
                 child: Row(
                   children: [
-                    // 1. Συμμετοχές
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                       decoration: BoxDecoration(
@@ -247,7 +245,6 @@ class _TeamPlayersDisplayWidgetState extends State<TeamPlayersDisplayWidget> {
                       ),
                     ),
                     const SizedBox(width: 10),
-                    // 2. Κάρτα Υγείας
                     _buildHealthCardStatus(player.cardExpiryDate),
                   ],
                 ),
@@ -258,14 +255,13 @@ class _TeamPlayersDisplayWidgetState extends State<TeamPlayersDisplayWidget> {
     );
   }
 
-  // Ελέγχει την ημερομηνία και επιστρέφει το πατητό εικονίδιο (Tooltip)
   Widget _buildHealthCardStatus(DateTime? issueDate) {
     if (issueDate == null) {
-      return const Tooltip(
-        message: "Χωρίς Κάρτα Υγείας",
+      return Tooltip(
+        message: greek ? "Χωρίς Κάρτα Υγείας" : "No Health Card",
         triggerMode: TooltipTriggerMode.tap,
-        showDuration: Duration(seconds: 3),
-        child: Icon(Icons.error, color: Colors.red, size: 18),
+        showDuration: const Duration(seconds: 3),
+        child: const Icon(Icons.error, color: Colors.red, size: 18),
       );
     }
 
@@ -276,25 +272,25 @@ class _TeamPlayersDisplayWidgetState extends State<TeamPlayersDisplayWidget> {
     final daysLeft = expiration.difference(today).inDays;
 
     if (daysLeft < 0) {
-      return const Tooltip(
-        message: "Ληγμένη Κάρτα!",
+      return Tooltip(
+        message: greek ? "Ληγμένη Κάρτα!" : "Expired Card!",
         triggerMode: TooltipTriggerMode.tap,
-        showDuration: Duration(seconds: 3),
-        child: Icon(Icons.cancel, color: Colors.red, size: 18), // Λίγο μικρότερο εικονίδιο για κομψότητα
+        showDuration: const Duration(seconds: 3),
+        child: const Icon(Icons.cancel, color: Colors.red, size: 18),
       );
     } else if (daysLeft <= 30) {
       return Tooltip(
-        message: "Λήγει σε $daysLeft μέρες",
+        message: greek ? "Λήγει σε $daysLeft μέρες" : "Expires in $daysLeft days",
         triggerMode: TooltipTriggerMode.tap,
         showDuration: const Duration(seconds: 3),
         child: const Icon(Icons.warning_amber_rounded, color: Colors.orange, size: 18),
       );
     } else {
-      return const Tooltip(
-        message: "Έγκυρη Κάρτα Υγείας",
+      return Tooltip(
+        message: greek ? "Έγκυρη Κάρτα Υγείας" : "Valid Health Card",
         triggerMode: TooltipTriggerMode.tap,
-        showDuration: Duration(seconds: 2),
-        child: Icon(Icons.check_circle, color: Colors.green, size: 18),
+        showDuration: const Duration(seconds: 2),
+        child: const Icon(Icons.check_circle, color: Colors.green, size: 18),
       );
     }
   }

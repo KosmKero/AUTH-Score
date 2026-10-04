@@ -7,7 +7,7 @@ import '../../Data_Classes/Team.dart';
 import '../../Firebase_Handle/firebase_screen_stats_helper.dart';
 import '../../Team_Display_Page_Package/TeamDisplayPage.dart';
 import '../../Team_Display_Page_Package/one_group_standings.dart';
-import '../../championship_details/StandingsPage.dart';
+import '../../championship_details/football/football_StandingsPage.dart';
 import '../../globals.dart';
 import '../../main.dart';
 import '../Starting__11_Display_Card.dart';
@@ -110,7 +110,7 @@ class _MatchNotStartedDetailsState extends State<MatchNotStartedDetails> {
       );
     } else {
       return SizedBox(
-        height: 50,
+        height: 25,
       );
     }
   }
@@ -223,8 +223,8 @@ class _buildTeamName extends State<buildTeamName> {
     setState(() {
       widget.team.changeFavourite();
       widget.team.isFavourite
-          ? favouriteTeams.add(widget.team)
-          : favouriteTeams.remove(widget.team);
+          ? favouriteTeamsFootball.add(widget.team)
+          : favouriteTeamsFootball.remove(widget.team);
     });
   }
 
@@ -233,10 +233,6 @@ class _buildTeamName extends State<buildTeamName> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        // Transform.translate(
-        //   //ΑΦΟΡΑ ΤΟ ΕΙΚΟΝΙΔΙΟ ΤΗΣ ΚΑΡΔΙΑΣ
-        //   offset: Offset(16, 0), // Μετακινεί το εικονίδιο πιο κοντά στο κείμενο
-        // ),
         GestureDetector(
             onTap: () {
               Navigator.push(
@@ -256,7 +252,7 @@ class _buildTeamName extends State<buildTeamName> {
                     height: 7,
                   ),
                   Text(
-                    widget.team.name,
+                    widget.team.displayName,
                     style: TextStyle(
                         fontSize: 10,
                         fontWeight: FontWeight.w500,
@@ -284,8 +280,8 @@ class _buildAwayTeamName extends State<buildAwayTeamName> {
     setState(() {
       widget.team.changeFavourite();
       widget.team.isFavourite
-          ? favouriteTeams.add(widget.team)
-          : favouriteTeams.remove(widget.team);
+          ? favouriteTeamsFootball.add(widget.team)
+          : favouriteTeamsFootball.remove(widget.team);
     });
   }
 
@@ -305,7 +301,7 @@ class _buildAwayTeamName extends State<buildAwayTeamName> {
                   );
                 },
                 child: Text(
-                  widget.team.name,
+                  widget.team.displayName,
                   style: TextStyle(
                       fontSize: 17,
                       fontWeight: FontWeight.w600,

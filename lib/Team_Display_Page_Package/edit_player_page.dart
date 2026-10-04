@@ -28,11 +28,12 @@ class _PlayerEditPageState extends State<PlayerEditPage> {
   late TextEditingController _yellowController;
   late TextEditingController _redController;
 
-  // Μεταβλητή για το Dropdown της θέσης
-  late String _selectedPosition;
+  //  Κρατάμε το INDEX αντί για το String (0=GK, 1=DEF, 2=MID, 3=ATT)
+  late int _selectedPositionIndex;
 
-  // Αντιστοίχιση των int σε Strings για το UI
-  final List<String> positions = ['Τερματοφύλακας', 'Αμυντικός', 'Μέσος', 'Επιθετικός'];
+  List<String> get _localizedPositions => greek
+      ? ['Τερματοφύλακας', 'Αμυντικός', 'Μέσος', 'Επιθετικός']
+      : ['Goalkeeper', 'Defender', 'Midfielder', 'Forward'];
 
   @override
   void initState() {
@@ -45,8 +46,8 @@ class _PlayerEditPageState extends State<PlayerEditPage> {
     _yellowController = TextEditingController(text: widget.player.numOfYellowCards.toString());
     _redController = TextEditingController(text: widget.player.numOfRedCards.toString());
 
-    // Μετατρέπουμε το int της βάσης στο αντίστοιχο String για το Dropdown
-    _selectedPosition = positions[widget.player.position.clamp(0, 3)];
+    // Παίρνουμε το int από τη βάση. Το clamp(0, 3) μας προστατεύει από invalid data.
+    _selectedPositionIndex = widget.player.position.clamp(0, 3);
   }
 
   @override
@@ -62,8 +63,7 @@ class _PlayerEditPageState extends State<PlayerEditPage> {
 
   void _saveForm() {
     if (_formKey.currentState!.validate()) {
-      // Μετατρέπουμε το String του Dropdown ξανά σε int (0, 1, 2, 3)
-      int pos = positions.indexOf(_selectedPosition);
+      int pos = _selectedPositionIndex;
 
       Player newPlayer = Player(
           _nameController.text.trim(),
@@ -180,8 +180,8 @@ class _PlayerEditPageState extends State<PlayerEditPage> {
                   const SizedBox(width: 10),
                   Expanded(
                     flex: 2,
-                    child: DropdownButtonFormField<String>(
-                      initialValue: _selectedPosition,
+                    child: DropdownButtonFormField<int>(
+                      value: _selectedPositionIndex,
                       dropdownColor: cardColor,
                       style: TextStyle(color: isDark ? Colors.white : Colors.black, fontSize: 16),
                       decoration: InputDecoration(
@@ -191,15 +191,15 @@ class _PlayerEditPageState extends State<PlayerEditPage> {
                         fillColor: cardColor,
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
                       ),
-                      items: positions.map((position) {
-                        return DropdownMenuItem<String>(
-                          value: position,
-                          child: Text(position),
+                      items: List.generate(_localizedPositions.length, (index) {
+                        return DropdownMenuItem<int>(
+                          value: index,
+                          child: Text(_localizedPositions[index]),
                         );
-                      }).toList(),
+                      }),
                       onChanged: (value) {
                         setState(() {
-                          _selectedPosition = value!;
+                          _selectedPositionIndex = value!;
                         });
                       },
                     ),
@@ -320,6 +320,4 @@ class _PlayerEditPageState extends State<PlayerEditPage> {
       },
     );
   }
-
-
 }

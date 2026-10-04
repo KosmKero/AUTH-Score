@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -12,19 +10,18 @@ class UserBetHistory extends StatefulWidget {
 }
 
 class _UserBetHistoryState extends State<UserBetHistory> {
-
-
   final backgroundColor = darkModeNotifier.value ? darkModeBackGround : lightModeBackGround;
+
   @override
   Widget build(BuildContext context) {
     final uid = FirebaseAuth.instance.currentUser?.uid;
 
     if (uid == null) {
       return Container(
-        color: darkModeNotifier.value ? darkModeBackGround : lightModeBackGround ,
+        color: darkModeNotifier.value ? darkModeBackGround : lightModeBackGround,
         child: Center(
           child: Text(
-            "Πρέπει να συνδεθείς για να δεις το ιστορικό σου",
+            greek ? "Πρέπει να συνδεθείς για να δεις το ιστορικό σου" : "You must log in to view your history",
             style: TextStyle(
               color: darkModeNotifier.value ? Colors.white : lightModeText,
             ),
@@ -38,8 +35,7 @@ class _UserBetHistoryState extends State<UserBetHistory> {
       body: ValueListenableBuilder<bool>(
         valueListenable: darkModeNotifier,
         builder: (context, isDark, _) {
-          final backgroundColor =
-          isDark ? darkModeBackGround : lightModeBackGround;
+          final backgroundColor = isDark ? darkModeBackGround : lightModeBackGround;
           final cardColor = isDark ? darkModeWidgets : lightModeContainer;
           final textColor = isDark ? Colors.white : lightModeText;
           final dateColor = isDark ? Colors.grey[400]! : Colors.grey[700]!;
@@ -54,7 +50,7 @@ class _UserBetHistoryState extends State<UserBetHistory> {
                   .snapshots(),
               builder: (context, snapshot) {
                 if (!snapshot.hasData) {
-                  return Center(child: CircularProgressIndicator());
+                  return const Center(child: CircularProgressIndicator());
                 }
 
                 final bets = snapshot.data!.docs;
@@ -62,7 +58,7 @@ class _UserBetHistoryState extends State<UserBetHistory> {
                 if (bets.isEmpty) {
                   return Center(
                     child: Text(
-                      "Δεν έχεις ακόμα στοιχήματα",
+                      greek ? "Δεν έχεις ακόμα στοιχήματα" : "You have no bets yet",
                       style: TextStyle(color: textColor),
                     ),
                   );
@@ -86,7 +82,6 @@ class _UserBetHistoryState extends State<UserBetHistory> {
           );
         },
       ),
-
     );
   }
 }
@@ -105,18 +100,37 @@ class BetCard extends StatelessWidget {
     required this.dateColor,
   });
 
+  // 💡 HELPER: Βρίσκει το σωστό Display Name από τη global λίστα ομάδων!
+  String getDisplayNameSafely(String? teamId) {
+    if (teamId == null || teamId.isEmpty) return "";
+    try {
+      final teamObj = teams.firstWhere((t) => t.name == teamId || t.nameEnglish == teamId);
+      return greek ? teamObj.displayGreek : teamObj.displayEnglish;
+    } catch (e) {
+      return teamId; // Αν δεν το βρει στη μνήμη (σπάνιο), επιστρέφει το ID
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final matchInfo = bet['matchInfo'] as Map<String, dynamic>;
     final DateTime startTime = (matchInfo['startTime'] as Timestamp).toDate();
     final status = (bet['status'] ?? 'pending') as String;
 
+    // Παιρνουμε τα αρχικά IDs από τη βάση
+    final homeTeamId = matchInfo['Hometeam'] ?? matchInfo['homeTeamEnglish'] ?? "";
+    final awayTeamId = matchInfo['Awayteam'] ?? matchInfo['awayTeamEnglish'] ?? "";
 
-    String choice = bet['choice'] == '1'
-        ? matchInfo['Hometeam'] ?? ""
+    // 💡 ΤΑ ΜΕΤΑΤΡΕΠΟΥΜΕ ΣΤΑ ΟΡΑΤΑ ΟΝΟΜΑΤΑ (DISPLAY NAMES)
+    final homeTeamDisplay = getDisplayNameSafely(homeTeamId);
+    final awayTeamDisplay = getDisplayNameSafely(awayTeamId);
+
+    // 💡 Υπολογίζουμε την επιλογή του χρήστη με το Display Name
+    String choiceDisplay = bet['choice'] == '1'
+        ? homeTeamDisplay
         : bet['choice'] == '2'
-        ? matchInfo['Awayteam'] ?? ""
-        : 'Ισοπαλία';
+        ? awayTeamDisplay
+        : (greek ? 'Ισοπαλία' : 'Draw');
 
     // 🎨 Χρώματα status
     Color statusColor;
@@ -124,47 +138,41 @@ class BetCard extends StatelessWidget {
 
     // COLORS
     const Color wonLight = Color(0xFF2E7D32);
-    const Color wonDark  = Color(0xFF66BB6A);
+    const Color wonDark = Color(0xFF66BB6A);
 
     const Color lostLight = Color(0xFFC62828);
-    const Color lostDark  = Color(0xFFEF5350);
+    const Color lostDark = Color(0xFFEF5350);
 
-    const Color cancelledLight = Color(0xFF616161); // grey 700
-    const Color cancelledDark  = Color(0xFFBDBDBD); // grey 400
-
-
-
+    const Color cancelledLight = Color(0xFF616161);
+    const Color cancelledDark = Color(0xFFBDBDBD);
 
     const Color pendingLight = Color(0xFFF57C00);
-    const Color pendingDark  = Color(0xFFFFB74D);
+    const Color pendingDark = Color(0xFFFFB74D);
 
-// LOGIC
+    // LOGIC
     final isDark = darkModeNotifier.value;
 
     switch (status) {
       case 'won':
         statusColor = isDark ? wonDark : wonLight;
-        statusText = "ΚΕΡΔΙΣΜΕΝΟ 🎉";
+        statusText = greek ? "ΚΕΡΔΙΣΜΕΝΟ 🎉" : "WON 🎉";
         break;
 
       case 'lost':
         statusColor = isDark ? lostDark : lostLight;
-        statusText = "ΧΑΜΕΝΟ ❌";
+        statusText = greek ? "ΧΑΜΕΝΟ ❌" : "LOST ❌";
         break;
 
       case 'cancelled':
         statusColor = isDark ? cancelledDark : cancelledLight;
-        statusText = "ΑΚΥΡΩΘΗΚΕ 🚫";
+        statusText = greek ? "ΑΚΥΡΩΘΗΚΕ 🚫" : "CANCELLED 🚫";
         break;
 
       default:
         statusColor = isDark ? pendingDark : pendingLight;
-        statusText = "ΕΚΚΡΕΜΕΙ ⏳";
+        statusText = greek ? "ΕΚΚΡΕΜΕΙ ⏳" : "PENDING ⏳";
     }
 
-
-    final homeTeam = matchInfo['Hometeam'] ?? "";
-    final awayTeam = matchInfo['Awayteam'] ?? "";
     final homeScore = matchInfo['GoalHome'];
     final awayScore = matchInfo['GoalAway'];
 
@@ -178,13 +186,13 @@ class BetCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Ομάδες
+            // Ομάδες (με τα Display Names!)
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 Flexible(
                   child: Text(
-                    homeTeam,
+                    homeTeamDisplay, // 💡 ΑΛΛΑΓΗ ΕΔΩ
                     textAlign: TextAlign.center,
                     softWrap: true,
                     overflow: TextOverflow.visible,
@@ -196,10 +204,10 @@ class BetCard extends StatelessWidget {
                     ),
                   ),
                 ),
-                Text("vs", style: TextStyle(fontSize: 16, color: textColor)),
+                Text(" vs ", style: TextStyle(fontSize: 16, color: textColor)),
                 Flexible(
                   child: Text(
-                    awayTeam,
+                    awayTeamDisplay, // 💡 ΑΛΛΑΓΗ ΕΔΩ
                     textAlign: TextAlign.center,
                     softWrap: true,
                     overflow: TextOverflow.visible,
@@ -218,72 +226,68 @@ class BetCard extends StatelessWidget {
 
             // Ημερομηνία
             Text(
-              "Ημερομηνία: ${DateFormat('dd/MM/yyyy – HH:mm').format(startTime)}",
+              "${greek ? 'Ημερομηνία:' : 'Date:'} ${DateFormat('dd/MM/yyyy – HH:mm').format(startTime)}",
               style: TextStyle(color: dateColor),
             ),
 
             // Επιλογή χρήστη + σκορ
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: RichText(
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  text: TextSpan(
-                    children: [
-                      TextSpan(
-                        text: "Η επιλογή σου: ",
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: textColor.withOpacity(0.7),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: RichText(
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    text: TextSpan(
+                      children: [
+                        TextSpan(
+                          text: greek ? "Η επιλογή σου: " : "Your pick: ",
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: textColor.withOpacity(0.7),
+                          ),
                         ),
-                      ),
-                      TextSpan(
-                        text: choice,
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: textColor,
-                          fontWeight: FontWeight.w500,
+                        TextSpan(
+                          text: choiceDisplay, // 💡 Δείχνει το Display Name της επιλογής του
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: textColor,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-
-
-              if (homeScore != null &&
-                  awayScore != null &&
-                  (status == "won" || status == "lost"))
-                Container(
-                  margin: const EdgeInsets.only(left: 8, top: 6),
-                  padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
-                  decoration: BoxDecoration(
-                    color: darkModeNotifier.value
-                        ? Colors.black38
-                        : const Color.fromARGB(60, 40, 90, 95),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Text(
-                    "Σκορ $homeScore - $awayScore",
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: darkModeNotifier.value ? Colors.white : Colors.black,
-                      fontWeight: FontWeight.w500,
+                      ],
                     ),
                   ),
                 ),
-            ],
-          ),
+                if (homeScore != null &&
+                    awayScore != null &&
+                    (status == "won" || status == "lost"))
+                  Container(
+                    margin: const EdgeInsets.only(left: 8, top: 6),
+                    padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
+                    decoration: BoxDecoration(
+                      color: darkModeNotifier.value
+                          ? Colors.black38
+                          : const Color.fromARGB(60, 40, 90, 95),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Text(
+                      "${greek ? 'Σκορ' : 'Score'} $homeScore - $awayScore",
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: darkModeNotifier.value ? Colors.white : Colors.black,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
 
+            const SizedBox(height: 8),
 
-          const SizedBox(height: 8),
-
-            // Κατάσταση
+            // Κατάσταση Στοιχήματος
             Container(
-              padding:
-              const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
+              padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
               decoration: BoxDecoration(
                 color: statusColor.withOpacity(0.15),
                 borderRadius: BorderRadius.circular(12),

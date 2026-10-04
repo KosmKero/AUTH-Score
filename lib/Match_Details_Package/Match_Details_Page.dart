@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:untitled1/Firebase_Handle/TeamsHandle.dart';
 import 'package:untitled1/Match_Details_Package/Match_Not_Started/Match_Not_Started_Details_Page.dart';
 import 'package:untitled1/Match_Details_Package/Match_Started_Details_Page.dart';
+import 'package:untitled1/Match_Details_Package/preview_match.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../Data_Classes/MatchDetails.dart';
 import '../ad_manager.dart';
@@ -64,7 +65,7 @@ class _matchDetailsPageViewState extends State<_matchDetailsPageView> {
         iconTheme: IconThemeData(color: darkModeNotifier.value?Colors.white:Colors.black),
         actions: [
           if (!match.hasMatchStarted)
-            if (globalUser.controlTheseTeamsFootball(match.homeTeam.name, match.awayTeam.name) || globalUser.isUpperAdmin)
+            if (globalUser.isUpperAdmin)
               Row(
                 children: [
                   IconButton(onPressed: () async {
@@ -110,11 +111,18 @@ class _matchDetailsPageViewState extends State<_matchDetailsPageView> {
                       context: context,
                       builder: (BuildContext context) {
                         return SimpleDialog(
-                          title: const Text('3-0 Άνευ αγώνα', textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.bold)),
+                          title: Text(
+                            greek ? '3-0 Άνευ αγώνα' : '3-0 Walkover',
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
                           children: <Widget>[
-                            const Padding(
-                              padding: EdgeInsets.all(8.0),
-                              child: Text('Ποια ομάδα κέρδισε το ματς στα χαρτιά:', textAlign: TextAlign.center),
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text(
+                                greek ? 'Ποια ομάδα κέρδισε το ματς στα χαρτιά:' : 'Which team won by forfeit:',
+                                textAlign: TextAlign.center,
+                              ),
                             ),
                             const Divider(),
                             Row(
@@ -122,6 +130,7 @@ class _matchDetailsPageViewState extends State<_matchDetailsPageView> {
                                 // Γηπεδούχος
                                 Expanded(
                                   child: SimpleDialogOption(
+                                    // Στέλνουμε το σταθερό ID στο backend
                                     onPressed: () => Navigator.pop(context, match.homeTeam.name),
                                     padding: EdgeInsets.zero,
                                     child: Column(
@@ -129,7 +138,13 @@ class _matchDetailsPageViewState extends State<_matchDetailsPageView> {
                                       children: [
                                         SizedBox(height: 60, width: 100, child: match.homeTeam.image),
                                         const SizedBox(height: 12),
-                                        Text(match.homeTeam.name, textAlign: TextAlign.center, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12, height: 1.1)),
+                                        Text(
+                                          match.homeTeam.displayName,
+                                          textAlign: TextAlign.center,
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: const TextStyle(fontSize: 12, height: 1.1),
+                                        ),
                                       ],
                                     ),
                                   ),
@@ -137,6 +152,7 @@ class _matchDetailsPageViewState extends State<_matchDetailsPageView> {
                                 // Φιλοξενούμενος
                                 Expanded(
                                   child: SimpleDialogOption(
+                                    // Στέλνουμε το σταθερό ID στο backend
                                     onPressed: () => Navigator.pop(context, match.awayTeam.name),
                                     padding: EdgeInsets.zero,
                                     child: Column(
@@ -144,7 +160,13 @@ class _matchDetailsPageViewState extends State<_matchDetailsPageView> {
                                       children: [
                                         SizedBox(height: 60, width: 100, child: match.awayTeam.image),
                                         const SizedBox(height: 12),
-                                        Text(match.awayTeam.name, textAlign: TextAlign.center, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12, height: 1.1)),
+                                        Text(
+                                          match.awayTeam.displayName,
+                                          textAlign: TextAlign.center,
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: const TextStyle(fontSize: 12, height: 1.1),
+                                        ),
                                       ],
                                     ),
                                   ),
@@ -158,27 +180,47 @@ class _matchDetailsPageViewState extends State<_matchDetailsPageView> {
 
                     if (winner == null) return;
 
+                    // 💡 Βρίσκουμε το Display Name του νικητή για τα μηνύματα επιβεβαίωσης
+                    String winnerDisplayName = winner == match.homeTeam.name
+                        ? match.homeTeam.displayName
+                        : match.awayTeam.displayName;
+
                     // ΒΗΜΑ 2: Επιβεβαίωση
                     bool? confirm = await showDialog<bool>(
                       context: context,
                       builder: (context) => AlertDialog(
-                        title: const Text('Επιβεβαίωση'),
-                        content: Text('Είσαι σίγουρος ότι θέλεις να κατοχυρώσεις τον αγώνα με 3-0 υπέρ της ομάδας "$winner";'),
+                        title: Text(greek ? 'Επιβεβαίωση' : 'Confirmation'),
+                        content: Text(greek
+                            ? 'Είσαι σίγουρος ότι θέλεις να κατοχυρώσεις τον αγώνα με 3-0 υπέρ της ομάδας "$winnerDisplayName";'
+                            : 'Are you sure you want to award a 3-0 win to "$winnerDisplayName"?'),
                         actions: [
-                          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Ακύρωση')),
-                          TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('Ναι, σίγουρα')),
+                          TextButton(
+                            onPressed: () => Navigator.pop(context, false),
+                            child: Text(greek ? 'Ακύρωση' : 'Cancel', style: const TextStyle(color: Colors.grey)),
+                          ),
+                          TextButton(
+                            onPressed: () => Navigator.pop(context, true),
+                            child: Text(greek ? 'Ναι, σίγουρα' : 'Yes, I am sure', style: const TextStyle(color: Colors.blue)),
+                          ),
                         ],
                       ),
                     );
 
                     // ΒΗΜΑ 3: Εκτέλεση
                     if (confirm == true) {
-                      match.noMatch30(winner == match.homeTeam.name);
-                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Το ματς κατοχυρώθηκε στην ομάδα $winner με 3-0!')));
+                      match.noMatch30(winner == match.homeTeam.name); // Χρησιμοποιούμε το ID για το logic
+                      ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(greek
+                                ? 'Το ματς κατοχυρώθηκε στην ομάδα $winnerDisplayName με 3-0!'
+                                : 'Match awarded to $winnerDisplayName with 3-0!'),
+                            backgroundColor: Colors.green,
+                          )
+                      );
                     }
                   },
                   icon: const Icon(Icons.gavel),
-                  tooltip: '3-0 Άνευ αγώνος',
+                  tooltip: greek ? '3-0 Άνευ αγώνος' : '3-0 Walkover',
                 ),
 
                 // 2. ΚΟΥΜΠΙ SLOT PICKER
@@ -194,6 +236,7 @@ class _matchDetailsPageViewState extends State<_matchDetailsPageView> {
                     );
                   },
                   icon: const Icon(Icons.edit_road),
+                  tooltip: greek ? 'Διαχείριση θέσης' : 'Manage Bracket Slot',
                 ),
 
                 // 3. ΚΟΥΜΠΙ ΔΙΑΓΡΑΦΗΣ
@@ -202,11 +245,19 @@ class _matchDetailsPageViewState extends State<_matchDetailsPageView> {
                     bool? confirmed = await showDialog<bool>(
                       context: context,
                       builder: (context) => AlertDialog(
-                        title: const Text('Επιβεβαίωση'),
-                        content: const Text('Είσαι σίγουρος ότι θέλεις να διαγράψεις τον αγώνα;'),
+                        title: Text(greek ? 'Επιβεβαίωση' : 'Confirmation'),
+                        content: Text(greek
+                            ? 'Είσαι σίγουρος ότι θέλεις να διαγράψεις τον αγώνα;'
+                            : 'Are you sure you want to delete this match?'),
                         actions: [
-                          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Ακύρωση')),
-                          TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('Ναι')),
+                          TextButton(
+                            onPressed: () => Navigator.pop(context, false),
+                            child: Text(greek ? 'Ακύρωση' : 'Cancel', style: const TextStyle(color: Colors.grey)),
+                          ),
+                          TextButton(
+                            onPressed: () => Navigator.pop(context, true),
+                            child: Text(greek ? 'Ναι' : 'Yes', style: const TextStyle(color: Colors.red)),
+                          ),
                         ],
                       ),
                     );
@@ -217,13 +268,35 @@ class _matchDetailsPageViewState extends State<_matchDetailsPageView> {
                     }
                   },
                   icon: const Icon(Icons.delete),
+                  tooltip: greek ? 'Διαγραφή αγώνα' : 'Delete Match',
                 ),
               ],
             )
           else
-            const SizedBox()
-
-
+            const SizedBox(),
+          /*
+          ElevatedButton.icon(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.pink[600], // Χρώμα που θυμίζει Instagram
+              elevation: 8,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+            icon: const Icon(Icons.camera_alt, color: Colors.white),
+            label: Text(
+              greek ? "Δημιουργία IG Story" : "Create IG Story",
+              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+            ),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => StoryPreviewScreen(match: match),
+                ),
+              );
+            },
+          ),
+           */
 
         ],
       ),

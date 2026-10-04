@@ -4,8 +4,10 @@ import 'dart:ui';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:untitled1/Data_Classes/MatchDetails.dart';
+import 'package:untitled1/Data_Classes/basketball/basketMatch.dart';
 import 'Data_Classes/AppUser.dart';
 import 'Data_Classes/Team.dart';
+import 'Data_Classes/basketball/basketTeam.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
@@ -16,18 +18,25 @@ ValueNotifier<bool> loggedInNotifications = ValueNotifier<bool>(false);
 ValueNotifier<bool> darkModeNotifier = ValueNotifier<bool>(WidgetsBinding.instance.platformDispatcher.platformBrightness == Brightness.dark );
 bool greek = true;
 String username = "";
-AppUser globalUser= AppUser("","",[],[],[], "user",{},"",false, false, false);
+AppUser globalUser= AppUser("","",[],[],[],[], "user",{},"",false, false, false,false);
 bool isToggled = false;
 
 List<Team> topTeams = [];
 
-
 List<Team> teams = [];
+
+//μπασκετ
+List<basketTeam> basketTeams = [];
+final ValueNotifier<String> selectedSport = ValueNotifier<String>('football');
+
+List<basketTeam> topTeamsBasket = [];
 
 String? pendingMatchId;
 int thisYearNow=2027;
 
 Map<int, MatchDetails> playOffMatches = {};
+
+Map<int, BasketMatch> playOffMatchesBasket = {};
 
 // 🌞 Light Mode
 Color lightModeBackGround = const Color(0xFF97B4C3);   // απαλή μπλε-γκρι βάση

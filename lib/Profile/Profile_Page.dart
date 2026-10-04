@@ -9,13 +9,16 @@ import 'package:untitled1/Profile/admin/update_betting_results_button.dart';
 import 'package:untitled1/Profile/admin_request_screen.dart';
 import 'package:untitled1/Profile/feedback_page.dart';
 import 'package:untitled1/globals.dart';
+import '../API/SeasonManager.dart';
 import '../Data_Classes/AppUser.dart';
 //import '../Data_Classes/basketball/basketMatch.dart';
 import '../Firebase_Handle/betting_result_update.dart';
 import '../Firebase_Handle/firebase_screen_stats_helper.dart';
 import '../basketMatches/basket_match_details.dart';
+import '../globals.dart' as global;
 import '../main.dart';
 import 'LogInScreen.dart';
+import 'admin/GroupManagementScreen.dart';
 import 'admin/requests_and_admins_page.dart';
 import 'bets/choosePage.dart';
 
@@ -270,7 +273,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                   isLoggedIn = false;
                                   loggedInNotifications.value = false;
                                   globalUser =
-                                      AppUser(" ", " ", [], [],[], "user", {}, "",false, false, false);
+                                      AppUser(" ", " ", [], [],[],[], "user", {}, "",false, false, false,false);
                                   signOutUser();
                                 });
                               }
@@ -621,17 +624,50 @@ class _ProfilePageState extends State<ProfilePage> {
                           ),
                           if (globalUser.isSuperUser)
                             ListTile(
-                            dense: true,
-                            leading: Icon(
-                              Icons.admin_panel_settings,
-                              color: darkModeOn ? Colors.white : Colors.blue,
-                            ),
-                            title: TextButton(
-                              onPressed: () {
-                                BettingResultUpdate().checkAndUpdateStats();
+                              dense: true,
+                              onTap: () async {
+                                try {
+                                  // 1. Ενημερώνουμε τον χρήστη ότι ξεκίνησε
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(greek ? "Γίνεται ενημέρωση..." : "Updating stats..."),
+                                      duration: const Duration(seconds: 2),
+                                    ),
+                                  );
+
+                                  // 2. Τρέχουμε την ασύγχρονη συνάρτηση με await
+                                  await BettingResultUpdate().checkAndUpdateStats();
+
+                                  // 3. Ενημερώνουμε για την επιτυχία (ελέγχοντας το mounted)
+                                  if (context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(greek ? "✅ Επιτυχής ανανέωση!" : "✅ Update successful!"),
+                                        backgroundColor: Colors.green,
+                                      ),
+                                    );
+                                  }
+                                } catch (e) {
+                                  // 4. Πιάνουμε οποιοδήποτε σφάλμα για να μην κρασάρει σιωπηλά
+                                  if (context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text("❌ Error: $e"),
+                                        backgroundColor: Colors.red,
+                                        duration: const Duration(seconds: 4),
+                                      ),
+                                    );
+                                  }
+                                }
                               },
-                              child: Text(
+                              leading: Icon(
+                                Icons.admin_panel_settings,
+                                color: darkModeOn ? Colors.white : Colors.blue,
+                              ),
+                              // Το title είναι πλέον απλό Text
+                              title: Text(
                                 greek ? "Ανανέωση στοιχημάτων" : "Betting update",
+                                textAlign: TextAlign.center,
                                 style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w600,
@@ -639,7 +675,101 @@ class _ProfilePageState extends State<ProfilePage> {
                                 ),
                               ),
                             ),
+
+                          ListTile(
+                            dense: true,
+                            leading: Icon(
+                              Icons.skip_next,
+                              color: darkModeOn ? Colors.white : Colors.blue,
+                            ),
+                            title: TextButton(
+                              onPressed: () async {
+                                int currentYear = global.thisYearNow;
+                                int nextYear = currentYear + 1;
+
+                                bool confirm = await showDialog(
+                                  context: context,
+                                  builder: (context) => AlertDialog(
+                                    backgroundColor: darkModeOn ? Colors.grey[900] : Colors.white,
+                                    title: Text(
+                                        "⚠️ Νέα Σεζόν",
+                                        style: TextStyle(fontWeight: FontWeight.bold, color: darkModeOn ? Colors.white : Colors.black)
+                                    ),
+                                    content: Text(
+                                      "Είσαι σίγουρος ότι θέλεις να αντιγράψεις τις ομάδες στο $nextYear και να μηδενίσεις τα στατιστικά;\n\nΤα δεδομένα του $currentYear ΔΕΝ θα διαγραφούν.",
+                                      style: TextStyle(color: darkModeOn ? Colors.white70 : Colors.black87),
+                                    ),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () => Navigator.pop(context, false),
+                                        child: const Text("Ακύρωση", style: TextStyle(color: Colors.grey)),
+                                      ),
+                                      ElevatedButton(
+                                        style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                                        onPressed: () => Navigator.pop(context, true),
+                                        child: const Text("Δημιουργία", style: TextStyle(color: Colors.white)),
+                                      ),
+                                    ],
+                                  ),
+                                ) ?? false;
+
+                                if (!confirm) return;
+
+                                try {
+                                  await SeasonManager.createNewSeason(currentYear);
+
+                                  if (context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text("Επιτυχία! Η σεζόν $nextYear είναι έτοιμη!"),
+                                        backgroundColor: Colors.green,
+                                      ),
+                                    );
+                                  }
+                                } catch (e) {
+                                  if (context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text("Σφάλμα: $e"), backgroundColor: Colors.red),
+                                    );
+                                  }
+                                }
+                              },
+                              child: Text(
+                                greek ? "Έναρξη Νέας Σεζόν" : "Start New Season",
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                  color: darkModeOn ? Colors.white :  Colors.blue[900],
+                                ),
+                              ),
+                            ),
+
                           ),
+                            ListTile(
+                              dense: true,
+                              leading: Icon(
+                                Icons.format_list_numbered,
+                                color: darkModeOn ? Colors.white : Colors.blue,
+                              ),
+                              title: TextButton(
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => const GroupManagementScreen(),
+                                    ),
+                                  );
+                                },
+                                child: Text(
+                                  greek ? "Διαχείριση Ομίλων" : "Group Management",
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                    color: darkModeOn ? Colors.white : Colors.blue[900],
+                                  ),
+                                ),
+                              ),
+                            ),
                         ],
                       ),
                     ),
@@ -684,7 +814,7 @@ class _ProfilePageState extends State<ProfilePage> {
                               isLoggedIn = false;
                               loggedInNotifications.value = false;
                               globalUser =
-                                  AppUser(" ", " ", [], [],[], "user", {}, "",false, false, false);
+                                  AppUser(" ", " ", [], [],[],[], "user", {}, "",false, false, false,false);
                             });
                           }
                         },
@@ -828,7 +958,7 @@ Future<bool> _deleteAccount(BuildContext context) async {
 
     isLoggedIn = false;
     loggedInNotifications.value = false;
-    globalUser = AppUser(" ", " ", [], [],[], "user", {}, "",false, false, false);
+    globalUser = AppUser(" ", " ", [], [],[], [], "user", {}, "",false, false, false,false);
 
     return true;
     if (!context.mounted) return false;

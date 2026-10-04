@@ -56,7 +56,7 @@ class MatchPdfPreviewScreen extends StatelessWidget {
 
     try {
       // 1. ΑΝΕΒΑΣΜΑ ΣΤΟ FIREBASE STORAGE
-      String path = "MatchReports/$thisYearNow/${match.matchKey}.pdf";
+      String path = "MatchReports/$thisYearNow/${match.matchDocId}.pdf";
       Reference storageRef = FirebaseStorage.instance.ref().child(path);
 
       UploadTask uploadTask = storageRef.putData(
@@ -71,28 +71,49 @@ class MatchPdfPreviewScreen extends StatelessWidget {
           .collection("year")
           .doc(thisYearNow.toString())
           .collection("matches")
-          .doc(match.matchKey)
+          .doc(match.matchDocId)
           .update({
         'pdfReportUrl': downloadUrl,
         'isFinalized': true,
       });
 
+      // =================================================================
+      // 3. ✉️ ΔΗΜΙΟΥΡΓΙΑ ΤΟΥ MAIL COLLECTION ΓΙΑ ΤΗΝ ΑΠΟΣΤΟΛΗ PDF (ΝΕΟ)
+      // =================================================================
+      await FirebaseFirestore.instance.collection("mail").add({
+        'to': ['oksder1234@gmail.com'],
+        'message': {
+          'subject': 'Φύλλο Αγώνα: ${match.homeTeam.displayName} - ${match.awayTeam.displayName}',
+          'html': '''
+            <h3>Φύλλο Αγώνα</h3>
+            <p>Σας αποστέλλουμε το υπογεγραμμένο φύλλο αγώνα για την αναμέτρηση <b>${match.homeTeam.displayName} - ${match.awayTeam.displayName}</b>.</p>
+            <p><b>Τελικό Σκορ:</b> ${match.homeScore} - ${match.awayScore}</p>
+            <p>Παρακαλούμε βρείτε το PDF του αγώνα επισυναπτόμενο σε αυτό το μήνυμα.</p>
+          ''',
+          'attachments': [
+            {
+              'filename': 'Match_Report_${match.homeTeam.name}_${match.awayTeam.name}.pdf',
+              'path': downloadUrl // Δίνουμε το URL του PDF από το Storage
+            }
+          ]
+        }
+      });
+      // =================================================================
+
       if (context.mounted) {
         Navigator.pop(context); // Κλείνει το Loading
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Το Φύλλο Αγώνα ανέβηκε επιτυχώς!'), backgroundColor: Colors.green),
+          const SnackBar(content: Text('Το Φύλλο Αγώνα ανέβηκε και στάλθηκε επιτυχώς!'), backgroundColor: Colors.green),
         );
-        // Επιστρέφουμε στην αρχική οθόνη (ή 2 οθόνες πίσω για να κλείσει και η οθόνη υπογραφών)
+        // Επιστρέφουμε στην αρχική οθόνη
         Navigator.of(context).popUntil((route) => route.isFirst);
       }
     } catch (e) {
       if (context.mounted) Navigator.pop(context);
-      print("Error uploading match PDF: $e");
+      print("Error uploading match PDF or sending email: $e");
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Σφάλμα κατά την υποβολή. Δοκιμάστε ξανά.'), backgroundColor: Colors.red),
       );
-      print("🕵️ ΕΛΕΓΧΟΣ AUTH: ${FirebaseAuth.instance.currentUser?.uid}");
     }
-  }
-}
+  }}

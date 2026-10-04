@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -7,13 +8,19 @@ import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
-//import 'API/BasketballMatchHandle.dart';
+import 'API/BasketballMatchHandle.dart';
 import 'Data_Classes/basketball/basketMatch.dart';
 import 'Data_Classes/basketball/basketTeam.dart';
-//import 'Firebase_Handle/BasketTeamsHandle.dart';
+import 'Firebase_Handle/BasketTeamsHandle.dart';
 import 'Firebase_Handle/betting_result_update.dart';
+import 'Match_Details_Package/StatsPage.dart';
 import 'Match_Details_Package/add_match_page.dart';
+import 'Profile/admin/pinWatch.dart';
+import 'Team_Basket_Display_Package/add_team_screen.dart';
 import 'Team_Display_Page_Package/addTeamScreen.dart';
+import 'basketMatches/add_match_basketball.dart';
+import 'championship_details/StandingsOrKnockoutsChooserPage.dart';
+import 'favorite_Page/favorite_Chooser.dart';
 import 'firebase_options.dart';
 
 import 'package:flutter/material.dart';
@@ -22,9 +29,9 @@ import 'package:untitled1/API/top_players_handle.dart';
 import 'package:untitled1/Data_Classes/Team.dart';
 import 'package:untitled1/Firebase_Handle/TeamsHandle.dart';
 import 'package:untitled1/Firebase_Handle/user_handle_in_base.dart';
-import 'package:untitled1/championship_details/sector_chooser.dart';
+import 'package:untitled1/championship_details/football/football_sector_chooser.dart';
 import 'API/NotificationService.dart';
-import 'Favorite_Page.dart';
+import 'favorite_Page/Football_Favorite_Page.dart';
 import 'Firebase_Handle/firebase_screen_stats_helper.dart';
 import 'HomePage.dart';
 import 'Data_Classes/Player.dart';
@@ -37,7 +44,9 @@ import 'globals.dart';
 List<MatchDetails> upcomingMatches = [];
 List<MatchDetails> previousMatches = [];
 List<List<MatchDetails>> matches = [];
-List<Team> favouriteTeams = [];
+
+List<Team> favouriteTeamsFootball = [];
+List<basketTeam> favoriteTeamsBasket = [];
 List<Player> players = [];
 
 Future<void> loadUser(User user) async {
@@ -47,14 +56,6 @@ Future<void> loadUser(User user) async {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  //await MobileAds.instance.initialize();
-  //await Hive.initFlutter();
-
-  //Hive.registerAdapter(MatchModelAdapter());
-  //Hive.registerAdapter(GoalAdapter());
-  //Hive.registerAdapter(PenaltyAdapter());
-
-  //await Hive.openBox<MatchModel>('matches');
 
   try {
     // 1. Αρχικοποίηση Firebase
@@ -64,28 +65,25 @@ void main() async {
 
     FirebaseFirestore.instance.settings = const Settings(
       persistenceEnabled: true,
-      cacheSizeBytes: Settings.CACHE_SIZE_UNLIMITED, // Κράτα όλο το ιστορικό τοπικά
+      cacheSizeBytes: Settings.CACHE_SIZE_UNLIMITED,
     );
 
-    //await FirebaseAnalytics.instance.setAnalyticsCollectionEnabled(true); //an δουλεψουν ποτε τα αναλυτικς
     await FirebaseAnalytics.instance.setAnalyticsCollectionEnabled(!kDebugMode);
     FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
 
-    // 2. Καταγραφή σφαλμάτων που συμβαίνουν εκτός Flutter framework (Asynchronous errors)
+    // 2. Καταγραφή σφαλμάτων εκτός Flutter
     PlatformDispatcher.instance.onError = (error, stack) {
       FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
       return true;
     };
 
-    // 2. Ρύθμιση Remote Config (Πριν από οτιδήποτε άλλο)
+    // 3. Ρύθμιση Remote Config
     final remoteConfig = FirebaseRemoteConfig.instance;
     await remoteConfig.setConfigSettings(RemoteConfigSettings(
       fetchTimeout: const Duration(seconds: 15),
-      minimumFetchInterval:
-          kDebugMode ? Duration.zero : const Duration(hours: 12),
+      minimumFetchInterval: kDebugMode ? Duration.zero : const Duration(hours: 12),
     ));
 
-    // Ορισμός defaults
     await remoteConfig.setDefaults(const {
       "has_home_sponsor": false,
       "home_sponsor_image_url": "",
@@ -102,11 +100,7 @@ void main() async {
 
     remoteConfig.fetchAndActivate().catchError((e) => print("Remote Config error: $e"));
 
-    //await MatchHandle.migrateMatches();
-    //await MatchHandle.migrateTeams();
-    //await MatchHandle().resetPlayerData("2026");
-    await Future.delayed(
-        const Duration(milliseconds: 100)); //να προλαβουν να γινουν ολα σωστα
+    await Future.delayed(const Duration(milliseconds: 100));
 
     User? user = FirebaseAuth.instance.currentUser;
     await initTracking();
@@ -138,14 +132,13 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       navigatorKey: navigatorKey,
       routes: {
-        '/home': (context) => LoadingScreen(),
+        '/home': (context) => const LoadingScreen(),
       },
-      home: LoadingScreen(),
+      home: const LoadingScreen(),
     );
   }
 }
 
-// New loading screen widget
 class LoadingScreen extends StatefulWidget {
   const LoadingScreen({super.key});
 
@@ -154,7 +147,6 @@ class LoadingScreen extends StatefulWidget {
 }
 
 class _LoadingScreenState extends State<LoadingScreen> {
-  bool _isLoading = true;
   String _loadingMessage = "Initializing...";
   bool _hasError = false;
   final String _errorMessage = "";
@@ -162,14 +154,10 @@ class _LoadingScreenState extends State<LoadingScreen> {
   @override
   void initState() {
     super.initState();
-
     _loadData();
     if (isLoggedIn) {
       _loadLanguage();
     }
-    //EmergencyRescue().restoreAllTimePredictions();
-   // BettingResultUpdate().recalculateAllHistoricalStats();
-      // BettingResultUpdate().recalculateAllScores();
   }
 
   Future<void> _loadLanguage() async {
@@ -182,12 +170,9 @@ class _LoadingScreenState extends State<LoadingScreen> {
       setState(() {
         _loadingMessage = "Loading teams...";
       });
-      await loadYear();
-
-     // basketTeam t=basketTeam("das", "sda",4, 2,2, 1,190,1 , "dsdada",1 , "asdewe","sadc");
-     // await BasketTeamsHandle().addNewTeam(t);
-
-
+      //await loadYear();
+      //await WinProbabilityCalculator.evaluateModel(2025);
+      //await WinProbabilityCalculator.evaluateModel(2026);
 
 
       await loadTeams();
@@ -201,43 +186,33 @@ class _LoadingScreenState extends State<LoadingScreen> {
       setState(() {
         _loadingMessage = "Setting up data...";
       });
-      MatchHandle().initializeMatces(matches);
+      MatchHandle().initializeMatches(matches);
       TopPlayersHandle().initializeList(teams);
 
       await BasketballMatchHandle().loadAllBasketballData(thisYearNow, basketTeams);
 
-      // Add a small delay so users can see the loading completed message
       setState(() {
         _loadingMessage = "All set!";
       });
-      bool hasSplashSponsor =
-          FirebaseRemoteConfig.instance.getBool('has_splash_sponsor');
-
+      bool hasSplashSponsor = FirebaseRemoteConfig.instance.getBool('has_splash_sponsor');
       int delayMilliseconds = hasSplashSponsor ? 1200 : 200;
 
       await Future.delayed(Duration(milliseconds: delayMilliseconds));
 
-      // Navigate to main screen once loading is complete
       if (mounted) {
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => MainScreen()),
+          MaterialPageRoute(builder: (context) => const MainScreen()),
         );
 
         if (pendingMatchId != null) {
-          // Δίνουμε μισό δευτερόλεπτο να χτιστεί η MainScreen και μετά πάμε στο ματς!
           Future.delayed(const Duration(milliseconds: 500), () {
             NotificationService.navigateToMatch(pendingMatchId!);
-            pendingMatchId = null; // Το καθαρίζουμε για να μην ξανανοίξει
+            pendingMatchId = null;
           });
         }
       }
     } catch (e) {
       print("Error loading data: $e");
-      //setState(() {
-      //  _hasError = true;
-      //  _errorMessage = "Failed to load data: $e";
-      //  _isLoading = false;
-      //});
     }
   }
 
@@ -247,8 +222,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
     bool isDarkMode = brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor:
-          isDarkMode ? const Color(0xFF121212) : const Color(0xFF97B4C3),
+      backgroundColor: isDarkMode ? const Color(0xFF121212) : const Color(0xFF97B4C3),
       body: Center(
         child: _hasError ? _buildErrorWidget() : _buildLoadingWidget(),
       ),
@@ -256,25 +230,18 @@ class _LoadingScreenState extends State<LoadingScreen> {
   }
 
   Widget _buildLoadingWidget() {
-    // Παίρνουμε το ύψος της οθόνης για να υπολογίσουμε τη θέση
     final double screenHeight = MediaQuery.of(context).size.height;
-
-    bool hasSplashSponsor =
-        FirebaseRemoteConfig.instance.getBool('has_splash_sponsor');
-    String splashLogoUrl =
-        FirebaseRemoteConfig.instance.getString('splash_logo_url');
+    bool hasSplashSponsor = FirebaseRemoteConfig.instance.getBool('has_splash_sponsor');
+    String splashLogoUrl = FirebaseRemoteConfig.instance.getString('splash_logo_url');
 
     return Stack(
-      alignment: Alignment.center, // Κεντράρει τα πάντα στο Stack
+      alignment: Alignment.center,
       children: [
-        // 1. Το "UniScore" - ΑΠΟΛΥΤΩΣ ΚΕΝΤΡΑΡΙΣΜΕΝΟ
         const Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              SizedBox(
-                height: 29,
-              ),
+              SizedBox(height: 29),
               Text(
                 "UniScore",
                 style: TextStyle(
@@ -287,26 +254,18 @@ class _LoadingScreenState extends State<LoadingScreen> {
             ],
           ),
         ),
-
         Positioned(
           left: 0,
           right: 0,
-          top: screenHeight / 2 + 50, // 50 pixels κάτω από το κέντρο της οθόνης
+          top: screenHeight / 2 + 50,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // To Spinner
-              const CircularProgressIndicator(
-                color: Colors.white,
-              ),
+              const CircularProgressIndicator(color: Colors.white),
               const SizedBox(height: 20),
-
               Text(
                 _loadingMessage,
-                style: const TextStyle(
-                  fontSize: 16,
-                  color: Colors.white,
-                ),
+                style: const TextStyle(fontSize: 16, color: Colors.white),
               ),
             ],
           ),
@@ -323,19 +282,16 @@ class _LoadingScreenState extends State<LoadingScreen> {
                   "Powered by",
                   style: TextStyle(
                     fontSize: 12,
-                    color: Colors.white.withOpacity(
-                        0.7), // Ελαφρώς διάφανο για να μην "φωνάζει"
+                    color: Colors.white.withOpacity(0.7),
                     letterSpacing: 1.0,
                   ),
                 ),
                 const SizedBox(height: 10),
                 SmartBanner(
                   hasSponsor: hasSplashSponsor,
-                  height: FirebaseRemoteConfig.instance
-                      .getDouble('splash_screen_sponsor_image_height'),
+                  height: FirebaseRemoteConfig.instance.getDouble('splash_screen_sponsor_image_height'),
                   sponsorImageUrl: splashLogoUrl,
-                  customBgColor: (MediaQuery.of(context).platformBrightness ==
-                          Brightness.dark)
+                  customBgColor: (MediaQuery.of(context).platformBrightness == Brightness.dark)
                       ? const Color(0xFF121212)
                       : const Color(0xFF97B4C3),
                 )
@@ -350,102 +306,63 @@ class _LoadingScreenState extends State<LoadingScreen> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Icon(
-          Icons.error_outline,
-          size: 70,
-          color: Colors.red,
-        ),
-        SizedBox(height: 20),
-        Text(
+        const Icon(Icons.error_outline, size: 70, color: Colors.red),
+        const SizedBox(height: 20),
+        const Text(
           "Error Loading Data",
-          style: TextStyle(
-            fontSize: 22,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
+          style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white),
         ),
-        SizedBox(height: 10),
+        const SizedBox(height: 10),
         Padding(
           padding: const EdgeInsets.all(20.0),
           child: Text(
             _errorMessage,
             textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.white,
-            ),
+            style: const TextStyle(fontSize: 16, color: Colors.white),
           ),
         ),
-        SizedBox(height: 20),
+        const SizedBox(height: 20),
         ElevatedButton(
           onPressed: () {
             setState(() {
               _hasError = false;
-              _isLoading = true;
               _loadingMessage = "Retrying...";
             });
             _loadData();
           },
-          child: Text("Retry"),
+          child: const Text("Retry"),
         ),
       ],
     );
   }
 }
 
-// Original team loading function
 Future<void> loadTeams() async {
   TeamsHandle teamsHandle = TeamsHandle();
   teams = await teamsHandle.getAllTeams();
 
   BasketTeamsHandle basketHandle = BasketTeamsHandle();
-  basketTeams = await basketHandle.getAllTeams();}
-
-/*
-  TeamHandle().addTeam('ΤΕΦΑΑ ΣΕΡΡΩΝ', "TEFAA SERRES", "PHED SER");
-  TeamHandle().addTeam('ΔΑΣΟΛΟΓΙΑ', "DASOLOGIA", "FOR");
-  TeamHandle().addTeam('ΠΟΛΙΤΙΚΟΙ ΜΗΧΑΝΙΚΟΙ 2', "CIVIL ENGINEERS 2", "CIVIL II");
-  TeamHandle().addTeam("ΕΡΑΣΜΟΥΣ", "ERASMUS", "ERASMUS");
-  TeamHandle().addTeam("ΓΕΩΛΟΓΙΑ", "GEOLOGY", "GEO");
-*/
-  /*
-  teamsHandle.addMatch("ΗΜΜΥ 2","ΟΙΚΟΝΟΜΙΚΟ",17,2, 2025, 2, true, true, 1510, "previous",0,11);
-  teamsHandle.addMatch("ΤΕΦΑΑ","ΦΥΣΙΚΟ",18, 2, 2025, 2, true, true, 1510, "previous",10,0);
-  teamsHandle.addMatch("ΗΜΜΥ 1","ΧΩΡΟΤΑΞΙΑ",19, 2, 2025, 2, true, true, 1510, "previous",5,0);
-  teamsHandle.addMatch("ΗΜΜΥ 2","ΓΕΩΠΟΝΙΑ",20, 2, 2025, 2, true, true, 1510, "previous",1,2);
-
-  teamsHandle.addMatch("ΠΟΛΙΤΙΚΩΝ ΕΠΙΣΤΗΜ.","ΧΗΜ.ΜΗΧΑΝΙΚΩΝ",21,2, 2025, 2, true, true, 1510, "previous",0,6);
-  teamsHandle.addMatch("ΠΑΙΔΑΓΩΓΙΚΗ","ΟΔΟΝΤΙΑΤΡΙΚΗ",24, 2, 2025, 2, true, true, 1510, "previous",1,2);
-  teamsHandle.addMatch("ΚΤΗΝΙΑΤΡΙΚΗ","ΝΟΜΙΚΗ",25, 2, 2025, 2, true, true, 1510, "previous",3,4);
-  teamsHandle.addMatch("ΒΙΟΛΟΓΙΑ","ΣΣΑΣ",26, 2, 2025, 2, true, true, 1510, "previous",0,12);
-
-
-   */
+  basketTeams = await basketHandle.getAllTeams();
 }
 
 Future<void> loadYear() async {
-  final doc =
-      await FirebaseFirestore.instance.collection('ThisYear').doc('2026').get();
-
+  final doc = await FirebaseFirestore.instance.collection('ThisYear').doc('2026').get();
   final data = doc.data();
   if (data != null && data.containsKey('year')) {
     thisYearNow = data['year'] as int;
   }
-
-  //thisYearNow=2027;
 }
 
-// Original matches loading function
 Future<void> loadMatches() async {
   TeamsHandle teamsHandle = TeamsHandle();
   upcomingMatches = await teamsHandle.getMatches("upcoming");
   previousMatches = await teamsHandle.getMatches("previous");
   matches = [upcomingMatches, previousMatches];
-
-  //teamsHandle.addMatch("ΕΜΠΟΡ.ΝΑΥΤΙΚΟ", "ΜΗΧΑΝ.ΜΗΧΑΝ.", 29, 4, 2025, 1, false, true, 1510, "upcoming", -1, -1);
 }
 
-// Original MainScreen and other classes
+
+
+
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
 
@@ -487,8 +404,7 @@ class _MainScreenState extends State<MainScreen> {
 
 // ------------------------ APP BAR ------------------------
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
-  final Function(String)?
-      onOptionSelected; // Το έκανα nullable αν δεν το πολυχρησιμοποιε πια
+  final Function(String)? onOptionSelected;
   final String? selectedOption;
 
   const CustomAppBar({
@@ -497,14 +413,11 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.selectedOption,
   });
 
-  @override
-  @override
+  @override // ΔΙΟΡΘΩΘΗΚΕ: Αφαιρέθηκε το διπλό @override
   Widget build(BuildContext context) {
-    // 1ο Builder για το Dark Mode
     return ValueListenableBuilder<bool>(
       valueListenable: darkModeNotifier,
       builder: (context, isDarkMode, _) {
-        // 2ο Builder για το Επιλεγμένο Άθλημα (Live UI Updates!)
         return ValueListenableBuilder<String>(
           valueListenable: selectedSport,
           builder: (context, currentSport, _) {
@@ -517,25 +430,18 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                   color: Colors.white,
                 ),
               ),
-              backgroundColor: isDarkMode
-                  ? const Color(0xFF121212)
-                  : const Color.fromARGB(250, 46, 90, 136),
+              backgroundColor: isDarkMode ?  const Color(0xFF1E1E1E) : const Color.fromARGB(250, 46, 90, 136),
               actions: [
-                // 1. Επιλογή Αθλήματος (Sport Selector)
+                /*
                 PopupMenuButton<String>(
                   icon: Icon(
-                    currentSport == 'football'
-                        ? Icons.sports_soccer
-                        : Icons.sports_basketball,
+                    currentSport == 'football' ? Icons.sports_soccer : Icons.sports_basketball,
                     color: Colors.white,
                   ),
                   tooltip: greek ? 'Επιλογή Αθλήματος' : 'Select Sport',
                   color: isDarkMode ? Colors.grey[900] : Colors.white,
                   onSelected: (String value) {
-                    // ΕΔΩ ΑΛΛΑΖΕΙ ΤΟ GLOBAL STATE ΧΩΡΙΣ setState()
                     selectedSport.value = value;
-
-                    // Αν το onOptionSelected χρειάζεται στην από κάτω σελίδα:
                     if (onOptionSelected != null) {
                       onOptionSelected!(value);
                     }
@@ -547,17 +453,13 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                         children: [
                           Icon(
                             Icons.sports_soccer,
-                            color: currentSport == 'football'
-                                ? Colors.blue
-                                : (isDarkMode ? Colors.white : Colors.black),
+                            color: currentSport == 'football' ? Colors.blue : (isDarkMode ? Colors.white : Colors.black),
                           ),
                           const SizedBox(width: 10),
                           Text(
                             greek ? 'Ποδόσφαιρο' : 'Football',
                             style: TextStyle(
-                              fontWeight: currentSport == 'football'
-                                  ? FontWeight.bold
-                                  : FontWeight.normal,
+                              fontWeight: currentSport == 'football' ? FontWeight.bold : FontWeight.normal,
                               color: isDarkMode ? Colors.white : Colors.black,
                             ),
                           ),
@@ -570,17 +472,13 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                         children: [
                           Icon(
                             Icons.sports_basketball,
-                            color: currentSport == 'basketball'
-                                ? Colors.orange
-                                : (isDarkMode ? Colors.white : Colors.black),
+                            color: currentSport == 'basketball' ? Colors.orange : (isDarkMode ? Colors.white : Colors.black),
                           ),
                           const SizedBox(width: 10),
                           Text(
                             greek ? 'Μπάσκετ' : 'Basketball',
                             style: TextStyle(
-                              fontWeight: currentSport == 'basketball'
-                                  ? FontWeight.bold
-                                  : FontWeight.normal,
+                              fontWeight: currentSport == 'basketball' ? FontWeight.bold : FontWeight.normal,
                               color: isDarkMode ? Colors.white : Colors.black,
                             ),
                           ),
@@ -590,13 +488,11 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                   ],
                 ),
 
-                // 2. Ειδοποιήσεις
+                 */
                 const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 2),
                   child: NotificationsForAllChampionship(),
                 ),
-
-                // 3. Κουμπί Αναζήτησης
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 2),
                   child: IconButton(
@@ -609,38 +505,55 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                     },
                   ),
                 ),
-
-                // 4. Κουμπί Προσθήκης Αγώνα (Άμεση πρόσβαση για Admins/Γραμματεία)
-                if (globalUser.isAdmin || globalUser.isUpperAdmin)
+                if (globalUser.isUpperAdmin)
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 2),
                     child: IconButton(
-                      icon: const Icon(Icons.add_circle_outline,
-                          color: Colors.white),
+                      icon: const Icon(Icons.add_circle_outline, color: Colors.white),
                       tooltip: greek ? "Προσθήκη Αγώνα" : "Add Match",
                       onPressed: () async {
-                        bool? didChange = await Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => AddMatchScreen()),
-                        );
+                        bool? didChange;
 
+                        // 1. ΕΛΕΓΧΟΣ ΑΘΛΗΜΑΤΟΣ: ΠΟΔΟΣΦΑΙΡΟ
+                        if (selectedSport.value == 'football') {
+                          didChange = await Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => AddMatchScreen()),
+                          );
+
+                          if (didChange == true) {
+                            await loadTeams();
+                            await loadMatches();
+                            MatchHandle().initializeMatches(matches);
+                            TopPlayersHandle().initializeList(teams);
+                          }
+                        }
+                        // 2. ΕΛΕΓΧΟΣ ΑΘΛΗΜΑΤΟΣ: ΜΠΑΣΚΕΤ
+                        else {
+                          didChange = await Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => const BasketballAddMatchScreen()),
+                          );
+
+                          if (didChange == true) {
+                            // Ανανέωση των ομάδων (φορτώνει ποδόσφαιρο ΚΑΙ μπάσκετ)
+                            await loadTeams();
+
+                            // Ξαναφορτώνουμε τους αγώνες μπάσκετ για να εμφανιστεί ο νέος αγώνας!
+                            await BasketballMatchHandle().loadAllBasketballData(thisYearNow, basketTeams);
+                          }
+                        }
+
+                        // 3. ΕΝΗΜΕΡΩΣΗ ΤΟΥ UI
                         if (didChange == true) {
-                          await loadTeams();
-                          await loadMatches();
-                          MatchHandle().initializeMatces(matches);
-                          TopPlayersHandle().initializeList(teams);
-
                           if (!context.mounted) return;
-                          // Ανανέώνει το UI της αρχικής σελίδας με βάση το άθλημα
                           if (onOptionSelected != null) {
-                            onOptionSelected!(selectedOption);
+                            onOptionSelected!(selectedSport.value);
                           }
                         }
                       },
                     ),
                   ),
-
-                // 5. Κουμπί Προσθήκης Ομάδας (Άμεση πρόσβαση μόνο για UpperAdmin)
                 if (globalUser.isUpperAdmin)
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 2),
@@ -648,39 +561,64 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                       icon: const Icon(Icons.group_add, color: Colors.white),
                       tooltip: greek ? "Προσθήκη Ομάδας" : "Add Team",
                       onPressed: () async {
-                        bool? didChange = await Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (_) => const AddTeamScreen()),
-                        );
+                        bool? didChange;
 
-                        if (didChange == true) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(greek
-                                  ? "Ανανέωση δεδομένων..."
-                                  : "Refreshing data..."),
-                              duration: const Duration(seconds: 1),
-                              backgroundColor: Colors.blue,
-                            ),
+                        // 1. ΕΛΕΓΧΟΣ ΑΘΛΗΜΑΤΟΣ: ΠΟΔΟΣΦΑΙΡΟ
+                        if (selectedSport.value == 'football') {
+                          didChange = await Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => const AddTeamScreen()),
                           );
 
-                          await loadTeams();
-                          await loadMatches();
-                          MatchHandle().initializeMatces(matches);
-                          TopPlayersHandle().initializeList(teams);
+                          if (didChange == true) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(greek ? "Ανανέωση δεδομένων ποδοσφαίρου..." : "Refreshing football data..."),
+                                duration: const Duration(seconds: 1),
+                                backgroundColor: Colors.blue,
+                              ),
+                            );
 
+                            await loadTeams();
+                            await loadMatches();
+                            MatchHandle().initializeMatches(matches);
+                            TopPlayersHandle().initializeList(teams);
+                          }
+                        }
+                        // 2. ΕΛΕΓΧΟΣ ΑΘΛΗΜΑΤΟΣ: ΜΠΑΣΚΕΤ
+                        else {
+                          didChange = await Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => const BasketballAddTeamScreen()),
+                          );
+
+                          if (didChange == true) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(greek ? "Ανανέωση δεδομένων μπάσκετ..." : "Refreshing basketball data..."),
+                                duration: const Duration(seconds: 1),
+                                backgroundColor: Colors.orange, // Πορτοκαλί για μπάσκετ
+                              ),
+                            );
+
+                            // Η loadTeams στο main.dart (ή globals.dart) συνήθως φορτώνει και τα 2 αθλήματα
+                            await loadTeams();
+
+                            // Ανανεώνουμε και τα παιχνίδια σε περίπτωση που επηρεάζονται
+                            await BasketballMatchHandle().loadAllBasketballData(thisYearNow, basketTeams);
+                          }
+                        }
+
+                        // 3. ΕΝΗΜΕΡΩΣΗ ΤΟΥ UI
+                        if (didChange == true) {
                           if (!context.mounted) return;
-
                           if (onOptionSelected != null) {
-                            onOptionSelected!(selectedOption);
+                            onOptionSelected!(selectedSport.value);
                           }
                         }
                       },
                     ),
                   ),
-
-                // Μικρό κενό δεξιά για οπτική ισορροπία
                 const SizedBox(width: 8),
               ],
             );
@@ -694,22 +632,14 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 }
 
-class NotificationsForAllChampionship extends StatefulWidget {
+class NotificationsForAllChampionship extends StatelessWidget {
   const NotificationsForAllChampionship({super.key});
 
-  @override
-  State<NotificationsForAllChampionship> createState() =>
-      _NotificationsForAllChampionshipState();
-}
-
-class _NotificationsForAllChampionshipState
-    extends State<NotificationsForAllChampionship> {
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<bool>(
       valueListenable: loggedInNotifications,
       builder: (context, isLogged, child) {
-        // 1. Αν δεν είναι συνδεδεμένος, δείχνουμε "νεκρό" εικονίδιο αμέσως!
         if (!isLogged) {
           return IconButton(
             icon: const Icon(Icons.notifications_none, color: Colors.white),
@@ -717,53 +647,67 @@ class _NotificationsForAllChampionshipState
           );
         }
 
-        // 2. Αν ΕΙΝΑΙ συνδεδεμένος, ακούμε τον τρέχοντα χρήστη
-        return ValueListenableBuilder<bool>(
-          valueListenable: globalUser.notifyAllMatches,
-          builder: (context, active, child) {
-            return IconButton(
-              tooltip: greek
-                  ? "Ειδοποιήσεις για όλα τα ματς"
-                  : "Notifications for all matches",
-              onPressed: () {
-                bool newValue = !active;
+        // Παρακολουθούμε ποιο άθλημα είναι επιλεγμένο αυτή τη στιγμή!
+        return ValueListenableBuilder<String>(
+            valueListenable: selectedSport,
+            builder: (context, currentSport, _) {
 
-                globalUser.setNotifyAllMatches(newValue);
+              // Επιλέγουμε τον σωστό ValueNotifier βάσει αθλήματος
+              // (Θα πρέπει να φτιάξεις το globalUser.notifyAllBasketMatches αν δεν υπάρχει)
+              ValueNotifier<bool> currentNotifier = currentSport == 'football'
+                  ? globalUser.notifyAllMatches
+                  : globalUser.notifyAllBasketMatches;
 
-                if (mounted) {
-                  ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                    content: Text(newValue
-                        ? (greek
-                            ? "Ενεργοποιήθηκαν οι ειδοποιήσεις!"
-                            : "Enabled!")
-                        : (greek
-                            ? "Απενεργοποιήθηκαν οι ειδοποιήσεις."
-                            : "Disabled.")),
-                    duration: const Duration(milliseconds: 1300),
-                    backgroundColor: newValue ? Colors.green : Colors.grey[700],
-                  ));
-                }
-                UserHandleBase().setNotifyAllMatches(newValue);
-              },
-              icon: Icon(
-                active ? Icons.notifications_active : Icons.notifications_none,
-                color: active ? Colors.amber : Colors.white,
-              ),
-            );
-          },
+              return ValueListenableBuilder<bool>(
+                valueListenable: currentNotifier,
+                builder: (context, active, child) {
+                  return IconButton(
+                    tooltip: greek
+                        ? (currentSport == 'football' ? "Ειδοποιήσεις (Ποδόσφαιρο)" : "Ειδοποιήσεις (Μπάσκετ)")
+                        : (currentSport == 'football' ? "Football Notifications" : "Basketball Notifications"),
+                    onPressed: () {
+                      bool newValue = !active;
+
+                      if (currentSport == 'football') {
+                        globalUser.setNotifyAllMatches(newValue);
+                        UserHandleBase().setNotifyAllMatches(newValue); // Η παλιά σου συνάρτηση
+                      } else {
+                        globalUser.setNotifyAllBasketMatches(newValue);
+                        UserHandleBase().setNotifyAllBasketMatches(newValue);
+                      }
+
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                          content: Text(newValue
+                              ? (greek ? "Ενεργοποιήθηκαν!" : "Enabled!")
+                              : (greek ? "Απενεργοποιήθηκαν." : "Disabled.")),
+                          duration: const Duration(milliseconds: 1300),
+                          backgroundColor: newValue
+                              ? (currentSport == 'football' ? Colors.blue : Colors.orange)
+                              : Colors.grey[700],
+                        ));
+                      }
+                    },
+                    icon: Icon(
+                      active ? Icons.notifications_active : Icons.notifications_none,
+                      color: active
+                          ? (currentSport == 'football' ? Colors.amber : Colors.orange)
+                          : Colors.white,
+                    ),
+                  );
+                },
+              );
+            }
         );
       },
     );
   }
 
-  // Βοηθητική συνάρτηση για καθαρό κώδικα
   void _showLoginWarning(BuildContext context) {
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(greek
-          ? "Πρέπει να συνδεθείς για να έχεις ειδοποιήσεις"
-          : "Please log in"),
+      content: Text(greek ? "Πρέπει να συνδεθείς για να έχεις ειδοποιήσεις" : "Please log in"),
       duration: const Duration(milliseconds: 1300),
       backgroundColor: Colors.redAccent.withOpacity(0.9),
     ));
@@ -775,35 +719,39 @@ class CustomBottomNavigationBar extends StatelessWidget {
   final int currentIndex;
   final Function(int) onTap;
 
-  const CustomBottomNavigationBar(
-      {super.key, required this.currentIndex, required this.onTap});
+  const CustomBottomNavigationBar({super.key, required this.currentIndex, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    return BottomNavigationBar(
-      backgroundColor:
-          darkModeNotifier.value ? Colors.grey[850] : Colors.black87,
-      selectedFontSize: 14,
-      unselectedFontSize: 12,
-      type: BottomNavigationBarType.fixed,
-      items: [
-        BottomNavigationBarItem(
-            icon: const Icon(Icons.sports_soccer),
-            label: greek ? "Αγώνες" : "Games"),
-        BottomNavigationBarItem(
-            icon: const Icon(Icons.emoji_events),
-            label: greek ? "Πρωτάθλημα" : "Championship"),
-        BottomNavigationBarItem(
-            icon: Icon(Icons.favorite),
-            label: greek ? "Αγαπημένα" : "Favorite"),
-        BottomNavigationBarItem(
-            icon: Icon(Icons.person), label: greek ? "Προφίλ" : "Profile"),
-        //BottomNavigationBarItem(icon: Icon(Icons.local_offer), label: greek? 'Φανέλες' : 'Merch')
-      ],
-      currentIndex: currentIndex,
-      selectedItemColor: Colors.blue,
-      unselectedItemColor: Colors.white,
-      onTap: onTap,
+    // ΔΙΟΡΘΩΘΗΚΕ: Το Bottom Navigation ακούει πλέον το επιλεγμένο άθλημα για να αλλάζει εικονίδιο
+    return ValueListenableBuilder<String>(
+      valueListenable: selectedSport,
+      builder: (context, currentSport, _) {
+        return BottomNavigationBar(
+          backgroundColor: darkModeNotifier.value ? Colors.grey[850] : Colors.black87,
+          selectedFontSize: 14,
+          unselectedFontSize: 12,
+          type: BottomNavigationBarType.fixed,
+          items: [
+            BottomNavigationBarItem(
+                icon: Icon(currentSport == 'football' ? Icons.sports_soccer : Icons.sports_basketball),
+                label: greek ? "Αγώνες" : "Games"),
+            BottomNavigationBarItem(
+                icon: const Icon(Icons.emoji_events),
+                label: greek ? "Πρωτάθλημα" : "Championship"),
+            BottomNavigationBarItem(
+                icon: const Icon(Icons.favorite), // Προσθήκη const
+                label: greek ? "Αγαπημένα" : "Favorite"),
+            BottomNavigationBarItem(
+                icon: const Icon(Icons.person), // Προσθήκη const
+                label: greek ? "Προφίλ" : "Profile"),
+          ],
+          currentIndex: currentIndex,
+          selectedItemColor: Colors.blue,
+          unselectedItemColor: Colors.white,
+          onTap: onTap,
+        );
+      },
     );
   }
 }
@@ -817,7 +765,6 @@ Widget _buildBody(int selectedIndex) {
       return StandingsOrKnockoutsChooserPage();
     case 2:
       return FavoritePage();
-
     case 3:
       return ProfilePage(user: globalUser);
     default:

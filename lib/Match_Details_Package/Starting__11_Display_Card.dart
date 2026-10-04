@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import '../Data_Classes/MatchDetails.dart';
 import '../Data_Classes/Player.dart';
+import '../Data_Classes/match_facts.dart';
 import '../globals.dart';
-import 'choosePlayers.dart'; // Ή το σωστό path για το LiveLineupScreen
+import 'choosePlayers.dart';
 
 class LineupsDisplayTab extends StatefulWidget {
   final MatchDetails match;
@@ -19,7 +20,7 @@ class _LineupsDisplayTabState extends State<LineupsDisplayTab> {
   @override
   void initState() {
     super.initState();
-    // 🌟 ΝΕΟ: Αν ο χρήστης ελέγχει ΜΟΝΟ τους φιλοξενούμενους, άνοιξε απευθείας αυτούς!
+    // Αν ο χρήστης ελέγχει ΜΟΝΟ τους φιλοξενούμενους, άνοιξε απευθείας αυτούς!
     bool canEditHome = globalUser.controlTheseTeamsFootball(widget.match.homeTeam.name, null) || globalUser.isUpperAdmin;
     bool canEditAway = globalUser.controlTheseTeamsFootball(widget.match.awayTeam.name, null) || globalUser.isUpperAdmin;
 
@@ -54,11 +55,11 @@ class _LineupsDisplayTabState extends State<LineupsDisplayTab> {
     List<String> squadKeys = showHomeTeam ? widget.match.homeSquad : widget.match.awaySquad;
     List<String> starterKeys = showHomeTeam ? widget.match.homeStarters : widget.match.awayStarters;
 
-    List<Player> starters = teamRoster.where((p) => starterKeys.contains("${p.name}${p.number}")).toList();
+    List<Player> starters = teamRoster.where((p) => starterKeys.contains(p.uniqueKey)).toList();
     starters.sort((a, b) => widget.match.getDisplayNumber(a).compareTo(widget.match.getDisplayNumber(b)));
 
     List<Player> bench = teamRoster.where((p) {
-      String key = "${p.name}${p.number}";
+      String key = p.uniqueKey;
       return squadKeys.contains(key) && !starterKeys.contains(key);
     }).toList();
     bench.sort((a, b) => widget.match.getDisplayNumber(a).compareTo(widget.match.getDisplayNumber(b)));
@@ -66,8 +67,8 @@ class _LineupsDisplayTabState extends State<LineupsDisplayTab> {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        // 🌟 1. ΚΟΥΜΠΙ ΕΠΕΞΕΡΓΑΣΙΑΣ (Μόνο αν ελέγχει την τρέχουσα ομάδα)
-        if (canEditCurrentTeam)
+        // 1. ΚΟΥΜΠΙ ΕΠΕΞΕΡΓΑΣΙΑΣ (Μόνο αν ελέγχει την τρέχουσα ομάδα)
+        if (canEditCurrentTeam && !widget.match.hasMatchEndedFinal)
           Padding(
             padding: const EdgeInsets.all(12.0),
             child: SizedBox(
@@ -95,7 +96,7 @@ class _LineupsDisplayTabState extends State<LineupsDisplayTab> {
             ),
           ),
 
-        // 🌟 2. ΕΠΙΛΟΓΗ ΟΜΑΔΑΣ (Κουμπιά ή Στατικός Τίτλος)
+        // 2. ΕΠΙΛΟΓΗ ΟΜΑΔΑΣ (Κουμπιά ή Στατικός Τίτλος)
         _buildTeamSelector(canEditHome, canEditAway, isSpectator),
 
         // 3. ΛΙΣΤΕΣ ΠΑΙΚΤΩΝ & STAFF
@@ -119,23 +120,20 @@ class _LineupsDisplayTabState extends State<LineupsDisplayTab> {
     );
   }
 
-  // 🌟 ΝΕΑ ΣΥΝΑΡΤΗΣΗ: Αποφασίζει τι θα δείξει στην επιλογή ομάδας
   Widget _buildTeamSelector(bool canEditHome, bool canEditAway, bool isSpectator) {
-    // Αν είναι Admin ή Φίλαθλος, βλέπει και τα δύο κουμπιά κανονικά
     if ((canEditHome && canEditAway) || isSpectator) {
       return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 12.0),
         child: Row(
           children: [
-            Expanded(child: _teamBtn(widget.match.homeTeam.name, true, Colors.blue[800]!)),
+            Expanded(child: _teamBtn(widget.match.homeTeam.displayName, true, Colors.blue[800]!)),
             const SizedBox(width: 8),
-            Expanded(child: _teamBtn(widget.match.awayTeam.name, false, Colors.red[800]!)),
+            Expanded(child: _teamBtn(widget.match.awayTeam.displayName, false, Colors.red[800]!)),
           ],
         ),
       );
     }
 
-    // Αν είναι Αρχηγός και ελέγχει ΜΟΝΟ ΤΗ ΜΙΑ ομάδα, του δείχνουμε απλά το όνομά της (δεν επιλέγει)
     String teamName = showHomeTeam ? widget.match.homeTeam.name : widget.match.awayTeam.name;
     Color teamColor = showHomeTeam ? Colors.blue[800]! : Colors.red[800]!;
 
@@ -188,6 +186,119 @@ class _LineupsDisplayTabState extends State<LineupsDisplayTab> {
     );
   }
 
+  // --- 💡 CUSTOM WIDGETS ΓΙΑ ΤΙΣ ΚΑΡΤΕΣ ---
+
+  // 1. Ορθογώνια μονή κάρτα
+  Widget _buildSingleCard(Color color) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 4.0),
+      child: Container(
+        width: 10,
+        height: 15,
+        decoration: BoxDecoration(
+          color: color,
+          borderRadius: BorderRadius.circular(2),
+          border: Border.all(color: Colors.black45, width: 0.5), // Απαλό περίγραμμα για να φαίνεται σε κάθε background
+        ),
+      ),
+    );
+  }
+
+  // 2. Η "2η Κίτρινη" (Μισή κίτρινη - Μισή κόκκινη, κολλημένες)
+  Widget _buildSplitCard() {
+    return Padding(
+      padding: const EdgeInsets.only(left: 4.0),
+      child: Container(
+        width: 14, // Λίγο πιο πλατιά για να ξεχωρίζουν τα χρώματα
+        height: 15,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(2),
+          border: Border.all(color: Colors.black45, width: 0.5),
+          gradient: const LinearGradient(
+            colors: [Colors.amber, Colors.red],
+            stops: [0.5, 0.5], // Τέλειο κόψιμο στη μέση
+          ),
+        ),
+      ),
+    );
+  }
+
+  // --- Επιστρέφει εικονίδια για Γκολ και Κάρτες ---
+  Widget _buildPlayerEvents(Player player, bool isHomeTeam) {
+    int goals = 0;
+    int yellowCards = 0;
+    bool hasDirectRed = false;
+    bool hasSecondYellowRed = false;
+
+    // Το format του ονόματος όπως αποθηκεύεται στα matchFacts ("Α. Ντουρος")
+    String formattedName = "${player.name.isNotEmpty ? player.name[0] : ''}. ${player.surname}";
+
+    // Σαρώνουμε όλα τα ημίχρονα (0, 1, 2, 3)
+    for (int i = 0; i < 4; i++) {
+      if (widget.match.matchFact.containsKey(i)) {
+        for (var fact in widget.match.matchFact[i]!) {
+          if (fact.isHomeTeam == isHomeTeam) {
+
+            if (fact is Goal && fact.name == formattedName) {
+              goals++;
+            } else if (fact is CardP && fact.name == formattedName) {
+              if (fact.isYellow) {
+                yellowCards++;
+              } else {
+                // Είναι κόκκινη κάρτα. Ελέγχουμε αν είναι 2η κίτρινη ή απευθείας!
+                if (fact.isSecondYellow) {
+                  hasSecondYellowRed = true;
+                } else {
+                  hasDirectRed = true;
+                }
+              }
+            }
+
+          }
+        }
+      }
+    }
+
+    List<Widget> icons = [];
+
+    // --- 1. ΛΟΓΙΚΗ ΚΑΡΤΩΝ (Με απόλυτο διαχωρισμό) ---
+    if (hasSecondYellowRed || yellowCards >= 2) {
+      // Περίπτωση Α: Αποβολή με 2η Κίτρινη -> Δείχνουμε την κολλημένη Κίτρινη/Κόκκινη
+      icons.add(_buildSplitCard());
+    } else {
+      // Περίπτωση Β: 1 Απλή Κίτρινη
+      if (yellowCards == 1) {
+        icons.add(_buildSingleCard(Colors.amber));
+      }
+    }
+
+    // Περίπτωση Γ: Απευθείας Κόκκινη Κάρτα (Ξεχωριστά από τη 2η κίτρινη!)
+    if (hasDirectRed) {
+      icons.add(_buildSingleCard(Colors.red));
+    }
+
+    // --- 2. ΛΟΓΙΚΗ ΓΚΟΛ ---
+    if (goals > 0) {
+      Color ballColor = darkModeNotifier.value ? Colors.white : Colors.black87;
+      icons.add(Padding(
+        padding: const EdgeInsets.only(left: 6.0),
+        child: Row(
+          children: [
+            Icon(Icons.sports_soccer, color: ballColor, size: 15),
+            if (goals > 1) // Αν έβαλε 2+ γκολ, δείχνουμε x2, x3 κ.λπ.
+              Padding(
+                padding: const EdgeInsets.only(left: 2.0),
+                child: Text("x$goals", style: TextStyle(color: ballColor, fontSize: 11, fontWeight: FontWeight.bold)),
+              ),
+          ],
+        ),
+      ));
+    }
+
+    if (icons.isEmpty) return const SizedBox.shrink();
+
+    return Row(mainAxisSize: MainAxisSize.min, children: icons);
+  }
   Widget _buildPlayerList(List<Player> players, Color highlightColor) {
     if (players.isEmpty) return Padding(padding: const EdgeInsets.all(16.0), child: Text(greek ? "Δεν έχουν δηλωθεί παίκτες" : "No players declared"));
 
@@ -227,6 +338,11 @@ class _LineupsDisplayTabState extends State<LineupsDisplayTab> {
                     ),
                   ),
                 ),
+
+                // Τα εικονίδια γεγονότων (Γκολ/Κάρτες)
+                if (widget.match.hasMatchStarted)
+                  _buildPlayerEvents(player, showHomeTeam),
+
                 const SizedBox(width: 8),
                 if (!widget.match.hasMatchStarted)
                   _buildHealthCardStatus(player.cardExpiryDate),

@@ -1,30 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:untitled1/Data_Classes/MatchDetails.dart';
 import 'package:untitled1/Firebase_Handle/TeamsHandle.dart';
-import 'package:untitled1/championship_details/StandingsPage.dart';
-import 'package:untitled1/championship_details/knock_outs_page.dart';
-import 'package:untitled1/championship_details/top_players_page.dart';
+import 'package:untitled1/championship_details/football/football_StandingsPage.dart';
+import 'package:untitled1/championship_details/football/football_knock_outs_page.dart';
+import 'package:untitled1/championship_details/football/football_top_players_page.dart';
 
-import '../API/Match_Handle.dart';
-import '../API/top_players_handle.dart';
-import '../Data_Classes/Team.dart';
-import '../Firebase_Handle/firebase_screen_stats_helper.dart';
-import '../globals.dart';
-import '../main.dart';
-import 'SeletonTopScorers.dart';
-import 'SkeletonKnockOuts.dart';
-import 'SkeletonLoading.dart';
+import '../../API/Match_Handle.dart';
+import '../../API/top_players_handle.dart';
+import '../../Data_Classes/Team.dart';
+import '../../Firebase_Handle/firebase_screen_stats_helper.dart';
+import '../../globals.dart';
+import '../../main.dart';
+import '../SeletonTopScorers.dart';
+import '../SkeletonKnockOuts.dart';
+import '../SkeletonLoading.dart';
 
 
 
-class StandingsOrKnockoutsChooserPage extends StatefulWidget {
-  const StandingsOrKnockoutsChooserPage({super.key});
+class FootballStandingsOrKnockoutsChooserPage extends StatefulWidget {
+  const FootballStandingsOrKnockoutsChooserPage({super.key});
 
   @override
-  State<StandingsOrKnockoutsChooserPage> createState() => _StandingsOrKnockoutsChooserPageState();
+  State<FootballStandingsOrKnockoutsChooserPage> createState() => _FootballStandingsOrKnockoutsChooserPageState();
 }
 
-class _StandingsOrKnockoutsChooserPageState extends State<StandingsOrKnockoutsChooserPage> {
+class _FootballStandingsOrKnockoutsChooserPageState extends State<FootballStandingsOrKnockoutsChooserPage> {
   int indexChoice = 0;
 
   void _changeSection(int index) {
@@ -34,7 +34,7 @@ class _StandingsOrKnockoutsChooserPageState extends State<StandingsOrKnockoutsCh
   }
 
   int selectedSeason = thisYearNow; // default
-  List<int> seasons = [2026, 2025];
+  late List<int> seasons;
 
   List<Team> teamList = teams;
 
@@ -49,16 +49,30 @@ class _StandingsOrKnockoutsChooserPageState extends State<StandingsOrKnockoutsCh
   @override
   void initState() {
     super.initState();
+
+    seasons = [for (int i = thisYearNow; i >= 2025; i--) i];
+
+    if (!seasons.contains(selectedSeason)) {
+      selectedSeason = seasons.isNotEmpty ? seasons.first : 2025;
+    }
+
+    cachedTeams[thisYearNow] = teams;
+    cachedGroupMatches[thisYearNow] = previousMatches;
+
     initializeMatches();
   }
 
   Future<void> initializeMatches() async {
     try {
-      var initialPlayOffs = await TeamsHandle().getPlayOffMatches(thisYearNow);
+      var initialPlayOffs = await TeamsHandle().getPlayOffMatches(thisYearNow, teams);
+
       if (mounted) {
         setState(() {
           playOffMatches = initialPlayOffs;
           currentSeasonGroupMatches = previousMatches;
+
+          cachedMatches[thisYearNow] = initialPlayOffs;
+
           isLoading = false;
         });
       }
@@ -108,7 +122,7 @@ class _StandingsOrKnockoutsChooserPageState extends State<StandingsOrKnockoutsCh
                     List<Team> list = await TeamsHandle().getAllTeamsByYear(value);
                     TopPlayersHandle().initializeList(list);
 
-                    Map<int, MatchDetails> listPlay = await TeamsHandle().getPlayOffMatches(value);
+                    Map<int, MatchDetails> listPlay = await TeamsHandle().getPlayOffMatches(value, list);
 
                     List<MatchDetails> listM = await MatchHandle().getMatchesByYear(value, list);
 
@@ -144,7 +158,7 @@ class _StandingsOrKnockoutsChooserPageState extends State<StandingsOrKnockoutsCh
               : indexChoice == 0
               ? StandingsPage(selectedSeason, teamList, currentSeasonGroupMatches)
               : (indexChoice == 1)
-              ? KnockOutsPage(
+              ? FootballKnockOutsPage(
             key: ValueKey(selectedSeason),
             playOffMatches: playOffMatches,
           )

@@ -5,9 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:untitled1/Firebase_Handle/user_handle_in_base.dart';
 import 'package:untitled1/Match_Details_Package/Match_Details_Page.dart';
 import 'package:untitled1/globals.dart';
-import 'Data_Classes/MatchDetails.dart';
-import 'API/NotificationService.dart';
-import 'globals.dart';
+import '../Data_Classes/MatchDetails.dart';
 
 //ΑΥΤΗ Η ΚΛΑΣΗ ΑΦΟΡΑ ΤΑ CONTAINER ΤΩΝ ΜΑΤΣ ΣΤΗΝ ΑΡΧΙΚΗ ΟΘΟΝΗ
 class matchesContainer extends StatelessWidget {
@@ -140,9 +138,9 @@ class matchesContainer extends StatelessWidget {
 class eachMatchContainer extends StatelessWidget {
   final MatchDetails match;
   const eachMatchContainer(
-    this.match, {
-    Key? key,
-  }) : super(key: key);
+      this.match, {
+        Key? key,
+      }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -174,7 +172,7 @@ class eachMatchContainerView extends StatelessWidget {
           margin: EdgeInsets.symmetric(vertical: 2, horizontal: 6),
           child: Padding(
             padding:
-                const EdgeInsets.symmetric(vertical: 5.0, horizontal: 16.0),
+            const EdgeInsets.symmetric(vertical: 5.0, horizontal: 16.0),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
@@ -202,18 +200,18 @@ class eachMatchContainerView extends StatelessWidget {
                               child: match.homeTeam.image),
                           Expanded(
                               child: Text(
-                            " ${match.homeTeam.displayName}",
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              color: darkModeNotifier.value == true
-                                  ? Colors.white
-                                  : lightModeText,
-                              fontFamily: 'Arial',
-                              letterSpacing: 0.3,
-                            ),
-                          ))
+                                " ${match.homeTeam.displayName}",
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  color: darkModeNotifier.value == true
+                                      ? Colors.white
+                                      : lightModeText,
+                                  fontFamily: 'Arial',
+                                  letterSpacing: 0.3,
+                                ),
+                              ))
                         ],
                       ),
                       SizedBox(height: 2),
@@ -226,18 +224,18 @@ class eachMatchContainerView extends StatelessWidget {
                               child: match.awayTeam.image),
                           Expanded(
                               child: Text(
-                            " ${match.awayTeam.displayName}",
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 1,
-                            style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                color: darkModeNotifier.value
-                                    ? Colors.white
-                                    : lightModeText,
-                                fontFamily: 'Arial',
-                                letterSpacing: 0.3),
-                          )),
+                                " ${match.awayTeam.displayName}",
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
+                                style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                    color: darkModeNotifier.value
+                                        ? Colors.white
+                                        : lightModeText,
+                                    fontFamily: 'Arial',
+                                    letterSpacing: 0.3),
+                              )),
                         ],
                       ),
                     ],
@@ -246,82 +244,82 @@ class eachMatchContainerView extends StatelessWidget {
                 const SizedBox(width: 20),
                 match.hasMatchStarted
                     ? Column(
-                        children: [
-                          Text(
-                            (match.homeScore).toString(),
-                            style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                fontFamily: 'Arial',
-                                color: !(!match.hasMatchFinished ||
-                                        (match.isExtraTimeTime &&
-                                            !match.hasExtraTimeFinished) ||
-                                        (match.isPenaltyTime &&
-                                            !match.isShootoutOver))
-                                    ? match.homeScore > match.awayScore
-                                        ? darkModeNotifier.value
-                                            ? Colors.white
-                                            : Colors.black
-                                        : Colors.grey
-                                    : Colors.red),
-                          ),
-                          Text(
-                            (match.awayScore).toString(),
-                            style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: !(!match.hasMatchFinished ||
-                                        (match.isExtraTimeTime &&
-                                            !match.hasExtraTimeFinished) ||
-                                        (match.isPenaltyTime &&
-                                            !match.isShootoutOver))
-                                    ? match.awayScore > match.homeScore
-                                        ? darkModeNotifier.value
-                                            ? Colors.white
-                                            : Colors.black
-                                        : Colors.grey
-                                    : Colors.red),
-                          ),
-                        ],
-                      )
+                  children: [
+                    Text(
+                      (match.homeScore).toString(),
+                      style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          fontFamily: 'Arial',
+                          color: !(!match.hasMatchFinished ||
+                              (match.isExtraTimeTime &&
+                                  !match.hasExtraTimeFinished) ||
+                              (match.isPenaltyTime &&
+                                  !match.isShootoutOver))
+                              ? match.homeScore > match.awayScore
+                              ? darkModeNotifier.value
+                              ? Colors.white
+                              : Colors.black
+                              : Colors.grey
+                              : Colors.red),
+                    ),
+                    Text(
+                      (match.awayScore).toString(),
+                      style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: !(!match.hasMatchFinished ||
+                              (match.isExtraTimeTime &&
+                                  !match.hasExtraTimeFinished) ||
+                              (match.isPenaltyTime &&
+                                  !match.isShootoutOver))
+                              ? match.awayScore > match.homeScore
+                              ? darkModeNotifier.value
+                              ? Colors.white
+                              : Colors.black
+                              : Colors.grey
+                              : Colors.red),
+                    ),
+                  ],
+                )
                     : SizedBox.shrink(),
                 (match.isPenaltyTime)
                     ? Padding(
-                        padding: const EdgeInsets.only(left: 5.0),
-                        child: Column(
-                          children: [
-                            Text(
-                              ('(${match.penaltyScoreHome})').toString(),
-                              style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                  fontFamily: 'Arial',
-                                  color: (match.hasMatchEndedFinal)
-                                      ? match.penaltyScoreHome >
-                                              match.penaltyScoreAway
-                                          ? darkModeNotifier.value
-                                              ? Colors.white
-                                              : Colors.black
-                                          : Colors.grey
-                                      : Colors.red),
-                            ),
-                            Text(
-                              ('(${match.penaltyScoreAway})').toString(),
-                              style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                  color: (match.hasMatchEndedFinal)
-                                      ? match.penaltyScoreAway >
-                                              match.penaltyScoreHome
-                                          ? darkModeNotifier.value
-                                              ? Colors.white
-                                              : Colors.black
-                                          : Colors.grey
-                                      : Colors.red),
-                            ),
-                          ],
-                        ),
-                      )
+                  padding: const EdgeInsets.only(left: 5.0),
+                  child: Column(
+                    children: [
+                      Text(
+                        ('(${match.penaltyScoreHome})').toString(),
+                        style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'Arial',
+                            color: (match.hasMatchEndedFinal)
+                                ? match.penaltyScoreHome >
+                                match.penaltyScoreAway
+                                ? darkModeNotifier.value
+                                ? Colors.white
+                                : Colors.black
+                                : Colors.grey
+                                : Colors.red),
+                      ),
+                      Text(
+                        ('(${match.penaltyScoreAway})').toString(),
+                        style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: (match.hasMatchEndedFinal)
+                                ? match.penaltyScoreAway >
+                                match.penaltyScoreHome
+                                ? darkModeNotifier.value
+                                ? Colors.white
+                                : Colors.black
+                                : Colors.grey
+                                : Colors.red),
+                      ),
+                    ],
+                  ),
+                )
                     : SizedBox.shrink(),
                 Padding(
                   padding: EdgeInsetsDirectional.only(start: 5, end: 0),
@@ -413,7 +411,7 @@ class _MatchContainerTimeState extends State<MatchContainerTime>
     _timer?.cancel(); // cancel previous timer if any
     _secondsElapsed = (DateTime.now().millisecondsSinceEpoch ~/ 1000) -
         widget.match.startTimeInSeconds;
-
+    //print("object");
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (!mounted) {
         _timer?.cancel();
@@ -426,7 +424,7 @@ class _MatchContainerTimeState extends State<MatchContainerTime>
   }
 
   Color get _timeColor => ((!widget.match.hasMatchFinished ||
-          (widget.match.isExtraTimeTime && !widget.match.hasExtraTimeFinished)))
+      (widget.match.isExtraTimeTime && !widget.match.hasExtraTimeFinished)))
       ? Colors.red
       : Colors.black;
   @override
@@ -437,19 +435,19 @@ class _MatchContainerTimeState extends State<MatchContainerTime>
         children: [
           (!widget.match.hasMatchStarted || widget.match.hasMatchEndedFinal)
               ? Text(
-                  widget.match.timeString,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color:
-                        darkModeNotifier.value ? Colors.white : Colors.black87,
-                  ),
-                )
+            widget.match.timeString,
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color:
+              darkModeNotifier.value ? Colors.white : Colors.black87,
+            ),
+          )
               : SizedBox.shrink(),
           if (widget.match.isHalfTime())
-            const Text(
-              "Ημίχρονο",
-              style: TextStyle(
+            Text(
+              greek ?  "Ημίχρονο" : 'HalfTime',
+              style: const TextStyle(
                 color: Colors.red,
                 fontSize: 9,
                 fontWeight: FontWeight.bold,
@@ -460,41 +458,41 @@ class _MatchContainerTimeState extends State<MatchContainerTime>
                   widget.match.hasExtraTimeFinished)))
             const SizedBox.shrink()
           else if (widget.match.isExtraTimeTime &&
-              widget.match.isExtraTimeHalf())
-            const Text(
-              "Ημίχρονο Παράτασης",
-              style: TextStyle(
-                color: Colors.red,
-                fontSize: 9,
-                fontWeight: FontWeight.bold,
-              ),
-              softWrap: true,
-              overflow: TextOverflow.visible,
-              textAlign: TextAlign.center,
-            )
-          else if (widget.match.isExtraTimeTime &&
-              widget.match.hasMatchFinished &&
-              !widget.match.hasExtraTimeStarted)
-            const Text(
-              "Αναμονή Παράτασης",
-              style: TextStyle(
-                color: Colors.red,
-                fontSize: 9,
-                fontWeight: FontWeight.bold,
-              ),
-              softWrap: true,
-              overflow: TextOverflow.visible,
-              textAlign: TextAlign.center,
-            )
-          else if (widget.match.hasMatchStarted)
-            Text(
-              '${(_secondsElapsed ~/ 60).toString().padLeft(2, '0')}:${(_secondsElapsed % 60).toString().padLeft(2, '0')}',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 12,
-                color: _timeColor,
-              ),
-            ),
+                widget.match.isExtraTimeHalf())
+              Text(
+                greek ? "Ημίχρονο Παράτασης" : 'ET half',
+                style: const TextStyle(
+                  color: Colors.red,
+                  fontSize: 9,
+                  fontWeight: FontWeight.bold,
+                ),
+                softWrap: true,
+                overflow: TextOverflow.visible,
+                textAlign: TextAlign.center,
+              )
+            else if (widget.match.isExtraTimeTime &&
+                  widget.match.hasMatchFinished &&
+                  !widget.match.hasExtraTimeStarted)
+                Text(
+                  greek ? "Αναμονή Παράτασης" : "ET Break",
+                  style: const TextStyle(
+                    color: Colors.red,
+                    fontSize: 9,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  softWrap: true,
+                  overflow: TextOverflow.visible,
+                  textAlign: TextAlign.center,
+                )
+              else if (widget.match.hasMatchStarted)
+                  Text(
+                    '${(_secondsElapsed ~/ 60).toString().padLeft(2, '0')}:${(_secondsElapsed % 60).toString().padLeft(2, '0')}',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                      color: _timeColor,
+                    ),
+                  ),
         ],
       ),
     );
@@ -505,7 +503,7 @@ class _MatchContainerTimeState extends State<MatchContainerTime>
 class MatchNotificationIcon extends StatefulWidget {
   final MatchDetails match;
 
-  const MatchNotificationIcon({
+  MatchNotificationIcon({
     super.key,
     required this.match,
   });
@@ -515,80 +513,86 @@ class MatchNotificationIcon extends StatefulWidget {
 }
 
 class _MatchNotificationIconState extends State<MatchNotificationIcon> {
-
-  // Η "έξυπνη" συνάρτηση που αποφασίζει αν το καμπανάκι πρέπει να ανάβει
-  bool _isNotificationActive() {
-    if (!globalUser.isLoggedIn) return false;
-
-    final isFavorite = globalUser.favoriteList.contains(
-        widget.match.homeTeam.name) ||
-        globalUser.favoriteList.contains(widget.match.awayTeam.name);
-
-    // Αν υπάρχει ΡΗΤΗ επιλογή (true/false) στη Map, ΥΠΕΡΙΣΧΥΕΙ των πάντων!
-    // Αν δεν υπάρχει (είναι null), τότε κοιτάμε αν είναι αγαπημένη ομάδα ή αν έχει το "Notify All" ενεργό.
-    return globalUser.matchKeys[widget.match.matchDocId] ??
-        (globalUser.notifyAllMatches.value || isFavorite);
-  }
+  // Ένας τοπικός notifier που αλλάζει τιμή απλώς για να κάνει rebuild το συγκεκριμένο IconButton
+  final ValueNotifier<int> _rebuildTrigger = ValueNotifier<int>(0);
 
   Future<void> toggleNotification() async {
-    if (!globalUser.isLoggedIn) {
+    if (globalUser.isLoggedIn) {
+      bool isFavorite = globalUser.favoriteList.contains(widget.match.homeTeam.name) ||
+          globalUser.favoriteList.contains(widget.match.awayTeam.name);
+
+      bool isGlobalFootball = globalUser.notifyAllMatches.value;
+
+      await UserHandleBase().smartToggleMatchNotification(
+          widget.match.matchDocId, isFavorite, isGlobalFootball);
+
+      // ΜΟΛΙΣ ΤΕΛΕΙΩΣΕΙ Η ΑΛΛΑΓΗ, αυξάνουμε το trigger για να γίνει ακαριαίο rebuild το εικονίδιο!
+      _rebuildTrigger.value++;
+
+      bool newState = globalUser.matchKeys.containsKey(widget.match.matchDocId)
+          ? globalUser.matchKeys[widget.match.matchDocId]!
+          : (isFavorite || isGlobalFootball);
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(newState
+              ? (greek
+              ? 'Θα λάβετε ειδοποίηση για το ${widget.match.homeTeam.name} - ${widget.match.awayTeam.name}'
+              : 'Reminder set for ${widget.match.homeTeam.nameEnglish} - ${widget.match.awayTeam.nameEnglish}')
+              : (greek
+              ? 'Απενεργοποιήθηκε η ειδοποίηση'
+              : 'Notification disabled')),
+          duration: const Duration(seconds: 2),
+          backgroundColor: Colors.blue,
+        ));
+      }
+    } else {
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(greek
             ? "Πρέπει να συνδεθείς για να έχεις ειδοποιήσεις."
             : "Please log in to receive notifications."),
-        duration: const Duration(seconds: 2),
+        duration: Duration(seconds: 2),
         backgroundColor: Colors.redAccent.withOpacity(0.9),
       ));
-      return;
     }
-
-    // Βρίσκουμε την τωρινή κατάσταση και την αντιστρέφουμε
-    bool currentlyActive = _isNotificationActive();
-    bool newValue = !currentlyActive;
-
-    setState(() {
-      globalUser.matchKeys[widget.match.matchDocId] = newValue;
-      widget.match.enableNotify(
-          newValue);
-    });
-
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(
-          greek
-              ? (newValue
-              ? 'Ενεργοποιήθηκαν οι ειδοποιήσεις για αυτό το ματς.'
-              : 'Έγινε σίγαση ειδοποιήσεων για αυτό το ματς.')
-              : (newValue
-              ? 'Notifications enabled for this match.'
-              : 'Notifications muted for this match.')
-      ),
-      duration: const Duration(milliseconds: 1500),
-
-    ));
-
-    await UserHandleBase().setMatchNotificationOverride(
-        widget.match.matchDocId, newValue);
   }
 
   @override
   Widget build(BuildContext context) {
-
+    // 1. Ακούμε το γενικό καμπανάκι (αν αλλάξει από πάνω, αλλάζουν όλα)
     return ValueListenableBuilder<bool>(
       valueListenable: globalUser.notifyAllMatches,
-      builder: (context, globalActive, child) {
-        bool isActive = _isNotificationActive();
+      builder: (context, notifyAllFootball, _) {
 
-        return IconButton(
-          icon: Icon(
-            isActive ? Icons.notifications_active : Icons.notifications_off,
-            color: isActive
-                ? (darkModeNotifier.value ? Colors.amber : Colors.blue)
-                : Colors.grey,
-          ),
-          tooltip: isActive ? "Απενεργοποίηση" : "Ενεργοποίηση",
-          onPressed: toggleNotification,
+        // 2. Ακούμε το τοπικό trigger του πατήματος
+        return ValueListenableBuilder<int>(
+          valueListenable: _rebuildTrigger,
+          builder: (context, _, child) {
+
+            // Καθαρός υπολογισμός χωρίς καμία παρεμβολή από εξωτερικά ValueNotifiers του Match
+            bool isExplicitlySet = globalUser.matchKeys.containsKey(widget.match.matchDocId);
+            bool isFavorite = globalUser.favoriteList.contains(widget.match.homeTeam.name) ||
+                globalUser.favoriteList.contains(widget.match.awayTeam.name);
+
+            bool isActive = isExplicitlySet
+                ? globalUser.matchKeys[widget.match.matchDocId]!
+                : (isFavorite || notifyAllFootball);
+
+            return IconButton(
+              icon: Icon(
+                isActive ? Icons.notifications_active : Icons.notifications_off,
+                color: isActive
+                    ? (darkModeNotifier.value ? Colors.amber : Colors.blue)
+                    : Colors.grey,
+              ),
+              tooltip: isActive
+                  ? (greek ? "Απενεργοποίηση ειδοποίησης" : "Disable notification")
+                  : (greek ? "Ενεργοποίηση ειδοποίησης" : "Enable notification"),
+              onPressed: toggleNotification,
+            );
+          },
         );
       },
     );

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
@@ -7,7 +8,7 @@ import 'package:untitled1/Data_Classes/Player.dart';
 import 'package:untitled1/Firebase_Handle/user_handle_in_base.dart';
 import 'package:untitled1/Match_Details_Package/StatsPage.dart';
 import 'package:untitled1/Match_Details_Package/penalty_shootout_widget.dart';
-import 'package:untitled1/championship_details/StandingsPage.dart';
+import 'package:untitled1/championship_details/football/football_StandingsPage.dart';
 import 'package:untitled1/globals.dart';
 import '../../Data_Classes/MatchDetails.dart';
 import 'package:provider/provider.dart';
@@ -50,6 +51,8 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
   Timer? _timer;
   late int _startTimeInSeconds;
 
+  bool _isLoadingProgress = false;
+
   @override
   void initState() {
     super.initState();
@@ -79,10 +82,14 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
   void _syncTime() {
     _secondsElapsed =
         DateTime.now().millisecondsSinceEpoch ~/ 1000 - _startTimeInSeconds;
+
+    if (_secondsElapsed < 0) {
+      _secondsElapsed = 0;
+    }
   }
 
   void _startTimer() {
-    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       setState(() {
         _secondsElapsed++;
       });
@@ -104,7 +111,7 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
         name: 'Match Ended Clicked',
         parameters: {
           'match_id':
-              '${widget.match.homeTeam.nameEnglish} ${widget.match.timeString} ${widget.match.awayTeam.nameEnglish}',
+          '${widget.match.homeTeam.nameEnglish} ${widget.match.timeString} ${widget.match.awayTeam.nameEnglish}',
           'home_team': widget.match.homeTeam.nameEnglish,
           'away_team': widget.match.awayTeam.nameEnglish,
         },
@@ -116,7 +123,7 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
         name: 'Match Started Clicked',
         parameters: {
           'match_id':
-              '${widget.match.homeTeam.nameEnglish} ${widget.match.timeString} ${widget.match.awayTeam.nameEnglish}',
+          '${widget.match.homeTeam.nameEnglish} ${widget.match.timeString} ${widget.match.awayTeam.nameEnglish}',
           'home_team': widget.match.homeTeam.nameEnglish,
           'away_team': widget.match.awayTeam.nameEnglish,
         },
@@ -131,21 +138,21 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
             Container(
               color: darkModeNotifier.value
                   ? Colors.grey[900]
-                  : Color.fromARGB(50, 5, 150, 200),
+                  : const Color.fromARGB(50, 5, 150, 200),
               child: Padding(
                 padding: const EdgeInsets.all(5.0),
                 child: Column(
                   children: [
                     Center(
                         child: Text(
-                      widget.match.matchweekInfo(),
-                      style: TextStyle(
-                          fontSize: 13,
-                          color: darkModeNotifier.value
-                              ? Colors.white
-                              : Colors.grey[800]),
-                    )),
-                    SizedBox(height: 10),
+                          widget.match.matchweekInfo(),
+                          style: TextStyle(
+                              fontSize: 13,
+                              color: darkModeNotifier.value
+                                  ? Colors.white
+                                  : Colors.grey[800]),
+                        )),
+                    const SizedBox(height: 10),
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -159,10 +166,10 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
                         Flexible(
                           fit: FlexFit.tight,
                           child: (((widget.match.hasMatchFinished &&
-                                          !widget.match.isExtraTimeTime) ||
-                                      (widget.match.hasExtraTimeFinished &&
-                                          !widget.match.isPenaltyTime)) ||
-                                  widget.match.isShootoutOver)
+                              !widget.match.isExtraTimeTime) ||
+                              (widget.match.hasExtraTimeFinished &&
+                                  !widget.match.isPenaltyTime)) ||
+                              widget.match.isShootoutOver)
                               ? _buildMatchFinishedScore()
                               : _buildMatchTimer(),
                         ),
@@ -174,14 +181,18 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
                         ),
                       ],
                     ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        _cardAdmin(true),
-                        _matchProgressAdmin(),
-                        _cardAdmin(false)
-                      ],
-                    ),
+
+                    if (globalUser.isUpperAdmin) ...[
+                      const SizedBox(height: 10),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          _cardAdmin(true),
+                          _matchProgressAdmin(),
+                          _cardAdmin(false)
+                        ],
+                      ),
+                    ],
 
                     _buildPdfReportButton(),
                     const Divider(),
@@ -201,18 +212,18 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
     Color homeColor, awayColor;
 
     (widget.match.homeScore + widget.match.penaltyScoreHome >
-            widget.match.awayScore + widget.match.penaltyScoreAway)
+        widget.match.awayScore + widget.match.penaltyScoreAway)
         ? {
-            homeColor = darkModeNotifier.value ? Colors.white : Colors.black,
-            awayColor = Colors.grey
-          }
+      homeColor = darkModeNotifier.value ? Colors.white : Colors.black,
+      awayColor = Colors.grey
+    }
         : (widget.match.homeScore + widget.match.penaltyScoreHome <
-                widget.match.awayScore + widget.match.penaltyScoreAway)
-            ? {
-                homeColor = Colors.grey,
-                awayColor = darkModeNotifier.value ? Colors.white : Colors.black
-              }
-            : {homeColor = Colors.blueGrey, awayColor = Colors.blueGrey};
+        widget.match.awayScore + widget.match.penaltyScoreAway)
+        ? {
+      homeColor = Colors.grey,
+      awayColor = darkModeNotifier.value ? Colors.white : Colors.black
+    }
+        : {homeColor = Colors.blueGrey, awayColor = Colors.blueGrey};
 
     return Container(
       child: Column(
@@ -244,7 +255,7 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
                       color: awayColor)),
             ],
           ),
-          Text('Ολοκληρώθηκε',
+          Text(greek ? 'Ολοκληρώθηκε' : 'Completed',
               style: TextStyle(
                   fontWeight: FontWeight.w400,
                   fontSize: 12,
@@ -260,6 +271,8 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
         int secondsElapsed = DateTime.now().millisecondsSinceEpoch ~/ 1000 -
             matchDetails.startTimeInSeconds;
 
+        secondsElapsed = max(0, secondsElapsed);
+
         int minutes = secondsElapsed ~/ 60;
         int seconds = secondsElapsed % 60;
 
@@ -267,41 +280,41 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            SizedBox(height: 15),
+            const SizedBox(height: 15),
             Text(
               "${matchDetails.homeScore + matchDetails.penaltyScoreHome}-${matchDetails.awayScore + matchDetails.penaltyScoreAway}",
               style: const TextStyle(
                   fontWeight: FontWeight.bold, fontSize: 25, color: Colors.red),
             ),
             (matchDetails.isPenaltyTime)
-                ? Text('Πέναλτι',
-                    style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 15,
-                        color: Colors.red),
-                    textAlign: TextAlign.center)
+                ? Text(greek ? 'Πέναλτι' : 'Penalty',
+                style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                    color: Colors.red),
+                textAlign: TextAlign.center)
                 : (!matchDetails.isHalfTime() &&
-                        !matchDetails.isExtraTimeHalf() &&
-                        !(matchDetails.hasMatchFinished &&
-                            !matchDetails.hasExtraTimeStarted))
-                    ? Text(
-                        '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}',
-                        style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                            color: Colors.red))
-                    : Text(
-                        (matchDetails.hasMatchFinished &&
-                                !matchDetails.hasExtraTimeStarted)
-                            ? 'Αναμονή Παράτασης'
-                            : matchDetails.isHalfTime()
-                                ? 'Ημίχρονο'
-                                : 'Ημίχρονο Παράτασης',
-                        style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 13,
-                            color: Colors.red),
-                        textAlign: TextAlign.center)
+                !matchDetails.isExtraTimeHalf() &&
+                !(matchDetails.hasMatchFinished &&
+                    !matchDetails.hasExtraTimeStarted))
+                ? Text(
+                '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}',
+                style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                    color: Colors.red))
+                : Text(
+                (matchDetails.hasMatchFinished &&
+                    !matchDetails.hasExtraTimeStarted)
+                    ? (greek ? 'Αναμονή Παράτασης' : 'Awaiting Extra Time')
+                    : matchDetails.isHalfTime()
+                    ? (greek ? 'Ημίχρονο' : 'Half Time')
+                    : (greek ? 'Ημίχρονο Παράτασης' : 'Extra Time Half Time'),
+                style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
+                    color: Colors.red),
+                textAlign: TextAlign.center)
           ],
         );
       },
@@ -320,7 +333,7 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
                 await widget.match.cancelPenalty();
                 setState(() {});
               },
-              child: Text('Διαγραφή τελευταίου πέναλτι')),
+              child: Text(greek ? 'Διαγραφή τελευταίου πέναλτι' : 'Delete last penalty')),
         if (widget.match.isPenaltyTime)
           PenaltyShootoutPanel(match: widget.match),
         if (widget.match.isExtraTimeTime &&
@@ -350,28 +363,30 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
             height: 1,
             width: (half > 2) ? 65 : 100,
             color: ((widget.match.hasMatchFinished &&
-                        !widget.match.isExtraTimeTime) ||
-                    widget.match.hasExtraTimeFinished)
+                !widget.match.isExtraTimeTime) ||
+                widget.match.hasExtraTimeFinished)
                 ? Colors.blueGrey
                 : Colors.redAccent,
           ),
           Text(
-            " ${ha}ο ημίχρονο ${(half > 2) ? 'παράτασης' : ""}",
+            greek
+                ? " ${ha}ο ημίχρονο ${(half > 2) ? 'παράτασης' : ""}"
+                : " ${ha}${ha == 1 ? 'st' : 'nd'} half ${(half > 2) ? 'extra time' : ""}",
             style: TextStyle(
                 color: ((widget.match.hasMatchFinished &&
-                            !widget.match.isExtraTimeTime) ||
-                        widget.match.hasExtraTimeFinished)
+                    !widget.match.isExtraTimeTime) ||
+                    widget.match.hasExtraTimeFinished)
                     ? darkModeNotifier.value
-                        ? Colors.white
-                        : Colors.black
+                    ? Colors.white
+                    : Colors.black
                     : Colors.redAccent),
           ),
           Container(
             height: 1,
             width: (half > 2) ? 65 : 100,
             color: ((widget.match.hasMatchFinished &&
-                        !widget.match.isExtraTimeTime) ||
-                    widget.match.hasExtraTimeFinished)
+                !widget.match.isExtraTimeTime) ||
+                widget.match.hasExtraTimeFinished)
                 ? Colors.blueGrey
                 : Colors.redAccent,
           ),
@@ -397,41 +412,43 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
   }
 
   Widget buildGoalIndicator(Goal goal, MatchDetails match) {
-    String goalScorer = goal.name == "Άλλος" ? 'Γκολ' : goal.name;
+    // Έξυπνη μετάφραση για το UI χωρίς να πειράζεται η βάση
+    String goalScorer = goal.name == "Άλλος" ? (greek ? 'Γκολ' : 'Goal') : goal.name;
+    if (!greek && goalScorer.contains("(ΑΥΤ.)")) {
+      goalScorer = goalScorer.replaceAll("(ΑΥΤ.)", "(OG)");
+    }
 
-    // Δυναμικά χρώματα για το Bubble
     Color bubbleColor =
-        darkModeNotifier.value ? Colors.grey[800]! : Colors.white;
+    darkModeNotifier.value ? Colors.grey[800]! : Colors.white;
     Color textColor = darkModeNotifier.value ? Colors.white : Colors.black87;
 
     return InkWell(
         onLongPress: () {
           ((!widget.match.hasMatchEndedFinal ||
-                      widget.match.startTimeInSeconds >
-                          DateTime.now().millisecondsSinceEpoch ~/ 1000 -
-                              110800) &&
-                  globalUser.isUpperAdmin)
+              widget.match.startTimeInSeconds >
+                  DateTime.now().millisecondsSinceEpoch ~/ 1000 -
+                      110800) &&
+              globalUser.isUpperAdmin)
               ? showModalBottomSheet(
-                  context: context,
-                  isScrollControlled: true,
-                  builder: (_) => EditMatchFactModal(fact: goal, match: match),
-                )
+            context: context,
+            isScrollControlled: true,
+            builder: (_) => EditMatchFactModal(fact: goal, match: match),
+          )
               : null;
         },
         child: Row(
           mainAxisAlignment:
-              goal.isHomeTeam ? MainAxisAlignment.start : MainAxisAlignment.end,
+          goal.isHomeTeam ? MainAxisAlignment.start : MainAxisAlignment.end,
           children: [
             if (!goal.isHomeTeam) const Spacer(),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
               child: Container(
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
                   color: bubbleColor,
                   borderRadius: BorderRadius.circular(10),
-                  // Διακριτική σκιά για να ξεκολλάει από το φόντο
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withOpacity(0.1),
@@ -442,19 +459,19 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
                 ),
                 child: goal.isHomeTeam
                     ? Text(
-                        "${goal.timeString}'  ⚽  $goalScorer (${goal.homeScore}-${goal.awayScore})",
-                        style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: textColor),
-                      )
+                  "${goal.timeString}'  ⚽  $goalScorer (${goal.homeScore}-${goal.awayScore})",
+                  style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: textColor),
+                )
                     : Text(
-                        "(${goal.homeScore}-${goal.awayScore}) $goalScorer  ⚽  ${goal.timeString}'",
-                        style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: textColor),
-                      ),
+                  "(${goal.homeScore}-${goal.awayScore}) $goalScorer  ⚽  ${goal.timeString}'",
+                  style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: textColor),
+                ),
               ),
             ),
             if (goal.isHomeTeam) const Spacer(),
@@ -464,13 +481,11 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
 
   Widget buildCardIndicator(CardP card, MatchDetails match) {
     Color bubbleColor =
-        darkModeNotifier.value ? Colors.grey[800]! : Colors.white;
+    darkModeNotifier.value ? Colors.grey[800]! : Colors.white;
     Color textColor = darkModeNotifier.value ? Colors.white : Colors.black87;
 
-    // --- ΒΟΗΘΗΤΙΚΟ WIDGET ΓΙΑ ΝΑ ΖΩΓΡΑΦΙΖΟΥΜΕ ΤΙΣ ΚΑΡΤΕΣ ---
     Widget cardIcon;
     if (card.isSecondYellow) {
-      // ΣΧΕΔΙΟ ΓΙΑ 2η ΚΙΤΡΙΝΗ (Επικάλυψη Κίτρινης με Κόκκινη)
       cardIcon = SizedBox(
         width: 18,
         height: 20,
@@ -504,7 +519,6 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
         ),
       );
     } else {
-      // ΑΠΛΗ ΚΙΤΡΙΝΗ Η ΑΠΕΥΘΕΙΑΣ ΚΟΚΚΙΝΗ
       cardIcon = Container(
           width: 12,
           height: 18,
@@ -522,7 +536,7 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
       },
       child: Row(
         mainAxisAlignment:
-            card.isHomeTeam ? MainAxisAlignment.start : MainAxisAlignment.end,
+        card.isHomeTeam ? MainAxisAlignment.start : MainAxisAlignment.end,
         children: [
           if (!card.isHomeTeam) const Spacer(),
           Padding(
@@ -541,39 +555,39 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
               ),
               child: card.isHomeTeam
                   ? Row(
-                      children: [
-                        Text("${card.timeString}' ",
-                            style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                color: textColor)),
-                        const SizedBox(width: 4),
-                        cardIcon, // Εδώ μπαίνει το έξυπνο εικονίδιο
-                        const SizedBox(width: 4),
-                        Text(" ${card.name}",
-                            style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                color: textColor)),
-                      ],
-                    )
+                children: [
+                  Text("${card.timeString}' ",
+                      style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: textColor)),
+                  const SizedBox(width: 4),
+                  cardIcon,
+                  const SizedBox(width: 4),
+                  Text(" ${card.name}",
+                      style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: textColor)),
+                ],
+              )
                   : Row(
-                      children: [
-                        Text("${card.name} ",
-                            style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                color: textColor)),
-                        const SizedBox(width: 4),
-                        cardIcon, // Εδώ μπαίνει το έξυπνο εικονίδιο
-                        const SizedBox(width: 4),
-                        Text(" ${card.timeString}'",
-                            style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                color: textColor)),
-                      ],
-                    ),
+                children: [
+                  Text("${card.name} ",
+                      style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: textColor)),
+                  const SizedBox(width: 4),
+                  cardIcon,
+                  const SizedBox(width: 4),
+                  Text(" ${card.timeString}'",
+                      style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: textColor)),
+                ],
+              ),
             ),
           ),
           if (card.isHomeTeam) const Spacer(),
@@ -593,7 +607,7 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
       case 1:
         return LineupsDisplayTab(match: match);
       case 2:
-         return StatsPage(match: match,);
+        return StatsPage(match: match,);
       case 3:
         DateTime now = DateTime.now();
         int seasonYear = now.month > 8 ? now.year : now.year - 1;
@@ -613,8 +627,8 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
             widget.match.startTimeInSeconds + 10 * 3600) {
       return Column(
         children: [
-          SizedBox(height: 15),
-          Text('Πέναλτι',
+          const SizedBox(height: 15),
+          Text(greek ? 'Πέναλτι' : 'Penalty',
               style: TextStyle(
                   color: darkModeNotifier.value
                       ? Colors.grey[300]
@@ -627,14 +641,14 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
                   await widget.match
                       .addPenalty(isScored: false, isHomeTeam: homeTeamScored);
                 },
-                icon: Icon(Icons.cancel, color: Colors.red, size: 30),
+                icon: const Icon(Icons.cancel, color: Colors.red, size: 30),
               ),
               IconButton(
                 onPressed: () async {
                   await widget.match
                       .addPenalty(isScored: true, isHomeTeam: homeTeamScored);
                 },
-                icon: Icon(Icons.check_circle, color: Colors.green, size: 30),
+                icon: const Icon(Icons.check_circle, color: Colors.green, size: 30),
               ),
             ],
           ),
@@ -648,35 +662,35 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
         onTap: () {
           homeTeamScored
               ? _showInputDialogForGoal(
-                  context, widget.match.homeTeam, homeTeamScored)
+              context, widget.match.homeTeam, homeTeamScored)
               : _showInputDialogForGoal(
-                  context, widget.match.awayTeam, homeTeamScored);
+              context, widget.match.awayTeam, homeTeamScored);
         },
         child: Card(
             elevation: 10,
-            color: Color.fromARGB(0, 15, 35, 30),
+            color: const Color.fromARGB(0, 15, 35, 30),
             child: Column(
               children: [
-                SizedBox(height: 10, width: 50),
-                Text("Γκολ",
+                const SizedBox(height: 10, width: 50),
+                Text(greek ? "Γκολ" : "Goal",
                     style: TextStyle(
                         color: darkModeNotifier.value
                             ? Colors.grey[300]
                             : Colors.black,
                         fontSize: 18)),
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
               ],
             )),
       );
     } else {
-      return SizedBox(height: 35);
+      return const SizedBox(height: 35);
     }
   }
 
   Widget _matchProgressAdmin() {
     if ((DateTime.now().millisecondsSinceEpoch ~/ 1000 >
         widget.match.startTimeInSeconds + 3 * 3600)) {
-      return SizedBox(height: 5);
+      return const SizedBox(height: 5);
     }
     if (widget.match.hasMatchFinished &&
         (!widget.match.isExtraTimeTime || widget.match.hasExtraTimeFinished) &&
@@ -684,110 +698,122 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
       return ElevatedButton(
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.redAccent,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-          padding: EdgeInsets.symmetric(horizontal: 2, vertical: 0),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 0),
           elevation: 5,
         ),
-        onPressed: () {
-          widget.match.matchCancelProgressed();
-          setState(() {});
+        // Κλείδωμα αν φορτώνει
+        onPressed: _isLoadingProgress ? null : () async {
+          setState(() { _isLoadingProgress = true; }); // Ξεκινάει το loading
+
+          await widget.match.matchCancelProgressed(); // Περιμένουμε τη βάση
+
+          if (mounted) {
+            setState(() { _isLoadingProgress = false; }); // Τελειώνει το loading
+          }
         },
-        child: Text(
+        child: _isLoadingProgress
+            ? const SizedBox(width: 12, height: 12, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+            : Text(
           (!widget.match.hasExtraTimeFinished)
-              ? "Ματς δεν τελείωσε"
-              : 'Η παράταση δεν τελείωσε',
-          style: TextStyle(color: Colors.white, fontSize: 9),
+              ? (greek ? "Ματς δεν τελείωσε" : "Match not finished")
+              : (greek ? 'Η παράταση δεν τελείωσε' : 'Extra time not finished'),
+          style: const TextStyle(color: Colors.white, fontSize: 9),
         ),
       );
     } else if (globalUser.isUpperAdmin) {
       MatchDetails match = widget.match;
       String progress = " ";
       String cancelProgress = " ";
+
       match.hasSecondHalfExtraTimeStarted
           ? (
-              progress = "Τέλος Παράτασης",
-              cancelProgress = "Ημίχρονο Παράτασης"
-            )
+      progress = greek ? "Τέλος Παράτασης" : "End Extra Time",
+      cancelProgress = greek ? "Ημίχρονο Παράτασης" : "Extra Time Half Time"
+      )
           : match.hasFirstHalfExtraTimeFinished
-              ? (
-                  progress = "Εκκίνηση 2ου Ημιχρόνου Παράτασης",
-                  cancelProgress = "1ο Ημίχρονο παράτασης"
-                )
-              : match.hasExtraTimeStarted
-                  ? (
-                      progress = "Ημίχρονο Παράτασης",
-                      cancelProgress = "Η παράταση δεν ξεκίνησε"
-                    )
-                  : match.hasMatchFinished
-                      ? (
-                          progress = "Εκκίνηση Παράτασης",
-                          cancelProgress = "Ο αγώνας δεν τελείωσε"
-                        )
-                      : match.hasSecondHalfStarted
-                          ? (
-                              progress = "Τέλος Αγώνα",
-                              cancelProgress = "Ημίχρονο"
-                            )
-                          : match.hasFirstHalfFinished
-                              ? (
-                                  progress = "Εκκίννηση 2ου Ημιχρόνου",
-                                  cancelProgress = "1ο ημίχρονο"
-                                )
-                              : (
-                                  progress = "Τέλος 1ου Ημιχρόνου",
-                                  cancelProgress = "Tο ματς δεν ξεκίνησε"
-                                );
+          ? (
+      progress = greek ? "Εκκίνηση 2ου Ημιχρόνου Παράτασης" : "Start 2nd Half ET",
+      cancelProgress = greek ? "1ο Ημίχρονο παράτασης" : "1st Half ET"
+      )
+          : match.hasExtraTimeStarted
+          ? (
+      progress = greek ? "Ημίχρονο Παράτασης" : "Extra Time Half Time",
+      cancelProgress = greek ? "Η παράταση δεν ξεκίνησε" : "Extra time not started"
+      )
+          : match.hasMatchFinished
+          ? (
+      progress = greek ? "Εκκίνηση Παράτασης" : "Start Extra Time",
+      cancelProgress = greek ? "Ο αγώνας δεν τελείωσε" : "Match not finished"
+      )
+          : match.hasSecondHalfStarted
+          ? (
+      progress = greek ? "Τέλος Αγώνα" : "End Match",
+      cancelProgress = greek ? "Ημίχρονο" : "Half Time"
+      )
+          : match.hasFirstHalfFinished
+          ? (
+      progress = greek ? "Εκκίννηση 2ου Ημιχρόνου" : "Start 2nd Half",
+      cancelProgress = greek ? "1ο ημίχρονο" : "1st Half"
+      )
+          : (
+      progress = greek ? "Τέλος 1ου Ημιχρόνου" : "End 1st Half",
+      cancelProgress = greek ? "Tο ματς δεν ξεκίνησε" : "Match not started"
+      );
 
       return Column(
         children: [
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.redAccent,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10)),
-              padding: EdgeInsets.symmetric(horizontal: 2, vertical: 0),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 0),
               elevation: 5,
             ),
-            onPressed: () {
-              match.matchCancelProgressed();
-              setState(() {});
+            // ΑΛΛΑΓΗ ΕΔΩ
+            onPressed: _isLoadingProgress ? null : () async {
+              setState(() { _isLoadingProgress = true; });
+              await match.matchCancelProgressed();
+              if (mounted) setState(() { _isLoadingProgress = false; });
             },
-            child: Text(cancelProgress,
-                style: TextStyle(color: Colors.white, fontSize: 9)),
+            child: _isLoadingProgress
+                ? const SizedBox(width: 12, height: 12, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                : Text(cancelProgress, style: const TextStyle(color: Colors.white, fontSize: 9)),
           ),
           ElevatedButton(
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.grey[200],
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(50)),
-                padding: EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
+                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
                 elevation: 5,
               ),
-              onPressed: () {
-                match.matchProgressed();
-                setState(() {});
+              // ΑΛΛΑΓΗ ΕΔΩ
+              onPressed: _isLoadingProgress ? null : () async {
+                setState(() { _isLoadingProgress = true; });
+                await match.matchProgressed();
+                if (mounted) setState(() { _isLoadingProgress = false; });
               },
-              child: Column(
+              child: _isLoadingProgress
+                  ? const SizedBox(height: 35, child: Center(child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))))
+                  : Column(
                 children: [
-                  SizedBox(height: 10, width: 50),
-                  Text(progress,
-                      style: TextStyle(color: Colors.blue, fontSize: 15)),
-                  SizedBox(height: 10),
+                  const SizedBox(height: 10, width: 50),
+                  Text(progress, style: const TextStyle(color: Colors.blue, fontSize: 15)),
+                  const SizedBox(height: 10),
                 ],
               )),
         ],
       );
     } else {
-      return SizedBox(height: 5);
+      return const SizedBox(height: 5);
     }
   }
-
 
   void _showInputDialogForGoal(BuildContext context, Team team, bool homeTeamScored) {
     String? goalScorer;
     bool isOwnGoal = false;
     String? errorMessage;
+    String otherText = greek ? "Άλλος" : "Other";
 
     TextEditingController minuteController = TextEditingController(
         text: (widget.match.hasMatchStarted)
@@ -824,19 +850,21 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
               return itemString;
             }).toList();
 
-            dropdownItems.add("Άλλος");
-            playerActiveStatus["Άλλος"] = false;
+            dropdownItems.add(otherText);
+            playerActiveStatus[otherText] = false;
 
             return AlertDialog(
               backgroundColor: darkModeNotifier.value ? Colors.grey[900] : Colors.white,
-              title: Text(isOwnGoal ? "ΑΥΤΟΓΚΟΛ ΥΠΕΡ ${team.name}" : "ΓΚΟΛ ${team.name}",
+              title: Text(isOwnGoal
+                  ? (greek ? "Αυτογκολ υπερ ${team.displayName}" : "Own goal for ${team.displayName}")
+                  : (greek ? "Γκολ υπέρ ${team.displayName}" : "Goal for ${team.displayName}"),
                   style: TextStyle(color: darkModeNotifier.value ? Colors.white : Colors.black, fontWeight: FontWeight.bold, fontSize: 18)),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   SwitchListTile(
                     contentPadding: EdgeInsets.zero,
-                    title: Text("Είναι Αυτογκόλ;", style: TextStyle(color: darkModeNotifier.value ? Colors.white70 : Colors.black87)),
+                    title: Text(greek ? "Είναι Αυτογκόλ;" : "Is it an Own Goal?", style: TextStyle(color: darkModeNotifier.value ? Colors.white70 : Colors.black87)),
                     value: isOwnGoal,
                     activeColor: Colors.redAccent,
                     onChanged: (bool value) => setDialogState(() {
@@ -851,10 +879,10 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
                       showSearchBox: true,
                       menuProps: MenuProps(backgroundColor: darkModeNotifier.value ? Colors.grey[850] : Colors.white),
                       itemBuilder: (context, item, isSelected) {
-                        bool isOther = item == "Άλλος";
+                        bool isOther = item == otherText;
                         bool isActive = playerActiveStatus[item] ?? false;
                         String number = isOther ? "" : item.split(" - ")[0];
-                        String name = isOther ? "Άλλος" : item.split(" - ")[1];
+                        String name = isOther ? otherText : item.split(" - ")[1];
 
                         return ListTile(
                           dense: true,
@@ -880,7 +908,9 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
                     items: dropdownItems,
                     dropdownDecoratorProps: DropDownDecoratorProps(
                       dropdownSearchDecoration: InputDecoration(
-                        labelText: isOwnGoal ? "Παίκτης που έβαλε το αυτογκόλ:" : "Σκόρερ:",
+                        labelText: isOwnGoal
+                            ? (greek ? "Παίκτης που έβαλε το αυτογκόλ:" : "Player who scored OG:")
+                            : (greek ? "Σκόρερ:" : "Scorer:"),
                         labelStyle: TextStyle(color: darkModeNotifier.value ? Colors.blue[200] : Colors.blue[800]),
                         filled: true,
                         fillColor: darkModeNotifier.value ? Colors.grey[850] : Colors.grey[100],
@@ -901,7 +931,7 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
                     style: TextStyle(color: darkModeNotifier.value ? Colors.white : Colors.black),
                     onChanged: (val) => setDialogState(() => errorMessage = null),
                     decoration: InputDecoration(
-                      labelText: "Λεπτό Γκολ",
+                      labelText: greek ? "Λεπτό Γκολ" : "Goal Minute",
                       labelStyle: TextStyle(color: darkModeNotifier.value ? Colors.blue[200] : Colors.blue[800]),
                       filled: true,
                       fillColor: darkModeNotifier.value ? Colors.grey[850] : Colors.grey[100],
@@ -926,34 +956,35 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
               ),
               actions: [
                 TextButton(
-                    child: Text("Ακύρωση", style: TextStyle(color: Colors.grey[600])),
+                    child: Text(greek ? "Ακύρωση" : "Cancel", style: TextStyle(color: Colors.grey[600])),
                     onPressed: () => Navigator.pop(context)),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(backgroundColor: isOwnGoal ? Colors.red[600] : Colors.green[600]),
                   onPressed: () {
                     if (goalScorer == null) {
-                      setDialogState(() => errorMessage = "Παρακαλώ επίλεξε σκόρερ!");
-                      return; // Σταματάει εδώ, ΔΕΝ κλείνει το dialog
+                      setDialogState(() => errorMessage = greek ? "Παρακαλώ επίλεξε σκόρερ!" : "Please select a scorer!");
+                      return;
                     }
 
                     int? parsedMinute = int.tryParse(minuteController.text);
                     if (parsedMinute == null) {
-                      setDialogState(() => errorMessage = "Παρακαλώ βάλε έγκυρο λεπτό!");
-                      return; // Σταματάει εδώ
+                      setDialogState(() => errorMessage = greek ? "Παρακαλώ βάλε έγκυρο λεπτό!" : "Please enter a valid minute!");
+                      return;
                     }
 
                     int finalSeconds = (parsedMinute - 1) * 60;
 
-                    String name = goalScorer == "Άλλος" ? "Άλλος" : goalScorer!.split(" - ")[1];
-                    if (isOwnGoal && goalScorer != 'Άλλος') name = "$name (ΑΥΤ.)";
+                    // Διατηρούμε το "Άλλος" / "(ΑΥΤ.)" για τη βάση δεδομένων
+                    String name = (goalScorer == otherText) ? "Άλλος" : goalScorer!.split(" - ")[1];
+                    if (isOwnGoal && goalScorer != otherText) name = "$name (ΑΥΤ.)";
 
                     homeTeamScored
-                        ? widget.match.homeScored(name, goalScorer != 'Άλλος' && !isOwnGoal, minute: finalSeconds)
-                        : widget.match.awayScored(name, goalScorer != 'Άλλος' && !isOwnGoal, minute: finalSeconds);
+                        ? widget.match.homeScored(name, goalScorer != otherText && !isOwnGoal, minute: finalSeconds)
+                        : widget.match.awayScored(name, goalScorer != otherText && !isOwnGoal, minute: finalSeconds);
 
-                    Navigator.pop(context); // Τώρα που όλα είναι τέλεια, κλείνει το dialog!
+                    Navigator.pop(context);
                   },
-                  child: const Text("Υποβολή", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                  child: Text(greek ? "Υποβολή" : "Submit", style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                 ),
               ],
             );
@@ -972,9 +1003,9 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
           onPressed: () {
             homeTeamCard
                 ? _showInputDialogCard(
-                    context, widget.match.homeTeam, homeTeamCard)
+                context, widget.match.homeTeam, homeTeamCard)
                 : _showInputDialogCard(
-                    context, widget.match.awayTeam, homeTeamCard);
+                context, widget.match.awayTeam, homeTeamCard);
             setState(() {});
           },
           child: Card(
@@ -982,10 +1013,10 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12)),
               elevation: 10,
-              child: Text("Κάρτα",
-                  style: TextStyle(color: Colors.black, fontSize: 15))));
+              child: Text(greek ? "Κάρτα" : "Card",
+                  style: const TextStyle(color: Colors.black, fontSize: 15))));
     } else {
-      return SizedBox(height: 5);
+      return const SizedBox(height: 5);
     }
   }
 
@@ -1026,7 +1057,7 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
 
             return AlertDialog(
               backgroundColor: darkModeNotifier.value ? Colors.grey[900] : Colors.white,
-              title: Text("ΚΑΡΤΑ - ${team.name}",
+              title: Text(greek ? "ΚΑΡΤΑ - ${team.displayName}" : "CARD - ${team.displayName}",
                   style: TextStyle(
                       color: darkModeNotifier.value ? Colors.white : Colors.black,
                       fontWeight: FontWeight.bold)),
@@ -1040,12 +1071,12 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
                         searchFieldProps: TextFieldProps(
                           style: TextStyle(color: darkModeNotifier.value ? Colors.white : Colors.black),
                           decoration: InputDecoration(
-                            hintText: "Αναζήτηση με όνομα ή νούμερο...",
+                            hintText: greek ? "Αναζήτηση με όνομα ή νούμερο..." : "Search by name or number...",
                             hintStyle: const TextStyle(color: Colors.grey),
                           ),
                         ),
-                        emptyBuilder: (_, __) => const Center(
-                            child: Text("Δεν βρέθηκαν παίκτες", style: TextStyle(color: Colors.grey))),
+                        emptyBuilder: (_, __) => Center(
+                            child: Text(greek ? "Δεν βρέθηκαν παίκτες" : "No players found", style: const TextStyle(color: Colors.grey))),
                         menuProps: MenuProps(
                             backgroundColor: darkModeNotifier.value ? Colors.grey[850] : Colors.white),
                         itemBuilder: (context, item, isSelected) {
@@ -1074,7 +1105,7 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
                       items: dropdownItems,
                       dropdownDecoratorProps: DropDownDecoratorProps(
                         dropdownSearchDecoration: InputDecoration(
-                          labelText: "Επιλογή Παίκτη:",
+                          labelText: greek ? "Επιλογή Παίκτη:" : "Select Player:",
                           labelStyle: TextStyle(color: darkModeNotifier.value ? Colors.blue[200] : Colors.blue[800]),
                           filled: true,
                           fillColor: darkModeNotifier.value ? Colors.grey[850] : Colors.grey[100],
@@ -1087,15 +1118,16 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
                         setDialogState(() {
                           selectedCardPlayer = newValue;
                           hasPreviousYellow = false;
+                          isYellow = true; // 💡 ΠΑΡΑΜΕΝΕΙ TRUE: Επιτρέπει στον διαιτητή να δώσει 2η κίτρινη
                           errorMessage = null;
 
                           if (newValue != null) {
                             String exactName = newValue.split(" - ")[1];
                             for (var halfList in widget.match.matchFact.values) {
                               for (var fact in halfList) {
-                                if (fact is CardP && fact.name == exactName && fact.isYellow) {
+                                // Ελέγχουμε αν έχει ήδη απλή κίτρινη κάρτα στο παρελθόν
+                                if (fact is CardP && fact.name == exactName && fact.isYellow && !fact.isSecondYellow) {
                                   hasPreviousYellow = true;
-                                  isYellow = false;
                                 }
                               }
                             }
@@ -1110,17 +1142,19 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
                         padding: const EdgeInsets.all(8),
                         margin: const EdgeInsets.only(bottom: 15),
                         decoration: BoxDecoration(
-                            color: Colors.red[100],
+                            color: Colors.orange[100],
                             borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: Colors.red)),
+                            border: Border.all(color: Colors.orange)),
                         child: Row(
                           children: [
-                            const Icon(Icons.warning, color: Colors.red),
+                            const Icon(Icons.warning, color: Colors.orange),
                             const SizedBox(width: 8),
                             Expanded(
                                 child: Text(
-                                    "Ο παίκτης έχει ήδη κίτρινη! Η κάρτα μετατράπηκε αυτόματα σε 2η Κίτρινη/Κόκκινη.",
-                                    style: TextStyle(color: Colors.red[900], fontSize: 12, fontWeight: FontWeight.bold))),
+                                    greek
+                                        ? "⚠️ Ο παίκτης έχει ήδη μία κίτρινη! Αν επιλέξετε Κίτρινη, θα καταγραφεί αυτόματα ως 2η Κίτρινη/Κόκκινη."
+                                        : "Player already has a yellow! Selecting yellow will record as 2nd Yellow/Red.",
+                                    style: TextStyle(color: Colors.orange[900], fontSize: 12, fontWeight: FontWeight.bold))),
                           ],
                         ),
                       ),
@@ -1128,42 +1162,40 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
+                        // --- ΚΙΤΡΙΝΗ / 2Η ΚΙΤΡΙΝΗ ---
                         GestureDetector(
-                          onTap: hasPreviousYellow
-                              ? null
-                              : () {
+                          onTap: () {
                             setDialogState(() {
                               isYellow = true;
                               errorMessage = null;
                             });
                           },
-                          child: Opacity(
-                            opacity: hasPreviousYellow ? 0.3 : 1.0,
-                            child: Column(
-                              children: [
-                                Container(
-                                  width: 45,
-                                  height: 65,
-                                  decoration: BoxDecoration(
-                                    color: Colors.yellow[600],
-                                    borderRadius: BorderRadius.circular(5),
-                                    border: isYellow
-                                        ? Border.all(color: darkModeNotifier.value ? Colors.white : Colors.black, width: 3)
-                                        : null,
-                                    boxShadow: isYellow
-                                        ? [BoxShadow(color: Colors.yellowAccent.withOpacity(0.5), blurRadius: 10)]
-                                        : null,
-                                  ),
+                          child: Column(
+                            children: [
+                              Container(
+                                width: 45,
+                                height: 65,
+                                decoration: BoxDecoration(
+                                  color: Colors.yellow[600],
+                                  borderRadius: BorderRadius.circular(5),
+                                  border: isYellow
+                                      ? Border.all(color: darkModeNotifier.value ? Colors.white : Colors.black, width: 3)
+                                      : null,
+                                  boxShadow: isYellow
+                                      ? [BoxShadow(color: Colors.yellowAccent.withOpacity(0.5), blurRadius: 10)]
+                                      : null,
                                 ),
-                                const SizedBox(height: 5),
-                                Text("Κίτρινη",
-                                    style: TextStyle(
-                                        color: darkModeNotifier.value ? Colors.white : Colors.black,
-                                        fontWeight: isYellow ? FontWeight.bold : FontWeight.normal))
-                              ],
-                            ),
+                              ),
+                              const SizedBox(height: 5),
+                              Text(hasPreviousYellow ? (greek ? "2η Κίτρινη" : "2nd Yellow") : (greek ? "Κίτρινη" : "Yellow"),
+                                  style: TextStyle(
+                                      color: darkModeNotifier.value ? Colors.white : Colors.black,
+                                      fontWeight: isYellow ? FontWeight.bold : FontWeight.normal,
+                                      fontSize: hasPreviousYellow ? 11 : 13))
+                            ],
                           ),
                         ),
+                        // --- ΚΟΚΚΙΝΗ (ΑΠΕΥΘΕΙΑΣ) ---
                         GestureDetector(
                           onTap: () {
                             setDialogState(() {
@@ -1188,7 +1220,7 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
                                 ),
                               ),
                               const SizedBox(height: 5),
-                              Text("Κόκκινη",
+                              Text(greek ? "Κόκκινη" : "Red",
                                   style: TextStyle(
                                       color: darkModeNotifier.value ? Colors.white : Colors.black,
                                       fontWeight: !isYellow ? FontWeight.bold : FontWeight.normal))
@@ -1203,7 +1235,7 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
                       controller: reasonController,
                       style: TextStyle(color: darkModeNotifier.value ? Colors.white : Colors.black),
                       decoration: InputDecoration(
-                        labelText: "Αιτιολογία (Προαιρετικό)",
+                        labelText: greek ? "Αιτιολογία (Προαιρετικό)" : "Reason (Optional)",
                         labelStyle: TextStyle(color: darkModeNotifier.value ? Colors.blue[200] : Colors.blue[800]),
                         filled: true,
                         fillColor: darkModeNotifier.value ? Colors.grey[850] : Colors.grey[100],
@@ -1229,37 +1261,41 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
               ),
               actions: [
                 TextButton(
-                  child: Text("Ακύρωση", style: TextStyle(color: Colors.grey[600])),
+                  child: Text(greek ? "Ακύρωση" : "Cancel", style: TextStyle(color: Colors.grey[600])),
                   onPressed: () => Navigator.of(context).pop(),
                 ),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(backgroundColor: isYellow ? Colors.yellow[700] : Colors.red[700]),
                   onPressed: () {
                     if (selectedCardPlayer == null) {
-                      setDialogState(() => errorMessage = "Παρακαλώ επίλεξε παίκτη!");
-                      return; // Σταματάει εδώ, ΔΕΝ κλείνει το dialog
+                      setDialogState(() => errorMessage = greek ? "Παρακαλώ επίλεξε παίκτη!" : "Please select a player!");
+                      return;
                     }
 
                     String finalPlayerName = selectedCardPlayer!.split(" - ")[1];
                     String? finalReason = reasonController.text.trim().isEmpty ? null : reasonController.text.trim();
 
+                    // Αν έχει ήδη κίτρινη και ο διαιτητής διάλεξε κίτρινη, τότε είναι 2η Κίτρινη
+                    bool finalIsSecondYellow = hasPreviousYellow && isYellow;
+
                     homeTeamCard
                         ? widget.match.playerGotCard(
                         finalPlayerName, widget.match.homeTeam, isYellow, null, homeTeamCard,
-                        isSecondYellow: hasPreviousYellow, reason: finalReason)
+                        isSecondYellow: finalIsSecondYellow, reason: finalReason)
                         : widget.match.playerGotCard(
                         finalPlayerName, widget.match.awayTeam, isYellow, null, homeTeamCard,
-                        isSecondYellow: hasPreviousYellow, reason: finalReason);
+                        isSecondYellow: finalIsSecondYellow, reason: finalReason);
 
-                    Navigator.of(context).pop(); // Κλείνει το dialog
+                    Navigator.of(context).pop();
                   },
-                  child: Text("Υποβολή", style: TextStyle(color: isYellow ? Colors.black : Colors.white, fontWeight: FontWeight.bold)),
+                  child: Text(greek ? "Υποβολή" : "Submit", style: TextStyle(color: isYellow ? Colors.black : Colors.white, fontWeight: FontWeight.bold)),
                 ),
               ],
             );
           });
         });
   }
+
   void _editCardDialog(BuildContext context, CardP card) {
     TextEditingController minuteController = TextEditingController(text: card.timeString);
     TextEditingController reasonController = TextEditingController(text: card.reason ?? "");
@@ -1274,6 +1310,7 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
     int? firstYellowMinuteRaw;
     String? errorMessage;
 
+    // Έλεγχος αν υπάρχει επόμενη 2η κίτρινη για τον ίδιο παίκτη
     if (card.isYellow && !card.isSecondYellow) {
       for (var halfList in widget.match.matchFact.values) {
         for (var fact in halfList) {
@@ -1298,11 +1335,12 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
       }
     }
 
-    bool checkHasPreviousYellow(String newPlayerName) {
+    // Συνάρτηση ελέγχου αν ο παίκτης έχει άλλη κίτρινη (εκτός από την τρέχουσα κάρτα που επεξεργαζόμαστε)
+    bool checkHasPreviousYellow(String newPlayerName, CardP currentCard) {
       bool hasPrev = false;
       for (var halfList in widget.match.matchFact.values) {
         for (var fact in halfList) {
-          if (fact is CardP && fact.name == newPlayerName && fact.isYellow && !fact.isSecondYellow && fact != card) {
+          if (fact is CardP && fact.name == newPlayerName && fact.isYellow && !fact.isSecondYellow && fact != currentCard) {
             hasPrev = true;
           }
         }
@@ -1346,7 +1384,9 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
             }).toList();
 
             selectedCardPlayer ??= dropdownItems.firstWhere((item) => item.contains(card.name), orElse: () => dropdownItems.first);
-            bool hasPreviousYellowForNewPlayer = checkHasPreviousYellow(selectedCardPlayer!.split(" - ")[1]);
+
+            String currentPlayerName = selectedCardPlayer!.split(" - ")[1];
+            bool hasPrevYellowForSelection = checkHasPreviousYellow(currentPlayerName, card);
 
             return Container(
               decoration: BoxDecoration(
@@ -1365,7 +1405,7 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
                       decoration: BoxDecoration(color: isDark ? Colors.grey[700] : Colors.grey[300], borderRadius: BorderRadius.circular(10)),
                     ),
 
-                    Text("Επεξεργασία Κάρτας", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: textColor)),
+                    Text(greek ? "Επεξεργασία Κάρτας" : "Edit Card", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: textColor)),
                     const SizedBox(height: 15),
 
                     if (hasSubsequentSecondYellow)
@@ -1377,7 +1417,11 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
                           children: [
                             const Icon(Icons.lock, color: Colors.orange),
                             const SizedBox(width: 8),
-                            Expanded(child: Text("Ο παίκτης έχει 2η κίτρινη. Παίκτης & χρώμα κλειδώθηκαν.", style: TextStyle(color: Colors.orange[900], fontSize: 12, fontWeight: FontWeight.bold))),
+                            Expanded(child: Text(
+                                greek
+                                    ? "Ο παίκτης έχει 2η κίτρινη. Παίκτης & χρώμα κλειδώθηκαν."
+                                    : "Player has 2nd yellow. Player & color locked.",
+                                style: TextStyle(color: Colors.orange[900], fontSize: 12, fontWeight: FontWeight.bold))),
                           ],
                         ),
                       ),
@@ -1387,7 +1431,7 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
                         showSearchBox: true,
                         searchFieldProps: TextFieldProps(
                           style: TextStyle(color: textColor),
-                          decoration: InputDecoration(hintText: "Αναζήτηση...", hintStyle: const TextStyle(color: Colors.grey), border: InputBorder.none),
+                          decoration: InputDecoration(hintText: greek ? "Αναζήτηση..." : "Search...", hintStyle: const TextStyle(color: Colors.grey), border: InputBorder.none),
                         ),
                         menuProps: MenuProps(backgroundColor: isDark ? const Color(0xFF2C2C2C) : Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
                         itemBuilder: (context, item, isSelected) {
@@ -1403,7 +1447,7 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
                       ),
                       items: dropdownItems,
                       dropdownDecoratorProps: DropDownDecoratorProps(
-                        dropdownSearchDecoration: InputDecoration(labelText: "Επιλογή Παίκτη:", labelStyle: TextStyle(color: labelColor), filled: true, fillColor: fieldColor, border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none)),
+                        dropdownSearchDecoration: InputDecoration(labelText: greek ? "Επιλογή Παίκτη:" : "Select Player:", labelStyle: TextStyle(color: labelColor), filled: true, fillColor: fieldColor, border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none)),
                         baseStyle: TextStyle(color: textColor),
                       ),
                       selectedItem: selectedCardPlayer,
@@ -1412,9 +1456,10 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
                         setDialogState(() {
                           selectedCardPlayer = newValue;
                           String newName = newValue!.split(" - ")[1];
-                          if (checkHasPreviousYellow(newName)) {
-                            isYellow = false;
-                            isSecondYellow = true;
+                          // Αν αλλάξει παίκτης, ελέγχουμε αν ο νέος έχει ήδη κίτρινη
+                          if (checkHasPreviousYellow(newName, card)) {
+                            isYellow = true;
+                            isSecondYellow = true; // Γίνεται 2η κίτρινη αυτόματα
                           } else {
                             isYellow = true;
                             isSecondYellow = false;
@@ -1425,39 +1470,63 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
                     ),
                     const SizedBox(height: 15),
 
+                    // --- ΕΠΙΛΟΓΗ ΧΡΩΜΑΤΟΣ ΚΑΡΤΑΣ ---
                     Opacity(
                       opacity: hasSubsequentSecondYellow ? 0.5 : 1.0,
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
+                          // 1. ΚΙΤΡΙΝΗ / 2Η ΚΙΤΡΙΝΗ
                           GestureDetector(
-                            onTap: (hasSubsequentSecondYellow || hasPreviousYellowForNewPlayer)
+                            onTap: hasSubsequentSecondYellow
                                 ? null
-                                : () => setDialogState(() { isYellow = true; isSecondYellow = false; }),
-                            child: Opacity(
-                              opacity: (hasPreviousYellowForNewPlayer || isSecondYellow) ? 0.3 : 1.0,
-                              child: Column(
-                                children: [
-                                  Container(
-                                    width: 40, height: 55,
-                                    decoration: BoxDecoration(color: Colors.yellow[600], borderRadius: BorderRadius.circular(5), border: isYellow ? Border.all(color: textColor, width: 3) : null, boxShadow: isYellow ? [BoxShadow(color: Colors.yellowAccent.withOpacity(0.5), blurRadius: 10)] : null),
-                                  ),
-                                  const SizedBox(height: 5),
-                                  Text("Κίτρινη", style: TextStyle(color: textColor, fontSize: 12))
-                                ],
-                              ),
-                            ),
-                          ),
-                          GestureDetector(
-                            onTap: hasSubsequentSecondYellow ? null : () => setDialogState(() { isYellow = false; if (!hasPreviousYellowForNewPlayer) isSecondYellow = false; }),
+                                : () => setDialogState(() {
+                              isYellow = true;
+                              // Αν ο παίκτης έχει ήδη άλλη κίτρινη, τότε αυτή γίνεται 2η κίτρινη!
+                              isSecondYellow = hasPrevYellowForSelection;
+                              errorMessage = null;
+                            }),
                             child: Column(
                               children: [
                                 Container(
                                   width: 40, height: 55,
-                                  decoration: BoxDecoration(color: Colors.red[600], borderRadius: BorderRadius.circular(5), border: !isYellow ? Border.all(color: textColor, width: 3) : null, boxShadow: !isYellow ? [BoxShadow(color: Colors.redAccent.withOpacity(0.5), blurRadius: 10)] : null),
+                                  decoration: BoxDecoration(
+                                      color: Colors.yellow[600],
+                                      borderRadius: BorderRadius.circular(5),
+                                      border: isYellow ? Border.all(color: textColor, width: 3) : null,
+                                      boxShadow: isYellow ? [BoxShadow(color: Colors.yellowAccent.withOpacity(0.5), blurRadius: 10)] : null
+                                  ),
                                 ),
                                 const SizedBox(height: 5),
-                                Text("Κόκκινη", style: TextStyle(color: textColor, fontSize: 12))
+                                Text(
+                                    hasPrevYellowForSelection && isYellow ? (greek ? "2η Κίτρινη" : "2nd Yellow") : (greek ? "Κίτρινη" : "Yellow"),
+                                    style: TextStyle(color: textColor, fontSize: 12, fontWeight: FontWeight.bold)
+                                )
+                              ],
+                            ),
+                          ),
+                          // 2. ΑΠΕΥΘΕΙΑΣ ΚΟΚΚΙΝΗ
+                          GestureDetector(
+                            onTap: hasSubsequentSecondYellow
+                                ? null
+                                : () => setDialogState(() {
+                              isYellow = false;
+                              isSecondYellow = false; // Απευθείας κόκκινη
+                              errorMessage = null;
+                            }),
+                            child: Column(
+                              children: [
+                                Container(
+                                  width: 40, height: 55,
+                                  decoration: BoxDecoration(
+                                      color: Colors.red[600],
+                                      borderRadius: BorderRadius.circular(5),
+                                      border: !isYellow ? Border.all(color: textColor, width: 3) : null,
+                                      boxShadow: !isYellow ? [BoxShadow(color: Colors.redAccent.withOpacity(0.5), blurRadius: 10)] : null
+                                  ),
+                                ),
+                                const SizedBox(height: 5),
+                                Text(greek ? "Κόκκινη" : "Red", style: TextStyle(color: textColor, fontSize: 12))
                               ],
                             ),
                           ),
@@ -1475,7 +1544,7 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
                             keyboardType: TextInputType.number,
                             style: TextStyle(color: textColor, fontWeight: FontWeight.bold),
                             onChanged: (val) { if (errorMessage != null) setDialogState(() => errorMessage = null); },
-                            decoration: InputDecoration(labelText: "Λεπτό", labelStyle: TextStyle(color: labelColor), filled: true, fillColor: fieldColor, border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none), prefixIcon: Icon(Icons.timer_outlined, color: isDark ? Colors.grey[400] : Colors.grey[700])),
+                            decoration: InputDecoration(labelText: greek ? "Λεπτό" : "Minute", labelStyle: TextStyle(color: labelColor), filled: true, fillColor: fieldColor, border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none), prefixIcon: Icon(Icons.timer_outlined, color: isDark ? Colors.grey[400] : Colors.grey[700])),
                           ),
                         ),
                         const SizedBox(width: 10),
@@ -1485,12 +1554,12 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
                             value: half,
                             dropdownColor: isDark ? const Color(0xFF2C2C2C) : Colors.white,
                             style: TextStyle(color: textColor, fontWeight: FontWeight.w500),
-                            decoration: InputDecoration(labelText: "Ημίχρονο", labelStyle: TextStyle(color: labelColor), filled: true, fillColor: fieldColor, border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none)),
+                            decoration: InputDecoration(labelText: greek ? "Ημίχρονο" : "Half", labelStyle: TextStyle(color: labelColor), filled: true, fillColor: fieldColor, border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none)),
                             items: [
-                              const DropdownMenuItem(value: 0, child: Text('1ο Ημίχρονο')),
-                              const DropdownMenuItem(value: 1, child: Text('2ο Ημίχρονο')),
-                              if (widget.match.hasExtraTimeStarted) const DropdownMenuItem(value: 2, child: Text('1ο Ημ. Παράτασης')),
-                              if (widget.match.hasSecondHalfExtraTimeStarted) const DropdownMenuItem(value: 3, child: Text('2ο Ημ. Παράτασης')),
+                              DropdownMenuItem(value: 0, child: Text(greek ? '1ο Ημίχρονο' : '1st Half')),
+                              DropdownMenuItem(value: 1, child: Text(greek ? '2ο Ημίχρονο' : '2nd Half')),
+                              if (widget.match.hasExtraTimeStarted) DropdownMenuItem(value: 2, child: Text(greek ? '1ο Ημ. Παράτασης' : '1st Half ET')),
+                              if (widget.match.hasSecondHalfExtraTimeStarted) DropdownMenuItem(value: 3, child: Text(greek ? '2ο Ημ. Παράτασης' : '2nd Half ET')),
                             ],
                             onChanged: (value) => setDialogState(() { half = value ?? 1; if (errorMessage != null) errorMessage = null; }),
                           ),
@@ -1503,7 +1572,7 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
                       controller: reasonController,
                       style: TextStyle(color: textColor),
                       decoration: InputDecoration(
-                        labelText: "Αιτιολογία (Προαιρετικό)",
+                        labelText: greek ? "Αιτιολογία (Προαιρετικό)" : "Reason (Optional)",
                         labelStyle: TextStyle(color: labelColor),
                         filled: true,
                         fillColor: fieldColor,
@@ -1531,7 +1600,9 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
                         TextButton(
                           onPressed: () {
                             if (hasSubsequentSecondYellow) {
-                              setDialogState(() => errorMessage = "Δεν μπορείτε να διαγράψετε την 1η κίτρινη. Διαγράψτε πρώτα την 2η (Κόκκινη)!");
+                              setDialogState(() => errorMessage = greek
+                                  ? "Δεν μπορείτε να διαγράψετε την 1η κίτρινη. Διαγράψτε πρώτα την 2η (Κόκκινη)!"
+                                  : "Cannot delete 1st yellow. Delete the 2nd (Red) first!");
                               return;
                             }
 
@@ -1540,23 +1611,28 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
                               builder: (ctx) => AlertDialog(
                                 backgroundColor: isDark ? const Color(0xFF2C2C2C) : Colors.white,
                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                                title: Text('Επιβεβαίωση', style: TextStyle(color: textColor)),
-                                content: Text('Είσαι σίγουρος ότι θέλεις να διαγράψεις αυτή την Κάρτα;', style: TextStyle(color: isDark ? Colors.white70 : Colors.black87)),
+                                title: Text(greek ? 'Επιβεβαίωση' : 'Confirmation', style: TextStyle(color: textColor)),
+                                content: Text(
+                                    greek
+                                        ? 'Είσαι σίγουρος ότι θέλεις να διαγράψεις αυτή την Κάρτα;'
+                                        : 'Are you sure you want to delete this Card?',
+                                    style: TextStyle(color: isDark ? Colors.white70 : Colors.black87)
+                                ),
                                 actions: [
-                                  TextButton(onPressed: () => Navigator.of(ctx).pop(), child: const Text('Ακύρωση', style: TextStyle(color: Colors.grey))),
+                                  TextButton(onPressed: () => Navigator.of(ctx).pop(), child: Text(greek ? 'Ακύρωση' : 'Cancel', style: const TextStyle(color: Colors.grey))),
                                   TextButton(
                                     onPressed: () {
                                       Navigator.of(ctx).pop();
                                       Navigator.of(context).pop();
                                       widget.match.cancelCard(card);
                                     },
-                                    child: const Text('Διαγραφή', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+                                    child: Text(greek ? 'Διαγραφή' : 'Delete', style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
                                   ),
                                 ],
                               ),
                             );
                           },
-                          child: Text("Διαγραφή",
+                          child: Text(greek ? "Διαγραφή" : "Delete",
                               style: TextStyle(color: hasSubsequentSecondYellow ? Colors.grey : Colors.red[600], fontWeight: FontWeight.bold, fontSize: 16)),
                         ),
                         ElevatedButton(
@@ -1566,17 +1642,21 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
                               String finalPlayerName = selectedCardPlayer!.split(" - ")[1];
                               int? parsedNewMinute = int.tryParse(minuteController.text);
                               if (parsedNewMinute == null) {
-                                setDialogState(() => errorMessage = "Παρακαλώ εισάγετε έγκυρο αριθμό!");
+                                setDialogState(() => errorMessage = greek ? "Παρακαλώ εισάγετε έγκυρο αριθμό!" : "Please enter a valid number!");
                                 return;
                               }
                               int newRawSeconds = (parsedNewMinute - 1) * 60;
 
                               if (hasSubsequentSecondYellow && secondYellowMinuteRaw != null && newRawSeconds >= secondYellowMinuteRaw!) {
-                                setDialogState(() => errorMessage = "Η 2η κίτρινη είναι στο ${(secondYellowMinuteRaw! ~/ 60) + 1}'. Η 1η πρέπει να είναι νωρίτερα!");
+                                setDialogState(() => errorMessage = greek
+                                    ? "Η 2η κίτρινη είναι στο ${(secondYellowMinuteRaw! ~/ 60) + 1}'. Η 1η πρέπει να είναι νωρίτερα!"
+                                    : "2nd yellow is at ${(secondYellowMinuteRaw! ~/ 60) + 1}'. 1st must be earlier!");
                                 return;
                               }
                               if (isSecondYellow && firstYellowMinuteRaw != null && newRawSeconds <= firstYellowMinuteRaw!) {
-                                setDialogState(() => errorMessage = "Η 1η κίτρινη είναι στο ${(firstYellowMinuteRaw! ~/ 60) + 1}'. Η 2η πρέπει να είναι αργότερα!");
+                                setDialogState(() => errorMessage = greek
+                                    ? "Η 1η κίτρινη είναι στο ${(firstYellowMinuteRaw! ~/ 60) + 1}'. Η 2η πρέπει να είναι αργότερα!"
+                                    : "1st yellow is at ${(firstYellowMinuteRaw! ~/ 60) + 1}'. 2nd must be later!");
                                 return;
                               }
 
@@ -1586,7 +1666,7 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
                               _saveEditedCard(card, minuteController.text, finalPlayerName, isYellow, isSecondYellow, half, finalReason);
                             }
                           },
-                          child: const Text("Αποθήκευση", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+                          child: Text(greek ? "Αποθήκευση" : "Save", style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
                         ),
                       ],
                     ),
@@ -1616,55 +1696,48 @@ class _MatchStartedViewState extends State<_MatchStartedView> {
         team: oldCard.team,
         isYellow: isYellow,
         isSecondYellow: isSecondYellow,
-        reason: reason, // 🌟 Περνάμε την αιτιολογία!
+        reason: reason,
         minute: seconds,
         isHomeTeam: oldCard.isHomeTeam,
         half: half,
       );
       await widget.match.editCard(oldCard, newCard);
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text("Παρακαλώ εισάγετε έναν έγκυρο αριθμό λεπτού."),
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(greek ? "Παρακαλώ εισάγετε έναν έγκυρο αριθμό λεπτού." : "Please enter a valid minute number."),
         backgroundColor: Colors.red,
       ));
     }
   }
 
-  //Κουμπί για το Φύλλο Αγώνα
   Widget _buildPdfReportButton() {
-    // Ελέγχουμε αν είναι admin ΚΑΙ αν το ματς έχει τελειώσει οριστικά!
     if (globalUser.isUpperAdmin && widget.match.hasMatchEndedFinal && !(DateTime.now().millisecondsSinceEpoch ~/ 1000 >
         widget.match.startTimeInSeconds + 3 * 3600)) {
       return Padding(
         padding: const EdgeInsets.only(top: 15.0, bottom: 5.0),
         child: ElevatedButton.icon(
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.blue[800], // Επίσημο χρώμα
+            backgroundColor: Colors.blue[800],
             elevation: 8,
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           ),
           icon: const Icon(Icons.picture_as_pdf, color: Colors.white),
-          label: const Text(
-            "Φύλλο Αγώνα & Υπογραφές",
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+          label: Text(
+            greek ? "Φύλλο Αγώνα & Υπογραφές" : "Match Report & Signatures",
+            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
           ),
           onPressed: () {
-            // Εδώ τον στέλνουμε στην οθόνη υπογραφών που φτιάξαμε!
-
             Navigator.push(
               context,
               MaterialPageRoute(
                 builder: (context) => MatchReportScreen(match: widget.match),
               ),
             );
-
-            print("Πάμε για υπογραφές!");
           },
         ),
       );
     }
-    // Αν το ματς παίζεται ακόμα, δεν δείχνουμε τίποτα.
     return const SizedBox.shrink();
   }
 }

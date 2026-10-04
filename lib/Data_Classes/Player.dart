@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:uuid/uuid.dart'; // 🌟 ΝΕΟ IMPORT
+import 'package:uuid/uuid.dart';
 
 import '../globals.dart';
 import 'Team.dart';

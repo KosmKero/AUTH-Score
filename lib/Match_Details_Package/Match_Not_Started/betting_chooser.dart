@@ -9,13 +9,11 @@ import 'DetailsMatchNotStarted.dart';
 
 class BettingChooser extends StatefulWidget {
   final MatchDetails match;
-  late final matchKey;
-  BettingChooser({
+
+  const BettingChooser({
     super.key,
     required this.match,
-  }){
-    matchKey = '${match.homeTeam.nameEnglish}${match.awayTeam.nameEnglish}${match.dateString}';
-  }
+  });
 
   @override
   State<BettingChooser> createState() => _BettingChooserState();
@@ -35,7 +33,7 @@ class _BettingChooserState extends State<BettingChooser> {
 
   bool _isVotingOpen() {
     int nowInSeconds = DateTime.now().millisecondsSinceEpoch ~/ 1000;
-    int lockTime = widget.match.matchDateTime2.millisecondsSinceEpoch ~/ 1000;  //15 λεπτα μετα την ωρα του ματς
+    int lockTime = widget.match.matchDateTime2.millisecondsSinceEpoch ~/ 1000;  // 15 λεπτά μετά την ώρα του ματς
     return nowInSeconds < lockTime && !widget.match.hasMatchStarted;
   }
 
@@ -44,14 +42,15 @@ class _BettingChooserState extends State<BettingChooser> {
     bool votingOpen = _isVotingOpen();
 
     if (vote != null && mounted) {
-      final loadedPercentages = await loadPercentages(widget.match);
+
+      final loadedPercentages = await teamsHandle.getPercentages(widget.match.matchDocId);
       setState(() {
         hasChosen = true;
         _selected = vote;
         percentages = loadedPercentages;
       });
     } else if (!votingOpen && mounted) {
-      final loadedPercentages = await loadPercentages(widget.match);
+      final loadedPercentages = await teamsHandle.getPercentages(widget.match.matchDocId);
       setState(() {
         percentages = loadedPercentages;
       });
@@ -81,8 +80,8 @@ class _BettingChooserState extends State<BettingChooser> {
       // Στέλνουμε τα δεδομένα στο Firebase
       await saveUserVoteToMatch(match: widget.match, choice: value);
 
-      // Φορτώνουμε τα νέα ποσοστά
-      final loadedPercentages = await loadPercentages(widget.match);
+      // 💡 Φορτώνουμε τα νέα ποσοστά με το νέο ID
+      final loadedPercentages = await teamsHandle.getPercentages(widget.match.matchDocId);
 
       if (mounted) {
         setState(() {
@@ -127,7 +126,6 @@ class _BettingChooserState extends State<BettingChooser> {
       padding: const EdgeInsets.only(right: 10),
       child: Column(
         children: [
-
           SizedBox(
               width: 320,
               child: SegmentedButton<String>(
@@ -144,14 +142,14 @@ class _BettingChooserState extends State<BettingChooser> {
                   ButtonSegment(
                     value: 'X',
                     label: Text(
-                      (hasChosen || !votingOpen) && percentages.isNotEmpty ? "${percentages[2].toStringAsFixed(0)}%" : 'X',
+                      (hasChosen || !votingOpen) && percentages.length > 2 ? "${percentages[2].toStringAsFixed(0)}%" : 'X',
                       style: const TextStyle(fontSize: 15),
                     ),
                   ),
                   ButtonSegment(
                     value: '2',
                     label: Text(
-                      (hasChosen || !votingOpen) && percentages.isNotEmpty ? "${percentages[1].toStringAsFixed(0)}%" : '2',
+                      (hasChosen || !votingOpen) && percentages.length > 1 ? "${percentages[1].toStringAsFixed(0)}%" : '2',
                       style: const TextStyle(fontSize: 15),
                     ),
                   ),
@@ -190,7 +188,7 @@ class _BettingChooserState extends State<BettingChooser> {
     required MatchDetails match,
     required String choice,
   }) async {
-    final docRef = FirebaseFirestore.instance.collection('votes').doc(widget.matchKey);
+    final docRef = FirebaseFirestore.instance.collection('votes').doc(match.matchDocId);
 
     await docRef.set({
       'userVotes': {
@@ -198,9 +196,9 @@ class _BettingChooserState extends State<BettingChooser> {
       }
     }, SetOptions(merge: true));
 
-    await FirebaseFirestore.instance.collection('bets').doc('${FirebaseAuth.instance.currentUser!.uid}_${widget.matchKey}').set({
+    await FirebaseFirestore.instance.collection('bets').doc('${FirebaseAuth.instance.currentUser!.uid}_${match.matchDocId}').set({
       'userId': FirebaseAuth.instance.currentUser!.uid,
-      'matchId': widget.matchKey,
+      'matchId': match.matchDocId,
       'choice': choice,
       'status': 'pending',
       'createdAt': FieldValue.serverTimestamp(),
@@ -217,7 +215,7 @@ class _BettingChooserState extends State<BettingChooser> {
   Future<String?> getUserVoteFromMatch({required MatchDetails match}) async {
     final doc = await FirebaseFirestore.instance
         .collection('votes')
-        .doc(widget.matchKey)
+        .doc(match.matchDocId)
         .get();
 
     final uid = FirebaseAuth.instance.currentUser?.uid;

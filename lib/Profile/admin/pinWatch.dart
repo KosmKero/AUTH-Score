@@ -1,6 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; // ΑΠΑΡΑΙΤΗΤΟ ΓΙΑ ΤΟ COPY (Clipboard)
+import 'package:flutter/services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:untitled1/globals.dart' as global;
 
@@ -20,7 +20,6 @@ class TeamPinsDashboard extends StatefulWidget {
 }
 
 class _TeamPinsDashboardState extends State<TeamPinsDashboard> {
-  // Controller και μεταβλητή για την αναζήτηση
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
 
@@ -33,11 +32,15 @@ class _TeamPinsDashboardState extends State<TeamPinsDashboard> {
   // Συνάρτηση για Δημιουργία Νέου PIN
   Future<void> _resetPin(BuildContext context, String teamId) async {
     String newPin = generateNewPin();
+
+    //  Αποθήκευση στο private/secrets
     await FirebaseFirestore.instance
         .collection('year')
         .doc(global.thisYearNow.toString())
         .collection('teams')
         .doc(teamId)
+        .collection('private')
+        .doc('secrets')
         .set({'secret_pin': newPin}, SetOptions(merge: true));
 
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -121,7 +124,6 @@ class _TeamPinsDashboardState extends State<TeamPinsDashboard> {
 
                 final allTeams = snapshot.data?.docs ?? [];
 
-                // Φιλτράρισμα βάσει του Search Query
                 final filteredTeams = allTeams.where((teamDoc) {
                   return teamDoc.id.toLowerCase().contains(_searchQuery);
                 }).toList();
@@ -142,48 +144,66 @@ class _TeamPinsDashboardState extends State<TeamPinsDashboard> {
                     var team = filteredTeams[index];
                     var teamData = team.data() as Map<String, dynamic>;
 
-                    String? currentPin = teamData.containsKey('secret_pin') ? teamData['secret_pin'] : null;
+                    // --- ΝΕΟ: Δεύτερο StreamBuilder για να διαβάζει live το PIN από το private subcollection ---
+                    return StreamBuilder<DocumentSnapshot>(
+                        stream: team.reference.collection('private').doc('secrets').snapshots(),
+                        builder: (context, secretSnapshot) {
 
-                    return Card(
-                      color: tileColor,
-                      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                      child: ListTile(
-                        leading: const CircleAvatar(
-                          backgroundColor: Colors.blueAccent,
-                          child: Icon(Icons.shield, color: Colors.white),
-                        ),
-                        title: Text(
-                          team.id,
-                          style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 16),
-                        ),
-                        subtitle: Text(
-                          currentPin != null ? 'PIN: $currentPin' : 'Χωρίς PIN',
-                          style: TextStyle(
-                            color: currentPin != null ? Colors.green : Colors.redAccent,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                            letterSpacing: 1.2,
-                          ),
-                        ),
-                        // ---- ΚΟΥΜΠΙΑ COPY ΚΑΙ REFRESH ----
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            if (currentPin != null) // Εμφανίζεται μόνο αν υπάρχει PIN
-                              IconButton(
-                                icon: const Icon(Icons.copy, color: Colors.blue),
-                                tooltip: 'Αντιγραφή PIN',
-                                onPressed: () => _copyToClipboard(currentPin, team.id),
+                          String? currentPin;
+
+                          // Ψάχνουμε πρώτα στο νέο κρυφό έγγραφο
+                          if (secretSnapshot.hasData && secretSnapshot.data!.exists) {
+                            var secretData = secretSnapshot.data!.data() as Map<String, dynamic>?;
+                            if (secretData != null && secretData.containsKey('secret_pin')) {
+                              currentPin = secretData['secret_pin'];
+                            }
+                          }
+                          // Fallback: Αν δεν υπάρχει στο κρυφό, κοιτάμε μήπως ξέμεινε στο κεντρικό έγγραφο
+                          if (currentPin == null && teamData.containsKey('secret_pin')) {
+                            currentPin = teamData['secret_pin'];
+                          }
+
+                          return Card(
+                            color: tileColor,
+                            margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                            child: ListTile(
+                              leading: const CircleAvatar(
+                                backgroundColor: Colors.blueAccent,
+                                child: Icon(Icons.shield, color: Colors.white),
                               ),
-                            IconButton(
-                              icon: const Icon(Icons.refresh, color: Colors.orange),
-                              tooltip: 'Δημιουργία νέου PIN',
-                              onPressed: () => _resetPin(context, team.id),
+                              title: Text(
+                                team.id,
+                                style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 16),
+                              ),
+                              subtitle: Text(
+                                currentPin != null ? 'PIN: $currentPin' : 'Χωρίς PIN',
+                                style: TextStyle(
+                                  color: currentPin != null ? Colors.green : Colors.redAccent,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                  letterSpacing: 1.2,
+                                ),
+                              ),
+                              trailing: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  if (currentPin != null)
+                                    IconButton(
+                                      icon: const Icon(Icons.copy, color: Colors.blue),
+                                      tooltip: 'Αντιγραφή PIN',
+                                      onPressed: () => _copyToClipboard(currentPin!, team.id),
+                                    ),
+                                  IconButton(
+                                    icon: const Icon(Icons.refresh, color: Colors.orange),
+                                    tooltip: 'Δημιουργία νέου PIN',
+                                    onPressed: () => _resetPin(context, team.id),
+                                  ),
+                                ],
+                              ),
                             ),
-                          ],
-                        ),
-                      ),
+                          );
+                        }
                     );
                   },
                 );

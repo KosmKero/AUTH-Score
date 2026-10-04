@@ -65,7 +65,7 @@ class CreateAppBar extends StatelessWidget implements PreferredSizeWidget
       title: Padding(
         padding: EdgeInsets.only(left: 10,top: 10),
         child: Text(
-          "Αλλαγή username",
+          greek? "Αλλαγή username" :'Change Username',
           style: TextStyle(
             fontSize: 22,
             fontWeight: FontWeight.w600,

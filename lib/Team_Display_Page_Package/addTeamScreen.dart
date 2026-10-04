@@ -13,12 +13,11 @@ class AddTeamScreen extends StatefulWidget {
 class _AddTeamScreenState extends State<AddTeamScreen> {
   final _formKey = GlobalKey<FormState>();
 
-  // Controllers για τα πεδία κειμένου
+  // Controllers
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _nameEnglishController = TextEditingController();
   final TextEditingController _initialsController = TextEditingController();
   final TextEditingController _foundationYearController = TextEditingController();
-  final TextEditingController _groupController = TextEditingController();
 
   bool _isLoading = false;
 
@@ -28,40 +27,41 @@ class _AddTeamScreenState extends State<AddTeamScreen> {
     _nameEnglishController.dispose();
     _initialsController.dispose();
     _foundationYearController.dispose();
-    _groupController.dispose();
     super.dispose();
   }
 
   Future<void> _submitTeam() async {
-    // 1. Έλεγχος ότι όλα τα πεδία είναι συμπληρωμένα σωστά
     if (_formKey.currentState!.validate()) {
       setState(() => _isLoading = true);
 
       try {
-        // 2. Δημιουργία του αντικειμένου της Νέας Ομάδας
-        // (νίκες, ήττες, ισοπαλίες, γκολ είναι όλα 0 από default)
+        // 💡 Τα ονόματα που γράφει ο χρήστης εδώ, γίνονται ΤΑΥΤΟΧΡΟΝΑ
+        // τα αμετάβλητα ID (name/nameEnglish) ΚΑΙ τα αρχικά Display Names.
+        String inputGreek = _nameController.text.trim();
+        String inputEnglish = _nameEnglishController.text.trim();
+
         Team newTeam = Team(
-          _nameController.text.trim(),                  // name
-          _nameEnglishController.text.trim(),           // nameEnglish
+          inputGreek,                                   // name (Immutable ID)
+          inputEnglish,                                 // nameEnglish (Immutable ID)
+          inputGreek,                                   // displayGreek (Αρχικό display)
+          inputEnglish,                                 // displayEnglish (Αρχικό display)
           0,                                            // matches
           0,                                            // wins
           0,                                            // losses
           0,                                            // draws
-          1,                                            // group
+          0,                                            // group (0 = Χωρίς Όμιλο αρχικά!)
           int.tryParse(_foundationYearController.text.trim()) ?? DateTime.now().year, // foundationYear
           0,                                            // titles
-          "",                 // coach
+          "",                                           // coach
           0,                                            // position
           _initialsController.text.trim().toUpperCase(),// initials
-          0,                                            //goals for
-          0,                                            //goals against
-          [],                                           // players (άδεια λίστα αρχικά)
+          0,                                            // goals for
+          0,                                            // goals against
+          [],                                           // players
         );
 
-        // 3. Αποθήκευση στο Firebase μέσω του βελτιωμένου TeamsHandle
         await TeamsHandle().addNewTeam(newTeam);
 
-        // 4. Μήνυμα Επιτυχίας και Επιστροφή
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -69,7 +69,7 @@ class _AddTeamScreenState extends State<AddTeamScreen> {
               backgroundColor: Colors.green,
             ),
           );
-          Navigator.pop(context,true); // Γυρνάμε πίσω στο HomePage
+          Navigator.pop(context, true);
         }
       } catch (e) {
         if (mounted) {
@@ -87,7 +87,6 @@ class _AddTeamScreenState extends State<AddTeamScreen> {
   Widget build(BuildContext context) {
     bool isDark = darkModeNotifier.value;
     Color bgColor = isDark ? const Color(0xFF121212) : Colors.grey[100]!;
-    Color textColor = isDark ? Colors.white : Colors.black87;
 
     return Scaffold(
       backgroundColor: bgColor,
@@ -103,12 +102,24 @@ class _AddTeamScreenState extends State<AddTeamScreen> {
         child: Form(
           key: _formKey,
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildTextField(_nameController, greek ? "Όνομα Ομάδας (Ελληνικά)" : "Team Name (Greek)", Icons.sports_soccer, isDark),
               _buildTextField(_nameEnglishController, greek ? "Όνομα Ομάδας (Αγγλικά)" : "Team Name (English)", Icons.language, isDark),
-              _buildTextField(_initialsController, greek ? "Αρχικά (π.χ. CSD, ECE I)" : "Initials (e.g. CSD)", Icons.short_text, isDark, maxLength: 7),
 
-              _buildTextField(_foundationYearController, greek ? "Έτος Ίδρυσης" : "Foundation Year", Icons.calendar_today, isDark, isNumber: true),
+              Row(
+                children: [
+                  Expanded(
+                    flex: 2,
+                    child: _buildTextField(_initialsController, greek ? "Αρχικά (π.χ. CSD)" : "Initials", Icons.short_text, isDark, maxLength: 7),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    flex: 3,
+                    child: _buildTextField(_foundationYearController, greek ? "Έτος Ίδρυσης" : "Foundation Year", Icons.calendar_today, isDark, isNumber: true),
+                  ),
+                ],
+              ),
 
               const SizedBox(height: 30),
 
@@ -134,7 +145,7 @@ class _AddTeamScreenState extends State<AddTeamScreen> {
     );
   }
 
-  // Βοηθητικό Widget για να μη γράφουμε τον ίδιο κώδικα 6 φορές για τα πεδία
+  // Το ίδιο Helper Widget που είχες
   Widget _buildTextField(TextEditingController controller, String label, IconData icon, bool isDark, {bool isNumber = false, int? maxLength}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16.0),

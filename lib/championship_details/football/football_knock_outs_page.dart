@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../Data_Classes/MatchDetails.dart';
-import '../Firebase_Handle/firebase_screen_stats_helper.dart';
-import '../Match_Details_Package/Match_Details_Page.dart';
-import '../globals.dart';
+import '../../Data_Classes/MatchDetails.dart';
+import '../../Firebase_Handle/firebase_screen_stats_helper.dart';
+import '../../Match_Details_Package/Match_Details_Page.dart';
+import '../../globals.dart';
 
-class KnockOutsPage extends StatefulWidget {
-  const KnockOutsPage({super.key, required this.playOffMatches});
+class FootballKnockOutsPage extends StatefulWidget {
+  const FootballKnockOutsPage({super.key, required this.playOffMatches});
 
   final Map<int, MatchDetails> playOffMatches;
 
   @override
-  State<KnockOutsPage> createState() => _KnockOutsPageState();
+  State<FootballKnockOutsPage> createState() => _FootballKnockOutsPageState();
 }
 
-class _KnockOutsPageState extends State<KnockOutsPage> {
+class _FootballKnockOutsPageState extends State<FootballKnockOutsPage> {
 
   @override
   void initState() {

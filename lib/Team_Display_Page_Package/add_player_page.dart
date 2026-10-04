@@ -24,8 +24,12 @@ class _AddPlayerScreenState extends State<AddPlayerScreen> {
   final _surnameController = TextEditingController();
   final _numberController = TextEditingController();
 
-  String _selectedPosition = 'Τερματοφύλακας';
-  final List<String> positions = ['Τερματοφύλακας', 'Αμυντικός', 'Μέσος', 'Επιθετικός'];
+  //  Κρατάμε το INDEX αντί για το String (0=GK, 1=DEF, 2=MID, 3=ATT)
+  int _selectedPositionIndex = 0;
+
+  List<String> get _localizedPositions => greek
+      ? ['Τερματοφύλακας', 'Αμυντικός', 'Μέσος', 'Επιθετικός']
+      : ['Goalkeeper', 'Defender', 'Midfielder', 'Forward'];
 
   @override
   void dispose() {
@@ -40,7 +44,8 @@ class _AddPlayerScreenState extends State<AddPlayerScreen> {
       final name = _nameController.text.trim();
       final surname = _surnameController.text.trim();
       final number = int.parse(_numberController.text.trim());
-      int pos = positions.indexOf(_selectedPosition);
+
+      int pos = _selectedPositionIndex;
 
       final newPlayer = Player(
           name,
@@ -114,7 +119,7 @@ class _AddPlayerScreenState extends State<AddPlayerScreen> {
               const SizedBox(height: 12),
 
               Row(
-                crossAxisAlignment: CrossAxisAlignment.start, // Στοίχιση πάνω γιατί το FormField μπορεί να μεγαλώσει με το error text
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Expanded(
                     flex: 1,
@@ -130,8 +135,8 @@ class _AddPlayerScreenState extends State<AddPlayerScreen> {
                   const SizedBox(width: 10),
                   Expanded(
                     flex: 2,
-                    child: DropdownButtonFormField<String>(
-                      value: _selectedPosition,
+                    child: DropdownButtonFormField<int>(
+                      value: _selectedPositionIndex,
                       dropdownColor: cardColor,
                       style: TextStyle(color: isDark ? Colors.white : Colors.black, fontSize: 16),
                       decoration: InputDecoration(
@@ -143,15 +148,15 @@ class _AddPlayerScreenState extends State<AddPlayerScreen> {
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
                         focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Colors.blueAccent, width: 1.5)),
                       ),
-                      items: positions.map((position) {
-                        return DropdownMenuItem<String>(
-                          value: position,
-                          child: Text(position),
+                      items: List.generate(_localizedPositions.length, (index) {
+                        return DropdownMenuItem<int>(
+                          value: index,
+                          child: Text(_localizedPositions[index]),
                         );
-                      }).toList(),
+                      }),
                       onChanged: (value) {
                         setState(() {
-                          _selectedPosition = value!;
+                          _selectedPositionIndex = value!;
                         });
                       },
                     ),
@@ -166,7 +171,7 @@ class _AddPlayerScreenState extends State<AddPlayerScreen> {
                 width: double.infinity,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green[600], // Πράσινο χρώμα γιατί είναι ενέργεια "Προσθήκης"
+                    backgroundColor: Colors.green[600],
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     elevation: 2,
                   ),
@@ -184,7 +189,6 @@ class _AddPlayerScreenState extends State<AddPlayerScreen> {
     );
   }
 
-  // Το ίδιο Helper Widget για τέλεια ευκρίνεια και συνέπεια
   Widget _buildModernTextField({
     required TextEditingController controller,
     required String label,

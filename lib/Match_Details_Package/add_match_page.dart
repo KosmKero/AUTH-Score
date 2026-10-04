@@ -5,6 +5,7 @@ import '../Data_Classes/Team.dart';
 import '../Firebase_Handle/TeamsHandle.dart';
 import '../Firebase_Handle/firebase_screen_stats_helper.dart';
 import '../globals.dart';
+import '../main.dart';
 
 class AddMatchScreen extends StatefulWidget {
   @override
@@ -13,6 +14,8 @@ class AddMatchScreen extends StatefulWidget {
 
 class _AddMatchScreenState extends State<AddMatchScreen> {
   final _formKey = GlobalKey<FormState>();
+
+  bool _isLoading = false; // Προστασία από διπλά κλικ
 
   Team? homeTeam;
   Team? awayTeam;
@@ -73,12 +76,18 @@ class _AddMatchScreenState extends State<AddMatchScreen> {
               ),
               const SizedBox(height: 24),
 
-              // --- ΕΠΙΛΟΓΗ ΩΡΑΣ ---
+              // --- ΕΠΙΛΟΓΗ ΩΡΑΣ (24ΩΡΗ ΜΟΡΦΗ) ---
               InkWell(
                 onTap: () async {
                   final TimeOfDay? picked = await showTimePicker(
                     context: context,
                     initialTime: matchTime ?? const TimeOfDay(hour: 20, minute: 15),
+                    builder: (context, child) {
+                      return MediaQuery(
+                        data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: true),
+                        child: child!,
+                      );
+                    },
                   );
                   if (picked != null) setState(() => matchTime = picked);
                 },
@@ -94,7 +103,9 @@ class _AddMatchScreenState extends State<AddMatchScreen> {
                       Icon(Icons.access_time, color: Colors.blue[400]),
                       const SizedBox(width: 12),
                       Text(
-                        matchTime != null ? matchTime!.format(context) : (greek ? 'Επιλέξτε Ώρα' : 'Select Time'),
+                        matchTime != null
+                            ? '${matchTime!.hour.toString().padLeft(2, '0')}:${matchTime!.minute.toString().padLeft(2, '0')}'
+                            : (greek ? 'Επιλέξτε Ώρα' : 'Select Time'),
                         style: TextStyle(color: textColor, fontSize: 16),
                       ),
                       const Spacer(),
@@ -197,8 +208,10 @@ class _AddMatchScreenState extends State<AddMatchScreen> {
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     elevation: 2,
                   ),
-                  onPressed: _onSavePressed,
-                  child: Text(
+                  onPressed: _isLoading ? null : _onSavePressed, // Κλειδώνει όσο φορτώνει
+                  child: _isLoading
+                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                      : Text(
                     greek ? 'ΑΠΟΘΗΚΕΥΣΗ ΜΑΤΣ' : 'SAVE MATCH',
                     style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: 1),
                   ),
@@ -212,13 +225,19 @@ class _AddMatchScreenState extends State<AddMatchScreen> {
     );
   }
 
-  // --- LOGIC ΓΙΑ ΤΟ SAVE (Καθαρισμένο από την UI μέθοδο) ---
-  void _onSavePressed() {
+  // --- LOGIC ΓΙΑ ΤΟ SAVE (Ασφαλές και Ασύγχρονο) ---
+  Future<void> _onSavePressed() async {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState?.save();
 
       if (homeTeam == null || awayTeam == null) {
         _showError(greek ? "Παρακαλώ επιλέξτε και τις δύο ομάδες!" : "Please select both teams!");
+        return;
+      }
+
+      // Αποτροπή αγώνα απέναντι στον ίδιο αντίπαλο
+      if (homeTeam == awayTeam) {
+        _showError(greek ? "Οι ομάδες πρέπει να είναι διαφορετικές!" : "Teams must be different!");
         return;
       }
 
@@ -237,19 +256,32 @@ class _AddMatchScreenState extends State<AddMatchScreen> {
       }
 
       if (globalUser.controlTheseTeamsFootball(homeTeam!.name, awayTeam!.name) || globalUser.isUpperAdmin) {
-        TeamsHandle().addMatch(
-            homeTeam!, awayTeam!, day, month, year, game, false, isGroupPhase,
-            time.hour * 100 + time.minute, "upcoming", 0, 0);
 
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(greek ? "Το ματς προστέθηκε επιτυχώς!" : "Match added successfully!"),
-          backgroundColor: Colors.green,
-        ));
+        setState(() { _isLoading = true; }); // Ξεκινάει το Loading
 
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          navigatorKey.currentState?.pushReplacementNamed('/home');
-        });
-        Navigator.pop(context, true);
+        try {
+          await TeamsHandle().addMatch(
+              homeTeam!, awayTeam!, day, month, year, game, false, isGroupPhase,
+              time.hour * 100 + time.minute, "upcoming", 0, 0);
+
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+              content: Text(greek ? "Το ματς προστέθηκε επιτυχώς!" : "Match added successfully!"),
+              backgroundColor: Colors.green,
+            ));
+
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              navigatorKey.currentState?.pushReplacementNamed('/home');
+            });
+            Navigator.pop(context, true);
+          }
+        } catch (e) {
+          _showError("Σφάλμα κατά την αποθήκευση: $e");
+        } finally {
+          if (mounted) {
+            setState(() { _isLoading = false; }); // Σταματάει το Loading
+          }
+        }
       } else {
         _showError(greek ? "Πρέπει να ελέγχεις τουλάχιστον τη μία ομάδα!" : "You must control at least one team!");
       }
@@ -283,11 +315,11 @@ class _AddMatchScreenState extends State<AddMatchScreen> {
         ),
         itemBuilder: (context, Team item, isSelected) {
           return ListTile(
-            title: Text(item.name, style: TextStyle(color: isDark ? Colors.white : Colors.grey[900])),
+            title: Text(item.displayName, style: TextStyle(color: isDark ? Colors.white : Colors.grey[900])),
           );
         },
       ),
-      itemAsString: (Team team) => team.name,
+      itemAsString: (Team team) => team.displayName,
       dropdownDecoratorProps: DropDownDecoratorProps(
         dropdownSearchDecoration: InputDecoration(
           labelText: label,
@@ -303,7 +335,7 @@ class _AddMatchScreenState extends State<AddMatchScreen> {
       onChanged: onChanged,
       dropdownBuilder: (context, selectedItem) {
         return Text(
-          selectedItem != null ? selectedItem.name : (greek ? 'Επιλέξτε Ομάδα' : 'Select Team'),
+          selectedItem != null ? selectedItem.displayName : (greek ? 'Επιλέξτε Ομάδα' : 'Select Team'),
           style: TextStyle(color: isDark ? Colors.white : Colors.grey[900]),
         );
       },

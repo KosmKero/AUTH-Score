@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:untitled1/Data_Classes/MatchDetails.dart';
-import 'package:untitled1/Firebase_Handle/TeamsHandle.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../Data_Classes/Team.dart';
 import '../Firebase_Handle/firebase_screen_stats_helper.dart';
@@ -105,6 +105,12 @@ class _MatchEditPageState extends State<MatchEditPage> {
                   final TimeOfDay? picked = await showTimePicker(
                     context: context,
                     initialTime: matchTime ?? const TimeOfDay(hour: 20, minute: 15),
+                    builder: (context, child) {
+                      return MediaQuery(
+                        data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: true),
+                        child: child!,
+                      );
+                    },
                   );
                   if (picked != null) setState(() => matchTime = picked);
                 },
@@ -117,10 +123,12 @@ class _MatchEditPageState extends State<MatchEditPage> {
                   ),
                   child: Row(
                     children: [
-                      Icon(Icons.access_time, color: Colors.orange[400]), // Πορτοκαλί για Edit
+                      Icon(Icons.access_time, color: Colors.orange[400]),
                       const SizedBox(width: 12),
                       Text(
-                        matchTime != null ? matchTime!.format(context) : (greek ? 'Επιλέξτε Ώρα' : 'Select Time'),
+                        matchTime != null
+                            ? '${matchTime!.hour.toString().padLeft(2, '0')}:${matchTime!.minute.toString().padLeft(2, '0')}' // 24ωρη μορφή HH:mm
+                            : (greek ? 'Επιλέξτε Ώρα' : 'Select Time'),
                         style: TextStyle(color: textColor, fontSize: 16),
                       ),
                       const Spacer(),
@@ -177,7 +185,6 @@ class _MatchEditPageState extends State<MatchEditPage> {
                         if (value == null || value.isEmpty) return greek ? 'Κενό' : 'Empty';
                         int? v = int.tryParse(value);
                         int currentYear = DateTime.now().year;
-                        // Επιτρέπουμε και την προηγούμενη χρονιά σε περίπτωση που κάνει edit παλιό ματς
                         if (v == null || v < currentYear - 1 || v > currentYear + 1) return 'Λάθος';
                         return null;
                       },
@@ -193,7 +200,7 @@ class _MatchEditPageState extends State<MatchEditPage> {
                 decoration: BoxDecoration(color: cardColor, borderRadius: BorderRadius.circular(12)),
                 child: SwitchListTile(
                   title: Text(greek ? "Φάση Ομίλων;" : "Group Phase?", style: TextStyle(color: textColor, fontWeight: FontWeight.bold)),
-                  activeColor: Colors.orange[700], // Πορτοκαλί για το edit theme
+                  activeColor: Colors.orange[700],
                   value: isGroupPhase,
                   onChanged: (value) => setState(() => isGroupPhase = value),
                 ),
@@ -224,7 +231,7 @@ class _MatchEditPageState extends State<MatchEditPage> {
                 width: double.infinity,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.orange[700], // Πορτοκαλί για να ξεχωρίζει ως "Edit"
+                    backgroundColor: Colors.orange[700],
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     elevation: 2,
                   ),
@@ -243,7 +250,7 @@ class _MatchEditPageState extends State<MatchEditPage> {
     );
   }
 
-  // --- LOGIC ΓΙΑ ΤΟ SAVE ---
+  // ---  ΛΟΓΙΚΗ EDIT ΜΕ FIREBASE UPDATE ΑΝΤΙ ΓΙΑ DELETE/ADD ---
   Future<void> _onSavePressed() async {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState?.save();
@@ -278,26 +285,90 @@ class _MatchEditPageState extends State<MatchEditPage> {
           setState(() => _isLoading = true);
 
           try {
+            // Υπολογίζουμε την παλιά και τη νέα ημερομηνία για να βρούμε τη διαφορά
+            DateTime oldMatchDate = DateTime(widget.match.year, widget.match.month, widget.match.day);
+            DateTime newMatchDate = DateTime(year, month, day);
+
+            // Βρίσκουμε τη διαφορά σε ημέρες (χρησιμοποιούμε το .abs() σε περίπτωση που το ματς ήρθε νωρίτερα)
+            int daysDifference = newMatchDate.difference(oldMatchDate).inDays.abs();
+
+            // Το ματς θεωρείται ότι έχει "Μεγάλη Αναβολή" αν η διαφορά είναι πάνω από 3 μέρες
+            bool matchPostponedSignificantly = daysDifference >= 3;
+
+            // Ο έλεγχος για τις ομάδες παραμένει ίδιος
+            bool teamsChanged = (homeTeam!.name != widget.match.homeTeam.name) ||
+                (awayTeam!.name != widget.match.awayTeam.name);
+
+            // Η τελική μας συνθήκη: Ακυρώνουμε αν άλλαξαν οι ομάδες Ή αν το ματς πήγε πολλές μέρες μετά
+            bool shouldCancelBets = teamsChanged || matchPostponedSignificantly;
+
+
+
             int formattedTime = matchTime!.hour * 100 + matchTime!.minute;
 
-            // 1. Διαγραφή του παλιού αγώνα
-            await TeamsHandle().deleteMatch(widget.match);
+            // Υπολογισμός του νέου Timestamp (Για το UI και τα Notifications)
+            final newDateTime = DateTime(year, month, day, matchTime!.hour, matchTime!.minute);
+            final newTimestamp = Timestamp.fromDate(newDateTime);
 
-            // 2. Προσθήκη του νέου (ανανεωμένου) αγώνα
-            await TeamsHandle().addMatch(
-              homeTeam!,
-              awayTeam!,
-              day,
-              month,
-              year,
-              isGroupPhase ? 0 : game, // Αν είναι όμιλος, ας το κάνει 0 όπως στο παλιό ή κράτα το
-              false,
-              isGroupPhase,
-              formattedTime,
-              "upcoming",
-              0,
-              0,
-            );
+            // 1. ΑΠΕΥΘΕΙΑΣ UPDATE ΣΤΟ ΕΓΓΡΑΦΟ ΤΟΥ ΑΓΩΝΑ (Χωρίς να αλλάξει το ID)
+            await FirebaseFirestore.instance
+                .collection("year")
+                .doc(thisYearNow.toString())
+                .collection("matches")
+                .doc(widget.match.matchDocId)
+                .update({
+              'Hometeam': homeTeam!.name,
+              'Awayteam': awayTeam!.name,
+              'homeTeamEnglish': homeTeam!.nameEnglish,
+              'awayTeamEnglish': awayTeam!.nameEnglish,
+              'Day': day,
+              'Month': month,
+              'Year': year,
+              'Time': formattedTime,
+              'IsGroupPhase': isGroupPhase,
+              'Game': isGroupPhase ? 0 : game,
+              'startTime': newTimestamp,
+            });
+
+            // 2. ΕΝΗΜΕΡΩΣΗ ΤΩΝ ΣΤΟΙΧΕΙΩΝ ΚΑΙ ΣΤΟ ΕΓΓΡΑΦΟ ΤΩΝ VOTES (Για να δείχνει σωστά στην οθόνη του στοιχήματος)
+            if (shouldCancelBets) {
+              await FirebaseFirestore.instance.collection("votes").doc(widget.match.matchDocId).update({
+                'homeTeam': homeTeam!.name,
+                'awayTeam': awayTeam!.name,
+                'startTime': newTimestamp,
+                'userVotes': {}, // Αδειάζει το Map για να δεχτεί νέες ψήφους.
+              });
+            } else {
+              await FirebaseFirestore.instance.collection("votes").doc(widget.match.matchDocId).update({
+                'startTime': newTimestamp,
+              });
+            }
+
+            var userBetsSnapshot = await FirebaseFirestore.instance
+                .collection("bets")
+                .where("matchId", isEqualTo: widget.match.matchDocId)
+                .get();
+
+            if (userBetsSnapshot.docs.isNotEmpty) {
+              WriteBatch batch = FirebaseFirestore.instance.batch();
+
+              for (var doc in userBetsSnapshot.docs) {
+                // Φτιάχνουμε το Map με τα πεδία που θα ανανεωθούν σίγουρα
+                Map<String, dynamic> betUpdates = {
+                  'startTime': newTimestamp,
+                };
+
+                // Μόνο αν άλλαξαν οι ομάδες, προσθέτουμε και την ακύρωση
+                if (shouldCancelBets) {
+                  betUpdates['status'] = 'cancelled';
+                }
+
+                batch.update(doc.reference, betUpdates);
+              }
+
+              // Εκτέλεση όλων των αλλαγών ταυτόχρονα
+              await batch.commit();
+            }
 
             if (mounted) {
               ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -350,11 +421,11 @@ class _MatchEditPageState extends State<MatchEditPage> {
         ),
         itemBuilder: (context, Team item, isSelected) {
           return ListTile(
-            title: Text(item.name, style: TextStyle(color: isDark ? Colors.white : Colors.grey[900])),
+            title: Text(item.displayName, style: TextStyle(color: isDark ? Colors.white : Colors.grey[900])),
           );
         },
       ),
-      itemAsString: (Team team) => team.name,
+      itemAsString: (Team team) => team.displayName,
       dropdownDecoratorProps: DropDownDecoratorProps(
         dropdownSearchDecoration: InputDecoration(
           labelText: label,
@@ -370,7 +441,7 @@ class _MatchEditPageState extends State<MatchEditPage> {
       onChanged: onChanged,
       dropdownBuilder: (context, selectedItem) {
         return Text(
-          selectedItem != null ? selectedItem.name : (greek ? 'Επιλέξτε Ομάδα' : 'Select Team'),
+          selectedItem != null ? selectedItem.displayName : (greek ? 'Επιλέξτε Ομάδα' : 'Select Team'),
           style: TextStyle(color: isDark ? Colors.white : Colors.grey[900]),
         );
       },

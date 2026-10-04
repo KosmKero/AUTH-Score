@@ -41,7 +41,7 @@ class PenaltyShootoutPanel extends StatelessWidget {
                   SizedBox(
                     width: 120,
                     child: Text(
-                      match.homeTeam.name,
+                      match.homeTeam.displayName,
                       style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 14,
@@ -72,7 +72,7 @@ class PenaltyShootoutPanel extends StatelessWidget {
                   SizedBox(
                     width: 120,
                     child: Text(
-                      match.awayTeam.name,
+                      match.awayTeam.displayName,
                       style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 14,

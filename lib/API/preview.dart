@@ -9,7 +9,7 @@ import 'matchPDF.dart';
 
 
 class MatchReportScreen extends StatefulWidget {
-  final MatchDetails match; // 🌟 Τώρα παίρνει ΟΛΟ το ματς!
+  final MatchDetails match; // παίρνει ΟΛΟ το ματς
 
   const MatchReportScreen({Key? key, required this.match}) : super(key: key);
 

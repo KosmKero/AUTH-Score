@@ -3,11 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:untitled1/API/top_players_handle.dart';
 
-import '../Data_Classes/Player.dart';
-import '../Data_Classes/Team.dart';
-import '../Firebase_Handle/firebase_screen_stats_helper.dart';
-import '../globals.dart';
-
+import '../../Data_Classes/Player.dart';
+import '../../Data_Classes/Team.dart';
+import '../../Firebase_Handle/firebase_screen_stats_helper.dart';
+import '../../globals.dart';
+//ποδόσφαιρο
 class TopPlayersProvider extends StatelessWidget {
   final List<Team> teamsList;
 

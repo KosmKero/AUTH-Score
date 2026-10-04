@@ -4,7 +4,7 @@ import '../Firebase_Handle/TeamsHandle.dart';
 import '../globals.dart';
 
 class EditTeamScreen extends StatefulWidget {
-  final Team team; // Πρέπει να περάσουμε την ομάδα που θέλουμε να κάνουμε edit!
+  final Team team;
 
   const EditTeamScreen({super.key, required this.team});
 
@@ -18,8 +18,12 @@ class _EditTeamScreenState extends State<EditTeamScreen> {
   // Controllers
   late TextEditingController _nameController;
   late TextEditingController _nameEnglishController;
+
+  late TextEditingController _displayGreekController;
+  late TextEditingController _displayEnglishController;
+
   late TextEditingController _initialsController;
-  late TextEditingController _coachController;
+  late TextEditingController _coachController;   // Διαχειρίζεται και κενές τιμές
   late TextEditingController _foundationYearController;
   late TextEditingController _groupController;
   late TextEditingController _titlesController;
@@ -29,11 +33,16 @@ class _EditTeamScreenState extends State<EditTeamScreen> {
   @override
   void initState() {
     super.initState();
-    // Προ-συμπληρώνουμε τα πεδία με τα υπάρχοντα δεδομένα της ομάδας!
     _nameController = TextEditingController(text: widget.team.name);
     _nameEnglishController = TextEditingController(text: widget.team.nameEnglish);
+
+    _displayGreekController = TextEditingController(text: widget.team.displayGreek);
+    _displayEnglishController = TextEditingController(text: widget.team.displayEnglish);
+
     _initialsController = TextEditingController(text: widget.team.initials);
+
     _coachController = TextEditingController(text: widget.team.coach);
+
     _foundationYearController = TextEditingController(text: widget.team.foundationYear.toString());
     _groupController = TextEditingController(text: widget.team.group.toString());
     _titlesController = TextEditingController(text: widget.team.titles.toString());
@@ -43,6 +52,8 @@ class _EditTeamScreenState extends State<EditTeamScreen> {
   void dispose() {
     _nameController.dispose();
     _nameEnglishController.dispose();
+    _displayGreekController.dispose();
+    _displayEnglishController.dispose();
     _initialsController.dispose();
     _coachController.dispose();
     _foundationYearController.dispose();
@@ -61,11 +72,23 @@ class _EditTeamScreenState extends State<EditTeamScreen> {
       }
 
       try {
-        await TeamsHandle().updateTeamDetails(
-          widget.team.name, // Δεν αλλάζει ποτέ, είναι το ID!
-          widget.team.nameEnglish, // Δεν το διαβάζουμε καν από τον controller πλέον, κρατάμε το αρχικό!
+        widget.team.updateTeamDetails(
+          widget.team.name,
+          _displayGreekController.text.trim(),   // Ελληνικό Display Name
+          _displayEnglishController.text.trim(), // Αγγλικό Display Name
           _initialsController.text.trim().toUpperCase(),
           _coachController.text.trim(),
+          int.parse(_foundationYearController.text.trim()),
+          int.parse(_groupController.text.trim()),
+          titles,
+        );
+
+        await TeamsHandle().updateTeamDetails(
+          widget.team.name,
+          _displayGreekController.text.trim(),
+          _displayEnglishController.text.trim(),
+          _initialsController.text.trim().toUpperCase(),
+          _coachController.text.trim().isEmpty ? "" : _coachController.text.trim(), // Αν είναι κενό, στέλνουμε άδειο string
           int.parse(_foundationYearController.text.trim()),
           int.parse(_groupController.text.trim()),
           titles,
@@ -119,28 +142,52 @@ class _EditTeamScreenState extends State<EditTeamScreen> {
           key: _formKey,
           child: Column(
             children: [
-              // 1. ΟΝΟΜΑ (GREEK) - Απενεργοποιημένο!
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildModernTextField(
+                      controller: _nameController,
+                      label: "ID Ελλ (Κλειδωμένο)",
+                      icon: Icons.lock,
+                      isDark: isDark,
+                      cardColor: cardColor,
+                      enabled: false,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: _buildModernTextField(
+                      controller: _nameEnglishController,
+                      label: "ID Αγγλ (Κλειδωμένο)",
+                      icon: Icons.lock,
+                      isDark: isDark,
+                      cardColor: cardColor,
+                      enabled: false,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+
               _buildModernTextField(
-                controller: _nameController,
-                label: greek ? "Όνομα Ομάδας (Κλειδωμένο)" : "Team Name (Locked)",
-                icon: Icons.lock,
+                controller: _displayGreekController,
+                label: greek ? "Εμφανιζόμενο Όνομα (Ελληνικά)" : "Display Name (Greek)",
+                icon: Icons.edit,
                 isDark: isDark,
                 cardColor: cardColor,
-                enabled: false,
               ),
               const SizedBox(height: 16),
 
               _buildModernTextField(
-                controller: _nameEnglishController,
-                label: greek ? "Αγγλικό Όνομα (Κλειδωμένο)" : "English Name (Locked)",
-                icon: Icons.lock_outline, // Άλλαξα το εικονίδιο για να δείχνει ότι είναι κλειδωμένο
+                controller: _displayEnglishController,
+                label: greek ? "Εμφανιζόμενο Όνομα (Αγγλικά)" : "Display Name (English)",
+                icon: Icons.edit,
                 isDark: isDark,
                 cardColor: cardColor,
-                enabled: false,
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 24),
 
-              // 3. ΑΡΧΙΚΑ & ΠΡΟΠΟΝΗΤΗΣ
+              // 3. ΑΡΧΙΚΑ & ΠΡΟΠΟΝΗΤΗΣ (Προαιρετικός προπονητής)
               Row(
                 children: [
                   Expanded(
@@ -159,10 +206,11 @@ class _EditTeamScreenState extends State<EditTeamScreen> {
                     flex: 3,
                     child: _buildModernTextField(
                       controller: _coachController,
-                      label: greek ? "Προπονητής" : "Coach",
+                      label: greek ? "Προπονητής (Προαιρετικό)" : "Coach (Optional)",
                       icon: Icons.person,
                       isDark: isDark,
                       cardColor: cardColor,
+                      isRequired: false,
                     ),
                   ),
                 ],
@@ -234,7 +282,6 @@ class _EditTeamScreenState extends State<EditTeamScreen> {
     );
   }
 
-  // Το Helper Widget
   Widget _buildModernTextField({
     required TextEditingController controller,
     required String label,
@@ -244,6 +291,7 @@ class _EditTeamScreenState extends State<EditTeamScreen> {
     bool enabled = true,
     bool isNumber = false,
     int? maxLength,
+    bool isRequired = true,
   }) {
     return TextFormField(
       controller: controller,
@@ -263,8 +311,13 @@ class _EditTeamScreenState extends State<EditTeamScreen> {
       ),
       validator: (value) {
         if (!enabled) return null;
-        if (value == null || value.trim().isEmpty) return greek ? 'Υποχρεωτικό' : 'Required';
-        if (isNumber && int.tryParse(value) == null) return greek ? 'Λάθος' : 'Error';
+        // Αν είναι υποχρεωτικό και είναι κενό, πετάει σφάλμα
+        if (isRequired && (value == null || value.trim().isEmpty)) {
+          return greek ? 'Υποχρεωτικό' : 'Required';
+        }
+        if (isNumber && value != null && value.trim().isNotEmpty && int.tryParse(value) == null) {
+          return greek ? 'Λάθος' : 'Error';
+        }
         return null;
       },
     );
