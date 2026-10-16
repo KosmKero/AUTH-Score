@@ -78,22 +78,60 @@ class MatchPdfPreviewScreen extends StatelessWidget {
       });
 
       // =================================================================
-      // 3. ✉️ ΔΗΜΙΟΥΡΓΙΑ ΤΟΥ MAIL COLLECTION ΓΙΑ ΤΗΝ ΑΠΟΣΤΟΛΗ PDF (ΝΕΟ)
+      // 3. ΑΝΑΚΤΗΣΗ ΔΥΝΑΜΙΚΩΝ ΠΑΡΑΛΗΠΤΩΝ (Γραμματεία + Αρχηγοί)
+      // =================================================================
+      List<String> recipients = [];
+
+      // Α. Άντληση emails Γραμματείας από τα settings
+      DocumentSnapshot settingsDoc = await FirebaseFirestore.instance
+          .collection('settings')
+          .doc('match_sheet')
+          .get();
+      if (settingsDoc.exists) {
+        recipients.addAll(List<String>.from(settingsDoc['recipients'] ?? []));
+      }
+
+      // Β. Άντληση email Αρχηγού Γηπεδούχου (αν υπάρχει το uid του)
+      if (match.homeCaptain != null && match.homeCaptain!.isNotEmpty) {
+        DocumentSnapshot hCapDoc = await FirebaseFirestore.instance.collection('users').doc(match.homeCaptain).get();
+        if (hCapDoc.exists && hCapDoc.data().toString().contains('email')) {
+          recipients.add(hCapDoc.get('email'));
+        }
+      }
+
+      // Γ. Άντληση email Αρχηγού Φιλοξενούμενου (αν υπάρχει το uid του)
+      if (match.awayCaptain != null && match.awayCaptain!.isNotEmpty) {
+        DocumentSnapshot aCapDoc = await FirebaseFirestore.instance.collection('users').doc(match.awayCaptain).get();
+        if (aCapDoc.exists && aCapDoc.data().toString().contains('email')) {
+          recipients.add(aCapDoc.get('email'));
+        }
+      }
+
+      // Αφαίρεση διπλότυπων (π.χ. αν ο αρχηγός είναι και διαχειριστής)
+      recipients = recipients.toSet().toList();
+
+      // Ασφάλεια: Αν για κάποιο λόγο δεν βρεθεί κανένα email, βάλε fallback
+      if (recipients.isEmpty) {
+        recipients.add('oksder1234@gmail.com');
+      }
+
+      // =================================================================
+      // 4. ✉️ ΔΗΜΙΟΥΡΓΙΑ ΤΟΥ MAIL COLLECTION ΓΙΑ ΤΗΝ ΑΠΟΣΤΟΛΗ PDF
       // =================================================================
       await FirebaseFirestore.instance.collection("mail").add({
-        'to': ['oksder1234@gmail.com'],
+        'to': recipients, // <-- Μπαίνει η δυναμική λίστα!
         'message': {
           'subject': 'Φύλλο Αγώνα: ${match.homeTeam.displayName} - ${match.awayTeam.displayName}',
           'html': '''
-            <h3>Φύλλο Αγώνα</h3>
-            <p>Σας αποστέλλουμε το υπογεγραμμένο φύλλο αγώνα για την αναμέτρηση <b>${match.homeTeam.displayName} - ${match.awayTeam.displayName}</b>.</p>
-            <p><b>Τελικό Σκορ:</b> ${match.homeScore} - ${match.awayScore}</p>
-            <p>Παρακαλούμε βρείτε το PDF του αγώνα επισυναπτόμενο σε αυτό το μήνυμα.</p>
-          ''',
+          <h3>Επίσημο Φύλλο Αγώνα</h3>
+          <p>Σας αποστέλλουμε το υπογεγραμμένο φύλλο αγώνα για την αναμέτρηση <b>${match.homeTeam.displayName} - ${match.awayTeam.displayName}</b>.</p>
+          <p><b>Τελικό Σκορ:</b> ${match.homeScore} - ${match.awayScore}</p>
+          <p>Παρακαλούμε βρείτε το PDF του αγώνα επισυναπτόμενο σε αυτό το μήνυμα.</p>
+        ''',
           'attachments': [
             {
               'filename': 'Match_Report_${match.homeTeam.name}_${match.awayTeam.name}.pdf',
-              'path': downloadUrl // Δίνουμε το URL του PDF από το Storage
+              'path': downloadUrl
             }
           ]
         }
@@ -116,4 +154,7 @@ class MatchPdfPreviewScreen extends StatelessWidget {
         const SnackBar(content: Text('Σφάλμα κατά την υποβολή. Δοκιμάστε ξανά.'), backgroundColor: Colors.red),
       );
     }
-  }}
+  }
+
+
+}

@@ -44,7 +44,6 @@ class MatchReportGenerator {
       pw.MultiPage(
         pageFormat: PdfPageFormat.a4,
         margin: const pw.EdgeInsets.all(32),
-        // 💡 Βάζουμε το Theme για ασφάλεια
         theme: pw.ThemeData.withFont(
           base: font,
           bold: boldFont,
