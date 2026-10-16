@@ -3,9 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:untitled1/Data_Classes/MatchDetails.dart';
 
 import '../Data_Classes/Team.dart';
+// Βάλε εδώ το σωστό import για την κλάση AppTheme αν είναι αλλού
+import '../appTheme_colors.dart';
 import '../globals.dart';
 import '../main.dart';
-import 'Standings_Preview_Screen.dart';
+// import 'Standings_Preview_Screen.dart';
 import 'TeamDisplayPage.dart';
 
 class OneGroupStandings extends StatefulWidget {
@@ -27,87 +29,19 @@ class _OneGroupStandingsState extends State<OneGroupStandings> {
   }
 
   void _calculateStandings() {
+    // 1. Φιλτράρισμα ομάδων του ομίλου
     List<Team> groupTeams = teams.where((team) => team.group == widget.group).toList();
 
-    DateTime seasonStart = DateTime(widget.seasonYear, 9, 1);
-    DateTime seasonEnd = DateTime(widget.seasonYear + 1, 6, 30);
+    // 2. Ταξινόμηση αποκλειστικά βάσει της έτοιμης θέσης (1, 2, 3...)
+    groupTeams.sort((a, b) => a.position.compareTo(b.position));
 
-    List<MatchDetails> validMatches = previousMatches.where((match) {
-      DateTime matchDate = DateTime(match.year, match.month, match.day);
-      return match.isGroupPhase &&
-          matchDate.isAfter(seasonStart.subtract(const Duration(days: 1))) &&
-          matchDate.isBefore(seasonEnd.add(const Duration(days: 1)));
-    }).toList();
-
-    // 1. Helper function για να "καθαρίζουμε" τα Strings
-    // Αφαιρεί κενά και κάνει τα γράμματα πεζά για ασφαλή σύγκριση.
-    String cleanName(String name) => name.trim().toLowerCase();
-
-    groupTeams.sort((a, b) {
-      // Κριτήριο 1: Συνολικοί Βαθμοί
-      int pointsCompare = b.totalPoints.compareTo(a.totalPoints);
-      if (pointsCompare != 0) return pointsCompare;
-
-      // --- ΕΝΑΡΞΗ ΛΟΓΙΚΗΣ ΙΣΟΒΑΘΜΙΑΣ (MINI-LEAGUE) ---
-
-      // Βρίσκουμε όλες τις ομάδες που έχουν τους ίδιους βαθμούς
-      List<Team> tiedTeams = groupTeams.where((t) => t.totalPoints == a.totalPoints).toList();
-
-      // Φιλτράρουμε τους αγώνες για να κρατήσουμε ΜΟΝΟ αυτούς μεταξύ των ισοβαθμούντων
-      var miniLeagueMatches = validMatches.where((match) {
-        bool isHomeTied = tiedTeams.any((t) => cleanName(t.name) == cleanName(match.homeTeam.name));
-        bool isAwayTied = tiedTeams.any((t) => cleanName(t.name) == cleanName(match.awayTeam.name));
-        return isHomeTied && isAwayTied;
-      }).toList();
-
-      int aH2hPoints = 0;
-      int bH2hPoints = 0;
-
-      // Υπολογίζουμε τους H2H πόντους για την ομάδα A και την B μέσα σε αυτό το Mini-League
-      for (var match in miniLeagueMatches) {
-        String homeName = cleanName(match.homeTeam.name);
-        String awayName = cleanName(match.awayTeam.name);
-        String nameA = cleanName(a.name);
-        String nameB = cleanName(b.name);
-
-        // Πόντοι για ομάδα Α
-        if (homeName == nameA) {
-          if (match.scoreHome > match.scoreAway) aH2hPoints += 3;
-          else if (match.scoreHome == match.scoreAway) aH2hPoints += 1;
-        } else if (awayName == nameA) {
-          if (match.scoreAway > match.scoreHome) aH2hPoints += 3;
-          else if (match.scoreAway == match.scoreHome) aH2hPoints += 1;
-        }
-
-        // Πόντοι για ομάδα Β
-        if (homeName == nameB) {
-          if (match.scoreHome > match.scoreAway) bH2hPoints += 3;
-          else if (match.scoreHome == match.scoreAway) bH2hPoints += 1;
-        } else if (awayName == nameB) {
-          if (match.scoreAway > match.scoreHome) bH2hPoints += 3;
-          else if (match.scoreAway == match.scoreHome) bH2hPoints += 1;
-        }
-      }
-
-      print("Comparing ${a.name} vs ${b.name}: H2H Pts: $aH2hPoints - $bH2hPoints");
-
-
-      // Κριτήριο 2: Head-to-Head Βαθμοί
-      if (bH2hPoints != aH2hPoints) return bH2hPoints.compareTo(aH2hPoints);
-
-      // --- ΤΕΛΟΣ ΛΟΓΙΚΗΣ ΙΣΟΒΑΘΜΙΑΣ ---
-
-      // Κριτήριο 3: Συνολική Διαφορά Τερμάτων
-      return b.goalDifference.compareTo(a.goalDifference);
-    });
-
-    // Ενημέρωση της global λίστας topTeams
-    // Προσοχή: Κάνουμε clear πρώτα για να μην προστίθενται διπλότυπα κάθε φορά που καλείται η μέθοδος!
+    // 3. Ενημέρωση της global λίστας topTeams
     topTeams.removeWhere((t) => groupTeams.any((g) => g.name == t.name));
     for (var topTeam in groupTeams.take(4)) {
       topTeams.add(topTeam);
     }
 
+    // 4. Ενημέρωση UI
     setState(() {
       sortedGroupTeams = groupTeams;
     });
@@ -115,11 +49,13 @@ class _OneGroupStandingsState extends State<OneGroupStandings> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = darkModeNotifier.value;
+    // Διαβάζουμε το theme mode από το Flutter αυτόματα
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final screenWidth = MediaQuery.of(context).size.width;
 
-    final Color rowColor1 = isDark ? const Color(0xFF2D2D2D) : const Color.fromARGB(255, 235, 243, 255);
-    final Color rowColor2 = isDark ? const Color(0xFF1E1E1E) : Colors.white;
+    // ΠΑΙΡΝΟΥΜΕ ΤΑ ΧΡΩΜΑΤΑ ΑΠΟ ΤΟ AppTheme
+    final Color rowColor1 = isDark ? AppTheme.tableRowDark1 : AppTheme.tableRowLight1;
+    final Color rowColor2 = isDark ? AppTheme.tableRowDark2 : AppTheme.tableRowLight2;
     final Color textColor = isDark ? Colors.white : Colors.black87;
     final Color headerTextColor = isDark ? Colors.white54 : Colors.black54;
 
@@ -159,7 +95,6 @@ class _OneGroupStandingsState extends State<OneGroupStandings> {
           mainAxisSize: MainAxisSize.min, // Αποτρέπει το overflow
           children: [
             // ΤΙΤΛΟΣ ΟΜΙΛΟΥ
-            // ΤΙΤΛΟΣ ΟΜΙΛΟΥ ΚΑΙ ΚΟΥΜΠΙ STORY
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 4.0),
               child: Row(
@@ -169,25 +104,6 @@ class _OneGroupStandingsState extends State<OneGroupStandings> {
                     greek ? "Όμιλος ${widget.group}" : "Group ${widget.group}",
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: textColor),
                   ),
-
-                    /*
-                    IconButton(
-                      icon: const Icon(Icons.camera_alt, color: Colors.pinkAccent),
-                      tooltip: greek ? "Δημιουργία IG Story" : "Create IG Story",
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => StandingsStoryPreviewScreen(
-                              group: widget.group,
-                              teams: sortedGroupTeams, // Στέλνουμε τις ήδη ταξινομημένες ομάδες
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                     */
-
                 ],
               ),
             ),
@@ -222,15 +138,12 @@ class _OneGroupStandingsState extends State<OneGroupStandings> {
 
               return InkWell(
                 onTap: () async {
-                  //Περιμένουμε το αποτέλεσμα από την TeamDisplayPage
                   bool? didChange = await Navigator.push(
                       context,
                       MaterialPageRoute(builder: (context) => TeamDisplayPage(team))
                   );
 
-                  //Αν έγινε διαγραφή ή επεξεργασία (γύρισε true)
                   if (didChange == true && mounted) {
-                    // Ξανατρέχει τον υπολογισμό. Η συνάρτηση διαβάζει τη νέα global λίστα (teams)
                     _calculateStandings();
                   }
                 },
@@ -246,7 +159,8 @@ class _OneGroupStandingsState extends State<OneGroupStandings> {
                           child: isPromotionSpot
                               ? Container(
                             width: 20, height: 20,
-                            decoration: BoxDecoration(color: isDark ? Colors.green.shade700 : Colors.green, shape: BoxShape.circle),
+                            // ΧΡΩΜΑ ΠΡΟΚΡΙΣΗΣ ΑΠΟ ΤΟ APP THEME
+                            decoration: BoxDecoration(color: isDark ? Colors.green.shade700 : AppTheme.promotionGreen, shape: BoxShape.circle),
                             child: Center(child: Text((index + 1).toString(), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 11))),
                           )
                               : Text((index + 1).toString(), style: TextStyle(color: headerTextColor, fontWeight: FontWeight.bold, fontSize: 12)),
@@ -280,7 +194,12 @@ class _OneGroupStandingsState extends State<OneGroupStandings> {
                       statCell("${team.goalsFor}:${team.goalsAgainst}", goalsWidth),
 
                       // Πόντοι
-                      statCell(team.totalPoints.toString(), ptsWidth, isBold: true, color: isDark ? Colors.lightBlueAccent : Colors.blue.shade700),
+                      statCell(
+                          team.totalPoints.toString(),
+                          ptsWidth,
+                          isBold: true,
+                          color: isDark ? AppTheme.pointsDark : AppTheme.pointsLight
+                      ),
                     ],
                   ),
                 ),
@@ -296,8 +215,9 @@ class _OneGroupStandingsState extends State<OneGroupStandings> {
                   Container(
                     width: 8,
                     height: 8,
+                    // ΧΡΩΜΑ ΠΡΟΚΡΙΣΗΣ ΑΠΟ ΤΟ APP THEME (ΓΙΑ ΤΟ ΥΠΟΜΝΗΜΑ)
                     decoration: BoxDecoration(
-                      color: isDark ? Colors.green.shade700 : Colors.green,
+                      color: isDark ? Colors.green.shade700 : AppTheme.promotionGreen,
                       shape: BoxShape.circle,
                     ),
                   ),

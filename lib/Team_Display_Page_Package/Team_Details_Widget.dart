@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:untitled1/Team_Display_Page_Package/one_group_standings.dart';
 import '../Data_Classes/Team.dart';
 import '../Firebase_Handle/firebase_screen_stats_helper.dart';
+// import '../Match_Details_Package/Match_Not_Started/DetailsMatchNotStarted.dart'; // Αν δεν χρησιμοποιείται, το αφαιρούμε
 import '../Match_Details_Package/Match_Not_Started/DetailsMatchNotStarted.dart';
-import '../championship_details/football/football_StandingsPage.dart';
 import '../globals.dart';
 
 //ΟΛΗ Η ΚΛΑΣΗ ΑΦΟΡΑ ΤΗΝ ΚΑΤΑΣΚΕΥΗ ΤΟΥ ΠΩΣ ΘΑ ΕΜΦΑΝΙΖΕΤΑΙ ΤΑ ΚΥΚΛΑΚΙΑ ΜΕ ΤΗΝ ΝΙΚΗ , ΙΣΟΠΑΛΙΑ, ΗΤΤΑ.
@@ -22,12 +22,15 @@ class _TeamDetailsWidgetState extends State<TeamDetailsWidget> {
     logScreenViewSta(
         screenName: 'Team arxiki', screenClass: 'Team arxiki page');
 
+    // 1. Παίρνουμε το theme ΜΙΑ φορά στην αρχή της build()
+    final theme = Theme.of(context);
+
     return Expanded(
         child: SingleChildScrollView(
           child: Column(
             children: [
               Card(
-                  color: darkModeNotifier.value ? const Color(0xFF1E1E1E) : Colors.white,
+                  color: theme.cardColor, // Δυναμικό χρώμα κάρτας
                   margin: EdgeInsets.symmetric(
                       horizontal: MediaQuery.of(context).size.width * 0.02,
                       vertical: 15),
@@ -43,9 +46,7 @@ class _TeamDetailsWidgetState extends State<TeamDetailsWidget> {
                             style: TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
-                                color: darkModeNotifier.value
-                                    ? Colors.white
-                                    : Colors.black),
+                                color: theme.textTheme.bodyLarge?.color), // Δυναμικό χρώμα κειμένου
                           ),
                         ),
                         Padding(
@@ -69,9 +70,7 @@ class _TeamDetailsWidgetState extends State<TeamDetailsWidget> {
                         style: TextStyle(
                             fontSize: 22,
                             fontWeight: FontWeight.bold,
-                            color: darkModeNotifier.value
-                                ? Colors.white
-                                : Colors.white)),
+                            color: theme.textTheme.bodyLarge?.color)), // Δυναμικό χρώμα
                     const SizedBox(height: 3),
                     GroupStandingsWidget(group: widget.team.group),
                   ],
@@ -84,7 +83,7 @@ class _TeamDetailsWidgetState extends State<TeamDetailsWidget> {
                 padding: const EdgeInsets.symmetric(horizontal: 0),
                 child: Card(
                   shadowColor: Colors.black,
-                  color: darkModeNotifier.value ? const Color(0xFF1E1E1E) : Colors.white,
+                  color: theme.cardColor, // Δυναμικό χρώμα κάρτας
                   elevation: 8,
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(15)),
@@ -98,9 +97,10 @@ class _TeamDetailsWidgetState extends State<TeamDetailsWidget> {
                         children: [
                           Row(
                             children: [
-                              const Padding(
-                                padding: EdgeInsets.only(left: 2),
-                                child: Icon(Icons.event, color: Colors.blueAccent),
+                              Padding(
+                                padding: const EdgeInsets.only(left: 2),
+                                // Δυναμικό χρώμα εικονιδίου
+                                child: Icon(Icons.event, color: theme.primaryColor),
                               ),
                               Padding(
                                 padding: const EdgeInsets.only(left: 10),
@@ -111,9 +111,7 @@ class _TeamDetailsWidgetState extends State<TeamDetailsWidget> {
                                       fontWeight: FontWeight.w600,
                                       fontFamily: "Arial",
                                       letterSpacing: 0.3,
-                                      color: darkModeNotifier.value
-                                          ? Colors.white
-                                          : Colors.black),
+                                      color: theme.textTheme.bodyLarge?.color),
                                 ),
                               ),
                             ],
@@ -125,9 +123,7 @@ class _TeamDetailsWidgetState extends State<TeamDetailsWidget> {
                                 style: TextStyle(
                                     fontSize: 20,
                                     fontWeight: FontWeight.bold,
-                                    color: darkModeNotifier.value
-                                        ? Colors.white
-                                        : Colors.black),
+                                    color: theme.textTheme.bodyLarge?.color),
                               )),
                         ],
                       ),
@@ -141,7 +137,7 @@ class _TeamDetailsWidgetState extends State<TeamDetailsWidget> {
                                 padding: EdgeInsets.only(left: 4),
                                 child: Icon(
                                   Icons.emoji_events,
-                                  color: Color.fromARGB(255, 202, 188, 0),
+                                  color: Colors.amber, // Semantic Color (Χρυσό για τρόπαια)
                                 ),
                               ),
                               Padding(
@@ -152,9 +148,7 @@ class _TeamDetailsWidgetState extends State<TeamDetailsWidget> {
                                       fontSize: 20,
                                       fontWeight: FontWeight.w600,
                                       fontFamily: "Arial",
-                                      color: darkModeNotifier.value
-                                          ? Colors.white
-                                          : Colors.black),
+                                      color: theme.textTheme.bodyLarge?.color),
                                 ),
                               ),
                             ],
@@ -166,22 +160,20 @@ class _TeamDetailsWidgetState extends State<TeamDetailsWidget> {
                                 style: TextStyle(
                                     fontSize: 20,
                                     fontWeight: FontWeight.bold,
-                                    color: darkModeNotifier.value
-                                        ? Colors.white
-                                        : Colors.black),
+                                    color: theme.textTheme.bodyLarge?.color),
                               )),
                         ],
                       ),
                       const SizedBox(height: 10),
-                      //ΓΙΑ ΤΟΝ ΠΡΟΠΟΝΗΤΗ!!
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Row(
                             children: [
-                              const Padding(
-                                padding: EdgeInsets.only(left: 2),
-                                child: Icon(Icons.person, color: Colors.blueAccent),
+                              Padding(
+                                padding: const EdgeInsets.only(left: 2),
+                                // Δυναμικό χρώμα εικονιδίου
+                                child: Icon(Icons.person, color: theme.primaryColor),
                               ),
                               Padding(
                                 padding: const EdgeInsets.only(left: 10),
@@ -191,9 +183,7 @@ class _TeamDetailsWidgetState extends State<TeamDetailsWidget> {
                                       fontSize: 20,
                                       fontWeight: FontWeight.w600,
                                       fontFamily: "Arial",
-                                      color: darkModeNotifier.value
-                                          ? Colors.white
-                                          : Colors.black),
+                                      color: theme.textTheme.bodyLarge?.color),
                                 ),
                               ),
                             ],
@@ -208,9 +198,7 @@ class _TeamDetailsWidgetState extends State<TeamDetailsWidget> {
                                   style: TextStyle(
                                       fontSize: 20,
                                       fontWeight: FontWeight.bold,
-                                      color: darkModeNotifier.value
-                                          ? Colors.white
-                                          : Colors.black),
+                                      color: theme.textTheme.bodyLarge?.color),
                                 )),
                           ),
                         ],
@@ -240,32 +228,33 @@ class _TeamFormWidgetState extends State<TeamFormWidget> {
   @override
   void initState() {
     super.initState();
-    // Καλούμε τη βάση ΜΟΝΟ ΜΙΑ ΦΟΡΑ όταν φορτώνει το widget!
     _formFuture = getFinalFive(widget.team.name);
   }
 
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
+    final theme = Theme.of(context);
 
     return FutureBuilder<List<String>>(
       future: _formFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const CircularProgressIndicator();
+          return CircularProgressIndicator(color: theme.primaryColor); // Δυναμικό spinner
         } else if (snapshot.hasError) {
-          return Text(greek ? "Σφάλμα φόρτωσης" : "Loading Error");
+          return Text(
+            greek ? "Σφάλμα φόρτωσης" : "Loading Error",
+            style: TextStyle(color: theme.colorScheme.error),
+          );
         } else {
           final results = snapshot.data ?? [];
-          final displayResults =
-          results.length == 6 ? results.sublist(1) : results;
+          final displayResults = results.length == 6 ? results.sublist(1) : results;
 
           return Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: displayResults
                 .map((result) => Padding(
-              padding:
-              EdgeInsets.symmetric(horizontal: screenWidth * 0.015),
+              padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.015),
               child: _buildResultIcon(result, screenWidth),
             ))
                 .toList(),
@@ -279,6 +268,7 @@ class _TeamFormWidgetState extends State<TeamFormWidget> {
     IconData icon;
     Color color;
 
+    // Τα χρώματα εδώ παραμένουν γιατί είναι Semantic (Νίκη=Πράσινο, Ήττα=Κόκκινο)
     switch (result) {
       case "W":
         icon = Icons.check_circle;

@@ -7,24 +7,92 @@ import 'package:untitled1/Match_Details_Package/Match_Details_Page.dart';
 import 'package:untitled1/globals.dart';
 import '../Data_Classes/MatchDetails.dart';
 
-//ΑΥΤΗ Η ΚΛΑΣΗ ΑΦΟΡΑ ΤΑ CONTAINER ΤΩΝ ΜΑΤΣ ΣΤΗΝ ΑΡΧΙΚΗ ΟΘΟΝΗ
+// ΑΥΤΗ Η ΚΛΑΣΗ ΑΦΟΡΑ ΤΑ CONTAINER ΤΩΝ ΜΑΤΣ ΣΤΗΝ ΑΡΧΙΚΗ ΟΘΟΝΗ
 class matchesContainer extends StatelessWidget {
-  matchesContainer({super.key, required this.matches, required this.type}) {
-    if (type == 1) {
-      sortMatches();
-    } else {
-      sortMatchesDifferent();
-    }
-  }
-  final List<MatchDetails> matches;
+  final List<MatchDetails> originalMatches;
+  final int type;
 
-  int type;
+  // Βάζουμε το originalMatches στο constructor
+  const matchesContainer({
+    super.key,
+    required List<MatchDetails> matches,
+    required this.type,
+  }) : originalMatches = matches;
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
+    // 1. Δημιουργούμε ένα αντίγραφο της λίστας για να μην καταστρέφουμε την αρχική (Fix Mutability Bug)
+    final sortedMatches = List<MatchDetails>.from(originalMatches);
+
+    // 2. Ταξινομούμε το αντίγραφο
+    if (type == 1) {
+      sortedMatches.sort((a, b) {
+        if (a.year != b.year) return a.year.compareTo(b.year);
+        if (a.month != b.month) return a.month.compareTo(b.month);
+        if (a.day != b.day) return a.day.compareTo(b.day);
+        return a.time.compareTo(b.time);
+      });
+    } else {
+      sortedMatches.sort((a, b) {
+        if (a.year != b.year) return b.year.compareTo(a.year);
+        if (a.month != b.month) return b.month.compareTo(a.month);
+        if (a.day != b.day) return b.day.compareTo(a.day);
+        return b.time.compareTo(a.time);
+      });
+    }
+
+    // 3. Φτιάχνουμε μια "επίπεδη" (flat) λίστα που θα έχει String (Ημερομηνίες) και MatchDetails (Αγώνες)
+    final List<dynamic> listItems = [];
+
+    for (int i = 0; i < sortedMatches.length; i++) {
+      final match = sortedMatches[i];
+
+      final isNewDate = i == 0 ||
+          match.day != sortedMatches[i - 1].day ||
+          match.month != sortedMatches[i - 1].month ||
+          match.year != sortedMatches[i - 1].year;
+
+      if (isNewDate) {
+        // Αν αλλάξει η μέρα, βάζουμε στη λίστα ένα String με την ημερομηνία
+        listItems.add("${match.day}/${match.month}/${match.year}");
+      }
+
+      // Μετά προσθέτουμε τον ίδιο τον αγώνα
+      listItems.add(match);
+    }
+
+    // 4. Επιστρέφουμε ListView.builder (Φορτώνει ΜΟΝΟ ό,τι βλέπει ο χρήστης)
+    return ListView.builder(
       padding: const EdgeInsets.symmetric(vertical: 10),
-      children: _buildMatchList(matches),
+      itemCount: listItems.length,
+      itemBuilder: (context, index) {
+        final item = listItems[index];
+
+        // Αν το item είναι String, φτιάχνουμε τον τίτλο της ημερομηνίας
+        if (item is String) {
+          return Padding(
+            // Βάζουμε μεγαλύτερο κενό πάνω αν δεν είναι η πρώτη ημερομηνία
+            padding: EdgeInsets.only(top: index == 0 ? 10 : 30, bottom: 8, left: 7),
+            child: Text(
+              item,
+              style: TextStyle(
+                fontSize: 14.5,
+                fontWeight: FontWeight.bold,
+                fontFamily: 'Arial',
+                color: darkModeNotifier.value ? Colors.white : Colors.white,
+                letterSpacing: 0.5,
+              ),
+            ),
+          );
+        }
+        // Αν το item είναι MatchDetails, φτιάχνουμε την κάρτα του αγώνα
+        else if (item is MatchDetails) {
+          return eachMatchContainer(item);
+        }
+
+        // Ασφαλής επιστροφή σε περίπτωση άγνωστου τύπου
+        return const SizedBox.shrink();
+      },
     );
   }
 
@@ -69,69 +137,6 @@ class matchesContainer extends StatelessWidget {
       default:
         return '';
     }
-  }
-
-  List<Widget> _buildMatchList(List<MatchDetails> matches) {
-    List<Widget> widgets = [];
-    for (int i = 0; i < matches.length; i++) {
-      final match = matches[i];
-
-      final isNewDate = i == 0 ||
-          match.day != matches[i - 1].day ||
-          match.month != matches[i - 1].month ||
-          match.year != matches[i - 1].year;
-
-      if (isNewDate) {
-        if (i != 0) widgets.add(SizedBox(height: 20));
-
-        widgets.add(
-          Padding(
-            padding: const EdgeInsets.only(top: 10, bottom: 8, left: 7),
-            child: Text(
-              "${match.day}/${match.month}/${match.year}",
-              style: TextStyle(
-                fontSize: 14.5,
-                fontWeight: FontWeight.bold,
-                fontFamily: 'Arial',
-                color: darkModeNotifier.value ? Colors.white : Colors.white,
-                letterSpacing: 0.5,
-              ),
-            ),
-          ),
-        );
-      }
-
-      widgets.add(eachMatchContainer(match));
-    }
-    return widgets;
-  }
-
-  void sortMatches() {
-    matches.sort((a, b) {
-      if (a.year != b.year) {
-        return a.year.compareTo(b.year);
-      } else if (a.month != b.month) {
-        return a.month.compareTo(b.month);
-      } else if (a.day != b.day) {
-        return a.day.compareTo(b.day);
-      } else {
-        return a.time.compareTo(b.time);
-      }
-    });
-  }
-
-  void sortMatchesDifferent() {
-    matches.sort((a, b) {
-      if (a.year != b.year) {
-        return b.year.compareTo(a.year);
-      } else if (a.month != b.month) {
-        return b.month.compareTo(a.month);
-      } else if (a.day != b.day) {
-        return b.day.compareTo(a.day);
-      } else {
-        return b.time.compareTo(a.time);
-      }
-    });
   }
 }
 

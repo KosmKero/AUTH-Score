@@ -446,6 +446,9 @@ class MatchDetails extends ChangeNotifier {
     _startTimeInSeconds = DateTime.now().millisecondsSinceEpoch ~/ 1000;
     _hasMatchStarted = true;
     await matchStartedBase(true);
+
+    await lockPredictionsAtKickoff();
+
     notifyListeners();
   }
 
@@ -657,48 +660,6 @@ class MatchDetails extends ChangeNotifier {
             'totalGoals': FieldValue.increment(scoreHome + scoreAway),
           }, SetOptions(merge: true));
         }
-
-        final matchMonth = month;
-        final matchCalendarYear = year;
-        final seasonYear = matchMonth >= 8 ? matchCalendarYear + 1 : matchCalendarYear;
-
-        // Κατεβάζουμε τα περσινά δεδομένα για τον αλγόριθμο
-        final pastA = await WinProbabilityCalculator.getLastYearStats(homeTeam.name, seasonYear);
-        final pastB = await WinProbabilityCalculator.getLastYearStats(awayTeam.name, seasonYear);
-        await WinProbabilityCalculator.loadLeagueAverages(seasonYear);
-
-        // Τρέχουμε τον αλγόριθμο
-        final prediction = WinProbabilityCalculator.calculateProbabilities(
-          teamA: homeTeam,
-          teamB: awayTeam,
-          pastStatsA: pastA,
-          pastStatsB: pastB,
-          isGroupPhase: isGroupPhase,
-        );
-
-        await FirebaseFirestore.instance
-            .collection('year')
-            .doc(global.thisYearNow.toString()) // Ή seasonYear αν προτιμάς
-            .collection('matches')
-            .doc(matchId)
-            .update({
-          // Κλειδωμένες Πιθανότητες από το prediction που μόλις υπολογίσαμε!
-          'lockedProb1': prediction.prob1,
-          'lockedProbX': prediction.probX,
-          'lockedProb2': prediction.prob2,
-          'lockedScore': prediction.exactScore,
-          'lockedScoreProb': prediction.exactProb,
-
-          // Κλειδωμένα Στατιστικά Γηπεδούχου (Παίρνει τη φόρμα όπως είναι σήμερα)
-          'lockedHomeMatches': homeTeam.matches,
-          'lockedHomeGoalsFor': homeTeam.goalsFor,
-          'lockedHomeGoalsAgainst': homeTeam.goalsAgainst,
-
-          // Κλειδωμένα Στατιστικά Φιλοξενούμενου
-          'lockedAwayMatches': awayTeam.matches,
-          'lockedAwayGoalsFor': awayTeam.goalsFor,
-          'lockedAwayGoalsAgainst': awayTeam.goalsAgainst,
-        });
 
 
       } else {
@@ -1321,6 +1282,48 @@ class MatchDetails extends ChangeNotifier {
       });
     } catch (e) {
       print('🔥 Σφάλμα κατά τον μαζικό συγχρονισμό: $e');
+    }
+  }
+
+  //κλειδωμα γκολ και πιθανοτητων μολις αρχισει το ματς
+  Future<void> lockPredictionsAtKickoff() async {
+    try {
+      final seasonYear = month >= 8 ? year + 1 : year;
+
+      final pastA = await WinProbabilityCalculator.getLastYearStats(homeTeam.name, seasonYear);
+      final pastB = await WinProbabilityCalculator.getLastYearStats(awayTeam.name, seasonYear);
+      await WinProbabilityCalculator.loadLeagueAverages(seasonYear);
+
+      // Επειδή είμαστε στη σέντρα, τα homeTeam.matches κ.λπ.
+      // έχουν ακριβώς τα στατιστικά ΠΡΙΝ ξεκινήσει αυτό το ματς!
+      final prediction = WinProbabilityCalculator.calculateProbabilities(
+        teamA: homeTeam,
+        teamB: awayTeam,
+        pastStatsA: pastA,
+        pastStatsB: pastB,
+        isGroupPhase: isGroupPhase,
+      );
+
+      await FirebaseFirestore.instance
+          .collection('year')
+          .doc(global.thisYearNow.toString())
+          .collection('matches')
+          .doc(matchDocId)
+          .update({
+        'lockedProb1': prediction.prob1,
+        'lockedProbX': prediction.probX,
+        'lockedProb2': prediction.prob2,
+        'lockedScore': prediction.exactScore,
+        'lockedScoreProb': prediction.exactProb,
+        'lockedHomeMatches': homeTeam.matches,
+        'lockedHomeGoalsFor': homeTeam.goalsFor,
+        'lockedHomeGoalsAgainst': homeTeam.goalsAgainst,
+        'lockedAwayMatches': awayTeam.matches,
+        'lockedAwayGoalsFor': awayTeam.goalsFor,
+        'lockedAwayGoalsAgainst': awayTeam.goalsAgainst,
+      });
+    } catch (e) {
+      print("Σφάλμα στο κλείδωμα προβλέψεων κατά τη σέντρα: $e");
     }
   }
 

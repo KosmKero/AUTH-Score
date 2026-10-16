@@ -1,8 +1,6 @@
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:untitled1/matchesContainer.dart';
-import 'package:untitled1/API/Match_Handle.dart';
 import 'package:untitled1/ad_manager.dart';
 import 'Firebase_Handle/firebase_screen_stats_helper.dart';
 import 'Profile/bets/choosePage.dart';
@@ -54,48 +52,56 @@ class _HomePageState extends State<HomePage> {
         ),
 
         Container(
-          color:
-              darkModeNotifier.value ? Color(0xFF121212) : lightModeBackGround,
+          color: darkModeNotifier.value ? const Color(0xFF121212) : lightModeBackGround,
           width: double.infinity,
-          height: 60,
-          child: TextButton(
-            onPressed: changeMatches,
-            child: upcomingMatches
-                ? Row(
-                    children: [
-                      Icon(CupertinoIcons.back, color: Colors.white, size: 19),
-                      Text(
-                        greek ? "Προηγούμενοι αγώνες" : "Previous matches",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 17,
-                          fontWeight: FontWeight.w600,
-                          fontFamily: "Arial",
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                    ],
-                  )
-                : Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Text(
-                        greek ? "Επερχόμενοι αγώνες" : "Upcoming matches",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 17,
-                          fontWeight: FontWeight.w600,
-                          fontFamily: "Arial",
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                      Icon(CupertinoIcons.right_chevron,
-                          color: Colors.white, size: 19),
-                    ],
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+          child: CupertinoSlidingSegmentedControl<bool>(
+            // Χρώμα του φόντου της μπάρας
+            backgroundColor: darkModeNotifier.value ? Colors.grey[900]! : Colors.grey[300]!,
+            // Χρώμα της επιλεγμένης καρτέλας (thumb)
+            thumbColor: darkModeNotifier.value ? Colors.grey[700]! : Colors.white,
+            // Ποιο είναι επιλεγμένο αυτή τη στιγμή
+            groupValue: upcomingMatches,
+            onValueChanged: (bool? value) {
+              if (value != null && value != upcomingMatches) {
+                setState(() {
+                  upcomingMatches = value;
+                });
+              }
+            },
+            children: {
+              false: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 10.0),
+                child: Text(
+                  greek ? "Προηγούμενοι" : "Previous",
+                  style: TextStyle(
+                    // Φωτίζουμε το κείμενο αν είναι επιλεγμένο, το κάνουμε πιο αχνό αν δεν είναι
+                    color: !upcomingMatches
+                        ? (darkModeNotifier.value ? Colors.white : Colors.black)
+                        : Colors.grey,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    fontFamily: "Arial",
                   ),
+                ),
+              ),
+              true: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 10.0),
+                child: Text(
+                  greek ? "Επερχόμενοι" : "Upcoming",
+                  style: TextStyle(
+                    color: upcomingMatches
+                        ? (darkModeNotifier.value ? Colors.white : Colors.black)
+                        : Colors.grey,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    fontFamily: "Arial",
+                  ),
+                ),
+              ),
+            },
           ),
         ),
-
         // === Main Match Container ===
         Expanded(
           child: Container(

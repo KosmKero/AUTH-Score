@@ -4,11 +4,13 @@ import 'package:untitled1/Team_Display_Page_Package/TeamDisplayPage.dart';
 import '../../Data_Classes/MatchDetails.dart';
 import '../../Data_Classes/Team.dart';
 import '../../Firebase_Handle/firebase_screen_stats_helper.dart';
+import '../../appTheme_colors.dart';
 import '../../globals.dart';
 import '../../main.dart';
+// Φρόντισε να κάνεις import το αρχείο με το AppTheme σου!
+// import '../../appTheme_colors.dart';
 
 class StandingsPage extends StatefulWidget {
-  //Προσθέσαμε τα seasonMatches στον Constructor
   const StandingsPage(this.seasonYear, this.teamsList, this.seasonMatches, {super.key});
 
   final int seasonYear;
@@ -20,7 +22,6 @@ class StandingsPage extends StatefulWidget {
 }
 
 class StandingsPage1 extends State<StandingsPage> {
-  // Εδώ θα κρατάμε έτοιμους τους υπολογισμένους ομίλους (1 έως 4)
   Map<int, List<Team>> sortedGroups = {};
 
   late List<Team> localTeams;
@@ -29,7 +30,6 @@ class StandingsPage1 extends State<StandingsPage> {
   @override
   void initState() {
     super.initState();
-    // Αρχικοποίηση με τα δεδομένα που μας ήρθαν από το Widget
     localTeams = List.from(widget.teamsList);
     localMatches = List.from(widget.seasonMatches);
     _calculateAllGroups();
@@ -38,7 +38,6 @@ class StandingsPage1 extends State<StandingsPage> {
   @override
   void didUpdateWidget(covariant StandingsPage oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // Αν το Dropdown (στη SearchPage πχ) έστειλε άλλη χρονιά, κάνε update τα τοπικά δεδομένα!
     if (oldWidget.seasonYear != widget.seasonYear ||
         oldWidget.seasonMatches != widget.seasonMatches) {
       localTeams = List.from(widget.teamsList);
@@ -48,79 +47,16 @@ class StandingsPage1 extends State<StandingsPage> {
   }
 
   void _calculateAllGroups() {
-    DateTime seasonStart = DateTime(widget.seasonYear-1, 9, 1);
-    DateTime seasonEnd = DateTime(widget.seasonYear , 6, 30);
-
-    // 💡 ΔΙΟΡΘΩΣΗ 1: Χρησιμοποιούμε τα localMatches (προστατεύει τα παλιά έτη!)
-    List<MatchDetails> validMatches = localMatches.where((match) {
-      DateTime matchDate = DateTime(match.year, match.month, match.day);
-      return match.isGroupPhase &&
-          matchDate.isAfter(seasonStart.subtract(const Duration(days: 1))) &&
-          matchDate.isBefore(seasonEnd.add(const Duration(days: 1)));
-    }).toList();
-
     topTeams.clear();
-    String cleanName(String name) => name.trim().toLowerCase();
 
     for (int group = 1; group <= 4; group++) {
-      // Χρησιμοποιούμε τα localTeams
+      // 1. Φιλτράρισμα ομάδων ανά όμιλο
       List<Team> groupTeams = localTeams.where((team) => team.group == group).toList();
 
-      groupTeams.sort((a, b) {
-        if (b.totalPoints != a.totalPoints) {
-          return b.totalPoints.compareTo(a.totalPoints);
-        }
+      // 2. Ταξινόμηση αποκλειστικά βάσει της έτοιμης θέσης (ισχύει για φέτος και πέρυσι)
+      groupTeams.sort((a, b) => a.position.compareTo(b.position));
 
-        // --- MINI-LEAGUE LOGIC ---
-        List<Team> tiedTeams = groupTeams.where((t) => t.totalPoints == a.totalPoints).toList();
-
-        var miniLeagueMatches = validMatches.where((match) {
-          bool isHomeTied = tiedTeams.any((t) => cleanName(t.name) == cleanName(match.homeTeam.name));
-          bool isAwayTied = tiedTeams.any((t) => cleanName(t.name) == cleanName(match.awayTeam.name));
-          return isHomeTied && isAwayTied;
-        }).toList();
-
-        int aH2hPoints = 0;
-        int bH2hPoints = 0;
-        int aH2hGD = 0;
-        int bH2hGD = 0;
-
-        for (var match in miniLeagueMatches) {
-          String h = cleanName(match.homeTeam.name);
-          String v = cleanName(match.awayTeam.name);
-          String nameA = cleanName(a.name);
-          String nameB = cleanName(b.name);
-
-          if (h == nameA) {
-            if (match.scoreHome > match.scoreAway) aH2hPoints += 3;
-            else if (match.scoreHome == match.scoreAway) aH2hPoints += 1;
-            aH2hGD += (match.scoreHome - match.scoreAway);
-          } else if (v == nameA) {
-            if (match.scoreAway > match.scoreHome) aH2hPoints += 3;
-            else if (match.scoreAway == match.scoreHome) aH2hPoints += 1;
-            aH2hGD += (match.scoreAway - match.scoreHome);
-          }
-
-          if (h == nameB) {
-            if (match.scoreHome > match.scoreAway) bH2hPoints += 3;
-            else if (match.scoreHome == match.scoreAway) bH2hPoints += 1;
-            bH2hGD += (match.scoreHome - match.scoreAway);
-          } else if (v == nameB) {
-            if (match.scoreAway > match.scoreHome) bH2hPoints += 3;
-            else if (match.scoreAway == match.scoreHome) bH2hPoints += 1;
-            bH2hGD += (match.scoreAway - match.scoreHome);
-          }
-        }
-
-        if (aH2hPoints != bH2hPoints) return bH2hPoints.compareTo(aH2hPoints);
-        if (aH2hGD != bH2hGD) return bH2hGD.compareTo(aH2hGD);
-
-        int overallGD = b.goalDifference.compareTo(a.goalDifference);
-        if (overallGD != 0) return overallGD;
-
-        return b.goalsFor.compareTo(a.goalsFor);
-      });
-
+      // 3. Αποθήκευση στο Map και στην global λίστα
       sortedGroups[group] = groupTeams;
       topTeams.addAll(groupTeams.take(4));
     }
@@ -130,11 +66,12 @@ class StandingsPage1 extends State<StandingsPage> {
     }
   }
 
+
   @override
   Widget build(BuildContext context) {
     logScreenViewSta(screenName: 'Standings Page', screenClass: 'Standings Page');
 
-    final isDark = darkModeNotifier.value;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
@@ -177,11 +114,12 @@ class StandingsPage1 extends State<StandingsPage> {
   }
 
   Widget buildGroupStandings(int group, List<Team> groupTeams) {
-    final isDark = darkModeNotifier.value;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final screenWidth = MediaQuery.of(context).size.width;
 
-    final Color rowColor1 = isDark ? const Color(0xFF2D2D2D) : const Color.fromARGB(255, 235, 243, 255);
-    final Color rowColor2 = isDark ? const Color(0xFF1E1E1E) : Colors.white;
+    // ΠΑΙΡΝΟΥΜΕ ΤΑ ΧΡΩΜΑΤΑ ΑΠΟ ΤΟ APP THEME
+    final Color rowColor1 = isDark ? AppTheme.tableRowDark1 : AppTheme.tableRowLight1;
+    final Color rowColor2 = isDark ? AppTheme.tableRowDark2 : AppTheme.tableRowLight2;
     final Color textColor = isDark ? Colors.white : Colors.black87;
     final Color headerTextColor = isDark ? Colors.white54 : Colors.black54;
 
@@ -260,9 +198,6 @@ class StandingsPage1 extends State<StandingsPage> {
                   );
 
                   if (didChange == true && mounted) {
-                    // 💡 ΔΙΟΡΘΩΣΗ 3: Αν είμαστε στη φετινή σεζόν, τραβάμε τα φρέσκα Global δεδομένα!
-                    // Αν κάποιος διέγραψε ομάδα σε παλιό έτος, δυστυχώς απαιτείται reload app,
-                    // αλλά για το φετινό (που συμβαίνουν οι αλλαγές) θα εξαφανιστεί αμέσως.
                     if (widget.seasonYear == thisYearNow) {
                       localTeams = List.from(teams);
                       localMatches = List.from(previousMatches);
@@ -281,7 +216,8 @@ class StandingsPage1 extends State<StandingsPage> {
                           child: isPromotionSpot
                               ? Container(
                             width: 20, height: 20,
-                            decoration: BoxDecoration(color: isDark ? Colors.green.shade700 : Colors.green, shape: BoxShape.circle),
+                            // ΧΡΩΜΑ ΠΡΟΚΡΙΣΗΣ ΑΠΟ ΤΟ APP THEME
+                            decoration: BoxDecoration(color: isDark ? AppTheme.promotionDark : AppTheme.promotionLight, shape: BoxShape.circle),
                             child: Center(child: Text((index + 1).toString(), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 11))),
                           )
                               : Text((index + 1).toString(), style: TextStyle(color: headerTextColor, fontWeight: FontWeight.bold, fontSize: 12)),
@@ -311,7 +247,13 @@ class StandingsPage1 extends State<StandingsPage> {
                       statCell(team.losses.toString(), statWidth),
                       statCell("${team.goalsFor}:${team.goalsAgainst}", goalsWidth),
 
-                      statCell(team.totalPoints.toString(), ptsWidth, isBold: true, color: isDark ? Colors.lightBlueAccent : Colors.blue.shade700),
+                      // ΠΟΝΤΟΙ - ΧΡΩΜΑ ΑΠΟ ΤΟ APP THEME
+                      statCell(
+                          team.totalPoints.toString(),
+                          ptsWidth,
+                          isBold: true,
+                          color: isDark ? AppTheme.pointsDark : AppTheme.pointsLight
+                      ),
                     ],
                   ),
                 ),
@@ -327,8 +269,9 @@ class StandingsPage1 extends State<StandingsPage> {
                   Container(
                     width: 8,
                     height: 8,
+                    // ΧΡΩΜΑ ΠΡΟΚΡΙΣΗΣ ΣΤΟ ΥΠΟΜΝΗΜΑ ΑΠΟ ΤΟ APP THEME
                     decoration: BoxDecoration(
-                      color: isDark ? Colors.green.shade700 : Colors.green,
+                      color: isDark ? AppTheme.promotionDark : AppTheme.promotionLight,
                       shape: BoxShape.circle,
                     ),
                   ),

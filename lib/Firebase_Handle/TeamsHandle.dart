@@ -424,19 +424,107 @@ class TeamsHandle {
   }
 
   Future<void> sortTeams(int group) async {
-    List<Team> groupTeams = teams.where((team) => team.group == group).toList()
-      ..sort((a, b) => b.totalPoints.compareTo(a.totalPoints));
+    List<Team> groupTeams = teams.where((team) => team.group == group).toList();
+
+    DateTime seasonStart = DateTime(thisYearNow - 1, 9, 1);
+    DateTime seasonEnd = DateTime(thisYearNow, 6, 30);
+
+    // 1. Φιλτράρισμα έγκυρων αγώνων του ομίλου για τη φετινή σεζόν
+    List<MatchDetails> validMatches = previousMatches.where((match) {
+      DateTime matchDate = DateTime(match.year, match.month, match.day);
+      return match.isGroupPhase &&
+          matchDate.isAfter(seasonStart.subtract(const Duration(days: 1))) &&
+          matchDate.isBefore(seasonEnd.add(const Duration(days: 1)));
+    }).toList();
+
+    String cleanName(String name) => name.trim().toLowerCase();
+
+    // 2. Εντοπισμός ισοβαθμιών
+    Map<int, List<Team>> pointsMap = {};
+    for (var team in groupTeams) {
+      pointsMap.putIfAbsent(team.totalPoints, () => []).add(team);
+    }
+
+    // 3. Υπολογισμός H2H Mini-League στατιστικών για όσες ομάδες ισοβαθμούν
+    Map<String, Map<String, int>> h2hStats = {};
+    for (var tiedTeams in pointsMap.values) {
+      if (tiedTeams.length > 1) {
+        var miniLeagueMatches = validMatches.where((match) {
+          bool isHomeTied = tiedTeams.any((t) => cleanName(t.name) == cleanName(match.homeTeam.name));
+          bool isAwayTied = tiedTeams.any((t) => cleanName(t.name) == cleanName(match.awayTeam.name));
+          return isHomeTied && isAwayTied;
+        }).toList();
+
+        for (var t in tiedTeams) {
+          h2hStats[cleanName(t.name)] = {'points': 0, 'gd': 0};
+        }
+
+        for (var match in miniLeagueMatches) {
+          String home = cleanName(match.homeTeam.name);
+          String away = cleanName(match.awayTeam.name);
+
+          if (match.scoreHome > match.scoreAway) {
+            h2hStats[home]!['points'] = (h2hStats[home]!['points'] ?? 0) + 3;
+          } else if (match.scoreHome < match.scoreAway) {
+            h2hStats[away]!['points'] = (h2hStats[away]!['points'] ?? 0) + 3;
+          } else {
+            h2hStats[home]!['points'] = (h2hStats[home]!['points'] ?? 0) + 1;
+            h2hStats[away]!['points'] = (h2hStats[away]!['points'] ?? 0) + 1;
+          }
+
+          int gd = match.scoreHome - match.scoreAway;
+          h2hStats[home]!['gd'] = (h2hStats[home]!['gd'] ?? 0) + gd;
+          h2hStats[away]!['gd'] = (h2hStats[away]!['gd'] ?? 0) - gd;
+        }
+      }
+    }
+
+    // 4. Πλήρης ταξινόμηση με όλα τα κριτήρια
+    groupTeams.sort((a, b) {
+      // Κριτήριο 1: Συνολικοί Πόντοι
+      if (b.totalPoints != a.totalPoints) return b.totalPoints.compareTo(a.totalPoints);
+
+      // Κριτήριο 2: Head-to-Head Πόντοι
+      String nameA = cleanName(a.name);
+      String nameB = cleanName(b.name);
+      int aH2hPoints = h2hStats[nameA]?['points'] ?? 0;
+      int bH2hPoints = h2hStats[nameB]?['points'] ?? 0;
+      if (aH2hPoints != bH2hPoints) return bH2hPoints.compareTo(aH2hPoints);
+
+      // Κριτήριο 3: Head-to-Head Διαφορά Τερμάτων
+      int aH2hGD = h2hStats[nameA]?['gd'] ?? 0;
+      int bH2hGD = h2hStats[nameB]?['gd'] ?? 0;
+      if (aH2hGD != bH2hGD) return bH2hGD.compareTo(aH2hGD);
+
+      // Κριτήριο 4: Συνολική Διαφορά Τερμάτων στον όμιλο
+      int overallGD = b.goalDifference.compareTo(a.goalDifference);
+      if (overallGD != 0) return overallGD;
+
+      // Κριτήριο 5: Συνολική Επίθεση (Γκολ υπέρ)
+      int goalsForCompare = b.goalsFor.compareTo(a.goalsFor);
+      if (goalsForCompare != 0) return goalsForCompare;
+
+      return a.name.compareTo(b.name);
+    });
+
+    // 5. Μαζική αποθήκευση στο Firebase με WriteBatch (1 δικτυακό request αντί για πολλαπλά)
+    WriteBatch batch = FirebaseFirestore.instance.batch();
 
     for (int i = 0; i < groupTeams.length; i++) {
       Team team = groupTeams[i];
       int position = i + 1;
       team.setPosition(position);
 
-      await FirebaseFirestore.instance
-          .collection("year").doc(thisYearNow.toString()).collection('teams')
-          .doc(team.name)
-          .set({'position': position}, SetOptions(merge: true));
+      DocumentReference teamDocRef = FirebaseFirestore.instance
+          .collection("year")
+          .doc(thisYearNow.toString())
+          .collection('teams')
+          .doc(team.name);
+
+      batch.set(teamDocRef, {'position': position}, SetOptions(merge: true));
     }
+
+    await batch.commit();
   }
 
 //  Βάλαμε το 'List<Team> yearTeams' στα ορίσματα!

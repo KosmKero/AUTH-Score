@@ -51,7 +51,7 @@ class _StatsPageState extends State<StatsPage> {
       final seasonYear = matchMonth >= 8 ? matchCalendarYear + 1 : matchCalendarYear;
 
       // 2. Έλεγχος αν το ματς ΕΧΕΙ ΛΗΞΕΙ (Κλείδωμα δεδομένων)
-      if (widget.match.hasMatchFinished) {
+      if (widget.match.hasMatchStarted) {
         var matchDoc = await FirebaseFirestore.instance
             .collection('year')
             .doc(seasonYear.toString())
@@ -65,7 +65,7 @@ class _StatsPageState extends State<StatsPage> {
             prob1: (data['lockedProb1'] ?? 33.3).toDouble(),
             probX: (data['lockedProbX'] ?? 33.4).toDouble(),
             prob2: (data['lockedProb2'] ?? 33.3).toDouble(),
-            exactScore: data['lockedScore'] ?? "N/A",
+            exactScore: data['lockedScore'] ?? "0.0",
             exactProb: (data['lockedScoreProb'] ?? 0.0).toDouble(),
           );
 
@@ -190,7 +190,7 @@ class _StatsPageState extends State<StatsPage> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           // 📊 ΜΠΑΡΑ ΠΙΘΑΝΟΤΗΤΩΝ
-          _buildSectionTitle(greek ? "Πιθανότητα Νίκης" : "Win Probability"),
+          _buildWinProbTitleWithInfo(context),
           WinProbabilityBar(
             prob1: prediction.prob1,
             probX: prediction.probX,
@@ -296,6 +296,66 @@ class _StatsPageState extends State<StatsPage> {
       ),
     );
   }
+
+  Widget _buildWinProbTitleWithInfo(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            (greek ? "Πιθανότητα Νίκης" : "Win Probability").toUpperCase(),
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 1.2,
+              color: darkModeNotifier.value ? Colors.grey[400] : Colors.grey[600],
+            ),
+          ),
+          const SizedBox(width: 6),
+          GestureDetector(
+            onTap: () {
+              showDialog(
+                context: context,
+                builder: (ctx) => AlertDialog(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16.0),
+                  ),
+                  title: Row(
+                    children: [
+                      const Icon(Icons.info_outline, size: 22, color: Colors.blue),
+                      const SizedBox(width: 8),
+                      Text(
+                        greek ? "Προβλέψεις (Beta)" : "Predictions (Beta)",
+                        style: const TextStyle(fontSize: 18),
+                      ),
+                    ],
+                  ),
+                  content: Text(
+                    greek
+                        ? "Οι προβλέψεις βασίζονται σε στατιστικά δεδομένα και είναι ενδεικτικές. Μην μας φάτε αν πάμε κουβά!"
+                        : "Predictions are based on statistical data and are purely indicative.",
+                    style: const TextStyle(fontSize: 14),
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(ctx),
+                      child: Text(greek ? "ΟΚ" : "OK"),
+                    ),
+                  ],
+                ),
+              );
+            },
+            child: Icon(
+              Icons.info_outline,
+              size: 18,
+              color: darkModeNotifier.value ? Colors.grey[400] : Colors.grey[600],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 // =========================================================
@@ -386,8 +446,8 @@ class WinProbabilityCalculator {
     required Map<String, dynamic> pastStatsA,
     required Map<String, dynamic> pastStatsB,
     required bool isGroupPhase,
-    double? overrideFormA, // ΝΕΟ
-    double? overrideFormB, // ΝΕΟ
+    double? overrideFormA,
+    double? overrideFormB,
   }) {
     double leagueAvgGoals = (cachedLeagueAvgGoals != null && cachedLeagueAvgGoals! > 0)
         ? cachedLeagueAvgGoals!
@@ -407,13 +467,9 @@ class WinProbabilityCalculator {
     // ΜΕΙΞΗ
     double matchesA = teamA.matches + virtualMatchesA;
     if (matchesA <= 0) matchesA = 1.0;
-    double goalsForA = teamA.goalsFor + virtualGoalsForA;
-    double goalsAgainstA = teamA.goalsAgainst + virtualGoalsAgainstA;
 
     double matchesB = teamB.matches + virtualMatchesB;
     if (matchesB <= 0) matchesB = 1.0;
-    double goalsForB = teamB.goalsFor + virtualGoalsForB;
-    double goalsAgainstB = teamB.goalsAgainst + virtualGoalsAgainstB;
 
     // --- ΠΡΟΣΤΑΣΙΑ (Small Sample Size) ---
     double capAvg(double value, double matches) {
