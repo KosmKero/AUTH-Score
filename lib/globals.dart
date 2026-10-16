@@ -42,6 +42,9 @@ Map<int, BasketMatch> playOffMatchesBasket = {};
 Color lightModeBackGround = const Color(0xFF97B4C3);   // απαλή μπλε-γκρι βάση
 Color lightModeContainer = const Color(0xFFF7F7F7);    // σχεδόν λευκό για κάρτες/κουτιά
 Color lightModeText = const Color(0xFF14131D);         // σκούρο για καθαρή αντίθεση
+Color lightModeSubText = const Color(0xFF475569);  // Γκρι για δευτερεύοντα κείμενα (ώρες, αναζήτηση)
+Color darkModeSubText  = const Color(0xFF94A3B8);  // Ανοιχτό γκρι για Dark Mode
+Color appPrimaryBlue   = const Color(0xFF2563EB);  // Το μπλε χρώμα για το ποδόσφαιρο
 
 // 🌙 Dark Mode
 Color darkModeBackGround = const Color(0xFF1E1E1E);    // πιο βαθύ γκρι/μαύρο

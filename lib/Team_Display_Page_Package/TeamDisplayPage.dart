@@ -1,4 +1,4 @@
-//mport 'package:firebase_analytics/firebase_analytics.dart';
+//import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -14,7 +14,6 @@ import '../Data_Classes/Player.dart';
 import '../Data_Classes/Team.dart';
 import '../Firebase_Handle/firebase_screen_stats_helper.dart';
 import 'editTeamPage.dart';
-import '../Firebase_Handle/TeamsHandle.dart';
 
 class TeamDisplayPage extends StatefulWidget {
   const TeamDisplayPage(this.team, {super.key});
@@ -26,14 +25,13 @@ class TeamDisplayPage extends StatefulWidget {
 
 class _TeamDisplayPageState extends State<TeamDisplayPage> {
   late Team team;
+  int selectedIndex = 0;
 
   @override
   void initState() {
     super.initState();
     team = widget.team; // Αρχικά παίρνει την ομάδα που του πασάραμε
   }
-
-  int selectedIndex = 0;
 
   void _changeSection(int index) {
     setState(() {
@@ -52,15 +50,13 @@ class _TeamDisplayPageState extends State<TeamDisplayPage> {
       },
     );
 
-
+    // Το theme παίρνεται ΜΙΑ φορά για όλη την οθόνη
+    final theme = Theme.of(context);
 
     return Scaffold(
-      //ΑΦΟΡΑ ΤΟ ΟΝΟΜΑ ΠΑΝΩ ΣΤΗΝ ΣΕΛΙΔΑ
         appBar: AppBar(
-            backgroundColor: darkModeNotifier.value
-                ? const Color(0xFF121212)
-                : const Color.fromARGB(250, 46, 90, 136),
-            iconTheme: const IconThemeData(color: Colors.white),
+          // Το backgroundColor και το iconTheme αφαιρέθηκαν!
+          // Το AppBarTheme αναλαμβάνει τα πάντα.
             title: Row(
               children: [
                 SizedBox(height: 33, width: 33, child: team.image),
@@ -72,14 +68,13 @@ class _TeamDisplayPageState extends State<TeamDisplayPage> {
                     greek ? team.displayGreek : team.displayEnglish,
                     maxLines: 2,
                     softWrap: true,
-                    overflow: TextOverflow
-                        .ellipsis, // για ασφάλεια αν είναι πολύ μεγάλο
+                    overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
                       fontSize: 21,
                       fontWeight: FontWeight.bold,
                       fontFamily: 'Arial',
                       fontStyle: FontStyle.italic,
-                      color: Colors.white,
+                      // Το color: Colors.white αφαιρέθηκε (παίρνει το foregroundColor)
                     ),
                   ),
                 )
@@ -88,22 +83,19 @@ class _TeamDisplayPageState extends State<TeamDisplayPage> {
             actions: [
               if (globalUser.controlTheseTeamsFootball(widget.team.name, null) || globalUser.isUpperAdmin)
                 IconButton(
-                    icon: const Icon(Icons.edit, color: Colors.white),
+                    icon: const Icon(Icons.edit), // Το color αφαιρέθηκε
                     tooltip: greek ? "Επεξεργασία" : "Edit",
                     onPressed: () async {
                       bool? didChange = await Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) =>
-                              EditTeamScreen(team: team),
+                          builder: (context) => EditTeamScreen(team: team),
                         ),
                       );
 
                       if (didChange == true) {
                         await loadTeams();
-
-                        Team? updatedTeam =
-                        TeamsHandle().getTeamFromList(team.name, teams);
+                        Team? updatedTeam = TeamsHandle().getTeamFromList(team.name, teams);
 
                         if (!context.mounted) return;
 
@@ -111,32 +103,24 @@ class _TeamDisplayPageState extends State<TeamDisplayPage> {
                           setState(() {
                             team = updatedTeam;
                           });
-
-
-                          setState(() {});
                         }
                       }
                     }),
 
               if (TeamsHandle().canDeleteTeam(team))
                 IconButton(
-                  icon: const Icon(Icons.delete_sweep_rounded, color: Colors.white),
+                  icon: const Icon(Icons.delete_sweep_rounded), // Το color αφαιρέθηκε
                   tooltip: greek ? "Διαγραφή Ομάδας" : "Delete Team",
                   onPressed: () => _showDeleteTeamDialog(context, team),
                 ),
 
-              isFavourite(
-                team: team,
-              ),
+              isFavourite(team: team),
               const SizedBox(width: 8)
             ]),
+        // Αφαιρέθηκε το background color από τα Scaffold
         body: Scaffold(
-            backgroundColor: darkModeNotifier.value
-                ? const Color(0xFF121212)
-                : lightModeBackGround,
             body: Column(
               children: [
-                //Text(team.name,style: TextStyle(color: Color.fromARGB(100, 255, 10, 40),)),
                 _NavigationButtons(onSectionChange: _changeSection),
                 _sectionChooser(
                   selectedIndex,
@@ -146,24 +130,23 @@ class _TeamDisplayPageState extends State<TeamDisplayPage> {
             )));
   }
 
-
   void _showDeleteTeamDialog(BuildContext context, Team team) {
-    bool isDark = darkModeNotifier.value;
+    final theme = Theme.of(context);
 
     showDialog(
       context: context,
       builder: (BuildContext dialogContext) => AlertDialog(
-        backgroundColor: isDark ? const Color(0xFF2C2C2C) : Colors.white,
+        backgroundColor: theme.cardColor, // Δυναμικό χρώμα (σκούρο ή άσπρο)
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
         title: Text(
-          greek ? "⚠️ Διαγραφή Ομάδας" : "⚠️ Delete Team",
-          style: TextStyle(color: isDark ? Colors.white : Colors.black, fontWeight: FontWeight.bold),
+          greek ? "⚠️️ Διαγραφή Ομάδας" : "⚠️ Delete Team",
+          style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold),
         ),
         content: Text(
           greek
               ? "Είστε σίγουρος ότι θέλετε να διαγράψετε την ομάδα '${team.displayName}'; Αυτή η ενέργεια είναι μόνιμη."
               : "Are you sure you want to delete '${team.displayName}'? This action is permanent.",
-          style: TextStyle(color: isDark ? Colors.white70 : Colors.black87),
+          style: theme.textTheme.bodyMedium,
         ),
         actions: [
           TextButton(
@@ -172,12 +155,10 @@ class _TeamDisplayPageState extends State<TeamDisplayPage> {
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red[700],
+              backgroundColor: theme.colorScheme.error, // Ένα σωστό κόκκινο από το theme
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
             ),
             onPressed: () async {
-              // 💡 1. Αποθηκεύουμε τα εργαλεία πλοήγησης ΠΡΙΝ τα await!
-              // Έτσι δεν μας νοιάζει αν θα αλλάξει το context αργότερα.
               final navigator = Navigator.of(context);
               final messenger = ScaffoldMessenger.of(context);
 
@@ -189,32 +170,19 @@ class _TeamDisplayPageState extends State<TeamDisplayPage> {
                 barrierDismissible: false,
                 builder: (BuildContext loadingCtx) => const Center(child: CircularProgressIndicator(color: Colors.redAccent)),
               );
-
               try {
-                // 4. Διαγραφή από τη Βάση
                 await TeamsHandle().deleteTeamCompletely(team);
-
-                // 5. Ξαναφορτώνουμε τα δεδομένα (εδώ χανόταν το context πριν!)
                 await loadTeams();
-
-                // 6. Κλείνουμε το κυκλάκι (χρησιμοποιώντας τον αποθηκευμένο navigator)
                 navigator.pop();
-
-                // 7. Μήνυμα Επιτυχίας
                 messenger.showSnackBar(
                   SnackBar(
                     content: Text(greek ? "Η ομάδα διαγράφηκε επιτυχώς." : "Team deleted successfully."),
                     backgroundColor: Colors.green,
                   ),
                 );
-
-                // 8. Επιστροφή στην προηγούμενη σελίδα (του Navigator της σελίδας)
                 navigator.pop(true);
-
               } catch (e) {
-                // Αν γίνει λάθος, κλείνουμε το κυκλάκι με ασφάλεια
                 navigator.pop();
-
                 messenger.showSnackBar(
                   SnackBar(
                     content: Text("Σφάλμα διαγραφής: $e"),
@@ -229,16 +197,12 @@ class _TeamDisplayPageState extends State<TeamDisplayPage> {
       ),
     );
   }
-
-
 }
 
-//ΑΦΟΡΑ ΤΑ 3 ΚΟΥΜΠΙΑ ΚΑΤΩ ΑΠΟ ΤΟ ΟΝΟΜΑ!!
 class _NavigationButtons extends StatefulWidget {
   final Function(int) onSectionChange;
 
-  const _NavigationButtons({Key? key, required this.onSectionChange})
-      : super(key: key);
+  const _NavigationButtons({Key? key, required this.onSectionChange}) : super(key: key);
 
   @override
   State<_NavigationButtons> createState() => _NavigationButtonsState();
@@ -251,10 +215,9 @@ class _NavigationButtonsState extends State<_NavigationButtons> {
     setState(() {
       selectedIndex = index;
     });
-    widget.onSectionChange(index); // Notify parent widget
+    widget.onSectionChange(index);
   }
 
-  //ΔΗΜΙΟΥΡΓΕΙ ΤΟΝ ΧΩΡΟ ΤΩΝ 3 ΚΟΥΜΠΙΩΝ
   @override
   Widget build(BuildContext context) {
     return SizedBox(
@@ -266,13 +229,13 @@ class _NavigationButtonsState extends State<_NavigationButtons> {
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             const SizedBox(width: 10),
-            _buildTextButton(greek ? "Λεπτομέρειες" : "Details", 0),
+            _buildTextButton(greek ? "Λεπτομέρειες" : "Details", 0, context),
             const SizedBox(width: 15),
-            _buildTextButton(greek ? "Αγώνες" : "Matches", 1),
+            _buildTextButton(greek ? "Αγώνες" : "Matches", 1, context),
             const SizedBox(width: 15),
-            _buildTextButton(greek ? "Παίχτες" : "Players", 2),
+            _buildTextButton(greek ? "Παίχτες" : "Players", 2, context),
             const SizedBox(width: 15),
-            _buildTextButton(greek ? "Κορυφαίοι Παίχτες" : "Top Players", 3),
+            _buildTextButton(greek ? "Κορυφαίοι Παίχτες" : "Top Players", 3, context),
             const SizedBox(width: 10),
           ],
         ),
@@ -280,9 +243,13 @@ class _NavigationButtonsState extends State<_NavigationButtons> {
     );
   }
 
-  //ΔΗΜΙΟΥΡΓΕΙ ΤΑ 3 ΚΟΥΜΠΙΑ(ΛΕΠΤΟΜΕΡΕΙΕΣ ΑΓΩΝΕΣ ΚΑΙ ΠΑΙΧΤΕΣ)
-  Widget _buildTextButton(String text, int index) {
+  Widget _buildTextButton(String text, int index, BuildContext context) {
     bool isSelected = selectedIndex == index;
+    final theme = Theme.of(context);
+
+    // Το χρώμα πλέον έρχεται από το Theme.
+    final Color activeColor = theme.primaryColor;
+    final Color inactiveColor = theme.textTheme.bodyMedium?.color ?? Colors.grey;
 
     return GestureDetector(
       onTap: () {
@@ -295,21 +262,16 @@ class _NavigationButtonsState extends State<_NavigationButtons> {
             text,
             style: TextStyle(
               fontSize: 17,
-              color: isSelected
-                  ? const Color.fromARGB(250, 46, 90, 136)
-                  : darkModeNotifier.value
-                  ? Colors.white
-                  : Colors.white,
+              color: isSelected ? activeColor : inactiveColor,
               fontWeight: isSelected ? FontWeight.bold : FontWeight.w700,
-              //backgroundColor: darkModeNotifier.value==true?Colors.black87: lightModeBackGround
             ),
           ),
-          const SizedBox(height: 3), // Απόσταση μεταξύ κειμένου και γραμμής
+          const SizedBox(height: 3),
           if (isSelected)
             Container(
-              width: 60, // Μήκος γραμμής
-              height: 3, // Πάχος γραμμής
-              color: const Color.fromARGB(250, 46, 90, 136), // Χρώμα γραμμής
+              width: 60,
+              height: 3,
+              color: activeColor, // Δυναμικό χρώμα υπογράμμισης
             ),
         ],
       ),
@@ -317,10 +279,8 @@ class _NavigationButtonsState extends State<_NavigationButtons> {
   }
 }
 
-//ελεγχει την κατασταση για το αν η ομαδα ειναι στα αγαπημενα ή οχι.
 class isFavourite extends StatefulWidget {
   final Team team;
-
   const isFavourite({super.key, required this.team});
 
   @override
@@ -334,13 +294,12 @@ class _isFavouriteState extends State<isFavourite> {
   @override
   void initState() {
     super.initState();
-    _checkIfFavourite(); // Κάνε τον αρχικό έλεγχο εδώ
+    _checkIfFavourite();
   }
 
   Future<void> _checkIfFavourite() async {
     if (isLoggedIn) {
-      bool result = globalUser.favoriteList.contains(widget.team
-          .name); //      await teamsHandle.isFavouriteTeam(widget.team.name);
+      bool result = globalUser.favoriteList.contains(widget.team.name);
       setState(() {
         isFavourite = result;
       });
@@ -364,7 +323,6 @@ class _isFavouriteState extends State<isFavourite> {
           return;
         }
 
-        // 1. Optimistic Update (άμεσο setState)
         setState(() {
           isFavourite = !isFavourite;
         });
@@ -372,17 +330,14 @@ class _isFavouriteState extends State<isFavourite> {
         try {
           if (isFavourite) {
             await teamsHandle.addFavouriteTeam(widget.team.name);
-            // Κλήση της νέας έξυπνης μεθόδου αντί της addFavoriteTeam
             globalUser.updateFootballMatchesNotificationsOnFavoriteChange(widget.team.name, true);
           } else {
             await teamsHandle.removeFavouriteTeam(widget.team.name);
-            // Κλήση της νέας έξυπνης μεθόδου αντί της removeFavoriteTeam
             globalUser.updateFootballMatchesNotificationsOnFavoriteChange(widget.team.name, false);
           }
-        }catch (e) {
-          // 2. Αν υπάρξει σφάλμα, κάνε revert το UI
+        } catch (e) {
           setState(() {
-            isFavourite = !isFavourite; // γύρνα το πίσω
+            isFavourite = !isFavourite;
           });
 
           ScaffoldMessenger.of(context).showSnackBar(
@@ -416,7 +371,6 @@ Widget _sectionChooser(int selectedIndex, Team team) {
       return TopPlayersPage(
         List.from(team.players)..sort((a, b) => b.goals.compareTo(a.goals)),
       );
-
     default:
       return TeamDetailsWidget(team: team);
   }

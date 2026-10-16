@@ -39,7 +39,6 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                   color: Colors.white,
                 ),
               ),
-              backgroundColor: isDarkMode ?  const Color(0xFF1E1E1E) : const Color.fromARGB(250, 46, 90, 136),
               actions: [
                 /*
                 PopupMenuButton<String>(

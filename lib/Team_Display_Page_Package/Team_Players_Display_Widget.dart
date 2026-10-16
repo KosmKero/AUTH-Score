@@ -35,10 +35,13 @@ class _TeamPlayersDisplayWidgetState extends State<TeamPlayersDisplayWidget> {
 
     bool isCaptain = globalUser.controlTheseTeamsFootball(widget.team.name, null) || globalUser.isUpperAdmin;
 
+    // 1. Παίρνουμε το theme μια  φορά για όλη την οθόνη
+    final theme = Theme.of(context);
+
     return Expanded(
       child: SingleChildScrollView(
         scrollDirection: Axis.vertical,
-        physics: const BouncingScrollPhysics(), // Πιο ομαλό scroll
+        physics: const BouncingScrollPhysics(),
         child: Column(
           children: [
             if (isCaptain)
@@ -48,7 +51,8 @@ class _TeamPlayersDisplayWidgetState extends State<TeamPlayersDisplayWidget> {
                   alignment: Alignment.centerRight,
                   child: ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green[600],
+                      // Χρησιμοποιούμε το κύριο χρώμα (π.χ. Μπλε) για το κουμπί
+                        backgroundColor: theme.primaryColor,
                         foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))
                     ),
@@ -59,10 +63,11 @@ class _TeamPlayersDisplayWidgetState extends State<TeamPlayersDisplayWidget> {
                 ),
               ),
 
-            _buildPositionSection(0, positionList(0)),
-            _buildPositionSection(1, positionList(1)),
-            _buildPositionSection(2, positionList(2)),
-            _buildPositionSection(3, positionList(3)),
+            // Περνάμε το theme στις functions για να μην το ξανακαλούμε
+            _buildPositionSection(0, positionList(0), theme),
+            _buildPositionSection(1, positionList(1), theme),
+            _buildPositionSection(2, positionList(2), theme),
+            _buildPositionSection(3, positionList(3), theme),
 
             if (isCaptain)
               Padding(
@@ -70,22 +75,21 @@ class _TeamPlayersDisplayWidgetState extends State<TeamPlayersDisplayWidget> {
                 child: Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                      color: Colors.blueAccent.withOpacity(0.1),
+                    // Δυναμικό info box με βάση το primary brand color
+                      color: theme.primaryColor.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.blueAccent.withOpacity(0.3))
+                      border: Border.all(color: theme.primaryColor.withOpacity(0.3))
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.info_outline, color: Colors.blueAccent),
+                      Icon(Icons.info_outline, color: theme.primaryColor),
                       const SizedBox(width: 10),
                       Expanded(
                         child: Text(
                           greek
                               ? "Για να επεξεργαστείς ένα παίκτη κάνε double-tap πάνω του."
                               : "To edit a player, double-tap on their name.",
-                          style: TextStyle(
-                              fontSize: 13,
-                              color: darkModeNotifier.value ? Colors.white70 : Colors.black87),
+                          style: theme.textTheme.bodySmall?.copyWith(fontSize: 13),
                         ),
                       ),
                     ],
@@ -114,7 +118,7 @@ class _TeamPlayersDisplayWidgetState extends State<TeamPlayersDisplayWidget> {
     }
   }
 
-  Widget _buildPositionSection(int position, List<Player> players) {
+  Widget _buildPositionSection(int position, List<Player> players, ThemeData theme) {
     if (players.isEmpty) return const SizedBox.shrink();
 
     String pos;
@@ -134,7 +138,7 @@ class _TeamPlayersDisplayWidgetState extends State<TeamPlayersDisplayWidget> {
       width: double.infinity,
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 6),
       decoration: BoxDecoration(
-          color: darkModeNotifier.value ? const Color(0xFF1E1E1E) : Colors.white,
+          color: theme.cardColor, // Δυναμικό background (άσπρο ή σκούρο γκρι)
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
@@ -151,21 +155,21 @@ class _TeamPlayersDisplayWidgetState extends State<TeamPlayersDisplayWidget> {
             width: double.infinity,
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(
-                color: darkModeNotifier.value ? Colors.grey[900] : Colors.grey[50],
+                color: theme.dividerColor.withOpacity(0.05),
                 borderRadius: const BorderRadius.only(topLeft: Radius.circular(12), topRight: Radius.circular(12))
             ),
             child: Text(
               pos,
-              style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: darkModeNotifier.value ? Colors.white : Colors.black87),
+              style: theme.textTheme.bodyLarge?.copyWith(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 4.0),
             child: Column(
-              children: players.map((player) => playerName(player)).toList(),
+              children: players.map((player) => playerName(player, theme)).toList(),
             ),
           )
         ],
@@ -173,9 +177,8 @@ class _TeamPlayersDisplayWidgetState extends State<TeamPlayersDisplayWidget> {
     );
   }
 
-  Widget playerName(Player player) {
+  Widget playerName(Player player, ThemeData theme) {
     bool isCaptain = globalUser.controlTheseTeamsFootball(widget.team.name, null) || globalUser.isUpperAdmin;
-    bool isDark = darkModeNotifier.value;
 
     return GestureDetector(
       onDoubleTap: isCaptain ? () async {
@@ -203,11 +206,12 @@ class _TeamPlayersDisplayWidgetState extends State<TeamPlayersDisplayWidget> {
               children: [
                 CircleAvatar(
                   radius: 18,
-                  backgroundColor: isDark ? Colors.grey[700] : Colors.blue[100],
+                  // Το κυκλάκι έχει το κύριο χρώμα  με λίγη διαφάνεια
+                  backgroundColor: theme.primaryColor.withOpacity(0.15),
                   child: Text(
                     player.number.toString(),
                     style: TextStyle(
-                        color: isDark ? Colors.white : Colors.blue[900],
+                        color: theme.primaryColor,
                         fontWeight: FontWeight.bold,
                         fontSize: 14
                     ),
@@ -217,14 +221,13 @@ class _TeamPlayersDisplayWidgetState extends State<TeamPlayersDisplayWidget> {
                 Expanded(
                   child: Text(
                     "${player.surname} ${player.name}",
-                    style: TextStyle(
-                        color: isDark ? Colors.white : Colors.black87,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500),
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                    ),
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
-
               ],
             ),
 
@@ -236,12 +239,12 @@ class _TeamPlayersDisplayWidgetState extends State<TeamPlayersDisplayWidget> {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                       decoration: BoxDecoration(
-                        color: Colors.blueAccent.withOpacity(0.1),
+                        color: theme.primaryColor.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
                         "${greek ? 'Συμμετοχές' : 'Apps'}: ${player.appearances}",
-                        style: const TextStyle(fontSize: 11, color: Colors.blueAccent, fontWeight: FontWeight.bold),
+                        style: TextStyle(fontSize: 11, color: theme.primaryColor, fontWeight: FontWeight.bold),
                       ),
                     ),
                     const SizedBox(width: 10),
