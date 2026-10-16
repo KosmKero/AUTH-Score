@@ -1,23 +1,21 @@
 import 'package:flutter/material.dart';
-import 'package:untitled1/Team_Display_Page_Package/edit_team_page.dart';
-import 'package:untitled1/Team_Display_Page_Package/one_group_standings.dart';
-import '../Data_Classes/Team.dart';
+import 'package:untitled1/Data_Classes/basketball/basketTeam.dart';
+import 'package:untitled1/basketMatches/basketMatchNotStarted/basketMatchNotStartedPage.dart';
 import '../Firebase_Handle/firebase_screen_stats_helper.dart';
-import '../Match_Details_Package/Match_Not_Started/DetailsMatchNotStarted.dart';
-import '../championship_details/StandingsPage.dart';
 import '../globals.dart';
+import 'one_group_standings_basket.dart';
 
 //ΟΛΗ Η ΚΛΑΣΗ ΑΦΟΡΑ ΤΗΝ ΚΑΤΑΣΚΕΥΗ ΤΟΥ ΠΩΣ ΘΑ ΕΜΦΑΝΙΖΕΤΑΙ ΤΑ ΚΥΚΛΑΚΙΑ ΜΕ ΤΗΝ ΝΙΚΗ , ΙΣΟΠΑΛΙΑ, ΗΤΤΑ.
 //ΑΝΑΦΕΡΕΙ ΕΠΙΣΗΣΒ ΤΗΝ ΒΑΘΜΟΛΟΓΙΑ
-class TeamDetailsWidget extends StatefulWidget {
-  const TeamDetailsWidget({super.key, required this.team});
-  final Team team;
+class TeamDetailsWidgetBasketball extends StatefulWidget {
+  const TeamDetailsWidgetBasketball({super.key, required this.team});
+  final basketTeam team;
 
   @override
-  State<TeamDetailsWidget> createState() => _TeamDetailsWidgetState();
+  State<TeamDetailsWidgetBasketball> createState() => _TeamDetailsWidgetBasketballState();
 }
 
-class _TeamDetailsWidgetState extends State<TeamDetailsWidget> {
+class _TeamDetailsWidgetBasketballState extends State<TeamDetailsWidgetBasketball> {
   @override
   Widget build(BuildContext context) {
     logScreenViewSta(
@@ -51,7 +49,7 @@ class _TeamDetailsWidgetState extends State<TeamDetailsWidget> {
                         ),
                         Padding(
                           padding: const EdgeInsets.only(top: 10.0),
-                          child: TeamFormWidget(
+                          child: TeamFormWidgetBasket(
                             team: widget.team,
                           ),
                         ),
@@ -98,11 +96,11 @@ class _TeamDetailsWidgetState extends State<TeamDetailsWidget> {
                       if (globalUser.controlTheseTeamsFootball(widget.team.name, null))
                         IconButton(
                             onPressed: () async {
-                              await Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) =>
-                                          TeamEditPage(widget.team)));
+                             // await Navigator.push(
+                             //     context,
+                             //     MaterialPageRoute(
+                             //         builder: (context) =>
+                             //             TeamEditPage(widget.team)));
                               if (!mounted) return;
 
                               setState(() {});
@@ -240,17 +238,17 @@ class _TeamDetailsWidgetState extends State<TeamDetailsWidget> {
 }
 
 //ΑΦΟΡΑ ΤΗΝ ΚΑΤΑΣΚΕΥΗ ΤΩΝ ΟΝΟΜΑΤΩΝ ΤΩΝ ΟΜΑΔΩΝ ΣΤΟ ΚΑΤΩ ΜΕΡΟΣ
-class TeamFormWidget extends StatelessWidget {
-  final Team team;
+class TeamFormWidgetBasket extends StatelessWidget {
+  final basketTeam team;
 
-  TeamFormWidget({super.key, required this.team});
+  TeamFormWidgetBasket({super.key, required this.team});
 
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
 
     return FutureBuilder<List<String>>(
-      future: getFinalFive(team.name),
+      future: getFinalFiveBasket(team.name),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const CircularProgressIndicator();
@@ -311,6 +309,6 @@ class GroupStandingsWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     DateTime now = DateTime.now();
     int seasonYear = now.month > 8 ? now.year : now.year - 1;
-    return OneGroupStandings(group: group, seasonYear: seasonYear);
+    return BasketballOneGroupStandings(group: group, seasonYear: seasonYear);
   }
 }

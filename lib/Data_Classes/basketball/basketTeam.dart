@@ -77,50 +77,43 @@ class basketTeam {
           .collection('teams')
           .doc(name);
 
-  // Method to add a player
+// Method to add a player
   Future<void> addPlayer(BasketPlayer player) async {
-    if (globalUser.controlTheseTeamsFootball(name, null)) { //αλλαγη συναρτησης
-      _players.add(player);
+    bool canEdit = globalUser.isUpperAdmin || globalUser.controlTheseTeamsBasket(name, _nameEnglish);
 
+    if (canEdit) {
+      _players.add(player); // Εμφάνιση στο UI
+
+      // Αποθήκευση στο Firebase
       await teamDoc.set({
         'Players': player.toMap(),
       }, SetOptions(merge: true));
+    } else {
+      print("ΠΡΟΣΟΧΗ: Δεν έχεις δικαιώματα για προσθήκη παίκτη σε αυτή την ομάδα.");
     }
   }
 
   Future<void> deletePlayer(BasketPlayer player) async {
-    if (globalUser.controlTheseTeamsFootball(name, null)) { //αλλαγη συναρτησης
+    bool canEdit = globalUser.isUpperAdmin || globalUser.controlTheseTeamsBasket(name, _nameEnglish);
+    if (canEdit) {
       _players.remove(player);
 
       await teamDoc.update({
-        'Players.${player.name}${player.surname}${player.number}': FieldValue.delete(),
+        'Players.${player.id}': FieldValue.delete(), // Διαγραφή με το ID
       });
     }
   }
 
   Future<void> updatePlayer(BasketPlayer oldPlayer, BasketPlayer newPlayer) async {
-    if (!globalUser.controlTheseTeamsFootball(name, null)) return; ////αλλαγη συναρτησης
-
-    // ΝΕΑ KEYS
-    final oldKey = '${oldPlayer.name}${oldPlayer.surname}${oldPlayer.number}';
-    final newKey = '${newPlayer.name}${newPlayer.surname}${newPlayer.number}';
-
-    if (oldKey != newKey) {
-      await teamDoc.update({
-        'Players.$oldKey': FieldValue.delete(),
-      });
-
-      await teamDoc.set({
-        'Players': newPlayer.toMap(),
-      }, SetOptions(merge: true));
-    } else {
-      await teamDoc.set({
-        'Players': newPlayer.toMap(),
-      }, SetOptions(merge: true));
-    }
+    bool canEdit = globalUser.isUpperAdmin || globalUser.controlTheseTeamsBasket(name, _nameEnglish);
+    if (!canEdit) return;
 
     _players.remove(oldPlayer);
     _players.add(newPlayer);
+
+    await teamDoc.set({
+      'Players': newPlayer.toMap(),
+    }, SetOptions(merge: true));
   }
 
   Future<void> increaseWins(bool isGroupPhase) async {

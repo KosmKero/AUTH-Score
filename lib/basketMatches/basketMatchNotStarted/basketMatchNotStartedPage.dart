@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:untitled1/Data_Classes/basketball/basketMatch.dart';
 import 'package:untitled1/Data_Classes/basketball/basketTeam.dart';
 import 'package:untitled1/Firebase_Handle/TeamsHandle.dart';
+import 'package:untitled1/Team_Basket_Display_Package/Basket_Team_Display_Page.dart';
 import '../../Data_Classes/MatchDetails.dart';
 import '../../Data_Classes/Team.dart';
 import '../../Firebase_Handle/BasketTeamsHandle.dart';
@@ -96,7 +97,7 @@ Future<List<num>> loadPercentages(BasketMatch match) async {
       '${match.homeTeam.nameEnglish}${match.awayTeam.nameEnglish}${match.dateString}');
 }
 
-Future<List<String>> getFinalFive(String teamName) async {
+Future<List<String>> getFinalFiveBasket(String teamName) async {
   BasketTeamsHandle basketTeamsHandle = BasketTeamsHandle(); // ΑΛΛΑΓΗ ΕΔΩ
   return basketTeamsHandle.getPreviousResults(teamName);
 }
@@ -112,7 +113,7 @@ class TeamFormWidget extends StatelessWidget {
     final screenWidth = MediaQuery.of(context).size.width;
 
     return FutureBuilder<List<String>>(
-      future: getFinalFive(team.name),
+      future: getFinalFiveBasket(team.name),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const CircularProgressIndicator();
@@ -131,13 +132,13 @@ class TeamFormWidget extends StatelessWidget {
                 // Team Name
                 Expanded(
                   child: InkWell(
-                    // onTap: () {
-                    //   Navigator.push(
-                    //     context,
-                    //     MaterialPageRoute(
-                    //         builder: (context) => TeamDisplayPage(team)),
-                    //   );
-                    // },
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => BasketballTeamDisplayPage(team)),
+                      );
+                    },
                     child: Row(
                       children: [
                         SizedBox(

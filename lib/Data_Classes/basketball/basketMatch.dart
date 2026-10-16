@@ -17,6 +17,7 @@ class BasketMatch extends ChangeNotifier {
   bool _hasMatchFinished = false;
 
   bool _hasPeriodEnded = false;
+  ValueNotifier<bool> _notify = ValueNotifier<bool>(false);
 
 
   int _currentPeriod = 0;
@@ -33,7 +34,6 @@ class BasketMatch extends ChangeNotifier {
 
 
 
-
   final int _day, _month, _year, _time;
   final bool _isGroupPhase;
   final int _game;
@@ -42,9 +42,11 @@ class BasketMatch extends ChangeNotifier {
   late int minute = _time % 100;
 
   StreamSubscription<DocumentSnapshot>? _matchSubscription;
-  ValueNotifier<bool> notify = ValueNotifier<bool>(false);
+
+  final String matchKey;
 
   BasketMatch(
+    this.matchKey,
     this._homeTeam,
     this._awayTeam,
 
@@ -66,6 +68,20 @@ class BasketMatch extends ChangeNotifier {
     //this.periods
   ) {
 
+    bool? explicitPreference = globalUser.matchKeys[matchKey];
+
+    if (explicitPreference != null) {
+      _notify = ValueNotifier<bool>(explicitPreference);
+    } else {
+      // 2. Αν δεν υπάρχει ρητή επιλογή, πάμε με τη λογική: Αγαπημένη Ομάδα Ή Γενικό Καμπανάκι Πρωταθλήματος
+      bool isFavoriteTeam = globalUser.favoriteListBasket.contains(homeTeam.name) ||
+          globalUser.favoriteListBasket.contains(awayTeam.name);
+
+      bool notifyAllChampionship = globalUser.notifyAllBasketMatches.value;
+
+      _notify = ValueNotifier<bool>(isFavoriteTeam || notifyAllChampionship);
+    }
+
     _startListeningForUpdates();
 
   }
@@ -79,6 +95,9 @@ class BasketMatch extends ChangeNotifier {
   bool get hasPeriodEnded => _hasPeriodEnded;
 
   bool get isHalftime => _hasPeriodEnded && _currentPeriod == 2;
+
+  int get game => _game;
+  bool get isGroupPhase => _isGroupPhase;
 
   int get time => _time;
   int get day => _day;
@@ -96,9 +115,14 @@ class BasketMatch extends ChangeNotifier {
     return "${_day.toString().padLeft(2, '0')}.${_month.toString().padLeft(2, '0')}.${(_year % 100).toString().padLeft(2, '0')}";
   }
 
-  String get matchDocId => "${homeTeam.nameEnglish}$_day$_month$_year$_game${awayTeam.nameEnglish}";
+  String get matchDocId => matchKey;
+  ValueNotifier<bool> get notify => _notify;
 
 
+
+  void enableNotify(bool notify) {
+    _notify.value = notify;
+  }
 
 
   // Δημιουργία DateTime
@@ -405,6 +429,12 @@ class BasketMatch extends ChangeNotifier {
       final data = snapshot.data()!;
       bool changed = false;
 
+      // ΠΡΟΣΤΕΘΗΚΕ: Έλεγχος για το αν ξεκίνησε το ματς (για να το βλέπουν live οι χρήστες)
+      if (_hasMatchStarted != (data['HasMatchStarted'] ?? _hasMatchStarted)) {
+        _hasMatchStarted = data['HasMatchStarted'] ?? false;
+        changed = true;
+      }
+
       // Έλεγχος βασικών μεταβλητών
       if (_homeScore != (data['HomeScore'] ?? _homeScore)) {
         _homeScore = data['HomeScore'] ?? 0;
@@ -423,18 +453,18 @@ class BasketMatch extends ChangeNotifier {
         changed = true;
       }
 
-      if (_hasPeriodEnded != (data['hasPeriodEnded'] ?? false)) {
-        _hasPeriodEnded = data['hasPeriodEnded'] ?? false;
+      // ΔΙΟΡΘΩΘΗΚΕ: Ήταν 'hasPeriodEnded' και έγινε 'IsPeriodEnded' για να ταιριάζει με το _updateBase!
+      if (_hasPeriodEnded != (data['IsPeriodEnded'] ?? false)) {
+        _hasPeriodEnded = data['IsPeriodEnded'] ?? false;
         changed = true;
       }
 
       // Έλεγχος Map δεκαλέπτων
       if (data.containsKey('PeriodScores')) {
-        // ΠΡΟΣΟΧΗ: Το Firebase διαβάζει τα keys ως String!
         Map<String, dynamic> fetchedPeriods = data['PeriodScores'];
 
         fetchedPeriods.forEach((key, value) {
-          int periodKey = int.parse(key); // Το μετατρέπουμε σε int για το δικό μας Map
+          int periodKey = int.parse(key);
 
           if (!_periodScores.containsKey(periodKey)) {
             _periodScores[periodKey] = {'home': 0, 'away': 0};
@@ -450,6 +480,7 @@ class BasketMatch extends ChangeNotifier {
         });
       }
 
+      // Έλεγχος Πόντων Παικτών
       if (data.containsKey('PlayerPoints')) {
         Map<String, dynamic> fetchedPlayerPoints = data['PlayerPoints'];
 
@@ -475,7 +506,6 @@ class BasketMatch extends ChangeNotifier {
       }
     });
   }
-
   void stopListening() {
     _matchSubscription?.cancel();
     _matchSubscription = null;

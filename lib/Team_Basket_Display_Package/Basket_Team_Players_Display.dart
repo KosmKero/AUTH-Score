@@ -1,215 +1,242 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import '../Data_Classes/Player.dart';
-import '../Data_Classes/Team.dart';
-import '../Firebase_Handle/firebase_screen_stats_helper.dart';
-import '../globals.dart';
+// TODO: Βάλε τα σωστά imports του Μπάσκετ σου
+import '../../Data_Classes/basketball/basketPlayer.dart';
+import '../../Data_Classes/basketball/basketTeam.dart';
+import '../../Firebase_Handle/firebase_screen_stats_helper.dart';
+import '../../globals.dart';
+import 'add_player_screen_basketball.dart';
+import 'edit_player_page_basketball.dart';
 
-
-class TeamPlayersDisplayWidget extends StatefulWidget {
-  const TeamPlayersDisplayWidget({super.key, required this.team});
-  final Team team;
+class BasketballTeamPlayersDisplayWidget extends StatefulWidget {
+  const BasketballTeamPlayersDisplayWidget({super.key, required this.team});
+  final basketTeam team;
 
   @override
-  State<TeamPlayersDisplayWidget> createState() => _TeamPlayersDisplayWidgetState();
+  State<BasketballTeamPlayersDisplayWidget> createState() =>
+      _BasketballTeamPlayersDisplayWidgetState();
 }
 
-class _TeamPlayersDisplayWidgetState extends State<TeamPlayersDisplayWidget> {
-  List<Player> positionList(int pos) {
-    return widget.team.players.where((player) => player.position == pos).toList();
+class _BasketballTeamPlayersDisplayWidgetState extends State<BasketballTeamPlayersDisplayWidget> {
+
+  List<BasketPlayer> positionList(int pos) {
+    return widget.team.players
+        .where((player) => player.position == pos)
+        .toList();
   }
 
-  void _updatePlayerList(Player newPlayer) {
+  void _updatePlayerList(BasketPlayer newPlayer) {
     setState(() {
-      widget.team.addPlayer(newPlayer);  // Προσθέτουμε τον νέο παίκτη στην ομάδα
+      widget.team.addPlayer(newPlayer);
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    logScreenViewSta(screenName: 'Team players',screenClass: 'Team players page');
+    logScreenViewSta(screenName: 'Basket Team players', screenClass: 'Basket Team players page');
 
+    bool isCaptain = globalUser.controlTheseTeamsBasket(widget.team.name, widget.team.nameEnglish) || globalUser.isUpperAdmin;
 
     return Expanded(
       child: SingleChildScrollView(
         scrollDirection: Axis.vertical,
+        physics: const BouncingScrollPhysics(),
         child: Column(
           children: [
-            (globalUser.controlTheseTeamsFootball(widget.team.name,null)) ? addPlayer() : SizedBox.shrink(),
-            playersCard(0, positionList(0)),
-            playersCard(1, positionList(1)),
-            playersCard(2, positionList(2)),
-            playersCard(3, positionList(3)),
-            if((globalUser.controlTheseTeamsFootball(widget.team.name,null)))
+            if (isCaptain)
               Padding(
-                padding: EdgeInsets.only(top: 20,left: 10),
-                child: Text(
-                  greek? "*Για να επεξεργαστείς ένα παίκτη κάνε double-tap πάνω του.": "*To edit a player, double-tap on their name.",
-                  style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.bold,
-                      fontFamily: 'Arial',
-                      color: darkModeNotifier.value ? Colors.white : Colors.black
+                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.orange[600], // Πορτοκαλί για μπάσκετ!
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))
+                    ),
+                    onPressed: _openAddPlayerScreen,
+                    icon: const Icon(Icons.add),
+                    label: Text(greek ? "Προσθήκη" : "Add"),
                   ),
                 ),
               ),
-            SizedBox(height: 20),
-          ],
-        ),
-      ),
-    );
-  }
 
-  Widget playersCard(int position, List<Player> players) {
-    String pos;
-    if (position == 0) {
-      pos = "Τερματοφύλακας";
-    } else if (position == 1) {
-      pos = "Αμυντικός";
-    } else if (position == 2) {
-      pos = "Μέσος";
-    } else {
-      pos = "Επιθετικός";
-    }
-    players.sort((a, b) => a.number.compareTo(b.number));
+            // ΟΙ 3 ΒΑΣΙΚΕΣ ΚΑΤΗΓΟΡΙΕΣ
+            _buildPositionSection(1, positionList(1)),
+            _buildPositionSection(2, positionList(2)),
+            _buildPositionSection(3, positionList(3)),
 
-    return SingleChildScrollView(
-      scrollDirection: Axis.vertical,
-      child: Container(
-        width: double.infinity,
-        margin: EdgeInsets.symmetric(vertical: 5, horizontal: 8),
-        decoration: ShapeDecoration(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          color:darkModeNotifier.value? Color(0xFF121212):Colors.white,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(5.0),
-              child: Text(
-                pos,
-                style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    fontFamily: 'Arial',
-                    color: darkModeNotifier.value?Colors.white:Colors.black
+            if (isCaptain)
+              Padding(
+                padding: const EdgeInsets.only(top: 20, bottom: 30, left: 16, right: 16),
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                      color: Colors.orangeAccent.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.orangeAccent.withOpacity(0.3))
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.info_outline, color: Colors.orangeAccent),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          greek
+                              ? "Για να επεξεργαστείς ένα παίκτη κάνε double-tap πάνω του."
+                              : "To edit a player, double-tap on their name.",
+                          style: TextStyle(
+                              fontSize: 13,
+                              color: darkModeNotifier.value ? Colors.white70 : Colors.black87),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-            Padding(
-              padding: EdgeInsets.symmetric(vertical: 5.0, horizontal: 8),
-              child: Column(
-                children: players
-                    .map((player) => Column(
-                  children: [
-                    //playerName(player),
-                    Divider(height: 10, thickness: 1, color: darkModeNotifier.value?Colors.white:Colors.black)
-                  ],
-                )).toList(),
-              ),
-            )
           ],
         ),
       ),
     );
   }
 
-  Widget playerName(Player player) {
-    return GestureDetector(
-      onDoubleTap: (globalUser.controlTheseTeamsFootball(widget.team.name,null)) ?  () async {
-      //  final updatedPlayer = await Navigator.push(
-      //    context,
-      //    MaterialPageRoute(
-      //      builder: (context) => PlayerEditPage(
-      //        player: player,
-      //        team: widget.team,
-      //      ),
-      //    ),
-      //  );
-      //if (updatedPlayer is bool && updatedPlayer==true){
-      //  setState(() {
-      //    final index = widget.team.players.indexWhere((p) => p.name == player.name && p.number==player.number);
-      //    if (index != -1) {
-      //      widget.team.players.removeAt(index);
-      //    }
-      //  });
-      //} else if (updatedPlayer != null && updatedPlayer is Player) {
-      //  setState(() {
-      //    //Βρες τη θέση του παλιού παίκτη και αντικατάστησέ τον
-      //    final index = widget.team.players.indexWhere((p) => p.name == player.name && p.number==player.number);
-      //    if (index != -1) {
-      //      widget.team.players[index] = updatedPlayer;
-      //    }
+  Future<void> _openAddPlayerScreen() async {
+     final newPlayer = await Navigator.push(
+       context,
+       MaterialPageRoute(
+         builder: (context) => BasketballAddPlayerScreen(
+           team: widget.team,
+           onPlayerAdded: _updatePlayerList,
+         ),
+       ),
+     );
 
-      //  });
-      // }
-      } : null,
+     if (newPlayer != null && newPlayer is BasketPlayer && mounted) {
+       setState(() {});
+     }
+  }
 
-      child: Column(
-        children: [
-          Row(children: [
-            SizedBox(
-                width: 31, height: 31, child: Image.asset('fotos/randomUserPic.png')),
-            SizedBox(width: 10),
-            Text(" ${player.number < 10 ? ' ${player.number}' : '${player.number}'}", style: TextStyle(color: darkModeNotifier.value?Colors.white:Colors.black,
-                fontFamily: "Arial",
-                fontSize: 15,
-                fontWeight: FontWeight.bold
+  Widget _buildPositionSection(int position, List<BasketPlayer> players) {
+    if (players.isEmpty) return const SizedBox.shrink();
+
+    String pos;
+    // ΟΙ 3 ΘΕΣΕΙΣ ΜΕ ΕΛΛΗΝΙΚΗ ΜΕΤΑΦΡΑΣΗ
+    if (position == 1) {
+      pos = greek ? "Γκαρντ" : "Guards";
+    } else if (position == 2) {
+      pos = greek ? "Φόργουορντ" : "Forwards";
+    } else {
+      pos = greek ? "Σέντερ" : "Centers";
+    }
+
+    players.sort((a, b) => a.number.compareTo(b.number));
+
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 6),
+      decoration: BoxDecoration(
+          color: darkModeNotifier.value ? const Color(0xFF1E1E1E) : Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 5,
+              offset: const Offset(0, 2),
             )
+          ]
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+                color: darkModeNotifier.value ? Colors.grey[900] : Colors.grey[50],
+                borderRadius: const BorderRadius.only(topLeft: Radius.circular(12), topRight: Radius.circular(12))
             ),
-            SizedBox(width: 10,),
-
-            Text(" ${player.name} ${player.surname}",
+            child: Text(
+              pos,
               style: TextStyle(
-                  color:darkModeNotifier.value?Colors.white:Colors.black,
-                  fontFamily: "Arial",
-                  fontSize: 16.5
-              ),),
-            //για ηλικία παικτών
-            //Row(
-            //  mainAxisAlignment: MainAxisAlignment.start,
-            //  children: [
-//
-            //    Text("  ${player.age} έτη", style: TextStyle(color:darkModeNotifier.value?Colors.white:Colors.black,
-            //      fontFamily: "Arial",
-            //      fontSize: 15
-            //      )
-            //    ),
-            //  ],
-            //),
-
-          ]),
-          SizedBox(height: 3),
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: darkModeNotifier.value ? Colors.white : Colors.black87),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4.0),
+            child: Column(
+              children: players.map((player) => playerName(player)).toList(),
+            ),
+          )
         ],
       ),
     );
   }
 
+  Widget playerName(BasketPlayer player) {
+    bool isCaptain = globalUser.controlTheseTeamsBasket(widget.team.name, widget.team.nameEnglish) || globalUser.isUpperAdmin;
+    bool isDark = darkModeNotifier.value;
 
-  Widget addPlayer() {
-    return IconButton(
-      onPressed: () async {
-      // final newPlayer = await Navigator.push(
-      //   context,
-      //  // MaterialPageRoute(
-      //  //   builder: (context) => AddPlayerScreen(
-      //  //     team: widget.team,
-      //  //     onPlayerAdded: _updatePlayerList,  // Περνάμε το callback
-      //  //   ),
-      //  // ),
-      // );
+    return GestureDetector(
+      onDoubleTap: isCaptain ? () async {
+         final result = await Navigator.push(
+           context,
+           MaterialPageRoute(
+             builder: (context) => BasketballPlayerEditPage(
+               player: player,
+               team: widget.team,
+             ),
+           ),
+         );
 
-        // Αν το νέο player δεν είναι null, ανανεώνουμε την UI με το setState
-      // if (newPlayer != null && newPlayer is Player) {
-      //   setState(() {});
-      // }
-      },
-      icon: Icon(
-        Icons.add,
-        color: darkModeNotifier.value?Colors.white:Colors.black,
+         if (result != null && mounted) {
+           setState(() {});
+         }
+      } : null,
+      child: Container(
+        color: Colors.transparent,
+        padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+        child: Row(
+          children: [
+            CircleAvatar(
+              radius: 18,
+              backgroundColor: isDark ? Colors.grey[700] : Colors.orange[100],
+              child: Text(
+                player.number.toString(),
+                style: TextStyle(
+                    color: isDark ? Colors.white : Colors.orange[900],
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                "${player.surname} ${player.name}",
+                style: TextStyle(
+                    color: isDark ? Colors.white : Colors.black87,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+
+            // Πόντοι του παίκτη
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: Colors.orange.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: Text(
+                "${player.points} pts",
+                style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.orange, fontSize: 12),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 }
-

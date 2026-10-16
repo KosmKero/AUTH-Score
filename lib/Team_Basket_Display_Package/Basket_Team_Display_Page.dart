@@ -1,28 +1,25 @@
-//mport 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:untitled1/Firebase_Handle/TeamsHandle.dart';
-import 'package:untitled1/Team_Display_Page_Package/Team_Details_Widget.dart';
-import 'package:untitled1/Team_Display_Page_Package/Team_Matches_Widget.dart';
-import 'package:untitled1/Team_Display_Page_Package/Team_Players_Display_Widget.dart';
-import 'package:untitled1/championship_details/top_players_page.dart';
-import 'package:untitled1/globals.dart';
-import 'package:untitled1/main.dart';
+import 'package:untitled1/Team_Basket_Display_Package/BasketTeamDetails.dart';
 
-import '../Data_Classes/Player.dart';
-import '../Data_Classes/Team.dart';
+import '../Data_Classes/basketball/basketTeam.dart';
+import '../Firebase_Handle/BasketTeamsHandle.dart';
 import '../Firebase_Handle/firebase_screen_stats_helper.dart';
+import '../Team_Display_Page_Package/Team_Details_Widget.dart';
+import '../championship_details/basket/basketball_standings_page.dart';
+import '../globals.dart';
+import 'Basket_Team_Matches_Widget.dart';
+import 'Basket_Team_Players_Display.dart';
 
-class TeamDisplayPage extends StatefulWidget{
 
-  const TeamDisplayPage(this.team, {super.key});
-  final Team team;
+class BasketballTeamDisplayPage extends StatefulWidget {
+  const BasketballTeamDisplayPage(this.team, {super.key});
+  final basketTeam team;
 
   @override
-  State<TeamDisplayPage> createState() => _TeamDisplayPageState();
+  State<BasketballTeamDisplayPage> createState() => _BasketballTeamDisplayPageState();
 }
 
-class _TeamDisplayPageState extends State<TeamDisplayPage> {
+class _BasketballTeamDisplayPageState extends State<BasketballTeamDisplayPage> {
   int selectedIndex = 0;
 
   void _changeSection(int index) {
@@ -33,86 +30,67 @@ class _TeamDisplayPageState extends State<TeamDisplayPage> {
 
   @override
   Widget build(BuildContext context) {
-    logScreenViewSta(screenName: 'Team page',screenClass: 'Team page');
-    /*FirebaseAnalytics.instance.logEvent(
-      name: 'team clicked',
-      parameters: {
-        'team name': widget.team.nameEnglish,
-      },
-    );
+    logScreenViewSta(screenName: 'Basket Team page', screenClass: 'Basket Team page');
 
-     */
-
-
-    return Scaffold( //ΑΦΟΡΑ ΤΟ ΟΝΟΜΑ ΠΑΝΩ ΣΤΗΝ ΣΕΛΙΔΑ
+    return Scaffold(
         appBar: AppBar(
-            backgroundColor:darkModeNotifier.value? Color(0xFF121212): const Color.fromARGB(250, 46, 90, 136),
-            iconTheme: IconThemeData(color: Colors.white),
+            backgroundColor: darkModeNotifier.value ? const Color(0xFF121212) : const Color.fromARGB(250, 46, 90, 136),
+            iconTheme: const IconThemeData(color: Colors.white),
             title: Row(
               children: [
-                SizedBox(
-                    height: 33,
-                    width:  33,
-                    child: widget.team.image),
-                SizedBox(width: 10,),
+                SizedBox(height: 33, width: 33, child: widget.team.image),
+                const SizedBox(width: 10),
                 Flexible(
                   child: Text(
                     widget.team.name,
                     maxLines: 2,
                     softWrap: true,
-                    overflow: TextOverflow.ellipsis, // για ασφάλεια αν είναι πολύ μεγάλο
-                    style: TextStyle(
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
                       fontSize: 21,
                       fontWeight: FontWeight.bold,
                       fontFamily: 'Arial',
                       fontStyle: FontStyle.italic,
                       color: Colors.white,
                     ),
-                  ),)
+                  ),
+                )
               ],
             ),
             actions: [
-              isFavourite(team: widget.team,),
-            ]
-        ),
-        body:Scaffold(
-            backgroundColor:darkModeNotifier.value?Color(0xFF121212): lightModeBackGround,
+              isFavouriteBasket(team: widget.team), // Κλήση της νέας κλάσης αγαπημένων
+            ]),
+        body: Scaffold(
+            backgroundColor: darkModeNotifier.value ? const Color(0xFF121212) : lightModeBackGround,
             body: Column(
               children: [
-                //Text(team.name,style: TextStyle(color: Color.fromARGB(100, 255, 10, 40),)),
-                _NavigationButtons(onSectionChange: _changeSection),
-                _sectionChooser(selectedIndex , widget.team,)
+                _NavigationButtonsBasket(onSectionChange: _changeSection),
+                _sectionChooserBasket(selectedIndex, widget.team)
               ],
-            )
-        )
-    );
+            )));
   }
-
-
 }
 
-//ΑΦΟΡΑ ΤΑ 3 ΚΟΥΜΠΙΑ ΚΑΤΩ ΑΠΟ ΤΟ ΟΝΟΜΑ!!
-class _NavigationButtons extends StatefulWidget {
+// ΑΦΟΡΑ ΤΑ 3 ΚΟΥΜΠΙΑ ΚΑΤΩ ΑΠΟ ΤΟ ΟΝΟΜΑ
+class _NavigationButtonsBasket extends StatefulWidget {
   final Function(int) onSectionChange;
 
-  const _NavigationButtons({Key? key, required this.onSectionChange})
-      : super(key: key);
+  const _NavigationButtonsBasket({Key? key, required this.onSectionChange}) : super(key: key);
 
   @override
-  State<_NavigationButtons> createState() => _NavigationButtonsState();
+  State<_NavigationButtonsBasket> createState() => _NavigationButtonsBasketState();
 }
 
-class _NavigationButtonsState extends State<_NavigationButtons> {
+class _NavigationButtonsBasketState extends State<_NavigationButtonsBasket> {
   int selectedIndex = 0;
 
   void _onButtonPressed(int index) {
     setState(() {
       selectedIndex = index;
     });
-    widget.onSectionChange(index); // Notify parent widget
+    widget.onSectionChange(index);
   }
 
-  //ΔΗΜΙΟΥΡΓΕΙ ΤΟΝ ΧΩΡΟ ΤΩΝ 3 ΚΟΥΜΠΙΩΝ
   @override
   Widget build(BuildContext context) {
     return SizedBox(
@@ -123,22 +101,21 @@ class _NavigationButtonsState extends State<_NavigationButtons> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            SizedBox(width: 10),
-            _buildTextButton("Λεπτομέρειες", 0),
-            SizedBox(width: 15),
-            _buildTextButton("Αγώνες", 1),
-            SizedBox(width: 15),
-            _buildTextButton("Παίχτες", 2),
-            SizedBox(width: 15),
-            _buildTextButton("Κορυφαίοι Παίχτες", 3),
-            SizedBox(width: 10),
+            const SizedBox(width: 10),
+            _buildTextButton(greek ? "Λεπτομέρειες" : "Details", 0),
+            const SizedBox(width: 15),
+            _buildTextButton(greek ? "Αγώνες" : "Matches", 1),
+            const SizedBox(width: 15),
+            _buildTextButton(greek ? "Παίκτες" : "Players", 2),
+            const SizedBox(width: 15),
+            _buildTextButton(greek ? "Κορυφαίοι Παίκτες" : "Top Players", 3),
+            const SizedBox(width: 10),
           ],
         ),
       ),
     );
   }
 
-  //ΔΗΜΙΟΥΡΓΕΙ ΤΑ 3 ΚΟΥΜΠΙΑ(ΛΕΠΤΟΜΕΡΕΙΕΣ ΑΓΩΝΕΣ ΚΑΙ ΠΑΙΧΤΕΣ)
   Widget _buildTextButton(String text, int index) {
     bool isSelected = selectedIndex == index;
 
@@ -153,17 +130,19 @@ class _NavigationButtonsState extends State<_NavigationButtons> {
             text,
             style: TextStyle(
               fontSize: 17,
-              color: isSelected ? Color.fromARGB(250, 46, 90, 136) :darkModeNotifier.value?Colors.white: Colors.white,
-              fontWeight: isSelected ? FontWeight.bold : FontWeight.w700,
-              //backgroundColor: darkModeNotifier.value==true?Colors.black87: lightModeBackGround
+              // ΔΙΟΡΘΩΣΗ: Στο Light Mode όταν δεν είναι επιλεγμένο θα είναι μαύρο για να φαίνεται!
+              color: isSelected
+                  ? Colors.orange // Βάλαμε πορτοκαλί για το μπάσκετ!
+                  : (darkModeNotifier.value ? Colors.white : Colors.black87),
+              fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
             ),
           ),
-          SizedBox(height: 3), // Απόσταση μεταξύ κειμένου και γραμμής
+          const SizedBox(height: 3),
           if (isSelected)
             Container(
-              width: 60, // Μήκος γραμμής
-              height: 3, // Πάχος γραμμής
-              color: Color.fromARGB(250, 46, 90, 136), // Χρώμα γραμμής
+              width: 60,
+              height: 3,
+              color: Colors.orange, // Πορτοκαλί γραμμή
             ),
         ],
       ),
@@ -171,35 +150,34 @@ class _NavigationButtonsState extends State<_NavigationButtons> {
   }
 }
 
+// ΕΛΕΓΧΕΙ ΑΝ Η ΟΜΑΔΑ ΜΠΑΣΚΕΤ ΕΙΝΑΙ ΣΤΑ ΑΓΑΠΗΜΕΝΑ
+class isFavouriteBasket extends StatefulWidget {
+  final basketTeam team;
 
-//ελεγχει την κατασταση για το αν η ομαδα ειναι στα αγαπημενα ή οχι.
-class isFavourite extends StatefulWidget {
-  final Team team;
-
-  const isFavourite({super.key, required this.team});
+  const isFavouriteBasket({super.key, required this.team});
 
   @override
-  State<isFavourite> createState() => _isFavouriteState();
+  State<isFavouriteBasket> createState() => _isFavouriteBasketState();
 }
 
-class _isFavouriteState extends State<isFavourite> {
+class _isFavouriteBasketState extends State<isFavouriteBasket> {
   bool isFavourite = false;
-  final TeamsHandle teamsHandle = TeamsHandle();
+  final BasketTeamsHandle basketTeamsHandle = BasketTeamsHandle();
 
   @override
   void initState() {
     super.initState();
-    _checkIfFavourite(); // Κάνε τον αρχικό έλεγχο εδώ
+    _checkIfFavourite();
   }
 
   Future<void> _checkIfFavourite() async {
     if (isLoggedIn) {
-      bool result = globalUser.favoriteList.contains(widget.team.name);//      await teamsHandle.isFavouriteTeam(widget.team.name);
+      // ΕΛΕΓΧΟΣ ΣΤΗ ΛΙΣΤΑ ΤΟΥ ΜΠΑΣΚΕΤ
+      bool result = globalUser.favoriteListBasket.contains(widget.team.name);
       setState(() {
         isFavourite = result;
       });
     }
-
   }
 
   @override
@@ -210,43 +188,31 @@ class _isFavouriteState extends State<isFavourite> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: greek
-                  ? Text('Πρέπει να συνδεθείς για να έχεις αγαπημένες ομάδες!')
-                  : Text('You have to log in to have favourite teams!'),
+                  ? const Text('Πρέπει να συνδεθείς για να έχεις αγαπημένες ομάδες!')
+                  : const Text('You have to log in to have favourite teams!'),
               backgroundColor: Colors.red,
-              duration: Duration(seconds: 3),
+              duration: const Duration(seconds: 3),
             ),
           );
           return;
         }
 
-        // 1. Optimistic Update (άμεσο setState)
         setState(() {
           isFavourite = !isFavourite;
         });
 
-        try {
-          if (isFavourite) {
-            await teamsHandle.addFavouriteTeam(widget.team.name);
-            globalUser.addFavoriteTeam(widget.team);
-          } else {
-            await teamsHandle.removeFavouriteTeam(widget.team.name);
-            globalUser.removeFavoriteTeam(widget.team);
-          }
-        } catch (e) {
-          // 2. Αν υπάρξει σφάλμα, κάνε revert το UI
-          setState(() {
-            isFavourite = !isFavourite; // γύρνα το πίσω
-          });
+        if (isFavourite) {
+          // 1. Ενημέρωση βάσης
+          await basketTeamsHandle.addFavouriteTeam(widget.team.name);
 
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: greek
-                  ? Text('Κάτι πήγε στραβά. Προσπάθησε ξανά.')
-                  : Text('Something went wrong. Please try again.'),
-              backgroundColor: Colors.red,
-              duration: Duration(seconds: 3),
-            ),
-          );
+          // 2. Ενημέρωση τοπικής λίστας ΚΑΙ UI αγώνων
+          globalUser.updateBasketMatchesNotificationsOnFavoriteChange(widget.team.name, true);
+        } else {
+          // 1. Ενημέρωση βάσης
+          await basketTeamsHandle.removeFavouriteTeam(widget.team.name);
+
+          // 2. Ενημέρωση τοπικής λίστας ΚΑΙ UI αγώνων
+          globalUser.updateBasketMatchesNotificationsOnFavoriteChange(widget.team.name, false);
         }
       },
       icon: Icon(
@@ -257,25 +223,21 @@ class _isFavouriteState extends State<isFavourite> {
   }
 }
 
-
-
-
-Widget _sectionChooser(int selectedIndex, Team team) {
+// ΕΠΙΛΟΓΕΑΣ ΥΠΟ-ΣΕΛΙΔΩΝ ΜΠΑΣΚΕΤ
+Widget _sectionChooserBasket(int selectedIndex, basketTeam team) {
   switch (selectedIndex) {
     case 0:
-      return TeamDetailsWidget(team: team);
+      return TeamDetailsWidgetBasketball(team: team,);
     case 1:
-      return TeamMatchesWidget(team: team);
+      return BasketballTeamMatchesWidget(team: team,);
     case 2:
-      return TeamPlayersDisplayWidget(team: team);
+      return BasketballTeamPlayersDisplayWidget(team: team,);
     case 3:
-      return TopPlayersPage(
-        List.from(team.players)..sort((a, b) => b.goals.compareTo(a.goals)),
+      return BasketballTopPlayersPage(
+        List.from(team.players)..sort((a, b) => b.points.compareTo(a.points)),
       );
 
     default:
-      return TeamDetailsWidget(team: team);
+      return Center(child: Text("Details Placeholder"));
   }
 }
-
-

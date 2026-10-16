@@ -1,6 +1,5 @@
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
-import 'package:untitled1/API/user_handle.dart';
 import 'package:untitled1/Data_Classes/basketball/basketMatch.dart';
 import 'package:untitled1/Data_Classes/basketball/basketTeam.dart';
 import 'package:untitled1/Firebase_Handle/user_handle_in_base.dart';
@@ -8,12 +7,12 @@ import 'package:untitled1/Match_Details_Package/Match_Not_Started/DetailsMatchNo
 import '../../Data_Classes/MatchDetails.dart';
 import '../../Data_Classes/Team.dart';
 import '../../Firebase_Handle/firebase_screen_stats_helper.dart';
+import '../../Team_Basket_Display_Package/Basket_Team_Display_Page.dart';
 import '../../Team_Display_Page_Package/TeamDisplayPage.dart';
 import '../../Team_Display_Page_Package/one_group_standings.dart';
-import '../../championship_details/StandingsPage.dart';
+import '../../championship_details/football/football_StandingsPage.dart';
 import '../../globals.dart';
 import '../../main.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
 import '../../ad_manager.dart';
 import 'basketMatchNotStartedPage.dart';
 
@@ -239,13 +238,13 @@ class _buildTeamName extends State<buildTeamName> {
         //   offset: Offset(16, 0), // Μετακινεί το εικονίδιο πιο κοντά στο κείμενο
         // ),
         GestureDetector(
-   //       onTap: () {
-   //         Navigator.push(
-   //           context,
-   //             MaterialPageRoute(
-   //                 builder: (context) => TeamDisplayPage(widget.team)),
-   //         );
-   //        },
+          onTap: () {
+            Navigator.push(
+              context,
+                MaterialPageRoute(
+                    builder: (context) => BasketballTeamDisplayPage(widget.team),)
+            );
+           },
             child: Container(
               child: Column(
                 children: [

@@ -7,11 +7,10 @@ import 'package:untitled1/Data_Classes/Player.dart';
 import 'package:untitled1/Data_Classes/basketball/basketMatch.dart';
 import 'package:untitled1/Firebase_Handle/user_handle_in_base.dart';
 import 'package:untitled1/Match_Details_Package/penalty_shootout_widget.dart';
-import 'package:untitled1/championship_details/StandingsPage.dart';
+import 'package:untitled1/championship_details/football/football_StandingsPage.dart';
 import 'package:untitled1/globals.dart';
 import '../../Data_Classes/MatchDetails.dart';
 import 'package:provider/provider.dart';
-import '../API/user_handle.dart';
 import '../Data_Classes/Penaltys.dart';
 import '../Data_Classes/Team.dart';
 import '../Data_Classes/basketball/basketMatch.dart';
@@ -21,7 +20,6 @@ import '../Team_Display_Page_Package/one_group_standings.dart';
 import 'basketMatchNotStarted/basketMatchNotStartedPage.dart';
 import 'basketMatchNotStarted/basketMatchUpperBody.dart';
 
-import 'package:google_mobile_ads/google_mobile_ads.dart';
 import '../../ad_manager.dart';
 
 import 'basketMatchNotStarted/basketMatchUpperBody.dart';
