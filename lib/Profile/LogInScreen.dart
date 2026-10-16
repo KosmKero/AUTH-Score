@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:untitled1/Data_Classes/Team.dart';
@@ -359,7 +360,7 @@ class _CreateSignUp extends State<CreateSignUp> {
           child: TextField(
             controller: _emailText,
             decoration: InputDecoration(
-              prefixIcon: Icon(Icons.email, color: Colors.blue[700]), // 💡 Άλλαξα το εικονίδιο σε email
+              prefixIcon: Icon(Icons.email, color: Colors.blue[700]), //  Άλλαξα το εικονίδιο σε email
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(15),
                 borderSide: const BorderSide(color: Colors.black87, width: 3),
@@ -744,6 +745,10 @@ Future<void> checkBase(BuildContext context,emailText,passwordText) async
 
       loggedInNotifications.value = true;
 
+      if (FirebaseAuth.instance.currentUser != null) {
+        setAnalyticsUser(FirebaseAuth.instance.currentUser!.uid);
+      }
+
       await NotificationService.saveTokenToFirestore();
 
       //ΕΠΙΣΤΡΕΦΩ ΣΤΗΝ ΑΡΧΙΚΗ ΣΕΛΙΔΑ!!
@@ -828,6 +833,18 @@ Future<void> addInBase(BuildContext context,TextEditingController  emailText,Tex
   {
     isLoggedIn = true;
     loggedInNotifications.value = true;
+
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      setAnalyticsUser(user.uid);
+
+      if (sxolh.isNotEmpty) {
+        await FirebaseAnalytics.instance.setUserProperty(
+          name: 'user_department',
+          value: sxolh,
+        );
+      }
+    }
 
     await NotificationService.saveTokenToFirestore();
 

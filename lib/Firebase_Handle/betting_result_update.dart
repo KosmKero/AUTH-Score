@@ -86,9 +86,26 @@ class BettingResultUpdate {
           int monthTotal = userData['monthlyStats']?[monthKey]?['totalVotes'] ?? 0;
 
           // --- Ενημέρωση ---
-          if (choice == correctChoice) {
+          // --- 2. ΝΕΟ: ΥΠΟΛΟΓΙΣΜΟΣ ΣΕΡΙ (STREAKS) ---
+          int currentStreak = userData['currentStreak'] ?? 0;
+          int bestStreak = userData['bestStreak'] ?? 0;
+
+          bool isCorrect = (choice == correctChoice);
+
+          if (isCorrect) {
             correct++; yearCorrect++; monthCorrect++;
+
+            // Αυξάνουμε το τρέχον σερί
+            currentStreak++;
+            // Ελέγχουμε αν ξεπέρασε το ιστορικό του ρεκόρ
+            if (currentStreak > bestStreak) {
+              bestStreak = currentStreak;
+            }
+          } else {
+            // Έχασε, άρα το σερί μηδενίζεται (το bestStreak παραμένει ως έχει)
+            currentStreak = 0;
           }
+
           total++; yearTotal++; monthTotal++;
 
           // --- Αποθήκευση στο Batch ---
@@ -100,6 +117,9 @@ class BettingResultUpdate {
               'score': _calculateScore(correct, total),
             },
             'totalVotes': total,
+            'currentStreak': currentStreak,
+            'bestStreak': bestStreak,
+
             'yearlyStats': {
               yearKey: {
                 'correctVotes': yearCorrect,

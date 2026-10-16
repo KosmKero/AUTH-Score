@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -80,7 +81,7 @@ class _BettingChooserState extends State<BettingChooser> {
       // Στέλνουμε τα δεδομένα στο Firebase
       await saveUserVoteToMatch(match: widget.match, choice: value);
 
-      // 💡 Φορτώνουμε τα νέα ποσοστά με το νέο ID
+      // Φορτώνουμε τα νέα ποσοστά με το νέο ID
       final loadedPercentages = await teamsHandle.getPercentages(widget.match.matchDocId);
 
       if (mounted) {
@@ -196,20 +197,37 @@ class _BettingChooserState extends State<BettingChooser> {
       }
     }, SetOptions(merge: true));
 
+    String userProfileDept = globalUser.university;
+    String mappedDepartment = departmentToTeamName[userProfileDept] ?? userProfileDept;
+
+    final int minutesBeforeStart = match.matchDateTime2.difference(DateTime.now()).inMinutes;
     await FirebaseFirestore.instance.collection('bets').doc('${FirebaseAuth.instance.currentUser!.uid}_${match.matchDocId}').set({
       'userId': FirebaseAuth.instance.currentUser!.uid,
       'matchId': match.matchDocId,
       'choice': choice,
       'status': 'pending',
       'createdAt': FieldValue.serverTimestamp(),
+      'minutesBeforeStart': minutesBeforeStart,
+      'userDepartment': mappedDepartment,
+      'isGroupPhase': match.isGroupPhase,
+      'game': match.game,
       'matchInfo': {
         'Hometeam': match.homeTeam.name,
         'Awayteam': match.awayTeam.name,
         'homeTeamEnglish': match.homeTeam.nameEnglish,
         'awayTeamEnglish': match.awayTeam.nameEnglish,
-        'startTime': match.matchDateTime2
-      }
+        'startTime': match.matchDateTime2,
+      },
     });
+
+    await FirebaseAnalytics.instance.logEvent(
+      name: 'bet_placed',
+      parameters: {
+        'match_id': match.matchDocId,
+        'choice': choice,
+      },
+    );
+
   }
 
   Future<String?> getUserVoteFromMatch({required MatchDetails match}) async {
@@ -230,4 +248,57 @@ class _BettingChooserState extends State<BettingChooser> {
     }
     return null;
   }
+
+  final Map<String, String> departmentToTeamName = {
+    // ΗΜΜΥ
+    'Ηλεκτρολόγων Μηχανικών και Μηχανικών Υπολογιστών': 'ΗΜΜΥ 1', // ή 'ΗΜΜΥ 2' ανάλογα πού παίζει, δες σημείωση παρακάτω
+
+    // Πολυτεχνείο
+    'Αρχιτεκτόνων Μηχανικών': 'ΑΡΧΙΤΕΚΤΟΝΙΚΗ',
+    'Μηχανικών Χωροταξίας και Ανάπτυξης': 'ΧΩΡΟΤΑΞΙΑ',
+    'Μηχανολόγων Μηχανικών': 'ΜΗΧΑΝ. ΜΗΧΑΝ.',
+    'Πολιτικών Μηχανικών': 'ΠΟΛΙΤΙΚΩΝ ΜΗΧΑΝ.', // Ή 'ΠΟΛΙΤΙΚΟΙ ΜΗΧΑΝΙΚΟΙ 2'
+    'Χημείας': 'ΧΗΜΙΚΟ', // Προσοχή: Άλλο Χημικό, άλλο Χημικών Μηχανικών (που δεν είναι στη λίστα των users)
+
+    // Θετικές Επιστήμες
+    'Βιολογίας': 'ΒΙΟΛΟΓΙΚΟ',
+    'Γεωλογίας': 'ΓΕΩΛΟΓΙΑ',
+    'Μαθηματικού': 'ΜΑΘΗΜΑΤΙΚΟ',
+    'Πληροφορικής': 'ΠΛΗΡΟΦΟΡΙΚΗ',
+    'Φυσικής': 'ΦΥΣΙΚΟ',
+
+    // Επιστήμες Υγείας
+    'Ιατρικής': 'ΙΑΤΡΙΚΗ',
+    'Κτηνιατρικής': 'ΚΤΗΝΙΑΤΡΙΚΗ',
+    'Νοσηλευτικής': 'ΝΟΣΗΛΕΥΤΙΚΗ',
+    'Οδοντιατρικής': 'ΟΔΟΝΤΙΑΤΡΙΚΗ',
+    'Φαρμακευτικής': 'ΦΑΡΜΑΚΕΥΤΙΚΗ',
+
+    // Γεωπονία & Δασολογία
+    'Αγροτικής Ανάπτυξης': 'ΓΕΩΠΟΝΙΑ',
+    'Γεωπονίας': 'ΓΕΩΠΟΝΙΑ',
+    'Δασολογίας': 'ΔΑΣΟΛΟΓΙΑ',
+    'Επιστήμης Τροφίμων': 'Τεχνολογίας Τροφίμων',
+
+    // Οικονομικές & Πολιτικές Επιστήμες
+    'Δημοσιογραφίας και ΜΜΕ': 'ΜΜΕ',
+    'Οικονομικών Επιστημών': 'ΟΙΚΟΝΟΜΙΚΟ',
+    'Πολιτικών Επιστημών': 'ΠΟΛΙΤΙΚΩΝ ΕΠΙΣΤΗΜ.',
+
+    // Νομική
+    'Νομικής': 'ΝΟΜΙΚΗ',
+
+    // ΤΕΦΑΑ
+    'Επιστήμης Φυσικής Αγωγής και Αθλητισμού': 'ΤΕΦΑΑ',
+
+    // Άλλα προγράμματα (Παιδαγωγικά, Φιλοσοφική) συχνά ενώνονται σε μία ομάδα,
+    // αν παίζουν ως "ΦΙΛΟΣΟΦΙΚΗ" ή "ΠΑΙΔΑΓΩΓΙΚΟ", πρόσθεσε τα αντίστοιχα εδώ:
+    'Παιδαγωγικό Δημοτικής Εκπαίδευσης': 'ΠΑΙΔΑΓΩΓΙΚΗ',
+    'Παιδαγωγικό Ειδικής Αγωγής': 'ΠΑΙΔΑΓΩΓΙΚΗ',
+    'Παιδαγωγικό Νηπιαγωγών': 'ΠΑΙΔΑΓΩΓΙΚΗ',
+
+    // Erasmus
+    'Erasmus': 'ΕΡΑΣΜΟΥΣ', // (Ή ΕΡΑΣΜΟΥΣ 2)
+  };
 }
+

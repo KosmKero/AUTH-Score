@@ -35,12 +35,15 @@ class _MatchNotStartedDetailsState extends State<MatchNotStartedDetails> {
 
   @override
   Widget build(BuildContext context) {
-    logScreenViewSta(screenName: 'Match Not Started Page',screenClass: 'Match Not Started Page');
+    logScreenViewSta(
+      screenName: 'Match Not Started',
+      screenClass: 'MatchDetailsScreen',
+    );
 
     FirebaseAnalytics.instance.logEvent(
-      name: 'Match Not Started Clicked',
+      name: 'match_preview_opened', // Χωρίς κενά!
       parameters: {
-        'match_id': '${widget.match.homeTeam.nameEnglish} ${widget.match.timeString} ${widget.match.awayTeam.nameEnglish}',
+        'match_id': widget.match.matchDocId,
         'home_team': widget.match.homeTeam.nameEnglish,
         'away_team': widget.match.awayTeam.nameEnglish,
       },

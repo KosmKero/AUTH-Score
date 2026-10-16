@@ -18,10 +18,14 @@ import 'Match_Details_Package/add_match_page.dart';
 import 'Profile/admin/pinWatch.dart';
 import 'Team_Basket_Display_Package/add_team_screen.dart';
 import 'Team_Display_Page_Package/addTeamScreen.dart';
+import 'appTheme_colors.dart';
 import 'basketMatches/add_match_basketball.dart';
 import 'championship_details/StandingsOrKnockoutsChooserPage.dart';
+import 'custom_app_bar.dart';
 import 'favorite_Page/favorite_Chooser.dart';
 import 'firebase_options.dart';
+import 'package:firebase_app_check/firebase_app_check.dart';
+import 'package:flutter/foundation.dart';
 
 import 'package:flutter/material.dart';
 import 'package:untitled1/API/Match_Handle.dart';
@@ -77,6 +81,12 @@ void main() async {
       return true;
     };
 
+    final locale = PlatformDispatcher.instance.locale;
+    await FirebaseAnalytics.instance.setUserProperty(
+      name: 'device_locale',
+      value: '${locale.languageCode}_${locale.countryCode}',
+    );
+
     // 3. Ρύθμιση Remote Config
     final remoteConfig = FirebaseRemoteConfig.instance;
     await remoteConfig.setConfigSettings(RemoteConfigSettings(
@@ -108,6 +118,13 @@ void main() async {
     if (user != null) {
       loadUser(user);
     }
+
+    final bool userLoggedIn = user != null;
+    await FirebaseAnalytics.instance.setUserProperty(
+      name: 'is_logged_in',
+      value: userLoggedIn ? 'true' : 'false',
+    );
+
     print("✅ Firebase initialized successfully!");
   } catch (e) {
     print("❌ Firebase initialization failed: $e");
@@ -117,6 +134,13 @@ void main() async {
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
+
+
+  await FirebaseAppCheck.instance.activate(
+    androidProvider: kDebugMode
+        ? AndroidProvider.debug        // Όταν τρέχεις σε emulator/PC
+        : AndroidProvider.playIntegrity, // Για το Play Store
+  );
 
   runApp(const MyApp());
 }
@@ -128,13 +152,22 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     logScreenViewSta(screenName: 'Opened', screenClass: 'Opened');
 
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      navigatorKey: navigatorKey,
-      routes: {
-        '/home': (context) => const LoadingScreen(),
-      },
-      home: const LoadingScreen(),
+    return ValueListenableBuilder<bool>(
+        valueListenable: darkModeNotifier,
+        builder: (context, isDark, child)
+    {
+      return MaterialApp(
+        debugShowCheckedModeBanner: false,
+        navigatorKey: navigatorKey,
+        theme: AppTheme.lightTheme,
+        darkTheme: AppTheme.darkTheme,
+        themeMode: darkModeNotifier.value ? ThemeMode.dark : ThemeMode.light,
+        routes: {
+          '/home': (context) => const LoadingScreen(),
+        },
+        home: const LoadingScreen(),
+      );
+    }
     );
   }
 }
@@ -170,6 +203,10 @@ class _LoadingScreenState extends State<LoadingScreen> {
       setState(() {
         _loadingMessage = "Loading teams...";
       });
+      if (FirebaseAuth.instance.currentUser != null) {
+        setAnalyticsUser(FirebaseAuth.instance.currentUser!.uid);
+      }
+
       //await loadYear();
       //await WinProbabilityCalculator.evaluateModel(2025);
       //await WinProbabilityCalculator.evaluateModel(2026);
@@ -403,6 +440,7 @@ class _MainScreenState extends State<MainScreen> {
 }
 
 // ------------------------ APP BAR ------------------------
+/*
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final Function(String)? onOptionSelected;
   final String? selectedOption;
@@ -413,7 +451,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.selectedOption,
   });
 
-  @override // ΔΙΟΡΘΩΘΗΚΕ: Αφαιρέθηκε το διπλό @override
+  @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<bool>(
       valueListenable: darkModeNotifier,
@@ -713,6 +751,9 @@ class NotificationsForAllChampionship extends StatelessWidget {
     ));
   }
 }
+
+ */
+
 
 // ------------------------ BOTTOM NAVIGATION ------------------------
 class CustomBottomNavigationBar extends StatelessWidget {
