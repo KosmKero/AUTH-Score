@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart'; // Απαραίτητο για το myUid
+import 'package:firebase_auth/firebase_auth.dart';
 
 import '../../globals.dart' as global;
 
@@ -17,9 +17,8 @@ class _AdminListWidgetState extends State<AdminListWidget> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
 
-  // ΝΕΟ: Εδώ αποθηκεύουμε ποιος είμαστε εμείς (για να τα περάσουμε στις κάρτες)
   String _myUid = '';
-  List<String> _myMainTeams = [];
+  List<String> _myControlledTeams = [];
 
   @override
   void initState() {
@@ -34,49 +33,63 @@ class _AdminListWidgetState extends State<AdminListWidget> {
   }
 
   Future<List<Map<String, dynamic>>> _fetchAdmins() async {
-    // 1. Βρίσκουμε ποιοι είμαστε
     _myUid = FirebaseAuth.instance.currentUser!.uid;
 
-    // Διαβάζουμε τα ΔΙΚΑ ΜΑΣ δικαιώματα από τη βάση
-    DocumentSnapshot myDoc = await FirebaseFirestore.instance.collection('users').doc(_myUid).get();
+    DocumentSnapshot myDoc =
+    await FirebaseFirestore.instance.collection('users').doc(_myUid).get();
     Map<String, dynamic>? myData = myDoc.data() as Map<String, dynamic>?;
 
-    _myMainTeams = List<String>.from(myData?['Main Teams'] ?? []);
-    List<String> myControlledTeams = List<String>.from(myData?['Controlled Teams'] ?? []);
+    _myControlledTeams = List<String>.from(myData?['Controlled Teams'] ?? []);
 
-    // 2. Χτίζουμε το Query για τους άλλους
-    Query query = FirebaseFirestore.instance.collection('users').where('role', isEqualTo: 'admin');
+    Query query;
 
-    if (!global.globalUser.isSuperUser && ! global.globalUser.isUpperAdmin) {
-      // Αν είμαι απλός/βασικός αρχηγός, φέρε ΜΟΝΟ όσους έχουν κοινές ομάδες με εμένα
-      if (myControlledTeams.isNotEmpty) {
-        query = query.where('Controlled Teams', arrayContainsAny: myControlledTeams);
+    if (global.globalUser.isSuperUser) {
+      query = FirebaseFirestore.instance.collection('users').where('role', isEqualTo: 'admin');
+    } else if (global.globalUser.isUpperAdmin) {
+      query = FirebaseFirestore.instance.collection('users').where('role', isEqualTo: 'admin');
+    } else {
+      if (_myControlledTeams.isNotEmpty) {
+        query = FirebaseFirestore.instance
+            .collection('users')
+            .where('role', isEqualTo: 'admin')
+            .where('Controlled Teams', arrayContainsAny: _myControlledTeams);
       } else {
-        return []; // Δεν έχω καμία ομάδα, άρα δεν βλέπω κανέναν
+        return [];
       }
     }
 
     final querySnapshot = await query.get();
-    List<Map<String, dynamic>> admins = querySnapshot.docs.map((doc) => {
+    List<Map<String, dynamic>> admins = querySnapshot.docs
+        .map((doc) => {
       ...doc.data() as Map<String, dynamic>,
       'uid': doc.id,
-    }).toList();
+    })
+        .toList();
 
-    // 3. Φίλτρο Ασφαλείας: Κρύβουμε τον Superuser από ΟΛΟΥΣ τους άλλους!
     if (!global.globalUser.isSuperUser) {
       admins.removeWhere((admin) => admin['superuser'] == "super123userRR");
     }
 
+    if (!global.globalUser.isSuperUser && !global.globalUser.isUpperAdmin) {
+      admins.removeWhere((admin) => admin['moderator'] == true);
+    }
+
+    // ΒΕΛΤΙΩΣΗ 2: Αλφαβητική Ταξινόμηση βάσει ονόματος
+    admins.sort((a, b) {
+      final nameA = (a['captainname'] ?? a['username'] ?? '').toString().toLowerCase();
+      final nameB = (b['captainname'] ?? b['username'] ?? '').toString().toLowerCase();
+      return nameA.compareTo(nameB);
+    });
+
     return admins;
   }
 
-  void _refreshAdmins() {
+  Future<void> _refreshAdmins() async {
     setState(() {
       _adminUsersFuture = _fetchAdmins();
     });
+    await _adminUsersFuture; // Περιμένουμε να ολοκληρωθεί για το RefreshIndicator
   }
-
-  // ... [Ο κώδικας του _updateYear και του _buildYearSelector ΠΑΡΑΜΕΝΕΙ Ο ΙΔΙΟΣ] ...
 
   @override
   Widget build(BuildContext context) {
@@ -86,41 +99,50 @@ class _AdminListWidgetState extends State<AdminListWidget> {
 
     return Column(
       children: [
-        //_buildYearSelector(), // Υποθέτω τον έχεις κρατήσει ίδιο
-
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
           child: TextField(
             controller: _searchController,
-            onChanged: (value) => setState(() => _searchQuery = value.toLowerCase()),
+            onChanged: (value) =>
+                setState(() => _searchQuery = value.toLowerCase()),
             style: TextStyle(color: textColor),
             decoration: InputDecoration(
-              labelText: 'Αναζήτηση (Όνομα, Email, Ομάδα)',
-              labelStyle: TextStyle(color: textColor.withOpacity(0.7)),
-              prefixIcon: Icon(Icons.search, color: textColor.withOpacity(0.7)),
+              hintText: 'Αναζήτηση (Όνομα, Email, Ομάδα)...',
+              hintStyle: TextStyle(color: textColor.withOpacity(0.5)),
+              prefixIcon: Icon(Icons.search, color: textColor.withOpacity(0.5)),
               suffixIcon: _searchQuery.isNotEmpty
                   ? IconButton(
-                icon: Icon(Icons.clear, color: textColor.withOpacity(0.7)),
-                onPressed: () {
-                  _searchController.clear();
-                  FocusScope.of(context).unfocus();
-                  setState(() => _searchQuery = '');
-                },
-              )
+                  icon: Icon(Icons.cancel, color: textColor.withOpacity(0.5)),
+                  onPressed: () {
+                    _searchController.clear();
+                    FocusScope.of(context).unfocus();
+                    setState(() => _searchQuery = '');
+                  })
                   : null,
               filled: true,
               fillColor: tileColor,
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+              contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 20),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(30),
+                borderSide: BorderSide(color: isDark ? Colors.white12 : Colors.grey.shade300),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(30),
+                borderSide: const BorderSide(color: Colors.blueAccent, width: 2),
+              ),
             ),
           ),
         ),
-
         Expanded(
           child: FutureBuilder<List<Map<String, dynamic>>>(
             future: _adminUsersFuture,
             builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) return const Center(child: CircularProgressIndicator());
-              if (snapshot.hasError) return Center(child: Text('Σφάλμα: ${snapshot.error}', style: TextStyle(color: textColor)));
+              if (snapshot.connectionState == ConnectionState.waiting)
+                return const Center(child: CircularProgressIndicator());
+              if (snapshot.hasError)
+                return Center(
+                    child: Text('Σφάλμα: ${snapshot.error}',
+                        style: TextStyle(color: textColor)));
 
               final admins = snapshot.data ?? [];
               final filteredAdmins = admins.where((admin) {
@@ -133,25 +155,29 @@ class _AdminListWidgetState extends State<AdminListWidget> {
               }).toList();
 
               if (filteredAdmins.isEmpty) {
-                return Center(child: Text('Δεν βρέθηκε αποτέλεσμα.', style: TextStyle(color: textColor)));
+                return Center(
+                    child: Text('Δεν βρέθηκε αποτέλεσμα.', style: TextStyle(color: textColor)));
               }
 
-              return ListView.builder(
-                keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                itemCount: filteredAdmins.length,
-                itemBuilder: (context, index) {
-                  return AdminCard(
-                    admin: filteredAdmins[index],
-                    searchQuery: _searchQuery,
-                    refreshList: _refreshAdmins,
-                    // ΝΕΟ: Περνάμε στην κάρτα ποιοι είμαστε!
-                    myUid: _myUid,
-                    isMeSuperUser: global.globalUser.isSuperUser,
-                    isMeSecretariat:  global.globalUser.isUpperAdmin,
-                    myMainTeams: _myMainTeams,
-                  );
-                },
+              // ΒΕΛΤΙΩΣΗ 3: Pull-to-Refresh για χειροκίνητη ανανέωση
+              return RefreshIndicator(
+                onRefresh: _refreshAdmins,
+                child: ListView.builder(
+                  keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  itemCount: filteredAdmins.length,
+                  itemBuilder: (context, index) {
+                    return AdminCard(
+                      admin: filteredAdmins[index],
+                      searchQuery: _searchQuery,
+                      refreshList: () => _refreshAdmins(),
+                      myUid: _myUid,
+                      isMeSuperUser: global.globalUser.isSuperUser,
+                      isMeSecretariat: global.globalUser.isUpperAdmin,
+                      myControlledTeams: _myControlledTeams,
+                    );
+                  },
+                ),
               );
             },
           ),
@@ -167,22 +193,21 @@ class AdminCard extends StatefulWidget {
   final VoidCallback refreshList;
   final String searchQuery;
 
-  // Δεχόμαστε τα στοιχεία του χρήστη που κρατάει το κινητό
   final String myUid;
   final bool isMeSuperUser;
   final bool isMeSecretariat;
-  final List<String> myMainTeams;
+  final List<String> myControlledTeams;
 
-  const AdminCard({
-    required this.admin,
-    required this.refreshList,
-    required this.myUid,
-    required this.isMeSuperUser,
-    required this.isMeSecretariat,
-    required this.myMainTeams,
-    this.searchQuery = '',
-    Key? key
-  }) : super(key: key);
+  const AdminCard(
+      {required this.admin,
+        required this.refreshList,
+        required this.myUid,
+        required this.isMeSuperUser,
+        required this.isMeSecretariat,
+        required this.myControlledTeams,
+        this.searchQuery = '',
+        Key? key})
+      : super(key: key);
 
   @override
   State<AdminCard> createState() => _AdminCardState();
@@ -191,30 +216,22 @@ class AdminCard extends StatefulWidget {
 class _AdminCardState extends State<AdminCard> {
   late bool moderator;
   late List<String> teams;
-  late List<String> targetMainTeams;
 
   @override
   void initState() {
     super.initState();
     moderator = widget.admin['moderator'] ?? false;
     teams = List<String>.from(widget.admin['Controlled Teams'] ?? []);
-    targetMainTeams = List<String>.from(widget.admin['Main Teams'] ?? []);
   }
 
-  // Δικαιώματα (Rules)
   bool get _canManageSecretariat => widget.isMeSuperUser || widget.isMeSecretariat;
   bool get _canAssignNewTeam => widget.isMeSuperUser || widget.isMeSecretariat;
 
   bool _canRemoveTeam(String team) {
     if (widget.isMeSuperUser || widget.isMeSecretariat) return true;
-    if (widget.admin['uid'] == widget.myUid) return true; // Αποχώρηση (Ο εαυτός μου)
-    if (widget.myMainTeams.contains(team)) return true; // Είμαι Βασικός Αρχηγός
+    if (widget.admin['uid'] == widget.myUid) return true;
+    if (widget.myControlledTeams.contains(team)) return true;
     return false;
-  }
-
-  bool _canPromoteToMain(String team) {
-    if (widget.isMeSuperUser) return true; // ΝΕΟ: Ο Superuser μπορεί πάντα να προάγει/υποβιβάζει
-    return _canRemoveTeam(team);
   }
 
   void _toggleModerator(String uid) async {
@@ -224,65 +241,64 @@ class _AdminCardState extends State<AdminCard> {
       await FirebaseFirestore.instance.collection('users').doc(uid).update({'moderator': newValue});
     } catch (e) {
       setState(() => moderator = !newValue);
-    }
-  }
-
-  // --- ΣΥΝΑΡΤΗΣΗ ΠΡΟΑΓΩΓΗΣ ---
-  void _promoteToMainCaptain(String uid, String team) async {
-    try {
-      await FirebaseFirestore.instance.collection('users').doc(uid).update({
-        'Main Teams': FieldValue.arrayUnion([team])
-      });
-      setState(() => targetMainTeams.add(team));
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Προήχθη σε Βασικό Αρχηγό!'), backgroundColor: Colors.green));
-    } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Σφάλμα: $e'), backgroundColor: Colors.red));
     }
   }
 
-  // --- ΣΥΝΑΡΤΗΣΗ ΥΠΟΒΙΒΑΣΜΟΥ (ΝΕΟ) ---
-  void _demoteFromMainCaptain(String uid, String team) async {
-    try {
-      await FirebaseFirestore.instance.collection('users').doc(uid).update({
-        'Main Teams': FieldValue.arrayRemove([team])
-      });
-      setState(() => targetMainTeams.remove(team));
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Έγινε ξανά απλός αρχηγός.'), backgroundColor: Colors.orange));
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Σφάλμα: $e'), backgroundColor: Colors.red));
-    }
+  // ΒΕΛΤΙΩΣΗ 1: Popup Επιβεβαίωσης πριν τη διαγραφή της ομάδας
+  void _confirmRemoveTeam(String uid, String team) {
+    final bool isLastTeam = teams.length == 1;
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Αφαίρεση Ομάδας'),
+        content: Text(isLastTeam
+            ? 'Αυτή είναι η τελευταία ομάδα. Αν την αφαιρέσετε, ο χρήστης θα χάσει τα δικαιώματα Admin. Είστε σίγουροι;'
+            : 'Θέλετε σίγουρα να αφαιρέσετε την ομάδα "$team";'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('ΑΚΥΡΟ'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
+            onPressed: () {
+              Navigator.pop(context);
+              _removeTeam(uid, team);
+            },
+            child: const Text('ΑΦΑΙΡΕΣΗ', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
   }
 
-  // --- ΣΥΝΑΡΤΗΣΗ ΑΦΑΙΡΕΣΗΣ ΟΜΑΔΑΣ (Και ολικής διαγραφής Admin) ---
   void _removeTeam(String uid, String team) async {
     try {
-      // 1. Τον βγάζουμε από την ομάδα (και ως απλό και ως βασικό)
       await FirebaseFirestore.instance.collection('users').doc(uid).update({
         'Controlled Teams': FieldValue.arrayRemove([team]),
-        'Main Teams': FieldValue.arrayRemove([team])
       });
 
       setState(() {
         teams.remove(team);
-        targetMainTeams.remove(team);
       });
 
-      // 2. ΝΕΟ: Αν δεν του έμεινε ΚΑΜΙΑ ομάδα, τον κάνουμε απλό χρήστη!
       if (teams.isEmpty) {
         await FirebaseFirestore.instance.collection('users').doc(uid).update({
           'role': 'user',
-          'moderator': false, // Του παίρνουμε και τη γραμματεία για ασφάλεια
+          'moderator': false,
         });
 
-        ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Ο χρήστης δεν έχει πια ομάδες και διαγράφηκε από Admin.'), backgroundColor: Colors.redAccent)
-        );
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text('Ο χρήστης δεν έχει πια ομάδες και διαγράφηκε από Admin.'),
+            backgroundColor: Colors.redAccent));
 
-        // Ανανεώνουμε τη λίστα για να εξαφανιστεί η κάρτα του!
         widget.refreshList();
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Σφάλμα: $e'), backgroundColor: Colors.red));
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Σφάλμα: $e'), backgroundColor: Colors.red));
     }
   }
 
@@ -291,10 +307,14 @@ class _AdminCardState extends State<AdminCard> {
     try {
       await FirebaseFirestore.instance.collection('users').doc(uid).update({
         'Controlled Teams': FieldValue.arrayUnion([team]),
-        'role': 'admin' // Σιγουρευόμαστε ότι είναι admin!
+        'role': 'admin'
       });
       setState(() => teams.add(team));
-    } catch (e) {}
+    } catch (e) {
+      // ΒΕΛΤΙΩΣΗ 4: Εμφάνιση σφάλματος αν αποτύχει η προσθήκη
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Σφάλμα προσθήκης: $e'), backgroundColor: Colors.red));
+    }
   }
 
   void _showAddTeamDialog(BuildContext context, String uid) {
@@ -303,12 +323,24 @@ class _AdminCardState extends State<AdminCard> {
       context: context,
       builder: (_) => AlertDialog(
         title: const Text('Προσθήκη Ομάδας'),
-        content: TextField(controller: controller, decoration: const InputDecoration(hintText: 'Όνομα Ομάδας')),
+        content: TextField(
+            controller: controller,
+            textCapitalization: TextCapitalization.words, // Βοηθάει να ξεκινάει με κεφαλαίο
+            decoration: const InputDecoration(hintText: 'Όνομα Ομάδας')),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Άκυρο')),
+          TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Άκυρο')),
           ElevatedButton(
             onPressed: () {
-              if (controller.text.trim().isNotEmpty) _addTeam(uid, controller.text.trim());
+              final newTeam = controller.text.trim(); // Καθαρίζουμε τα κενά
+              if (newTeam.isNotEmpty) {
+                if (teams.contains(newTeam)) {
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Ο χρήστης διαχειρίζεται ήδη αυτή την ομάδα.')));
+                } else {
+                  _addTeam(uid, newTeam);
+                }
+              }
               Navigator.pop(context);
             },
             child: const Text('Προσθήκη'),
@@ -331,7 +363,10 @@ class _AdminCardState extends State<AdminCard> {
 
     List<String> displayTeams = List.from(teams);
     if (widget.searchQuery.isNotEmpty) {
-      displayTeams = displayTeams.where((team) => team.toLowerCase().contains(widget.searchQuery.toLowerCase())).toList();
+      displayTeams = displayTeams
+          .where((team) =>
+          team.toLowerCase().contains(widget.searchQuery.toLowerCase()))
+          .toList();
     }
 
     return Card(
@@ -339,7 +374,9 @@ class _AdminCardState extends State<AdminCard> {
       margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: isMyOwnCard ? const BorderSide(color: Colors.blueAccent, width: 2) : BorderSide.none,
+        side: isMyOwnCard
+            ? const BorderSide(color: Colors.blueAccent, width: 2)
+            : BorderSide.none,
       ),
       elevation: isDark ? 0 : 2,
       child: Padding(
@@ -350,17 +387,29 @@ class _AdminCardState extends State<AdminCard> {
             ListTile(
               contentPadding: EdgeInsets.zero,
               leading: CircleAvatar(
-                backgroundColor: moderator ? Colors.purple : (isMyOwnCard ? Colors.green : Colors.blue),
-                child: Icon(moderator ? Icons.verified_user : Icons.person, color: Colors.white),
+                backgroundColor: moderator
+                    ? Colors.purple
+                    : (isMyOwnCard ? Colors.green : Colors.blue),
+                child: Icon(moderator ? Icons.verified_user : Icons.person,
+                    color: Colors.white),
               ),
-              title: Text(isMyOwnCard ? "$name (Εσύ)" : name, style: TextStyle(fontWeight: FontWeight.bold, color: textColor, fontSize: 16)),
-              subtitle: Text(email, style: TextStyle(color: textColor.withOpacity(0.7), fontSize: 13)),
+              title: Text(isMyOwnCard ? "$name (Εσύ)" : name,
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: textColor,
+                      fontSize: 16)),
+              subtitle: Text(email,
+                  style: TextStyle(
+                      color: textColor.withOpacity(0.7), fontSize: 13)),
               trailing: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   if (_canManageSecretariat && !isMyOwnCard)
                     IconButton(
-                      icon: moderator ? const Icon(Icons.star, color: Colors.amber) : Icon(Icons.star_border, color: textColor.withOpacity(0.5)),
+                      icon: moderator
+                          ? const Icon(Icons.star, color: Colors.amber)
+                          : Icon(Icons.star_border,
+                          color: textColor.withOpacity(0.5)),
                       tooltip: 'Γραμματεία',
                       onPressed: () => _toggleModerator(uid),
                     ),
@@ -373,81 +422,44 @@ class _AdminCardState extends State<AdminCard> {
                 ],
               ),
             ),
-
             const Divider(),
-
-            Text("Ομάδες:", style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: textColor.withOpacity(0.8))),
+            Text("Ομάδες:",
+                style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                    color: textColor.withOpacity(0.8))),
             const SizedBox(height: 6),
-
             if (teams.isEmpty)
-              const Text("Καμία ενεργή ομάδα", style: TextStyle(color: Colors.redAccent, fontSize: 13, fontStyle: FontStyle.italic))
+              const Text("Καμία ενεργή ομάδα",
+                  style: TextStyle(
+                      color: Colors.redAccent,
+                      fontSize: 13,
+                      fontStyle: FontStyle.italic))
             else if (displayTeams.isEmpty && widget.searchQuery.isNotEmpty)
-              Text("Δεν ταιριάζουν στην αναζήτηση", style: TextStyle(color: textColor.withOpacity(0.5), fontSize: 13, fontStyle: FontStyle.italic))
+              Text("Δεν ταιριάζουν στην αναζήτηση",
+                  style: TextStyle(
+                      color: textColor.withOpacity(0.5),
+                      fontSize: 13,
+                      fontStyle: FontStyle.italic))
             else
               Wrap(
                 spacing: 8,
                 runSpacing: 4,
                 children: displayTeams.map((team) {
-                  bool isMainCapt = targetMainTeams.contains(team);
                   bool canIRemoveThem = _canRemoveTeam(team);
 
-                  return GestureDetector(
-                    // Η Λογική Προαγωγής / Υποβιβασμού!
-                    onTap: () {
-                      if (_canPromoteToMain(team)) {
-                        if (!isMainCapt) {
-                          // Είναι απλός, τον κάνουμε βασικό
-                          showDialog(
-                            context: context,
-                            builder: (_) => AlertDialog(
-                              title: const Text('Προαγωγή'),
-                              content: Text('Θέλετε να κάνετε αυτόν τον χρήστη Βασικό Αρχηγό για την ομάδα "$team";'),
-                              actions: [
-                                TextButton(onPressed: () => Navigator.pop(context), child: const Text('Άκυρο')),
-                                ElevatedButton(
-                                  onPressed: () {
-                                    _promoteToMainCaptain(uid, team);
-                                    Navigator.pop(context);
-                                  },
-                                  child: const Text('Ναι, Προαγωγή'),
-                                ),
-                              ],
-                            ),
-                          );
-                        } else {
-                          // Είναι ΗΔΗ βασικός, τον κάνουμε απλό (Υποβιβασμός)
-                          showDialog(
-                            context: context,
-                            builder: (_) => AlertDialog(
-                              title: const Text('Αφαίρεση Δικαιωμάτων'),
-                              content: Text('Θέλετε να αφαιρέσετε τα δικαιώματα Βασικού Αρχηγού για την ομάδα "$team"; (Θα παραμείνει απλός αρχηγός)'),
-                              actions: [
-                                TextButton(onPressed: () => Navigator.pop(context), child: const Text('Άκυρο')),
-                                ElevatedButton(
-                                  style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
-                                  onPressed: () {
-                                    _demoteFromMainCaptain(uid, team);
-                                    Navigator.pop(context);
-                                  },
-                                  child: const Text('Ναι, Αφαίρεση'),
-                                ),
-                              ],
-                            ),
-                          );
-                        }
-                      }
-                    },
-                    child: Chip(
-                      avatar: isMainCapt ? const Icon(Icons.workspace_premium, color: Colors.amber, size: 20) : null,
-                      backgroundColor: isMainCapt ? Colors.amber.withOpacity(0.15) : Colors.blue.withOpacity(0.1),
-                      labelStyle: TextStyle(
-                          color: isDark ? Colors.lightBlueAccent : Colors.blue[800]!,
-                          fontWeight: isMainCapt ? FontWeight.w900 : FontWeight.bold
-                      ),
-                      label: Text(team),
-                      deleteIcon: canIRemoveThem ? Icon(Icons.cancel, size: 18, color: Colors.red.withOpacity(0.8)) : null,
-                      onDeleted: canIRemoveThem ? () => _removeTeam(uid, team) : null,
-                    ),
+                  return Chip(
+                    backgroundColor: Colors.blue.withOpacity(0.1),
+                    labelStyle: TextStyle(
+                        color: isDark ? Colors.lightBlueAccent : Colors.blue[800]!,
+                        fontWeight: FontWeight.bold),
+                    label: Text(team),
+                    deleteIcon: canIRemoveThem
+                        ? Icon(Icons.cancel,
+                        size: 18, color: Colors.red.withOpacity(0.8))
+                        : null,
+                    // Κλήση της επιβεβαίωσης αντί για κατευθείαν διαγραφή
+                    onDeleted: canIRemoveThem ? () => _confirmRemoveTeam(uid, team) : null,
                   );
                 }).toList(),
               ),

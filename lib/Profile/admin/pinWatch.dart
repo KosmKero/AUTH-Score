@@ -1,8 +1,10 @@
 import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:untitled1/globals.dart' as global;
+import 'package:firebase_auth/firebase_auth.dart';
+import '../../globals.dart' as global;
 
 // Συνάρτηση παραγωγής τυχαίου PIN
 String generateNewPin() {
@@ -23,17 +25,42 @@ class _TeamPinsDashboardState extends State<TeamPinsDashboard> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
 
+  List<String> _myControlledTeams = [];
+  bool _isLoadingTeams = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchMyTeams();
+  }
+
+  Future<void> _fetchMyTeams() async {
+    if (global.globalUser.isSuperUser || global.globalUser.isUpperAdmin) {
+      if (mounted) setState(() => _isLoadingTeams = false);
+      return;
+    }
+
+    String uid = FirebaseAuth.instance.currentUser!.uid;
+    DocumentSnapshot doc = await FirebaseFirestore.instance.collection('users').doc(uid).get();
+    var data = doc.data() as Map<String, dynamic>?;
+
+    if (mounted) {
+      setState(() {
+        _myControlledTeams = List<String>.from(data?['Controlled Teams'] ?? []);
+        _isLoadingTeams = false;
+      });
+    }
+  }
+
   @override
   void dispose() {
     _searchController.dispose();
     super.dispose();
   }
 
-  // Συνάρτηση για Δημιουργία Νέου PIN
   Future<void> _resetPin(BuildContext context, String teamId) async {
     String newPin = generateNewPin();
 
-    //  Αποθήκευση στο private/secrets
     await FirebaseFirestore.instance
         .collection('year')
         .doc(global.thisYearNow.toString())
@@ -49,7 +76,6 @@ class _TeamPinsDashboardState extends State<TeamPinsDashboard> {
     ));
   }
 
-  // Συνάρτηση για Αντιγραφή στο Πρόχειρο (Copy)
   void _copyToClipboard(String pin, String teamName) {
     Clipboard.setData(ClipboardData(text: pin)).then((_) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -62,6 +88,10 @@ class _TeamPinsDashboardState extends State<TeamPinsDashboard> {
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoadingTeams) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
     final Color backgroundColor = global.darkModeNotifier.value ? const Color(0xFF1E1E1E) : Colors.white;
     final Color textColor = global.darkModeNotifier.value ? Colors.white : Colors.black87;
     final Color tileColor = global.darkModeNotifier.value ? const Color(0xFF2C2C2C) : Colors.grey[200]!;
@@ -70,7 +100,6 @@ class _TeamPinsDashboardState extends State<TeamPinsDashboard> {
       color: backgroundColor,
       child: Column(
         children: [
-          // ---- ΜΠΑΡΑ ΑΝΑΖΗΤΗΣΗΣ ----
           Padding(
             padding: const EdgeInsets.all(12.0),
             child: TextField(
@@ -106,7 +135,6 @@ class _TeamPinsDashboardState extends State<TeamPinsDashboard> {
             ),
           ),
 
-          // ---- ΛΙΣΤΑ ΟΜΑΔΩΝ ----
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
               stream: FirebaseFirestore.instance
@@ -125,13 +153,19 @@ class _TeamPinsDashboardState extends State<TeamPinsDashboard> {
                 final allTeams = snapshot.data?.docs ?? [];
 
                 final filteredTeams = allTeams.where((teamDoc) {
-                  return teamDoc.id.toLowerCase().contains(_searchQuery);
+                  bool hasAccess = global.globalUser.isSuperUser ||
+                      global.globalUser.isUpperAdmin ||
+                      _myControlledTeams.contains(teamDoc.id);
+
+                  bool matchesSearch = teamDoc.id.toLowerCase().contains(_searchQuery);
+
+                  return hasAccess && matchesSearch;
                 }).toList();
 
                 if (filteredTeams.isEmpty) {
                   return Center(
                     child: Text(
-                      _searchQuery.isEmpty ? 'Δεν βρέθηκαν ομάδες.' : 'Δεν βρέθηκε ομάδα με αυτό το όνομα.',
+                      _searchQuery.isEmpty ? 'Δεν έχεις αναλάβει κάποια ομάδα.' : 'Δεν βρέθηκε ομάδα.',
                       style: TextStyle(color: textColor),
                     ),
                   );
@@ -142,25 +176,19 @@ class _TeamPinsDashboardState extends State<TeamPinsDashboard> {
                   itemCount: filteredTeams.length,
                   itemBuilder: (context, index) {
                     var team = filteredTeams[index];
-                    var teamData = team.data() as Map<String, dynamic>;
 
-                    // --- ΝΕΟ: Δεύτερο StreamBuilder για να διαβάζει live το PIN από το private subcollection ---
+                    // Διαβάζουμε ΜΟΝΟ από το κρυφό path private/secrets
                     return StreamBuilder<DocumentSnapshot>(
                         stream: team.reference.collection('private').doc('secrets').snapshots(),
                         builder: (context, secretSnapshot) {
 
                           String? currentPin;
 
-                          // Ψάχνουμε πρώτα στο νέο κρυφό έγγραφο
                           if (secretSnapshot.hasData && secretSnapshot.data!.exists) {
                             var secretData = secretSnapshot.data!.data() as Map<String, dynamic>?;
                             if (secretData != null && secretData.containsKey('secret_pin')) {
                               currentPin = secretData['secret_pin'];
                             }
-                          }
-                          // Fallback: Αν δεν υπάρχει στο κρυφό, κοιτάμε μήπως ξέμεινε στο κεντρικό έγγραφο
-                          if (currentPin == null && teamData.containsKey('secret_pin')) {
-                            currentPin = teamData['secret_pin'];
                           }
 
                           return Card(
@@ -188,17 +216,21 @@ class _TeamPinsDashboardState extends State<TeamPinsDashboard> {
                               trailing: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
+                                  // 1. Το κουμπί Αντιγραφής (Copy) το βλέπουν ΟΛΟΙ (Αρχηγοί, Γραμματεία, Superusers)
                                   if (currentPin != null)
                                     IconButton(
                                       icon: const Icon(Icons.copy, color: Colors.blue),
                                       tooltip: 'Αντιγραφή PIN',
                                       onPressed: () => _copyToClipboard(currentPin!, team.id),
                                     ),
-                                  IconButton(
-                                    icon: const Icon(Icons.refresh, color: Colors.orange),
-                                    tooltip: 'Δημιουργία νέου PIN',
-                                    onPressed: () => _resetPin(context, team.id),
-                                  ),
+
+                                  // 2. Το κουμπί Ανανέωσης (Reset) το βλέπουν ΜΟΝΟ Superusers και Γραμματεία
+                                  if (global.globalUser.isSuperUser || global.globalUser.isUpperAdmin)
+                                    IconButton(
+                                      icon: const Icon(Icons.refresh, color: Colors.orange),
+                                      tooltip: 'Δημιουργία νέου PIN',
+                                      onPressed: () => _resetPin(context, team.id),
+                                    ),
                                 ],
                               ),
                             ),

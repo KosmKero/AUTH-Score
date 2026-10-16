@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:untitled1/Profile/admin/pinWatch.dart';
 import 'package:untitled1/Profile/admin/see_feedback.dart';
 import 'package:untitled1/Profile/admin/user_statistics.dart';
+import 'addMailPage.dart';
 import 'admins_handle.dart';
 import 'request_approval_or_disapproval.dart';
 import 'package:untitled1/globals.dart';
@@ -20,16 +21,20 @@ class _RequestApprovalScreenState extends State<RequestApprovalScreen> {
     });
   }
 
+
   @override
   void initState() {
     super.initState();
 
-    if (!globalUser.isSuperUser && globalUser.isUpperAdmin) {
-      selectedIndex = 3;
+    if (globalUser.isSuperUser) {
+      selectedIndex = 0; // Ο Superuser βλέπει by default τα Requests
+    } else if (globalUser.isUpperAdmin) {
+      selectedIndex = 3; // Η Γραμματεία βλέπει by default τα PINs
     } else {
-      selectedIndex = 0;
+      selectedIndex = 1; // Ο Απλός Αρχηγός βλέπει by default τους Admins
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -60,7 +65,9 @@ class _RequestApprovalScreenState extends State<RequestApprovalScreen> {
               ? Expanded(child: FeedbackViewPage())
               : selectedIndex ==3 ?
                 Expanded(child: TeamPinsDashboard())
-              : Expanded(child: SchoolStatsPage()),
+              : selectedIndex == 4 ?
+               Expanded(child: SchoolStatsPage())
+              : Expanded(child: MatchSheetEmailsPage())
 
         ],
       ),
@@ -90,15 +97,22 @@ class _NavigationButtons extends StatelessWidget {
         child: Row(
           children: [
             if (globalUser.isSuperUser)
-            _buildTextButton("See Requests", 0, textColor),
-            if (globalUser.isSuperUser)
+              _buildTextButton("See Requests", 0, textColor),
+
+            // (Superuser, Γραμματεία, Απλοί Αρχηγοί)
             _buildTextButton("See Admins", 1, textColor),
+
             if (globalUser.isSuperUser)
-            _buildTextButton("See Feedback", 2, textColor),
-            if (globalUser.isUpperAdmin)
-            _buildTextButton("Pins Page", 3, textColor),
+              _buildTextButton("See Feedback", 2, textColor),
+
+              _buildTextButton("Pins Page", 3, textColor),
+
             if (globalUser.isSuperUser)
-            _buildTextButton("User Stats", 4, textColor),
+              _buildTextButton("User Stats", 4, textColor),
+
+            if ( globalUser.isUpperAdmin)
+              _buildTextButton("Emails φύλλου αγώνα", 5, textColor),
+
             const SizedBox(width: 10),
           ],
         ),

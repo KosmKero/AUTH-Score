@@ -577,7 +577,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     ),
                   ),
                   // Αντί για FutureBuilder, απλός και γρήγορος έλεγχος!
-                  if (isLoggedIn && globalUser.isUpperAdmin)
+                  if (isLoggedIn && (globalUser.isUpperAdmin || globalUser.isAdmin))
                     Container(
                       margin: EdgeInsets.all(20),
                       padding: EdgeInsets.symmetric(horizontal: 5, vertical: 2),
@@ -675,7 +675,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                 ),
                               ),
                             ),
-
+                          if (globalUser.isUpperAdmin)
                           ListTile(
                             dense: true,
                             leading: Icon(
@@ -745,6 +745,8 @@ class _ProfilePageState extends State<ProfilePage> {
                             ),
 
                           ),
+                          if (globalUser.isUpperAdmin)
+
                             ListTile(
                               dense: true,
                               leading: Icon(
