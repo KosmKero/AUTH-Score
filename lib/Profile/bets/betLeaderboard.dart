@@ -44,13 +44,24 @@ Future<List<Map<String, dynamic>>> getTopUsers(String docId) async {
   final data = snapshot.data() as Map<String, dynamic>;
   final List<dynamic> users = data['users'] ?? [];
 
-  return users.map<Map<String, dynamic>>((user) => {
-    'uid': user['uid'],
-    'username': user['username'] ?? 'Unknown',
-    'accuracy': (user['accuracy'] ?? 0.0).toDouble(),
-    'correctVotes': user['correctVotes'] ?? 0,
-    'totalVotes': user['totalVotes'] ?? 0,
-    'score': (user['score'] ?? 0.0).toDouble(),
+  return users.map<Map<String, dynamic>>((user) {
+    int correctVotes = user['correctVotes'] ?? 0;
+    int totalVotes = user['totalVotes'] ?? 0;
+    double accuracy = (user['accuracy'] ?? 0.0).toDouble();
+
+    // Υπολογισμός ποσοστού αν δεν υπάρχει ήδη αποθηκευμένο
+    if (accuracy == 0.0 && totalVotes > 0) {
+      accuracy = (correctVotes / totalVotes) * 100.0;
+    }
+
+    return {
+      'uid': user['uid'],
+      'username': user['username'] ?? 'Unknown',
+      'accuracy': accuracy,
+      'correctVotes': correctVotes,
+      'totalVotes': totalVotes,
+      'score': (user['score'] ?? 0.0).toDouble(),
+    };
   }).toList();
 }
 
@@ -315,6 +326,10 @@ class _TopUsersListState extends State<TopUsersList> {
           correct = predictions['correctVotes'] ?? 0;
           total = predictions['totalVotes'] ?? 0;
           rawScore = (predictions['score'] ?? 0).toDouble();
+
+          if (accuracy == 0.0 && total > 0) {
+            accuracy = (correct / total) * 100.0;
+          }
         } else {
           String periodKey = docId.replaceFirst('top20_', '');
           if (periodKey.contains('_')) { // Μηνιαία
