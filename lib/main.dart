@@ -207,7 +207,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
         setAnalyticsUser(FirebaseAuth.instance.currentUser!.uid);
       }
 
-      //await loadYear();
+      await loadYear();
       //await WinProbabilityCalculator.evaluateModel(2025);
       //await WinProbabilityCalculator.evaluateModel(2026);
 
