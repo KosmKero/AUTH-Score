@@ -42,7 +42,7 @@ android {
         applicationId "com.authteam.authscore"
         minSdkVersion flutter.minSdkVersion
         //noinspection OldTargetApi,EditedTargetSdkVersion
-        targetSdkVersion 35
+        targetSdkVersion 36
 
         versionCode  flutter.versionCode?.toInteger() ?: 2
         versionName  flutter.versionName ?: "1.0.1"
